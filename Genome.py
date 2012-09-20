@@ -1,0 +1,318 @@
+import configuration as conf
+from tools import UsefulFunctions as uf
+
+from Chromosome import Chromosome
+import sys, pickle, random, shutil, os, glob
+
+class AbortedNewGenome(Exception) :
+	def __init__(self, message):
+		self.message = message
+		
+	def __str__(self):
+		return 'Could not finish consctructing new Genome: %s' % self.message
+		
+def __parseMpileupLine__(line) :
+	sl = line.split('\t')
+	chro = sl[0][3:]
+	pos = int(sl[1])-1
+	refAllele = sl[2].upper()
+	nbTotalReads = int(sl[3])
+	
+	nucCount = {'A': 0, 'T': 0, 'C': 0, 'G' :0 } #ATCG
+	i = 0
+	#print 'aaaa', line.replace('\n', ''), ' = ', sl[5]
+	
+	while i < len(sl[4]) :
+		char = sl[4][i]
+		if char == '^' :
+			i+=1
+		elif char == 'A' or char == 'a':
+			nucCount['A'] += 1
+		elif char == 'T' or char == 't':
+			nucCount['T'] += 1
+		elif char == 'C' or char == 'c':
+			nucCount['C'] += 1
+		elif char == 'G' or char == 'g':
+			nucCount['G'] += 1
+		elif char == ',' or char == '.' :
+			nucCount[refAllele] += 1
+			
+		i += 1
+	#print {'chr' : chro, 'pos' : pos, 'refAllele' : refAllele, 'nbTotalReads' : nbTotalReads, 'nucCount' : nucCount}
+	return {'chr' : chro, 'pos' : pos, 'refAllele' : refAllele, 'nbTotalReads' : nbTotalReads, 'nucCount' : nucCount}
+	
+def __makeNewChromosome__(genome, chrN, mpileupFile, minReadNumber, minReadRatio):
+	print 'Updating chr %s, of genome %s' % (chrN, genome.path)
+	chromo = genome.loadChromosome(chrN, False)
+	f = open(mpileupFile)
+	
+	i = 0
+	while(1):
+		try :
+			k = f.readline()
+			l = __parseMpileupLine__(k)
+			#if l['nucCount'] != [0,0,0,0] :
+			alleles = ''
+			if (l['nucCount']['A'] > minReadNumber and l['nucCount']['A']/float(l['nbTotalReads']) > minReadRatio):
+				alleles += 'A'
+				#print 'a'
+			if (l['nucCount']['T'] > minReadNumber and l['nucCount']['T']/float(l['nbTotalReads']) > minReadRatio):
+				alleles += 'T'
+				#print 't'
+			if(l['nucCount']['C'] > minReadNumber and l['nucCount']['C']/float(l['nbTotalReads']) > minReadRatio):
+				alleles += 'C'
+				#print 'c'
+			if (l['nucCount']['G'] > minReadNumber and l['nucCount']['G']/float(l['nbTotalReads']) > minReadRatio):
+				alleles += 'G'
+				#print 'g'
+			
+			#if len(alleles) > 0 :
+			#	print '==============='
+			#	print l['nucCount'], alleles, uf.getPolymorphicNucleotide(alleles)#, chromo.data[l['pos']], l['refAllele'], chromo.data[l['pos']] == l['refAllele']
+			#	print '----'
+			#	print k
+			#	print l
+			if len(alleles) > 1 :
+				chromo.data.forceSet(l['pos'], uf.getPolymorphicNucleotide(alleles))
+			i+=1
+		except IOError:
+			break
+		except Exception as e:
+				print '--line--', i
+				print k
+				break
+	f.close()
+	fw = open('%s/chr%s_generationParameters.txt' % (genome.getSequencePath(), chrN), 'w')
+	fw.write('''Chr %s
+	mpileup file : %s
+	min read number : %d
+	min read ration : %f
+	stoped at line : %d''' %(chrN, mpileupFile, minReadNumber, minReadRatio, i))
+	fw.close()
+	print 'Done chr %s, of genome %s' % (chrN, genome.path)
+
+def makeGenome(specie, genomeName, mpileupFolder, referenceName, minReadNumber,  minReadRatio) :
+	"""Creates a new genome using self as the reference"""
+	print 'Making new Genome %s, form %s...' %(genomeName, referenceName)
+	
+	referencePath = '%s/ncbi/%s/sequences/%s' %(conf.DATA_PATH, specie, referenceName)
+	newAbsPath = '%s/ncbi/%s/sequences/%s' %(conf.DATA_PATH, specie, genomeName)
+	
+	if not os.path.isdir(referencePath) :
+		raise AbortedNewGenome('Couldn\'t find the reference genome %s' % referencePath)
+	
+	if os.path.isdir(newAbsPath) :
+		raise AbortedNewGenome('The new genome path already %s exists, please chose an other one or call updateGenome to modify it' % newAbsPath)
+	
+	os.mkdir(newAbsPath)
+	
+	print 'Copying files: %s -> %s...' % (referencePath, newAbsPath)
+	for fil in glob.glob(referencePath +'/*.dat') :
+		print '\tCopying %s...' % fil
+		shutil.copy(fil, fil.replace(referencePath, newAbsPath))
+	
+	print '\tCopying %s ..' % (referencePath + '/genomeChrPos.index')
+	shutil.copy(referencePath + '/genomeChrPos.index', newAbsPath + '/genomeChrPos.index')
+	
+	#shutil.copytree(referencePath, newAbsPath)
+	updateGenome('%s/%s'%(specie, genomeName), mpileupFolder, minReadNumber,  minReadRatio)
+
+def updateGenome(path, mpileupFolder, minReadNumber, minReadRatio, chromosomesList = None) :
+	print 'Updating Genome %s...' %(path)
+	genome = Genome(path)
+	if chromosomesList == None :
+		listChr = genome.getChromosomesList()
+	else :
+		listChr = chromosomesList
+		
+	#__makeNewChromosome__(genome, '22', '%s/chr%s.Mpileup' %(mpileupFolder, '22'), minReadNumber)
+	for chrN in listChr :
+		__makeNewChromosome__(genome, chrN, '%s/chr%s.Mpileup' %(mpileupFolder, chrN), minReadNumber, minReadRatio)
+	
+class ChromosomeNotFound(Exception) :
+	def __init__(self, msg) :
+		self.msg = msg
+	def __str__(self) :
+		return self.msg + '\n'
+		
+class ChrData_Struct :
+	
+	def __init__(self, genome, number, x1, x2, length) :
+		self. x1 = int(x1)
+		self.x2 = int(x2)
+		self.number = number
+		self.length = int(length)
+	
+		f = open(conf.DATA_PATH+'/ensembl/%s/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number))
+		self.geneSymbolIndex = pickle.load(f)
+		f.close()
+	
+	def hasGene(self, symbol) :
+		return symbol in self.geneSymbolIndex.keys()
+
+class Genome :
+	
+	def __init__(self, path = 'human/reference', verbose = False) :
+		self.reset(path, verbose)
+		
+	def reset(self, path = 'human/reference', verbose = False) :
+		if verbose :
+			print "Creating genome: " + path + "..."
+		
+		self.path = path
+		self.specie = path.split('/')[0]
+		self.name = path.split('/')[1]
+		
+		self.absolutePath = conf.DATA_PATH+'/ncbi/%s/sequences/%s' % (self.specie, self.name)
+		self.referencePath = conf.DATA_PATH+'/ncbi/%s/sequences/reference' % (self.specie)
+		#: WARNING ONLY FOR HUMANS!!!
+		#self.chromosomeList = map(uf.intToStr, range(1, 23))
+		#self.chromosomeList.extend(['x', 'y'])
+		
+		try :
+			f = open(self.absolutePath + '/genomeChrPos.index')
+		except IOError:
+			f = open(self.referencePath + '/genomeChrPos.index')
+			
+		self.chrsData = {}
+		for l in f.readlines()[1:] :
+			sl = l.split(';')
+			#print sl
+			self.chrsData[sl[0]] = ChrData_Struct(self, sl[0], sl[1], sl[2], sl[3]) 
+			self.length = self.chrsData[sl[0]].x2
+		f.close()
+		
+		self.empty()
+	
+	def getChromosomesList(self):
+		return self.chrsData.keys()
+	
+	def getSequencePath(self) :
+		return conf.DATA_PATH+'/ncbi/%s/sequences/%s' % (self.specie, self.name)
+	
+	def getReferenceSequencePath(self) :
+		return conf.DATA_PATH+'/ncbi/%s/sequences/reference' % (self.specie)
+		
+	def getAnnotationPath(self) :
+		return conf.DATA_PATH+'/ensembl/%s' % self.getSpecie()
+	
+	def getSNPsPath(self) :
+		return conf.DATA_PATH+'/ncbi/%s/dbSNP/' % (self.specie)
+		
+	def getSpecie(self):
+		return self.specie
+		
+	def empty(self) :
+		self.chromosomes = {}
+	
+	def loadChromosome(self, number, loadSNPs = True, verbose = False) :
+		if number not in self.chromosomes.keys():
+			#try :
+			if number != '' :
+				self.chromosomes[number] = Chromosome(number, self, loadSNPs, verbose)
+			#except IOError:
+			#	raise ChromosomeNotFound('Unable to load chromosome :' + number)
+		return self.chromosomes[number]
+	
+	#def loadAltChromosome(self, number, verbose = False) :
+	#	"""Loads the alternative chromosome"""
+	#	num = number+'_alt'
+	#	"""if num not in self.chromosomes.keys():
+	#		try :
+	#			if number != '' :
+	#				self.chromosomes[num] = Chromosome(num, self, verbose)
+	#		except IOError:
+	#			raise ChromosomeNotFound('Unable to load alternatve chromosome :' + num)
+	#	return self.chromosomes[num]"""
+	#	return self.loadChromosome(num, verbose)
+	
+	def getChromosomes(self) :
+		return self.chromosomes.values()
+	
+	def loadAllChromosomes(self, verbose = False) :
+		for c in self.chrsData.keys() :
+			self.loadChromosome(c, verbose)
+	
+	def unloadChromosome(self, number) :
+		del(self.chromosomes[number])
+	
+	def getSequence(self, x1, x2) :
+		ret = ''
+		c = self.chrsData[self.whereIs(x1)]
+		loaded = False	
+		if not self.isLoaded(c.number) :
+			loaded = True
+		chr = self.loadChromosome(c.number)
+		
+		ret = chr.getSequence(x1 - c.x1, min(x2 - c.x1, len(chr)-1))
+		
+		if loaded :
+			self.unloadChromosome(c.number)
+		
+		return ret
+	
+	def whereIs(self, x1) :
+		"""returns the nimber of the chormosome that correspond to pos x1"""
+		for c in self.chrsData.values() :
+			if c.x1 <= x1 <= c.x2 :
+				return c.number
+	
+	def whereIsGene(self, geneSymbol, chromosomes = None) :
+		""""Special request from Diana:
+		Returns a list of chormosomes indicating where the gene has been found
+		@param: geneSymbol a string
+		@param: chromosomes list of chromosomes numbers
+		if chromosomes is None, the whole list of genome's chromosome will be checked
+		"""
+		return self.whereAreGenes([geneSymbol], chromosomes)[geneSymbol]
+		
+	def whereAreGenes(self, geneSymbols, chromosomes = None) :
+		""""Special request from Diana:
+		Returns a dictionary indicating where the genes have been found
+		{Gene : chromosome list}
+		@param: geneSymbols list of gene symbols
+		@param: chromosomes list of chromosomes to look into (strings)
+		if chromosomes is None, the whole list of genome's chromosome will be checked
+		"""
+		if chromosomes == None : 
+			chros = self.chrsData.keys()
+		else :
+			chros = chromosomes 
+		
+		res = {}
+		#wasLoaded = False
+		for g in geneSymbols :
+			res[g] = []
+			for c in chros :
+				if self.chrsData[c].hasGene(g) :
+					res[g].append(c)
+				"""if self.isLoaded(c) :
+					if self.chromosomes[c].hasGene(g) :
+						res[g].append(c)
+				else :
+					f = open('ensembl/%s/chr%s_gene_symbols.index.pickle'%(self.name, c))
+					self.geneSymbolIndex = pickle.load(f)
+					f.close()
+					try :
+						self.geneSymbolIndex[g]
+						res[g].append(c)
+					except KeyError:
+						pass"""
+						
+		return res
+	
+	def loadRandomChromosome(self, loadSnps = True) :
+		"""Picks a random position in the genome and returns it's chromosome"""
+		x1 = int(random.random()*self.length)
+		return self.loadChromosome(self.whereIs(x1), loadSnps)
+		
+	def isLoaded(self, number) :
+		return number in self.chromosomes.keys()
+		
+	def __getitem__(self, chromo) :
+		return self.chromosomes[chromo]
+
+	def __len__(self) :
+		"""Size of the genome in pb"""
+		return self.length
+
