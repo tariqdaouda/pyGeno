@@ -200,9 +200,10 @@ def translateDNA(sequence, frame = 1) :
 			except KeyError :
 				#print dna[i:i+3]
 				combinaisons = polymorphicCondonCombinaisons(list(dna[i:i+3]))
+				translations = set()
 				for ci in range(len(combinaisons)):
-					combinaisons[ci] = codonTable[combinaisons[ci]]
-				protein += '/'.join(combinaisons)
+					translations.add(codonTable[combinaisons[ci]])
+				protein += '/'.join(translations)
 				
 	return protein
 	

@@ -154,14 +154,6 @@ class SegmentTree :
 					x1 = c.x1
 					x2 = c.x2
 			res.append((x1, x2))
-			#for i in range(0, len(self.children)-1, 2):
-			#	c1 = self.children[i]
-			#	c2 = self.children[i+1]
-			#	if c1.x2 < c2.x1 :
-			#		res.append((c1.x1, c1.x2))
-			#		res.append((c2.x1, c2.x2))
-			#	else :
-			#		res.append((c1.x1, c2.x2))
 		else :
 			if self.x1 != None :
 				res = [(self.x1, self.x2)]

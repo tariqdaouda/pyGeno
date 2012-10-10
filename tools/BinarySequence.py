@@ -161,6 +161,7 @@ class BinarySequence :
 		return nbP
 		
 	def find(self, strSeq) :
+		"finds all instances of strSeq"
 		lpos = range(len(self))
 		arr = self.encode(strSeq)
 		
@@ -247,7 +248,12 @@ class BinarySequence :
 	def extend(self, arr) :
 		self.binSequence.extend(arr)
 
-	def decode(self, binSeq):
+	def decode(self, binSequence):
+		if type(binSequence).__name__ == 'list' :
+			binSeq = binSequence[0]
+		else :
+			binSeq = binSequence
+			
 		ret = ''
 		for b in binSeq :
 			ch = ''
