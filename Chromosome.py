@@ -2,6 +2,7 @@ import re, random, sys,pickle
 from tools.SegmentTree import SegmentTree as SegmentTree
 from tools.SecureMmap import SecureMmap as SecureMmap
 from tools import UsefulFunctions as uf
+from tools import SingletonManager as SM
 
 import configuration as conf
 from Gene import Gene
@@ -138,8 +139,14 @@ class CasavaSNP :
 	def __getitem__(self, i) :
 		return self.values[i]
 	
+	def __setitem__(self, i, v) :
+		self.values[i] = v
+		
 	def __str__(self) :
 		return str(self.values)
+	
+	def __eq__(self, s) :
+		return self.values == s.values
 		
 class CasavaSNPs :
 	
@@ -219,7 +226,7 @@ class CasavaSNPs :
 	def __len__(self) :
 		return len(self.lines)
 
-def defaultMostProbableGenotypeRule(casavaSnp) :
+def defaultSNVsFilter(casavaSnp) :
 	"""The default rule to decide wether to take the most probable genotype or the
 	reference, always returns true"""
 	#print "aaaa", casavaSnp
@@ -251,15 +258,25 @@ class Chromosome :
 		self.number = str(number).upper()
 		self.genome = genome
 	
-		self.realNumber = self.number.replace('_alt', '')
+		#self.number = self.number.replace('_alt', '')
 		
 		try :
 			self.casavaSNPs = CasavaSNPs('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number))
-			self.data = SecureMmap('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
+			refSeq = '%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number)
+			self.data = SM.get(refSeq)
+			if self.data == None :
+				SM.add(SecureMmap(refSeq), refSeq)
+				self.data = SM.get(refSeq)
+				
 			self.isLight = True
 			#print "aaa", '%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number), len(self.data )
 		except IOError:
-			self.data = SecureMmap('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number))
+			try :
+				self.data = SecureMmap('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number))
+			except IOError:
+				print 'Warning : couldn\'t find local version of chromosome %s, loading reference instead...' % self.number
+				self.data = SecureMmap('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
+				
 			self.isLight = False
 			
 		#f = open('pyGenoData/ncbi/%s/sequences//chr%s.dat'%(self.genome.name, number), 'r+b')
@@ -268,7 +285,7 @@ class Chromosome :
 		#f.close()
 		
 		#f = open('pyGenoData/ensembl/%s/chr%s.gtf'%(self.genome.name, number), 'r+b')
-		f = open('%s/chr%s.gtf'%(self.genome.getAnnotationPath(), self.realNumber), 'r')
+		f = open('%s/chr%s.gtf'%(self.genome.getAnnotationPath(), self.number), 'r')
 		#self.gtf = mmap.mmap(f.fileno(), 0)
 		self.gtfLines = f.readlines()
 		f.close()
@@ -276,7 +293,7 @@ class Chromosome :
 		#f = open('ensembl/%s/chr%s_gene_symbols.index.pickle'%(self.genome.name, number))
 		#self.geneSymbolIndex = pickle.load(f)
 		#f.close()
-		self.geneSymbolIndex = self.genome.chrsData[self.realNumber].geneSymbolIndex
+		self.geneSymbolIndex = self.genome.chrsData[self.number].geneSymbolIndex
 		
 		self.empty()
 		if loadSNPs :
@@ -292,12 +309,12 @@ class Chromosome :
 				
 				specie = self.genome.getSpecie()
 				
-				f = open('%s/chr%s.sort.pygenosnp'%(self.genome.getSNPsPath(), self.realNumber))
+				f = open('%s/chr%s.sort.pygenosnp'%(self.genome.getSNPsPath(), self.number))
 				self.SNPData = f.readlines()
 				f.close()
 				if verbose :
 					print '--Loading SNP Index...'
-				self.SNPIndexTree = SNPIndexTree('%s/chr%s.sort.pygenosnp.index' %(self.genome.getSNPsPath(), self.realNumber))
+				self.SNPIndexTree = SNPIndexTree('%s/chr%s.sort.pygenosnp.index' %(self.genome.getSNPsPath(), self.number))
 			except IOError:
 				print self.genome.getSNPsPath()
 				sys.stderr.write('Unable to load snp data for chr %s of genome %s' %(self.number, self.genome.name))
@@ -325,9 +342,9 @@ class Chromosome :
 	def hasGene(self, symbol) :
 		return symbol in self.geneSymbolIndex.keys()
 	
-	def loadGene(self, symbol, mostProbableGenotypeRule = None, verbose = False) :
-		"""mostProbableGenotypeRule is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulMostProbableGenotypeRule is used. This parameter has no effect if the genome is not light
+	def loadGene(self, symbol, SNVsFilter = None, verbose = False) :
+		"""SNVsFilter is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
+		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		
 		if symbol not in self.genes.keys() :
@@ -339,19 +356,19 @@ class Chromosome :
 		
 			gtf = GTFFile()
 			gtf.parseStr(geneData)
-			self.genes[symbol] = Gene(self, gtf, mostProbableGenotypeRule , verbose)
+			self.genes[symbol] = Gene(self, gtf, SNVsFilter , verbose)
 		
 		return self.genes[symbol]
 
 	def unloadGene(self, symbol) :
 		del(self.genes[symbol])
 	
-	def loadAllGenes(self, mostProbableGenotypeRule = None, verbose = False) :
-		"""mostProbableGenotypeRule is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulMostProbableGenotypeRule is used. This parameter has no effect if the genome is not light
+	def loadAllGenes(self, SNVsFilter = None, verbose = False) :
+		"""SNVsFilter is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
+		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		for symbol in self.geneSymbolIndex.keys() :
-			self.loadGene(symbol, mostProbableGenotypeRule, verbose)
+			self.loadGene(symbol, SNVsFilter, verbose)
 		
 	def loadGene_bck(self, symbolOrId) :
 		"""Loads a gene and returns it"""
@@ -374,26 +391,26 @@ class Chromosome :
 	def getGenes(self) :
 		return self.genes.values()
 	
-	def getNucleotide(self, x1, mostProbableGenotypeRule = None) :
-		"""mostProbableGenotypeRule is a fct that takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulMostProbableGenotypeRule is used. This parameter has no effect if the genome is not light
+	def getNucleotide(self, x1, SNVsFilter = None) :
+		"""SNVsFilter is a fct that takes a CasavaSnp as input a returns true if it correpsond to the rule.
+		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		if not self.isLight :
 			return self.data[x1]
 		
-		if (mostProbableGenotypeRule != None) :
-			fct = mostProbableGenotypeRule
+		if (SNVsFilter != None) :
+			fct = SNVsFilter
 		else :
-			fct = defaultMostProbableGenotypeRule
+			fct = defaultSNVsFilter
 			
 		snp = self.casavaSNPs.findSnp(x1)
 		if snp != None :
 			return snp['max_gt']
 		return self.data[x1]
 
-	def getSequence(self, x1, x2, mostProbableGenotypeRule = None) :
-		"""mostProbableGenotypeRule is a fct that takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulMostProbableGenotypeRule is used. This parameter has no effect if the genome is not light
+	def getSequence(self, x1, x2, SNVsFilter = None) :
+		"""SNVsFilter is a fct that takes a CasavaSnp as input a returns true if it correpsond to the rule.
+		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		if x2 != None :
 			if x1 > x2 :
@@ -404,10 +421,10 @@ class Chromosome :
 			if not self.isLight :
 				return self.data[start:end]
 			else :
-				if (mostProbableGenotypeRule != None) :
-					fct = mostProbableGenotypeRule
+				if (SNVsFilter != None) :
+					fct = SNVsFilter
 				else :
-					fct = defaultMostProbableGenotypeRule
+					fct = defaultSNVsFilter
 				
 				snps = self.casavaSNPs.findSnpsInRange(start, end)
 				#print '----', snps
@@ -431,9 +448,9 @@ class Chromosome :
 	def getPolymorphismsInRange(self, x1, x2) :
 		return self.casavaSNPs.findSnpsInRange(x1, x2)
 		
-	def getSequence_test(self, x1, x2, mostProbableGenotypeRule = None) :
-		"""mostProbableGenotypeRule is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulMostProbableGenotypeRule is used. This parameter has no effect if the genome is not light
+	def getSequence_test(self, x1, x2, SNVsFilter = None) :
+		"""SNVsFilter is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
+		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		
 		if x1 > x2 :
@@ -447,10 +464,10 @@ class Chromosome :
 				return self.data[start:end]
 			return self.data[end:start]
 		else :
-			if (mostProbableGenotypeRule != None) :
-				fct = mostProbableGenotypeRule
+			if (SNVsFilter != None) :
+				fct = SNVsFilter
 			else :
-				fct = defaultMostProbableGenotypeRule
+				fct = defaultSNVsFilter
 			
 			snps = self.casavaSNPs.findSnpsInRange(start, end)
 			#print snps
@@ -461,7 +478,7 @@ class Chromosome :
 					if fct(snp) :
 						pos = snp['pos'] - start-1
 						data[pos] = snp['max_gt']
-					if defaultMostProbableGenotypeRule(snp):
+					if defaultSNVsFilter(snp):
 						pos = snp['pos'] - start-1
 						data2[pos] = snp['max_gt']
 						
@@ -501,9 +518,9 @@ class Chromosome :
 		
 		return snps
 	
-	def getSNVsInRange(self, x1, x2, mostProbableGenotypeRule = None) :
-		"""mostProbableGenotypeRule is a fct that takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulMostProbableGenotypeRule is used. This parameter has no effect if the genome is not light
+	def getSNVsInRange(self, x1, x2, SNVsFilter = None) :
+		"""SNVsFilter is a fct that takes a CasavaSnp as input a returns true if it correpsond to the rule.
+		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		res = []
 		if x1 > x2 :
@@ -514,10 +531,10 @@ class Chromosome :
 		if not self.isLight :
 			return res
 		else :
-			if (mostProbableGenotypeRule != None) :
-				fct = mostProbableGenotypeRule
+			if (SNVsFilter != None) :
+				fct = SNVsFilter
 			else :
-				fct = defaultMostProbableGenotypeRule
+				fct = defaultSNVsFilter
 			
 			snps = self.casavaSNPs.findSnpsInRange(start, end)
 			
@@ -539,14 +556,14 @@ class Chromosome :
 	def getGeneIndex(self) :
 		return self.geneSymbolIndex
 	
-	def loadRandomGene(self, mostProbableGenotypeRule = None) :
-		"""Loads a gene at random. mostProbableGenotypeRule is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulMostProbableGenotypeRule is used. This parameter has no effect if the genome is not light
+	def loadRandomGene(self, SNVsFilter = None) :
+		"""Loads a gene at random. SNVsFilter is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
+		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		
 		k = int(random.random()*len(self.geneSymbolIndex.keys()))
 		key = self.geneSymbolIndex.keys()[k]
-		return self.loadGene(key, mostProbableGenotypeRule)
+		return self.loadGene(key, SNVsFilter)
 		
 	def __getitem__(self, i) :
 		#"""Returns a gene"""

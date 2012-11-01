@@ -249,15 +249,22 @@ class BinarySequence :
 		self.binSequence.extend(arr)
 
 	def decode(self, binSequence):
-		if type(binSequence).__name__ == 'list' :
-			binSeq = binSequence[0]
-		else :
+		#if type(binSequence[0]).__name__ == 'list' :
+		#	binSeq = binSequence[0]
+		#else :
+		#	binSeq = binSequence
+		#print type(binSequence[0]), binSequence
+		
+		try:
+			binSeq = iter(binSequence[0])
+		except TypeError, te:
 			binSeq = binSequence
-			
+    
 		ret = ''
 		for b in binSeq :
 			ch = ''
 			for c in self.charToBin :
+				#print b, self.forma[self.charToBin[c]], c
 				if b & self.forma[self.charToBin[c]] > 0 :
 					ch += c +'/'
 			if ch == '' :

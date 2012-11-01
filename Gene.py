@@ -30,11 +30,11 @@ class InvalidExonComponent(Exception):
 
 class Exon:
 
-	def __init__(self, x1, x2, number, transcript, type, mostProbableGenotypeRule = None, startCodon = -1, stopCodon = -1) :
+	def __init__(self, x1, x2, number, transcript, type, SNVsFilter = None, startCodon = -1, stopCodon = -1) :
 		r"""An exon, the sequence is set according to gene strand, if it's '-' the sequence is the complement.
 		A CDS is a couple of coordinates that lies inside of the exon.
-		mostProbableGenotypeRule is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulMostProbableGenotypeRule is used. This parameter has no effect if the genome is not light
+		SNVsFilter is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
+		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		
 		self.type = type
@@ -48,7 +48,7 @@ class Exon:
 		#self.threePrimeUtr = None
 		#self.fivePrimeUtr = None
 
-		seq = self.transcript.gene.chromosome.getSequence(x1, x2+1, mostProbableGenotypeRule)
+		seq = self.transcript.gene.chromosome.getSequence(x1, x2+1, SNVsFilter)
 		if self.transcript.gene.strand == '+' :
 			self.sequence = seq
 		else :
@@ -126,7 +126,6 @@ class Exon:
 	def __len__(self) :
 		return len(self.sequence)
 
-		
 class Transcript :
 	def __init__(self, gene, id, name, proteinId = '') :
 		self.gene = gene
@@ -377,9 +376,9 @@ class Transcript :
 		
 class Gene :
 	
-	def __init__(self, chromosome, gtfFile, mostProbableGenotypeRule = None, verbose = False) :
-		"""mostProbableGenotypeRule is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulMostProbableGenotypeRule is used. This parameter has no effect if the genome is not light
+	def __init__(self, chromosome, gtfFile, SNVsFilter = None, verbose = False) :
+		"""SNVsFilter is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
+		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		
 		if verbose :
@@ -423,7 +422,7 @@ class Gene :
 				#if (x1, x2) in self.exons.keys() :
 				#	exon = self.exons[(x1, x2)]
 				#else :
-				exon = Exon(x1, x2, exonNumber, self.transcripts[transId], codingType, mostProbableGenotypeRule)
+				exon = Exon(x1, x2, exonNumber, self.transcripts[transId], codingType, SNVsFilter)
 				#self.exons[(x1, x2)] = exon
 				self.exons.append(exon)
 				self.indexRegion(x1, x2, repr(exon), exon)

@@ -1,4 +1,4 @@
-import string, os, copy, pickle
+import string, os, copy, pickle, time
 import numpy as N
 
 class UnknownNucleotide(Exception) :
@@ -39,6 +39,8 @@ codonTable = {
 'GAT' : 'D', 'GAC' : 'D', 'GAA' : 'E', 'GAG' : 'E', 
 'GGT' : 'G', 'GGC' : 'G', 'GGA' : 'G', 'GGG' : 'G'
 }
+
+AAs = ['A', 'C', 'E', 'D', 'G', 'F', 'I', 'H', 'K', '*', 'M', 'L', 'N', 'Q', 'P', 'S', 'R', 'T', 'W', 'V', 'Y']
 
 toFloat = lambda x: float(x)
 toInt = lambda x: int(x)
@@ -86,12 +88,17 @@ def saveResults(directoryName, results, errors = '', params = '', fileName = '')
 	return "results/%s/"%(directoryName)
 
 def saveResults_pkl(filename, obj):
+	fn = ''
 	if filename.find('.pygeno-pklresults') > 1:
-		f = open(filename, 'w')
+		fn = filename
 	else :
-		f = open(filename+'.pygeno-pklresults', 'w')
+		fn = filename+'.pygeno-pklresults'
+	
+	if os.path.exists(fn) :
+		fn = fn.replace('.pygeno-pklresults', '_%s.pygeno-pklresults' %(time.ctine()))
 
-	pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+	f = open(fn, 'w')
+	pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)	
 	f.close()
 
 def unescapeHtml(html) :
@@ -288,7 +295,7 @@ def getCodon(sequence, x1) :
 		return (sequence[x1-2: x1+1], 2)
 		
 def showDifferences(seq1, seq2) :
-	"returns a string representig matching chars (-) and differences (A/T) between the two strings or length exceeded (#)"
+	"returns a string representig matching chars (-) and differences (A|T) between the two strings or length exceeded (#)"
 	ret = []
 	for i in range(max(len(seq1), len(seq2))) :
 		
@@ -302,7 +309,41 @@ def showDifferences(seq1, seq2) :
 			c2 = seq2[i]
 		
 		if c1 != c2 :
-			ret.append('%s/%s' % (c1, c2))
+			ret.append('%s|%s' % (c1, c2))
+		else :
+			ret.append('-')
+		
+	return ''.join(ret)
+
+def showDifferences_test(seq1, seq2) :
+	"returns a string representig matching chars (-) and differences (A|T) between the two strings or length exceeded (#)"
+	ret = []
+	
+	for i in range(max(len(seq1), len(seq2))) :
+		if i >= len(seq1) :
+			c1 = '#'
+		else :
+			if (i+1) < len(seq1) and seq1[i+1] == '/' :
+				try :
+					c1 = seq1[i:i+2]
+				except :
+					c1 = seq1[i]
+			else :
+				c1 = seq1[i]
+				
+		if i >= len(seq2) :
+			c2 = '#'
+		else :
+			if (i+1) < len(seq2) and seq2[i+1] == '/' :
+				try :
+					c2 = seq2[i:i+2]
+				except :
+					c2 = seq2[i]
+			else :
+				c2 = seq2[i]
+		
+		if c1 != c2 :
+			ret.append('%s|%s' % (c1, c2))
 		else :
 			ret.append('-')
 		

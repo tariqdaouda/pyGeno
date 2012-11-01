@@ -90,18 +90,6 @@ class Genome :
 			#	raise ChromosomeNotFound('Unable to load chromosome :' + number)
 		return self.chromosomes[number]
 	
-	#def loadAltChromosome(self, number, verbose = False) :
-	#	"""Loads the alternative chromosome"""
-	#	num = number+'_alt'
-	#	"""if num not in self.chromosomes.keys():
-	#		try :
-	#			if number != '' :
-	#				self.chromosomes[num] = Chromosome(num, self, verbose)
-	#		except IOError:
-	#			raise ChromosomeNotFound('Unable to load alternatve chromosome :' + num)
-	#	return self.chromosomes[num]"""
-	#	return self.loadChromosome(num, verbose)
-	
 	def getChromosomes(self) :
 		return self.chromosomes.values()
 	

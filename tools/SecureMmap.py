@@ -6,6 +6,7 @@ class SecureMmap:
 		
 		self.enableWrite = enableWrite
 		self.filename = filename
+		self.name = filename
 		
 		f = open(filename, 'r+b')
 		self.data = mmap.mmap(f.fileno(), 0)

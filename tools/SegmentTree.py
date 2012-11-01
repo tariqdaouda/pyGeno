@@ -56,23 +56,26 @@ class SegmentTree :
 				return self.children[i].insert(x1, x2, name, referedObject)
 			
 			elif xx1 <= self.children[i].x1 and self.children[i].x2 <= xx2 :
+				#print "aaaaaaaaaaa", xx1, xx2
 				if rt == None :
 					rt = SegmentTree(xx1, xx2, name, self, self.level+1, referedObject)
 					insertId = i
 					
-				self.children[i].father = rt
 				rt.__addChild(self.children[i])
+				#print '===========>', rt
+				self.children[i].father = rt
 				childrenToRemove.append(self.children[i])
-				
+				#childrenToRemove.append(i)
 			elif xx1 <= self.children[i].x1 and xx2 <= self.children[i].x2 :
 				insertId = i
 				break
 				
 		if rt != None :
+			#print 'childrenToRemove', childrenToRemove, len(self.children)
+			self.__addChild(rt, insertId)
 			for c in childrenToRemove :
 				self.children.remove(c)
-				
-			self.__addChild(rt, insertId)
+				#print len(self.children)
 		else :
 			rt = SegmentTree(xx1, xx2, name, self, referedObject)
 			if insertId != None :
@@ -162,10 +165,15 @@ class SegmentTree :
 		return res
 		
 	def __str__(self) :
-		#print self.id, self.children
 		strRes = repr(self)
+		
+		offset = ''
+		for i in range(self.level+1) :
+			offset += '\t'
+			
 		for c in self.children :
-			strRes += '\t-->'+str(c)
+			strRes += '\n'+offset+'-->'+str(c)
+		
 		return strRes
 	
 	def __repr__(self) :
@@ -175,7 +183,7 @@ class SegmentTree :
 			else :
 				return "Root : EMPTY , name : %s, id : %d" %(self.name, self.id)
 		else :
-			return "Segment : %d-%d, name : %s, id : %d" %(self.x1, self.x2, self.name, self.id)
+			return "Segment : %d-%d, name : %s, id : %d, father id : %d" %(self.x1, self.x2, self.name, self.id, self.father.id)
 			
 		
 	def __len__(self) :
@@ -192,7 +200,7 @@ class SegmentTree :
 			return xx2 - xx1
 	
 	def getEffectiveLength(self) :
-		r"returns the sum of the total length of the leafs"
+		r"returns the sum of the total length of the leafs without overlap"
 		#print "getEffectiveLength a cheker"
 		if self.x1 == None and len(self.children) == 0 :
 			return 0

@@ -99,7 +99,7 @@ def DNAToCDNA(pos, transcript) :
 	cdsLen = 0
 	for e in transcript.exons :
 		if e.hasCDS() :
-			#print e.CDS, pos, e.CDS[0] <= pos and pos <= e.CDS[1], transcript.gene.strand
+			print e.CDS, pos, e.CDS[0] <= pos and pos <= e.CDS[1], transcript.gene.strand
 			if e.CDS[0] <= pos and pos <= e.CDS[1]:
 				if transcript.gene.strand == '+'  :
 					resPos = pos - e.CDS[0] + cdsLen
