@@ -156,10 +156,7 @@ class CasavaSNPs :
 		f.close()
 		self.snps = {}
 		
-	def __findSnp(self, x1):#, bound = 'upper') :
-		"""
-		upper/lower refer to the position in the list (opposite of the actual value) 
-		A dichotomic search"""
+	def __findSnp(self, x1):
 		r1 = 0
 		r2 = len(self)-1
 		while (r1 <= r2) :
@@ -370,25 +367,26 @@ class Chromosome :
 		for symbol in self.geneSymbolIndex.keys() :
 			self.loadGene(symbol, SNVsFilter, verbose)
 		
-	def loadGene_bck(self, symbolOrId) :
-		"""Loads a gene and returns it"""
-		if symbolOrId not in self.genes.keys() :
-
-			try :
-				f = open('ncbi/%s/sequences/genes/chr%s_%s.gtf'%(self.genome.name, self.number, symbolOrId))
-				geneData = f.read()
-				f.close()
-			except :
-				geneData = "".join(re.findall('.+"%s".+\n'%(symbolOrId), self.gtf))
-				f = open('ncbi/%s/sequences/genes/chr%s_%s.gtf'%(self.genome.name, self.number, symbolOrId), 'w')
-				f.write(geneData)
-				f.close()
-			#print geneData
-			self.genes[symbolOrId] = Gene(symbolOrId, self, geneData)
-		
-		return self.genes[symbolOrId]
+	#def loadGene_bck(self, symbolOrId) :
+	#	"""Loads a gene and returns it"""
+	#	if symbolOrId not in self.genes.keys() :
+	#
+	#		try :
+	#			f = open('ncbi/%s/sequences/genes/chr%s_%s.gtf'%(self.genome.name, self.number, symbolOrId))
+	#			geneData = f.read()
+	#			f.close()
+	#		except :
+	#			geneData = "".join(re.findall('.+"%s".+\n'%(symbolOrId), self.gtf))
+	#			f = open('ncbi/%s/sequences/genes/chr%s_%s.gtf'%(self.genome.name, self.number, symbolOrId), 'w')
+	#			f.write(geneData)
+	#			f.close()
+	#		#print geneData
+	#		self.genes[symbolOrId] = Gene(symbolOrId, self, geneData)
+	#	
+	#	return self.genes[symbolOrId]
 	
-	def getGenes(self) :
+	def getGenes(self, SNVsFilter = None) :
+		self.loadAllGenes(SNVsFilter)
 		return self.genes.values()
 	
 	def getNucleotide(self, x1, SNVsFilter = None) :
@@ -408,12 +406,15 @@ class Chromosome :
 			return snp['max_gt']
 		return self.data[x1]
 
-	def getSequence(self, x1, x2, SNVsFilter = None) :
+	def getSequence(self, x1, x2 = None, SNVsFilter = None) :
 		"""SNVsFilter is a fct that takes a CasavaSnp as input a returns true if it correpsond to the rule.
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
-		if x2 != None :
-			if x1 > x2 :
+		
+		if x1 != None :
+			if x2 == None :
+				start, end = x1, x1 + 1
+			elif x1 > x2 :
 				start, end = x2, x1 
 			else :
 				start, end = x1, x2
@@ -448,7 +449,7 @@ class Chromosome :
 	def getPolymorphismsInRange(self, x1, x2) :
 		return self.casavaSNPs.findSnpsInRange(x1, x2)
 		
-	def getSequence_test(self, x1, x2, SNVsFilter = None) :
+	def getSequence_bck(self, x1, x2, SNVsFilter = None) :
 		"""SNVsFilter is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""

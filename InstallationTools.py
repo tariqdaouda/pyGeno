@@ -12,7 +12,8 @@ def installSequences(fastaDir, specie, genomeName) :
 	This may take some time, please wait...""" %(fastaDir, specie, genomeName)
 	
 	
-	path = conf.DATA_PATH+'/ncbi/%s/sequences/%s/'%(specie, genomeName)
+	#path = conf.DATA_PATH+'/ncbi/%s/sequences/%s/'%(specie, genomeName)
+	path = conf.DATA_PATH+'/%s/genomes/%s/'%(specie, genomeName)
 
 	if not os.path.exists(path):
 		os.makedirs(path)
@@ -64,7 +65,7 @@ def installGeneSymbolIndex(gtfFile, specie) :
 	#gtf = GTFFile()
 	#gtf.parseFile(gtfFile)
 	
-	path = conf.DATA_PATH+'/ensembl/%s/'%(specie)
+	path = conf.DATA_PATH+'/%s/gene_sets/'%(specie)
 	if not os.path.exists(path):
 		os.makedirs(path)
 		
@@ -145,7 +146,8 @@ def makeGenome_casava(specie, genomeName, snpsTxtFile) :
 	The .casavasnps files generated are identical to the casava snps but with ';' instead of tabs and 
 	a single position instead of a range"""
 
-	path = conf.DATA_PATH+'/ncbi/%s/sequences/%s/'%(specie, genomeName)
+	#path = conf.DATA_PATH+'/ncbi/%s/sequences/%s/'%(specie, genomeName)
+	path = conf.DATA_PATH+'/%s/genomes/%s/'%(specie, genomeName)
 	print 'Installing genome %s...' %path
 	
 	if not os.path.exists(path):
@@ -176,17 +178,91 @@ def makeGenome_casava(specie, genomeName, snpsTxtFile) :
 		f = open('%s/%s.casavasnps'%(path, currChr), 'w')
 		f.write(strRes)
 		f.close()
-
+	
+	#print '%s/sourceFile.txt'%(path)
+	f = open('%s/sourceFile.txt'%(path), 'w')
+	f.write(snpsTxtFile)
+	f.close()
+	
 	print 'Installation of genome %s/%s done.' %(specie, genomeName)
 
+def makeDbSNPFile(filePath, outputFolder, compressOutput = False, verbose = False) :
+	"""
+	filePath should be a gziped file.
+	dbSNP Files are sorted by rsId, in pyGeno format they are sorted by position in the chromosome.
+	This function does the sorting.
+	If compressOutput is set to true, the sorted output for each chromosome will be a gz file.
+	This creates significantly smaller files on disk but will result in an overhead while loading the data"""
+	
+	print "Extracting data from %s..." %filePath
+	f = gzip.open(filePath, 'rb')#open('chr_Y.txt')
+	lines = f.readlines()
+	f.close()
+	
+	d = {}
+	print 'populating dict...'
+	for l in lines :
+		sl = l.split('\t');
+		try :
+			sl[11] = str(int(sl[11])-1) #pyGeno starts counting at 0
+			d[sl[11]] = ';'.join(sl)
+		except IndexError:
+			if verbose:
+				print "ignoring invalid line %s" %l
+		except ValueError:
+			if verbose:
+				print "ignoring line for invalid chromosome position : ", sl[11]
+			
+	print 'sorting...'
+	keys = d.keys()
+	keys.sort()
+	
+	filename = filePath.split('/')[-1]
+	outFile = filename.replace('chr_', 'chr')
+	outFile = outFile.replace('.txt.gz', '.pygeno-dbsnp')
+	outFile = outputFolder + '/' + outFile
+	if compressOutput :
+		if verbose :
+			print "\toutput will is compressed"
+		print "writing output to %s..." % (outFile+'.gz')
+		f = gzip.open(outFile+'.gz', 'w')
+	else :
+		print "writing output to %s..." % (outFile)
+		f = open(outFile, 'w')
 
-#makeGenome_casava('human', 'lightR', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
-#makeGenome_casava('human', 'lightM', '/u/corona/Project_DSP008a/Build_Diana_ARN_M/snps.txt')
-#print 'install mouse'
-#installGenome('/u/daoudat/py/pyGeno/pyGenoData/fasta-installs/mouse', 'mouse', 'reference')
-#print 'install b6'
-#makeGenome_casava('mouse', 'B6', '/u/corona/Project_DSP014/120313_SN942_0105_AD093KACXX/Build_B6/snps.txt')
-#makeGeneSymbolIndex('pyGenoData/installs/mouse/Mus_musculus.NCBIM37.64.gtf', 'mouse')
+	for k in keys :
+		f.write(d[k])
+	f.close()
 
-installGenome('/u/daoudat/py/pyGeno/pyGenoData/installationPackages/mouse', 'mouse', 'reference')
+def install_dbSNP(packageFolder, specie, versionName, compressOutput = False, verbose = False) :
+	"""To install dbSNP informations, download chromosome reports (chr_rpts )files from the 
+	dbSNP ftp : ftp://ftp.ncbi.nih.gov/snp/organisms/ and place them all in one single folder. This folder
+	will be considered as a package. Launch this function and drink a cup of coffee while waiting
+	
+	versionName is name with wich you want to call this specific version of dbSNP
+	If compressOutput is set to true, the sorted output for each chromosome will be a gz file.
+	This creates significantly smaller files on disk but will result in an overhead while loading the data
+	"""
+	
+	files = glob.glob(packageFolder+'/*.txt.gz')
+	outputPath = conf.DATA_PATH+'/%s/dbSNP/%s/' %(specie, versionName)
+	
+	if not os.path.exists(outputPath):
+		os.makedirs(outputPath)
+		
+	for fil in files :
+		makeDbSNPFile(fil, outputPath)
+	
+if __name__ = "__main__" :
+	#makeGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
+	#makeGenome_casava('human', 'lightM_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_M/snps.txt')
+	#makeGenome_casava('human', 'lightR_Exome', '/u/corona/Project_DSP008a/Build_Diana_ADN_R/snps.with_removed.txt')
+	#makeGenome_casava('human', 'lightM_Exome', '/u/corona/Project_DSP008a/Build_Diana_ADN_M/snps.with_removed.txt')
+
+	#print 'install mouse'
+	#installGenome('/u/daoudat/py/pyGeno/pyGenoData/fasta-installs/mouse', 'mouse', 'reference')
+	#print 'install b6'
+	#makeGenome_casava('mouse', 'B6', '/u/corona/Project_DSP014/120313_SN942_0105_AD093KACXX/Build_B6/snps.txt')
+	#makeGeneSymbolIndex('pyGenoData/installs/mouse/Mus_musculus.NCBIM37.64.gtf', 'mouse')
+	#installGenome('/u/daoudat/py/pyGeno/pyGenoData/installationPackages/mouse', 'mouse', 'reference')
 

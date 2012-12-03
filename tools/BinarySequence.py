@@ -274,6 +274,7 @@ class BinarySequence :
 		return ret
 		
 	def getChar(self, i):
+		#print i, len(self.binSequence) 
 		return self.decode([self.binSequence[i]])
 		
 	def __len__(self):

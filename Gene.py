@@ -149,11 +149,17 @@ class Transcript :
 		self.startCodon = None
 		self.stopCodon = None
 		
+		#<7iyed>
 		#this is set to None until getCodonUsage is called once
 		self.codonUsage = None
+		#</7iyed>
 		self.lowAffinityCodonsNb = -1
 		self.highAffinityCodonsNb = -1
 		
+		#This dict contains a set au flags about the transcript
+		#and his updated automaticly, and in theory should be modified directly.
+		#the flag DUBIOUS is on if : LEN_NOT_MULT_3
+		self.flags = {'DUBIOUS' : False, 'CDNA_LEN_NOT_MULT_3': False} 
 		self.unclose()
 	
 	def appendExon(self, exon) :
@@ -204,30 +210,6 @@ class Transcript :
 	def getCodon(self, cdnaX1) :
 		"Returns the entire codon of the nucleotide at pos cdnaX1 in the cdna, and the position of that nocleotide in the codon"
 		return uf.getCodon(self.CDNA, cdnaX1)
-	
-	def getCodonUsage(self) :
-		if self.codonUsage != None :
-			return self.codonUsage
-		
-		for k in uf.codonTable.keys() :
-			self.codonUsage[k] = 0
-			
-		for i in range(0, len(self.sequence), 3) :
-			if self.sequence[i:i+3] in uf.codonTable.keys() :
-				self.codonUsage[self.sequence[i:i+3]] += 1
-				if self.sequence[i:i+3] in uf.lowAffinityCodons :
-					self.lowAffinityCodonsNb += 1
-				else :
-					self.highAffinityCodonsNb += 1
-			else :
-				for c in uf.polymorphicCondonCombinaisons(self.sequence[i:i+3]) :
-					self.codonUsage[c] += 1
-					if c in uf.lowAffinityCodons :
-						self.lowAffinityCodonsNb += 1
-					else :
-						self.highAffinityCodonsNb += 1
-	
-		return self.codonUsage
 
 	def close(self) :
 		"""After a transcript has been closed youcan still add exons but each new append would cause it
@@ -236,10 +218,21 @@ class Transcript :
 		about it, but just in case you can unclose a transcript using unclose()"""
 		self.__updateBinarySequences()
 		self.closed = True
+		self.__setFlags()
 	
 	def unclose(self) :
+		self. __resetFlags()
 		self.closed = False
 	
+	def __setFlags(self) :
+		if len(self.CDNA)%3 != 0 :
+			self.flags['CDNA_LEN_NOT_MULT_3'] = True
+			self.flags['DUBIOUS'] = True
+	
+	def __resetFlags(self) :
+		self.flags['CDNA_LEN_NOT_MULT_3'] = False
+		self.flags['DUBIOUS'] = False
+			
 	def __updateBinarySequences(self) :
 		if len(self.CDNA) > 0:
 			self.binCDNA = NucBinarySequence(self.CDNA)
@@ -298,7 +291,8 @@ class Transcript :
 		
 	#def getThreePrimeUtrLength(self):
 	#	return len(self.threePrimeUtr)
-		
+	
+	#<7iyed>
 	def getCodonAffinityMap(self, chunkRatio = 0.05) :
 		chunks = []
 		if len(self.CDNA) < 3 :
@@ -362,6 +356,31 @@ class Transcript :
 			#	print self.CDNA[i:i+3]
 		return chunks
 		
+	def getCodonUsage(self) :
+		if self.codonUsage != None :
+			return self.codonUsage
+		
+		for k in uf.codonTable.keys() :
+			self.codonUsage[k] = 0
+			
+		for i in range(0, len(self.sequence), 3) :
+			if self.sequence[i:i+3] in uf.codonTable.keys() :
+				self.codonUsage[self.sequence[i:i+3]] += 1
+				if self.sequence[i:i+3] in uf.lowAffinityCodons :
+					self.lowAffinityCodonsNb += 1
+				else :
+					self.highAffinityCodonsNb += 1
+			else :
+				for c in uf.polymorphicCondonCombinaisons(self.sequence[i:i+3]) :
+					self.codonUsage[c] += 1
+					if c in uf.lowAffinityCodons :
+						self.lowAffinityCodonsNb += 1
+					else :
+						self.highAffinityCodonsNb += 1
+	
+		return self.codonUsage
+	#</7iyed>
+	
 	def __getitem__(self, i) :
 		return self.sequence[i]
 		
@@ -401,6 +420,7 @@ class Gene :
 		self.SNPs = {}
 		self.exons = []
 		self.transcripts = {}
+		self.unDubiousTranscripts = []
 		
 		for i in range(len(self.gtfFile)) :
 			x1 = int(self.gtfFile.get(i, 'x1')) -1
@@ -448,7 +468,9 @@ class Gene :
 			if verbose :
 				print "closing transcript : %s..."%(tid)
 			self.transcripts[tid].close()
-			
+			if not self.transcripts[tid].flags['DUBIOUS'] :
+				self.unDubiousTranscripts.append(self.transcripts[tid])
+	
 	def indexRegion(self, x1, x2, name = '', referencedObject = None):
 		return self.regionIndex.addRegion(x1, x2, name, referencedObject)
 	
@@ -495,9 +517,11 @@ class Gene :
 	def getTranscriptIds(self) :
 		return self.transcripts.keys()
 
-	def getTranscript(self) :
-		return self.transcripts.values()
-
+	def getTranscripts(self, unDubiousOnly = False) :
+		if not unDubiousOnly :
+			return self.transcripts.values()
+		return self.unDubiousTranscripts
+		
 	def getPolymorphisms(self) :
 		ret = []
 		for e in self.exons :

@@ -85,9 +85,11 @@ class SegmentTree :
 		
 		return rt
 		
-	def intersect(self, x1, x2) :
+	def intersect(self, x1, x2= None) :
 		"""Returns all the segments intersected by x1, x2"""
-		if x1 > x2 :
+		if x2 == None :
+			xx1, xx2 = x1, x1
+		elif x1 > x2 :
 			xx1, xx2 = x2, x1
 		else :
 			xx1, xx2 = x1, x2

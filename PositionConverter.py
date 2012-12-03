@@ -99,7 +99,28 @@ def DNAToCDNA(pos, transcript) :
 	cdsLen = 0
 	for e in transcript.exons :
 		if e.hasCDS() :
-			print e.CDS, pos, e.CDS[0] <= pos and pos <= e.CDS[1], transcript.gene.strand
+			#print e.CDS, pos, e.CDS[0] <= pos and pos < e.CDS[1], transcript.gene.strand, e.getCDSLength(), cdsLen
+			if e.CDS[0] <= pos and pos < e.CDS[1]:
+				if transcript.gene.strand == '+'  :
+					resPos = pos - e.CDS[0] + cdsLen
+					#print '\trespos', resPos, pos, '-', e.CDS[0], '+', cdsLen
+					#print transcript.CDNA
+					#print transcript.loadProtein().sequence
+					#print transcript.id
+					return resPos
+				resPos = (e.CDS[1] -pos) + cdsLen #+1
+				return resPos
+			else :
+				cdsLen += e.getCDSLength()
+	#print 'NF'
+	return None
+
+def DNAToCDNA_bck(pos, transcript) :
+	"return None if the position is out of range"
+	cdsLen = 0
+	for e in transcript.exons :
+		if e.hasCDS() :
+			#print e.CDS, pos, e.CDS[0] <= pos and pos <= e.CDS[1], transcript.gene.strand
 			if e.CDS[0] <= pos and pos <= e.CDS[1]:
 				if transcript.gene.strand == '+'  :
 					resPos = pos - e.CDS[0] + cdsLen
@@ -111,11 +132,11 @@ def DNAToCDNA(pos, transcript) :
 				cdsLen += e.getCDSLength()
 	#print 'NF'
 	return None
-
+	
 def proteinToCDNA(pos) :
 	return int(pos*3)
-		
-def CDNAtoProtein(pos) :
+
+def CDNAToProtein(pos) :
 	return int(pos)/3
 
 def proteinToDNA(pos, protein) :
@@ -128,6 +149,6 @@ def proteinToDNA_range(x1, x2, protein, iWantCDSNumbers = False) :
 	#print "====>", protein
 	return CDNAToDNA_range(xx1, xx2, protein.transcript, iWantCDSNumbers) 
 	
-def DNAtoProtein(pos, protein):
-	return CDNAtoProtein(DNAToCDNA(pos, protein.transcript))
+def DNAToProtein(pos, protein):
+	return CDNAToProtein(DNAToCDNA(pos, protein.transcript))
 	

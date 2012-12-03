@@ -19,7 +19,8 @@ class ChrData_Struct :
 		self.number = number
 		self.length = int(length)
 	
-		f = open(conf.DATA_PATH+'/ensembl/%s/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number))
+		#f = open(conf.DATA_PATH+'/ensembl/%s/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number))
+		f = open(conf.DATA_PATH+'%s/gene_sets/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number))
 		self.geneSymbolIndex = pickle.load(f)
 		f.close()
 	
@@ -39,8 +40,8 @@ class Genome :
 		self.specie = path.split('/')[0]
 		self.name = path.split('/')[1]
 		
-		self.absolutePath = conf.DATA_PATH+'/ncbi/%s/sequences/%s' % (self.specie, self.name)
-		self.referencePath = conf.DATA_PATH+'/ncbi/%s/sequences/reference' % (self.specie)
+		self.absolutePath = conf.DATA_PATH+'/%s/genomes/%s' % (self.specie, self.name)
+		self.referencePath = conf.DATA_PATH+'/%s/genomes/reference' % (self.specie)
 		#: WARNING ONLY FOR HUMANS!!!
 		#self.chromosomeList = map(uf.intToStr, range(1, 23))
 		#self.chromosomeList.extend(['x', 'y'])
@@ -64,16 +65,20 @@ class Genome :
 		return self.chrsData.keys()
 	
 	def getSequencePath(self) :
-		return conf.DATA_PATH+'/ncbi/%s/sequences/%s' % (self.specie, self.name)
+		#return conf.DATA_PATH+'/ncbi/%s/sequences/%s' % (self.specie, self.name)
+		return conf.DATA_PATH+'/%s/genomes/%s' % (self.specie, self.name)
 	
 	def getReferenceSequencePath(self) :
-		return conf.DATA_PATH+'/ncbi/%s/sequences/reference' % (self.specie)
+		#return conf.DATA_PATH+'/ncbi/%s/sequences/reference' % (self.specie)
+		return conf.DATA_PATH+'/%s/genomes/reference' % (self.specie)
 		
-	def getAnnotationPath(self) :
-		return conf.DATA_PATH+'/ensembl/%s' % self.getSpecie()
+	def getSetsPath(self) :
+		#return conf.DATA_PATH+'/ensembl/%s' % self.getSpecie()
+		return conf.DATA_PATH+'/%s/gene_sets' % self.getSpecie()
 	
 	def getSNPsPath(self) :
-		return conf.DATA_PATH+'/ncbi/%s/dbSNP/' % (self.specie)
+		#return conf.DATA_PATH+'/ncbi/%s/dbSNP/' % (self.specie)
+		return conf.DATA_PATH+'/%s/dbSNP/' % (self.specie)
 		
 	def getSpecie(self):
 		return self.specie

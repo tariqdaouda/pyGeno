@@ -15,8 +15,10 @@ polymorphicNucleotides = {
 			'D' : ['A','G','T'], 'H' : ['A','C','T'], 'V' : ['A','C','G'], 'N': ['A','C','G','T']
 			}
 
+#<7iyed>
 #from Molecular Systems Biology 8; Article number 572; doi:10.1038/msb.2012.3
 lowAffinityCodons = ['GCA', 'GCT', 'AGA', 'CGA', 'CGT', 'AAT', 'GAT', 'TGT', 'CAA', 'GAA', 'GGA', 'GGT', 'CAT', 'ATA', 'ATT', 'CTA', 'CTT', 'TTA', 'AAA', 'TTT', 'CCA', 'CCT', 'AGT', 'TCA', 'TCT', 'ACA', 'ACT', 'TAT', 'GTA', 'GTT']
+#</7iyed>
 
 codonTable = {
 'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 
