@@ -1,9 +1,10 @@
-import os, glob, pickle
+import os, glob, gzip, pickle
 import configuration as conf
-#import cPickle
 
+#import cPickle
 from Genome import Genome
 from tools import UsefulFunctions as uf
+from expyutils.CSVTools import CSVFile
 #from expyutils.GTFTools import GTFFile
 
 def installSequences(fastaDir, specie, genomeName) :
@@ -186,11 +187,16 @@ def makeGenome_casava(specie, genomeName, snpsTxtFile) :
 	
 	print 'Installation of genome %s/%s done.' %(specie, genomeName)
 
-def makeDbSNPFile(filePath, outputFolder, compressOutput = False, verbose = False) :
+def makeDbSNPFile_chrrpts_bck(filePath, outputFolder, compressOutput = False, verbose = False) :
 	"""
 	filePath should be a gziped file.
-	dbSNP Files are sorted by rsId, in pyGeno format they are sorted by position in the chromosome.
-	This function does the sorting.
+	
+	The resulting file is almost identical to dbSNPs except that:
+	-they are ';' separated 
+	-dbSNP Files are sorted by rsId, in pyGeno format they are sorted by position in the chromosome. This function does the sorting.
+	-In pygeno files the position in the chormosome and rsId column are inverted => chr position is now at column 0 and the rsid at column 11
+	-The chr prostion begins at 0 and not a 1 as in dbSNP
+	
 	If compressOutput is set to true, the sorted output for each chromosome will be a gz file.
 	This creates significantly smaller files on disk but will result in an overhead while loading the data"""
 	
@@ -204,7 +210,9 @@ def makeDbSNPFile(filePath, outputFolder, compressOutput = False, verbose = Fals
 	for l in lines :
 		sl = l.split('\t');
 		try :
-			sl[11] = str(int(sl[11])-1) #pyGeno starts counting at 0
+			chroPos = str(int(sl[11])-1) #pyGeno starts counting at 0
+			sl[11] = sl[0]
+			sl[0] = chroPos
 			d[sl[11]] = ';'.join(sl)
 		except IndexError:
 			if verbose:
@@ -234,26 +242,100 @@ def makeDbSNPFile(filePath, outputFolder, compressOutput = False, verbose = Fals
 		f.write(d[k])
 	f.close()
 
-def install_dbSNP(packageFolder, specie, versionName, compressOutput = False, verbose = False) :
-	"""To install dbSNP informations, download chromosome reports (chr_rpts )files from the 
+def install_dbSNP(packageFolder, specie, versionName) :
+	"""To install dbSNP informations, download ASN1_flat files from the 
 	dbSNP ftp : ftp://ftp.ncbi.nih.gov/snp/organisms/ and place them all in one single folder. This folder
 	will be considered as a package. Launch this function and drink a cup of coffee while waiting
 	
 	versionName is name with wich you want to call this specific version of dbSNP
-	If compressOutput is set to true, the sorted output for each chromosome will be a gz file.
-	This creates significantly smaller files on disk but will result in an overhead while loading the data
 	"""
-	
-	files = glob.glob(packageFolder+'/*.txt.gz')
-	outputPath = conf.DATA_PATH+'/%s/dbSNP/%s/' %(specie, versionName)
-	
-	if not os.path.exists(outputPath):
-		os.makedirs(outputPath)
+	#Fcts
+	def fillCSV(res, csv) :
+		l = res.keys()
+		l.sort()
+		for k in l :
+			li = csv.addLine()
+			csv.setElement(li, 'pos', res[k]['pos'])
+			csv.setElement(li, 'chro', res[k]['chro'])
+			csv.setElement(li, 'rs', res[k]['rs'])
+			csv.setElement(li, 'type', res[k]['type'])
+			csv.setElement(li, 'alleles', res[k]['alleles'])
+			csv.setElement(li, 'validated', res[k]['validated'])
+			csv.setElement(li, 'assembly', res[k]['assembly'])
 		
+	def parse(s, chroNumber, res) :
+		lines = s.split('\n')
+		
+		rs = None
+		typ = None
+		pos = None
+		assembly = None
+		chro = None
+		validated = None
+		alleles = None
+		
+		for l in lines :
+			sl = l.split('|')
+			if sl[0][:2] == 'rs' :
+				rs = sl[0][2:].strip()#csv.setElement(li, 'rs', )
+				typ = sl[3].strip()#csv.setElement(li, 'rs', )
+			
+			elif sl[0][:3] == 'SNP' and rs != None :
+				alleles = sl[1].strip().replace('alleles=', '').replace("'", "")
+				#csv.setElement(li, 'alleles', )
+			
+			elif sl[0][:3] == 'VAL' and rs != None :
+				validated = sl[1].strip().replace("validated=", '')
+				#csv.setElement(li, 'alleles', )
+				
+			elif sl[0][:3] == 'CTG' and sl[1].find('GRCh') > -1 and rs != None :
+				assembly = sl[1].replace('assembly=', '').strip()
+				chro = sl[2].replace('chr=', '').strip()
+				pos = sl[3].replace('chr-pos=', '').strip()
+				if chro != chroNumber or pos == '?' :
+					chro = None
+					pos = None
+			
+			if rs != None and chro != None and pos != None and alleles != None and assembly != None and validated != None:
+				res[pos] = {'pos' : pos, 'chro' : chro, 'rs' : rs, 'type' : typ, 'alleles' : alleles, 'validated' : validated, 'assembly' : assembly}
+				break
+	#Fcts
+	files = glob.glob(packageFolder+'/*.flat.gz')
+	outPath = conf.DATA_PATH+'/%s/dbSNP/%s/' %(specie, versionName)
+	if not os.path.exists(outPath):
+		os.makedirs(outPath)
+
 	for fil in files :
-		makeDbSNPFile(fil, outputPath)
+		chrStrStartPos = fil.find('ch')
+		chrStrStopPos = fil.find('.flat')
+		#print chrStrStartPos, chrStrStopPos
+		chroNumber = fil[chrStrStartPos+2: chrStrStopPos]
+		outFile = fil.replace(packageFolder, outPath).replace('ds_flat_', '').replace('ch'+chroNumber, 'chr'+chroNumber).replace('.flat.gz', '.pygeno-dbSNP')
+		headerFile = outFile.replace('.pygeno-dbSNP', '-header.txt')
+		
+		print "extracting file :", fil, "..."
+		f = gzip.open(fil)
+		snps = f.read().split('\n\n')
+		f.close()
+		print snps[0]
+		print "\tparsing..."
+		res = {}
+		resCSV = CSVFile(['pos', 'chro', 'rs', 'type', 'alleles', 'validated', 'assembly'])
+		for snp in snps[1:] :
+			parse(snp, chroNumber, res)
+			
+		print "\tformating data..."
+		fillCSV(res, resCSV)
+
+		print "\tsaving..."
+		resCSV.save(outFile)
+		header = "source file : %s\n%s" % (fil, snps[0])
+		f = open(headerFile, 'w')
+		f.write(header)
+		f.close()
 	
-if __name__ = "__main__" :
+if __name__ == "__main__" :
+	install_dbSNP('/u/daoudat/py/pyGeno/pyGenoData/installationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
 	#makeGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
 	#makeGenome_casava('human', 'lightM_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_M/snps.txt')
 	#makeGenome_casava('human', 'lightR_Exome', '/u/corona/Project_DSP008a/Build_Diana_ADN_R/snps.with_removed.txt')

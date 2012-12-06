@@ -445,13 +445,13 @@ class Gene :
 				exon = Exon(x1, x2, exonNumber, self.transcripts[transId], codingType, SNVsFilter)
 				#self.exons[(x1, x2)] = exon
 				self.exons.append(exon)
-				self.indexRegion(x1, x2, repr(exon), exon)
+				#self.indexRegion(x1, x2, repr(exon), exon)
 			else :
 				for e in self.exons :
 					if e.transcript.id == transId and e.x1 <= x1 and x2 <= e.x2:
 						if self.gtfFile.get(i, 'region_type') == 'CDS':
 							e.setCDS(x1, x2)
-							self.indexRegion(x1, x2, 'CDS of: %s' % (repr(e)), None)
+							#self.indexRegion(x1, x2, 'CDS of: %s' % (repr(e)), None)
 						elif self.gtfFile.get(i, 'region_type') == 'start_codon':
 							e.startCodon = x1
 							e.transcript.startCodon = e
@@ -471,8 +471,8 @@ class Gene :
 			if not self.transcripts[tid].flags['DUBIOUS'] :
 				self.unDubiousTranscripts.append(self.transcripts[tid])
 	
-	def indexRegion(self, x1, x2, name = '', referencedObject = None):
-		return self.regionIndex.addRegion(x1, x2, name, referencedObject)
+	#def indexRegion(self, x1, x2, name = '', referencedObject = None):
+	#	return self.regionIndex.addRegion(x1, x2, name, referencedObject)
 	
 	def loadTranscript(self, transId) :
 		return self.transcripts[transId]
@@ -487,9 +487,9 @@ class Gene :
 	#	"""Just an alias for loadTranscript for the sack of back compatibility"""
 	#	return self.getTanscripts(transId)
 	
-	def getSNPs(self) :
-		self.SNPs = self.regionIndex.getSNPs()
-		return self.SNPs
+	#def getSNPs(self) :
+	#	self.SNPs = self.regionIndex.getSNPs()
+	#	return self.SNPs
 	
 	def getStartPosition(self) :
 		return self.regionIndex.getX1()

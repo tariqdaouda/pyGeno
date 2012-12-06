@@ -72,7 +72,7 @@ class Genome :
 		#return conf.DATA_PATH+'/ncbi/%s/sequences/reference' % (self.specie)
 		return conf.DATA_PATH+'/%s/genomes/reference' % (self.specie)
 		
-	def getSetsPath(self) :
+	def getGeneSetsPath(self) :
 		#return conf.DATA_PATH+'/ensembl/%s' % self.getSpecie()
 		return conf.DATA_PATH+'/%s/gene_sets' % self.getSpecie()
 	
