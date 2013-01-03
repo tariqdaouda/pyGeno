@@ -245,7 +245,8 @@ def makeDbSNPFile_chrrpts_bck(filePath, outputFolder, compressOutput = False, ve
 def install_dbSNP(packageFolder, specie, versionName) :
 	"""To install dbSNP informations, download ASN1_flat files from the 
 	dbSNP ftp : ftp://ftp.ncbi.nih.gov/snp/organisms/ and place them all in one single folder. This folder
-	will be considered as a package. Launch this function and drink a cup of coffee while waiting
+	will be considered as a package.
+	Launch this function and go make yourself a cup of coffee, this function has absolutly not been written to be fast
 	
 	versionName is name with wich you want to call this specific version of dbSNP
 	"""
@@ -255,7 +256,7 @@ def install_dbSNP(packageFolder, specie, versionName) :
 		l.sort()
 		for k in l :
 			li = csv.addLine()
-			csv.setElement(li, 'pos', res[k]['pos'])
+			csv.setElement(li, '//pos', res[k]['pos'])
 			csv.setElement(li, 'chro', res[k]['chro'])
 			csv.setElement(li, 'rs', res[k]['rs'])
 			csv.setElement(li, 'type', res[k]['type'])
@@ -295,7 +296,9 @@ def install_dbSNP(packageFolder, specie, versionName) :
 				if chro != chroNumber or pos == '?' :
 					chro = None
 					pos = None
-			
+				else :
+					pos = int(pos)-1
+				
 			if rs != None and chro != None and pos != None and alleles != None and assembly != None and validated != None:
 				res[pos] = {'pos' : pos, 'chro' : chro, 'rs' : rs, 'type' : typ, 'alleles' : alleles, 'validated' : validated, 'assembly' : assembly}
 				break
@@ -320,7 +323,7 @@ def install_dbSNP(packageFolder, specie, versionName) :
 		print snps[0]
 		print "\tparsing..."
 		res = {}
-		resCSV = CSVFile(['pos', 'chro', 'rs', 'type', 'alleles', 'validated', 'assembly'])
+		resCSV = CSVFile(['//pos', 'chro', 'rs', 'type', 'alleles', 'validated', 'assembly'])
 		for snp in snps[1:] :
 			parse(snp, chroNumber, res)
 			
@@ -328,8 +331,16 @@ def install_dbSNP(packageFolder, specie, versionName) :
 		fillCSV(res, resCSV)
 
 		print "\tsaving..."
-		resCSV.save(outFile)
 		header = "source file : %s\n%s" % (fil, snps[0])
+		header = header.split('\n')
+		for i in range(len(header)) :
+			header[i] = '//'+header[i]+'\n'
+		header = ''.join(header)
+		
+		resCSV.setHeader(header)
+		resCSV.save(outFile)
+		
+		
 		f = open(headerFile, 'w')
 		f.write(header)
 		f.close()

@@ -215,8 +215,36 @@ def translateDNA(sequence, frame = 1) :
 				protein += '/'.join(translations)
 				
 	return protein
+
+def getSequenceCombinaisons(polymorphipolymorphicDnaSeqSeq, pos = 0) :
+	"""Takes a dna sequence with polymorphismes and returns all the possible sequences that it can yield"""
 	
-def polymorphicCondonCombinaisons(dnaSeq, startId = 0) :
+	if type(polymorphipolymorphicDnaSeqSeq).__name__ != 'list' :
+		seq = list(polymorphipolymorphicDnaSeqSeq)
+	else :
+		seq = polymorphipolymorphicDnaSeqSeq
+		
+	if pos >= len(seq) :
+		return [''.join(seq)]
+
+	variants = []
+	if seq[pos] in polymorphicNucleotides :
+		chars = decodePolymorphicNucleotide(seq[pos]).split('/')
+	else :
+		chars = seq[pos].split('/')
+		
+	#print chars
+	for c in chars :
+		rseq = copy.copy(seq)
+		rseq[pos] = c
+		variants.extend(getSequenceCombinaisons(rseq, pos + 1))
+	
+	return variants
+	
+def polymorphicCondonCombinaisons(codon) :
+	return getSequenceCombinaisons(codon, 0)
+	
+def polymorphicCondonCombinaisons_bck(dnaSeq, startId = 0) :
 	if type(dnaSeq).__name__ != 'list' :
 		dna = list(dnaSeq)
 	else :
@@ -237,16 +265,16 @@ def polymorphicCondonCombinaisons(dnaSeq, startId = 0) :
 		res.extend(polymorphicCondonCombinaisons(rDna, startId +1))
 
 	return res
-	
+
 def getPolymorphicNucleotide(strSeq) :
-	"""Seq is a string like : ATG"""
+	"""Seq is a string like : ATG or A/T/G"""
 	
-	seq = list(strSeq)
+	seq = list(strSeq.replace('/', ''))
 	for i in range(len(seq)) :
 		if seq[i] in polymorphicNucleotides :
 			seq[i] = ''.join(polymorphicNucleotides[seq[i]])
 	
-	seq = set(strSeq)
+	seq = set(seq)
 	if len(seq) == 4:
 		return 'N'
 	elif len(seq) == 3 :
@@ -280,7 +308,8 @@ def decodePolymorphicNucleotide(nuc) :
 	if nuc in polymorphicNucleotides :
 		return '/'.join(polymorphicNucleotides[nuc])
 	
-	return nuc
+	raise ValueError('nuc: %s, is not a valid polymorphic nucleotide' % nuc)
+	#return nuc
 	
 def getCodon(sequence, x1) :
 	"Returns the entire codon of the nucleotide at pos x1 in the cdna, and the position of that nocleotide in the codon"

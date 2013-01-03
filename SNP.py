@@ -4,11 +4,31 @@ from tools import UsefulFunctions as uf
 class SNPFile :
 	"""This represent a file containing a list of snps sorted by position, the position must be in the first column"""
 	def __init__(self, filePath, SNPObj) :
+		self.filePath = filePath
 		f = open(filePath)
 		self.lines = f.readlines()
 		f.close()
+		if self.lines[0][:2] == '//' :
+			j = 0
+			for i in range(len(self.lines)) :
+				if self.lines[i][:6] =='//pos;' :
+					break
+				j += 1
+				
+			self.lines = self.lines[j+1:]
+			
+		if len(self.lines) < 1 :
+			raise ValueError("file %s is empty" % filePath)
+
 		self.snps = {}
 		self.SNPObj = SNPObj
+		#print self.filePath
+		#try :
+		#	for l in self.lines[15922:15923+1]:
+		#		print l
+		#except :
+		#	pass
+	
 	def __findSnp(self, x1):
 		r1 = 0
 		r2 = len(self)-1
@@ -26,15 +46,26 @@ class SNPFile :
 
 		return (pos, val)
 
-	def findSnpsInRange(self, x1, x2) :
+	def findSnpsInRange(self, x1, x2 = None) :
 		"""X1 inclusive, x2 exc"""
-		l1, val1 = self.__findSnp(x1)
-		l2, val2 = self.__findSnp(x2)
+		if x2 == None or x1 == x2:
+			xx1 = x1
+			xx2 = x1+1
+		else :
+			if x1 < x2 :
+				xx1, xx2 = x1, x2
+			else :
+				xx1, xx2 = x2, x1
+				
+		#print self.__findSnp(xx1)
+		#print self.__findSnp(xx2)
+		l1, val1 = self.__findSnp(xx1)
+		l2, val2 = self.__findSnp(xx2)
 		
 		ret = []
 		for l in range(l1, l2+1) :
 			snp = self.__getSNP(l)
-			if  x1<= snp['pos'] and snp['pos'] <x2 :
+			if  xx1<= snp['pos'] and snp['pos'] < xx2 :
 				ret.append(snp)
 
 		return ret
@@ -91,7 +122,10 @@ class SNP :
 		s = f.read()
 		f.close()
 		print s
-
+	
+	def __hash__(self):
+		return hash(self.__class__.__name__) ^ hash(self.values)
+	
 class CasavaSNP(SNP) :
 	def __init__(self, line) :
 		SNP.__init__(self, line)
@@ -120,8 +154,20 @@ class dbSNP(SNP) :
 		SNP.__init__(self, line)
 		self.formatDecriptionFile = 'dbSNP_FormatDescription.txt'
 		self.__make(line.split(';'))
-		
+	
 	def __make(self, sl) :
+		#print 'make', sl
+		self.values = {}
+		self.values['pos'] = int(sl[0])
+		self.values['chr'] = sl[1]
+		self.values['rs'] = int(sl[2])
+		self.values['type'] = sl[3]
+		self.values['alleles'] = sl[4]
+		self.values['validated'] = sl[5]
+		self.values['assembly'] = sl[6]
+		
+	def __make_bck(self, sl) :
+		#Fror chr reports when dbSNP fixes it's formats
 		self.values = {}
 		self.values['pos'] = int(sl[0])
 		self.values['mapwgt'] = int(sl[1])

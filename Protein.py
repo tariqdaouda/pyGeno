@@ -65,7 +65,7 @@ class Protein :
 		return len(self.binarySequence)
 
 	def __str__(self) :
-		return "Chr: %s, Gene: %s, Transcript: %s Protein: %s\nSequence: %s" %(self.transcript.gene.chromosome.number, self.transcript.gene.symbol, self.transcript.id, self.id, self.sequence)
+		return "Protein, id: %s -|- %s" %(self.id, str(self.transcript))
 
 	def __repr__(self):
 		return self.sequence

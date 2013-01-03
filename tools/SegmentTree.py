@@ -1,5 +1,6 @@
 import random
 
+
 class SegmentTree :
 	"""This is like an R-tree but with segments
 	Root : 0-15
@@ -29,7 +30,7 @@ class SegmentTree :
 		self.children = []
 		self.referedObject = referedObject
 		#print "index", x1, x2, name, self.id
-	
+		#print '===', self.name, self.referedObject
 	def __addChild(self, segmentTree, index = -1) :
 		segmentTree.level = self.level + 1
 		if index < 0 :
@@ -77,7 +78,7 @@ class SegmentTree :
 				self.children.remove(c)
 				#print len(self.children)
 		else :
-			rt = SegmentTree(xx1, xx2, name, self, referedObject)
+			rt = SegmentTree(xx1, xx2, name, self, self.level+1, referedObject)
 			if insertId != None :
 				self.__addChild(rt, insertId)
 			else :
@@ -146,6 +147,36 @@ class SegmentTree :
 		'same as getFirstLevel, but overlapping children are merged'
 		#print "Warning: getMergedFirstLevel a checker"
 		res = []
+		if self.x1 == None and self.x2 == None:
+			if len(self.children) == 1 :
+				res = [self.children[0]]
+			elif len(self.children) > 1 :
+				x1 = self.children[0].x1
+				x2 = self.children[0].x2
+				refObjs = [self.children[0].referedObject]
+				for c in self.children[1:]:
+					if x2 > c.x1 :
+						x2 = c.x2
+						refObjs.append(c.referedObject)
+					else :
+						# print refObjs
+						res.append(SegmentTree(x1, x2, father = self, referedObject = refObjs))
+						x1 = c.x1
+						x2 = c.x2
+						refObjs = [c.referedObject]
+						
+				res.append(SegmentTree(x1, x2, father = self, referedObject = refObjs))
+			else :
+				res = []
+		else :
+			res = [self]
+		#print res
+		return res
+	
+	def getMergedFirstLevel_bck(self) :
+		'same as getFirstLevel, but overlapping children are merged'
+		#print "Warning: getMergedFirstLevel a checker"
+		res = []
 		if len(self.children) == 1 :
 			res.append((self.children[0].x1, self.children[0].x2))
 		elif len(self.children) > 1 :
@@ -167,7 +198,7 @@ class SegmentTree :
 		return res
 		
 	def __str__(self) :
-		strRes = repr(self)
+		strRes = self.__str()
 		
 		offset = ''
 		for i in range(self.level+1) :
@@ -178,14 +209,14 @@ class SegmentTree :
 		
 		return strRes
 	
-	def __repr__(self) :
+	def __str(self) :
 		if self.x1 == None :
 			if len(self.children) > 0 :
-				return "Root : %d-%d, name : %s, id : %d" %(self.children[0].x1, self.children[-1].x2, self.name, self.id)
+				return "Root: %d-%d, name: %s, id: %d, obj: %s" %(self.children[0].x1, self.children[-1].x2, self.name, self.id, repr(self.referedObject))
 			else :
-				return "Root : EMPTY , name : %s, id : %d" %(self.name, self.id)
+				return "Root: EMPTY , name: %s, id: %d, obj: %s" %(self.name, self.id, repr(self.referedObject))
 		else :
-			return "Segment : %d-%d, name : %s, id : %d, father id : %d" %(self.x1, self.x2, self.name, self.id, self.father.id)
+			return "Segment: %d-%d, name: %s, id: %d, father id: %d, obj: %s" %(self.x1, self.x2, self.name, self.id, self.father.id, repr(self.referedObject))
 			
 		
 	def __len__(self) :
@@ -204,9 +235,11 @@ class SegmentTree :
 	def getEffectiveLength(self) :
 		r"returns the sum of the total length of the leafs without overlap"
 		#print "getEffectiveLength a cheker"
+		#print len(self.children)	
+
 		if self.x1 == None and len(self.children) == 0 :
 			return 0
-			
+		
 		if len(self.children) == 0 :
 			return self.x2 - self.x1
 		else :
@@ -216,6 +249,7 @@ class SegmentTree :
 				l = 0
 				for i in range(0, len(self.children)-1) :
 					l += self.children[i].getEffectiveLength() - max(self.children[i].x2 - self.children[i+1].x1, 0)		
+				
 				return l+self.children[-1].getEffectiveLength()
 	
 	def getMergedLeafs(self) :

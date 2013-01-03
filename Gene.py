@@ -42,21 +42,16 @@ class Exon:
 		self.startCodonPos = startCodon
 		self.stopCodonPos = stopCodon
 		self.x1 = int(x1)
-		self.x2 = int(x2)
+		self.x2 = int(x2+1)
 		self.number = int(number)
 		self.CDS = None
-		#self.threePrimeUtr = None
-		#self.fivePrimeUtr = None
-
+		
 		seq = self.transcript.gene.chromosome.getSequence(x1, x2+1, SNVsFilter)
 		if self.transcript.gene.strand == '+' :
 			self.sequence = seq
 		else :
-			#self.sequence = uf.complementarySequence(seq[::-1])
 			self.sequence = uf.reverseComplement(seq)
 		
-		#self.sequence = seq
-	
 	def getPolymorphisms(self) :
 		return self.transcript.gene.chromosome.getPolymorphismsInRange(self.x1, self.x2)
 	
@@ -66,63 +61,38 @@ class Exon:
 		return False
 	
 	def setCDS(self, x1, x2):
-		self.CDS = (int(x1), int(x2))
-		#if self.x1 != x1 :
-		#	self.fivePrimeUtr = (self.x1, int(x1)-1)
-		#if self.x2 != x2 :
-		#	self.threePrimeUtr = (int(x2), self.x2)
-		
+		#if self.CDS != None and (self.CDS[0] != x1 or self.CDS[1] != x2):
+		#	print "==>Warning, Exon.setCDS() : exon %s already has a CDS defined, new CDS: %s " % (self, (x1, x2+1))
+		#if self.transcript.gene.strand == '+' :
+		#	self.CDS = (int(x1), int(x2+1))
+		#else :
+			#self.CDS = (int(x1), int(x2-1))
+		#	self.CDS = (int(x1), int(x2))
+		self.CDS = (int(x1), int(x2+1))
+			
 	def getCDSLength(self) :
 		return len(self.getCDSSequence())
 
-	#def getFivePrimeUtrLength(self) :
-	#	return len(self.getFivePrimeUtrSequence())
-	
-	#def getThreePrimeUtrLength(self) :
-	#	return len(self.getThreePrimeUtrSequence())	
 	
 	def getCDSSequence(self) :
 		try :
 			if self.transcript.gene.strand == '+' :
-				return self.sequence[self.CDS[0]-self.x1:self.CDS[1]-self.x1+1]
+				return self.sequence[self.CDS[0]-self.x1:self.CDS[1]-self.x1]
+				#return self.sequence[self.CDS[0]-self.x1:self.CDS[1]-self.x1+1]
 			else :
 				x1 = self.CDS[0]-self.x1
 				x2 = self.CDS[1]-self.x1
-				return self.sequence[len(self.sequence)-1-x2:len(self.sequence)-x1]
+				#return self.sequence[len(self.sequence)-1-x2:len(self.sequence)-x1]
+				return self.sequence[len(self.sequence)-x2:len(self.sequence)-x1]
 		except TypeError:
 			return ''
-			#raise InvalidExonComponent("Invalid CDS, maybe the exon hasn't got any")
-
-	#def getFivePrimeUtrSequence(self) :
-	#	try :
-	#		if self.transcript.gene.strand == '+' :
-	#			return self.sequence[self.fivePrimeUtr[0]-self.x1:self.fivePrimeUtr[1]-self.x1+1]
-	#		else :
-	#			x1 = self.fivePrimeUtr[0]-self.x1
-	#			x2 = self.fivePrimeUtr[1]-self.x1
-	#			return self.sequence[len(self.sequence)-1-x2:len(self.sequence)-x1]
-	#	except TypeError:
-	#		return ''
-	#		#raise InvalidExonComponent("Invalid fivePrimeUtr, maybe the exon hasn't got any")
-	
-	#def getThreePrimeUtrSequence(self) :
-	#	try :
-	#		if self.transcript.gene.strand == '+' :
-	#			return self.sequence[self.threePrimeUtr[0]-self.x1:self.threePrimeUtr[1]-self.x1+1]
-	#		else :
-	#			x1 = self.threePrimeUtr[0]-self.x1
-	#			x2 = self.threePrimeUtr[1]-self.x1
-	#			return self.sequence[len(self.sequence)-1-x2:len(self.sequence)-x1]
-	#	except TypeError:
-	#		return ''
-	#		#raise InvalidExonComponent("Invalid threePrimeUtr, maybe the exon hasn't got any")
 	
 	def __getitem__(self, i) :
 		return self.sequence[i]
 	
 	def __str__(self) :
-		return """EXON number: %d, x1: %d, x2: %d, cds: %s, transcript: %s""" %(self.number, self.x1, self.x2, str(self.CDS),self.transcript.name)
-
+		return """EXON, number: %d, (x1, x2): (%d, %d), cds: %s -|- %s """ %(self.number, self.x1, self.x2, str(self.CDS), str(self.transcript))
+		
 	def __len__(self) :
 		return len(self.sequence)
 
@@ -384,14 +354,14 @@ class Transcript :
 	def __getitem__(self, i) :
 		return self.sequence[i]
 		
-	def __str__(self) :
-		return """Transcript in Chr: %s, Gene: %s, id: %s, name: %s""" %(self.gene.chromosome.number, self.gene.symbol, self.id, self.name)
-
 	def __len__(self) :
 		return len(self.sequence)
 	
-	def __repr__(self):
-		return self.sequence
+	#def __repr__(self):
+	#	return self.sequence
+	
+	def __str__(self) :
+		return """Transcript, id: %s, name: %s -|- %s""" %(self.id, self.name, str(self.gene))
 		
 class Gene :
 	
@@ -416,7 +386,7 @@ class Gene :
 		self.id = self.gtfFile.get(0, 'gene_id')
 		self.symbol = self.gtfFile.get(0, 'gene_name')
 		
-		self.regionIndex = self.chromosome.getRegionIndex(self.symbol)
+		#self.regionIndex = self.chromosome.getRegionIndex(self.symbol)
 		self.SNPs = {}
 		self.exons = []
 		self.transcripts = {}
@@ -471,9 +441,6 @@ class Gene :
 			if not self.transcripts[tid].flags['DUBIOUS'] :
 				self.unDubiousTranscripts.append(self.transcripts[tid])
 	
-	#def indexRegion(self, x1, x2, name = '', referencedObject = None):
-	#	return self.regionIndex.addRegion(x1, x2, name, referencedObject)
-	
 	def loadTranscript(self, transId) :
 		return self.transcripts[transId]
 	
@@ -482,14 +449,6 @@ class Gene :
 		k = int(random.random()*len(self.transcripts.keys()))
 		key = self.transcripts.keys()[k]
 		return self.loadTranscript(key)
-	
-	#def getTranscript(self, transId) :
-	#	"""Just an alias for loadTranscript for the sack of back compatibility"""
-	#	return self.getTanscripts(transId)
-	
-	#def getSNPs(self) :
-	#	self.SNPs = self.regionIndex.getSNPs()
-	#	return self.SNPs
 	
 	def getStartPosition(self) :
 		return self.regionIndex.getX1()
@@ -500,10 +459,6 @@ class Gene :
 	def __len__(self) :
 		"""Sum of coding regions lengths"""
 		return self.regionIndex.stree.getEffectiveLength()
-
-	#def getCDNA(self) :
-	#	"""Todo"""
-	#	pass
 		
 	def loadProtein(self, protId) :
 		"""Browse the transcript list looking for the one that code for the protein and returns
@@ -527,3 +482,6 @@ class Gene :
 		for e in self.exons :
 			ret.extend(e.getPolymorphisms())
 		return ret
+
+	def __str__(self) :
+		return "Gene, symbol: %s, id: %s, strand: %s -|- %s" %(self.symbol, self.id, self.strand, str(self.chromosome))

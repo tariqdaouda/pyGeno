@@ -76,7 +76,7 @@ class Genome :
 		#return conf.DATA_PATH+'/ensembl/%s' % self.getSpecie()
 		return conf.DATA_PATH+'/%s/gene_sets' % self.getSpecie()
 	
-	def getSNPsPath(self) :
+	def getdbSNPPath(self) :
 		#return conf.DATA_PATH+'/ncbi/%s/dbSNP/' % (self.specie)
 		return conf.DATA_PATH+'/%s/dbSNP/' % (self.specie)
 		
@@ -86,11 +86,11 @@ class Genome :
 	def empty(self) :
 		self.chromosomes = {}
 	
-	def loadChromosome(self, number, loadSNPs = True, verbose = False) :
+	def loadChromosome(self, number, dbSNPVersion = None, verbose = False) :
 		if number not in self.chromosomes.keys():
 			#try :
 			if number != '' :
-				self.chromosomes[number] = Chromosome(number, self, loadSNPs, verbose)
+				self.chromosomes[number] = Chromosome(number, self, dbSNPVersion, verbose)
 			#except IOError:
 			#	raise ChromosomeNotFound('Unable to load chromosome :' + number)
 		return self.chromosomes[number]
@@ -185,3 +185,5 @@ class Genome :
 		"""Size of the genome in pb"""
 		return self.length
 
+	def __str__(self) :
+		return "Genome: %s" %(self.path)
