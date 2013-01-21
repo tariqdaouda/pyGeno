@@ -52,8 +52,8 @@ class Exon:
 		else :
 			self.sequence = uf.reverseComplement(seq)
 		
-	def getPolymorphisms(self) :
-		return self.transcript.gene.chromosome.getPolymorphismsInRange(self.x1, self.x2)
+	#def getPolymorphisms(self) :
+	#	return self.transcript.gene.chromosome.getPolymorphismsInRange(self.x1, self.x2)
 	
 	def hasCDS(self) :
 		if self.CDS != None :
@@ -91,7 +91,7 @@ class Exon:
 		return self.sequence[i]
 	
 	def __str__(self) :
-		return """EXON, number: %d, (x1, x2): (%d, %d), cds: %s -|- %s """ %(self.number, self.x1, self.x2, str(self.CDS), str(self.transcript))
+		return """EXON, number: %d, (x1, x2): (%d, %d), cds: %s / %s """ %(self.number, self.x1, self.x2, str(self.CDS), str(self.transcript))
 		
 	def __len__(self) :
 		return len(self.sequence)
@@ -361,7 +361,7 @@ class Transcript :
 	#	return self.sequence
 	
 	def __str__(self) :
-		return """Transcript, id: %s, name: %s -|- %s""" %(self.id, self.name, str(self.gene))
+		return """Transcript, id: %s, name: %s / %s""" %(self.id, self.name, str(self.gene))
 		
 class Gene :
 	
@@ -484,4 +484,4 @@ class Gene :
 		return ret
 
 	def __str__(self) :
-		return "Gene, symbol: %s, id: %s, strand: %s -|- %s" %(self.symbol, self.id, self.strand, str(self.chromosome))
+		return "Gene, symbol: %s, id: %s, strand: %s / %s" %(self.symbol, self.id, self.strand, str(self.chromosome))

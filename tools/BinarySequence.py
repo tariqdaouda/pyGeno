@@ -1,5 +1,6 @@
 import array, copy
 import UsefulFunctions as uf
+import numpy as N
 
 class BinarySequence :
 	
@@ -91,7 +92,7 @@ class BinarySequence :
 		"returns a version str sequence where only the last allele of each polymorphisms is shown" 
 		return self.defaultSequence
 	
-	def __getSequenceVariants_bck(self, x1, x2, sequence, polymorphismsKeys) :
+	def __getSequenceVariants_bck_old(self, x1, x2, sequence, polymorphismsKeys) :
 		ret = []
 		for pk in polymorphismsKeys :
 			if pk >= x1 or pk < x2 :
@@ -99,8 +100,8 @@ class BinarySequence :
 					sequence[pk-x1] = c
 					ret.extend(self.__getSequenceVariants(self, x1, x2, sequence, polymorphismsKeys))
 	
-	def __getSequenceVariants(self, x1, polyStart, polyStop, listSequence) :
-		"""polyStop, is the polymorphisme number where te calcul of combinaisons stops"""
+	def __getSequenceVariants_bck(self, x1, polyStart, polyStop, listSequence) :
+		"""polyStop, is the polymorphisme at wixh number where the calcul of combinaisons stops"""
 		if polyStart < len(self.polymorphisms) and polyStart < polyStop: 
 			sequence = copy.copy(listSequence)
 			ret = []
@@ -112,10 +113,10 @@ class BinarySequence :
 					pk = self.polymorphisms[polyStartNext]
 					polyStartNext += 1
 					
-				ret.extend(self.__getSequenceVariants(x1, polyStartNext +1, polyStop, sequence))
+				ret.extend(self.__getSequenceVariants_bck(x1, polyStartNext +1, polyStop, sequence))
 				for allele in pk[1][:-1] :
 					sequence[pk[0]-x1] = allele
-					ret.extend(self.__getSequenceVariants(x1, polyStartNext +1, polyStop, sequence))
+					ret.extend(self.__getSequenceVariants_bck(x1, polyStartNext +1, polyStop, sequence))
 			else :
 				return [''.join(listSequence)]
 		else :
@@ -123,9 +124,9 @@ class BinarySequence :
 			
 		return ret
 	
-	def getSequenceVariants(self, x1 = 0, x2 = -1, maxVariantNumber = 128) :
-		"""compute the combinaisons of all polymorphismes between x1 and x2
-		@return a couple (bool, variants of sequence between x1 and x2), bool == true if the maxVariantNumber threshold is depasse"""
+	def getSequenceVariants_bck(self, x1 = 0, x2 = -1, maxVariantNumber = 128) :
+		"""returns the sequences resulting from all combinaisons of all polymorphismes between x1 and x2
+		@return a couple (bool, variants of sequence between x1 and x2), bool == true if there's more combinaisons than maxVariantNumber"""
 		if x2 == -1 :
 			xx2 = len(self.defaultSequence)
 		else :
@@ -143,7 +144,58 @@ class BinarySequence :
 				polyStop += 1
 		#print polyStop, nbP
 		#if nbP <= maxVariantNumber :
-		return (stopped, self.__getSequenceVariants(x1, 0, polyStop, list(self.defaultSequence[x1:xx2])))
+		return (stopped, self.__getSequenceVariants_bck(x1, 0, polyStop, list(self.defaultSequence[x1:xx2])))
+	
+	
+	def __getSequenceVariants(self, x1, polyStart, polyStop, listSequence) :
+		"""polyStop, is the polymorphisme at wixh number where the calcul of combinaisons stops"""
+		if polyStart < len(self.polymorphisms) and polyStart < polyStop: 
+			sequence = copy.copy(listSequence)
+			ret = []
+			
+			pk = self.polymorphisms[polyStart]
+			posInSequence = pk[0]-x1
+			if posInSequence < len(listSequence) : 
+				for allele in pk[1] :
+					sequence[posInSequence] = allele
+					ret.extend(self.__getSequenceVariants(x1, polyStart+1, polyStop, sequence))
+			
+			return ret
+		else :
+			return [''.join(listSequence)]
+
+	
+	def getSequenceVariants(self, x1 = 0, x2 = -1, maxVariantNumber = 128) :
+		"""returns the sequences resulting from all combinaisons of all polymorphismes between x1 and x2
+		@return a couple (bool, variants of sequence between x1 and x2), bool == true if there's more combinaisons than maxVariantNumber"""
+		if x2 == -1 :
+			xx2 = len(self.defaultSequence)
+		else :
+			xx2 = x2
+		
+		polyStart = None
+		nbP = 1
+		stopped = False
+		j = 0
+		for p in self.polymorphisms:
+			if p[0] >= xx2 :
+				break
+			#print x1, xx2, p
+			if x1 <= p[0] :
+				if polyStart == None :
+					polyStart = j
+				
+				nbP *= len(p[1])
+				
+				if nbP > maxVariantNumber :
+					stopped = True
+					break
+				j += 1
+		
+		if polyStart == None :
+			return (stopped, [self.defaultSequence[x1:xx2]])
+
+		return (stopped, self.__getSequenceVariants(x1, polyStart, j, list(self.defaultSequence[x1:xx2])))
 	
 	
 	def getNbVariants(self, x1, x2 = -1) :
@@ -319,5 +371,35 @@ class NucBinarySequence(BinarySequence) :
 		return res
 		
 if __name__=="__main__":
-	a = AABinarySequence('ACEDGFIHKM')
-	print a.find_fast('ED')
+	
+	#nbT = 100000
+	#maxSeqLen = 100
+	#minSeqLen = 8
+	#pPoly = 0.05
+	#for i in range(nbT) :
+	#	seq = ''
+	#	seqLen = N.random.randint(minSeqLen, maxSeqLen)
+	#	nbVar = 1
+	#	for i in range(seqLen) :
+	#		seq += uf.AAs(N.random.randint(0, len(uf.AAs)))
+	#		if N.rand() <= pPoly :
+	#			seq += '/'+uf.AAs(N.random.randint(0, len(uf.AAs)))
+		
+	#seq = 'ACED/E/GFIHK/MLMQPS/RTWVY'
+	seq = 'ACED/E/GFIHK/MLMQPS/RTWVY/A/R'
+	bSeq = AABinarySequence(seq)
+	start = 0
+	stop = 4
+	rB = bSeq.getSequenceVariants_bck(start, stop)
+	r = bSeq.getSequenceVariants(start, stop)
+	
+	#print start, stop, 'nb_comb_r', len(r[1]), set(rB[1])==set(r[1]) 
+	print start, stop#, 'nb_comb_r', len(r[1]), set(rB[1])==set(r[1]) 
+	
+	#if set(rB[1])!=set(r[1]) :
+	print '-AV-'
+	print start, stop, 'nb_comb_r', len(rB[1])
+	print '\n'.join(rB[1])
+	print '=AP========'
+	print start, stop, 'nb_comb_r', len(r[1]) 
+	print '\n'.join(r[1])

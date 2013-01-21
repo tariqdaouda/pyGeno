@@ -320,4 +320,4 @@ class Chromosome :
 		return len(self.data)
 
 	def __str__(self) :
-		return "Chromosome: number %s -|- %s" %(self.number, str(self.genome))
+		return "Chromosome: number %s / %s" %(self.number, str(self.genome))

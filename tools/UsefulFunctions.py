@@ -308,7 +308,10 @@ def decodePolymorphicNucleotide(nuc) :
 	if nuc in polymorphicNucleotides :
 		return '/'.join(polymorphicNucleotides[nuc])
 	
-	raise ValueError('nuc: %s, is not a valid polymorphic nucleotide' % nuc)
+	if nuc in nucleotides :
+		return nuc
+	
+	raise ValueError('nuc: %s, is not a valid nucleotide' % nuc)
 	#return nuc
 	
 def getCodon(sequence, x1) :

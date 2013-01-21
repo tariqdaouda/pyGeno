@@ -117,16 +117,16 @@ class SegmentTree :
 			return self.x2
 		return self.children[-1].x2
 	
-	def getIndexedRegionsLength(self) :
-		if self.x1 != None :
+	def getIndexedLength(self) :
+		if self.x1 == None and self.x2 == None:
 			return self.x2 - self.x1
 		else :
 			if len(self.children) == 0 :
 				return 0
 			else :
-				l = 0
-				for c in self.children :
-					l += c.x2 - c.x1
+				l = self.children[0].x2 - self.children[0].x1
+				for i in range(1, len(self.children)) :
+					l += self.children[i].x2 - self.children[i].x1 - max(0, self.children[i-1].x2 - self.children[i].x1)
 				return l
 	
 	def getFirstLevel(self) :
@@ -143,39 +143,46 @@ class SegmentTree :
 				res = None
 		return res
 
-	def getMergedFirstLevel(self) :
-		'same as getFirstLevel, but overlapping children are merged'
-		#print "Warning: getMergedFirstLevel a checker"
-		res = []
+	def flattened(self) :
+		r"""Returns a flattend version of the tree. A list of SegmentTrees where all overlapping children have been merged together"""
+		#print "Warning: flattened a checker"
+		root = SegmentTree()
+		#res = []
 		if self.x1 == None and self.x2 == None:
 			if len(self.children) == 1 :
-				res = [self.children[0]]
+				#res = [self.children[0]]
+				root.insert(self.children[0].x1, self.children[0].x2, '', [self.children[0].referedObject])
 			elif len(self.children) > 1 :
 				x1 = self.children[0].x1
 				x2 = self.children[0].x2
 				refObjs = [self.children[0].referedObject]
 				for c in self.children[1:]:
-					if x2 > c.x1 :
+					if x2 >= c.x1 :
+						#print 'merging', x1, x2, "-", c.x1, c.x2
 						x2 = c.x2
 						refObjs.append(c.referedObject)
 					else :
 						# print refObjs
-						res.append(SegmentTree(x1, x2, father = self, referedObject = refObjs))
+						#res.append(SegmentTree(x1, x2, father = self, referedObject = refObjs))
+						root.insert(x1, x2, '', referedObject = refObjs)
 						x1 = c.x1
 						x2 = c.x2
 						refObjs = [c.referedObject]
 						
-				res.append(SegmentTree(x1, x2, father = self, referedObject = refObjs))
-			else :
-				res = []
+				#res.append(SegmentTree(x1, x2, '', referedObject = refObjs))
+				root.insert(x1, x2, '', referedObject = refObjs)
+			#else :
+			#	res = []
 		else :
-			res = [self]
+			#res = [self]
+			return self
 		#print res
-		return res
-	
-	def getMergedFirstLevel_bck(self) :
+		#return res
+		return root
+		
+	def flattened_bck(self) :
 		'same as getFirstLevel, but overlapping children are merged'
-		#print "Warning: getMergedFirstLevel a checker"
+		#print "Warning: flattened a checker"
 		res = []
 		if len(self.children) == 1 :
 			res.append((self.children[0].x1, self.children[0].x2))
@@ -218,8 +225,11 @@ class SegmentTree :
 		else :
 			return "Segment: %d-%d, name: %s, id: %d, father id: %d, obj: %s" %(self.x1, self.x2, self.name, self.id, self.father.id, repr(self.referedObject))
 			
-		
+	
 	def __len__(self) :
+		self.getIndexedLength()
+		
+	def __len__bck(self) :
 		r"""if root returns whole region of interest length. if not it is identical to getIndexedRegionsLength()"""
 		
 		if self.x1 != None :
@@ -232,9 +242,9 @@ class SegmentTree :
 			
 			return xx2 - xx1
 	
-	def getEffectiveLength(self) :
+	def lengthOfLeafs_bck(self) :
 		r"returns the sum of the total length of the leafs without overlap"
-		#print "getEffectiveLength a cheker"
+		#print "flattenedLength a cheker"
 		#print len(self.children)	
 
 		if self.x1 == None and len(self.children) == 0 :
@@ -248,15 +258,15 @@ class SegmentTree :
 			else :
 				l = 0
 				for i in range(0, len(self.children)-1) :
-					l += self.children[i].getEffectiveLength() - max(self.children[i].x2 - self.children[i+1].x1, 0)		
+					l += self.children[i].lengthOfLeafs() - max(self.children[i].x2 - self.children[i+1].x1, 0)		
 				
-				return l+self.children[-1].getEffectiveLength()
+				return l+self.children[-1].lengthOfLeafs()
 	
 	def getMergedLeafs(self) :
 		#TODO
 		pass
 	
-	def getIndexedRegionsLength(self) :
+	def getIndexedRegionsLength_bck(self) :
 		if self.x1 != None :
 			return self.x2 - self.x1
 		else :
