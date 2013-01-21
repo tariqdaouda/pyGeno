@@ -98,9 +98,9 @@ class Genome :
 	def getChromosomes(self) :
 		return self.chromosomes.values()
 	
-	def loadAllChromosomes(self, verbose = False) :
+	def loadAllChromosomes(self, dbSNPVersion = None, verbose = False) :
 		for c in self.chrsData.keys() :
-			self.loadChromosome(c, verbose)
+			self.loadChromosome(c, dbSNPVersion, verbose)
 	
 	def unloadChromosome(self, number) :
 		del(self.chromosomes[number])

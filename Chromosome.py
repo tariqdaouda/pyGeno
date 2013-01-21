@@ -28,8 +28,7 @@ class RequestError(Exception):
 		
 	def __str__(self):
 		return """Request Error: %s"""%(self.message)
-				
-#import xml.etree.cElementTree as ET
+
 def defaultSNVsFilter(casavaSnp) :
 	"""The default rule to decide wether to take the most probable genotype or the
 	reference, always returns true"""
@@ -66,11 +65,8 @@ class Chromosome :
 		
 		self.number = str(number).upper()
 		self.genome = genome
-	
-		#self.number = self.number.replace('_alt', '')
 		
 		try :
-			#self.casavaSNPs = CasavaSNPs('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number))
 			self.casavaSNPs = SNPFile('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number), CasavaSNP)
 			refSeq = '%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number)
 			
@@ -80,7 +76,6 @@ class Chromosome :
 			self.data = SingletonManager.get(refSeq)
 				
 			self.isLight = True
-			#print "aaa", '%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number), len(self.data )
 		except IOError:
 			try :
 				self.data = SecureMmap('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number))
@@ -89,22 +84,12 @@ class Chromosome :
 				self.data = SecureMmap('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
 				
 			self.isLight = False
-			
-		#f = open('pyGenoData/ncbi/%s/sequences//chr%s.dat'%(self.genome.name, number), 'r+b')
-		#f = open('%s/chr%s.dat'%(self.genome.getSequencePath(), number), 'r+b')
-		#mmap.mmap(f.fileno(), 0)#f.read()
-		#f.close()
-		
-		#f = open('pyGenoData/ensembl/%s/chr%s.gtf'%(self.genome.name, number), 'r+b')
-		#f = open('%s/chr%s.gtf'%(self.genome.getAnnotationPath(), self.number), 'r')
+
 		f = open('%s/chr%s.gtf'%(self.genome.getGeneSetsPath(), self.number), 'r')
-		#self.gtf = mmap.mmap(f.fileno(), 0)
+
 		self.gtfLines = f.readlines()
 		f.close()
 		
-		#f = open('ensembl/%s/chr%s_gene_symbols.index.pickle'%(self.genome.name, number))
-		#self.geneSymbolIndex = pickle.load(f)
-		#f.close()
 		self.geneSymbolIndex = self.genome.chrsData[self.number].geneSymbolIndex
 		
 		self.empty()
@@ -127,26 +112,7 @@ class Chromosome :
 			sys.stderr.write('Unable to load snp data for chr %s of genome %s' %(self.number, self.genome.name))
 			sys.stderr.write('\t->Unable to resolve path: %s/chr%s.pygeno-dbSNP'%(self.genome.getdbSNPPath(), self.number))
 			
-	#def materialiseSNP(self, line) :
-	#	"""creates a SNP object from data line. The snp is memorised
-	#	by the chromosome
-	#	@return the SNP object"""
-	#	#print self.SNPData[line]
-	#	sl = self.SNPData[line].split('#v#')
-	#	snpL = sl[0].split(';')
-	#	#'chr;chr-pos;rsid;alleles;orient;assembly;validated'
-	#	snp = SNP(self.number, snpL[1], snpL[2], snpL[3], snpL[4], snpL[5], snpL[6])
-	#	for lv in sl[1:] :
-	#		slv = lv.split(';')
-	#		#print 'a', slv
-	#		#'gene-symbol;fxn-class;allele;residue;aa_position;frame'
-	#		#(snp, geneSymbol, function, allele, residue, aaPosition, frame)
-	#		snp.addVariant(slv[0], slv[1], slv[2], slv[3], slv[4], slv[5])
-	#		
-	#	self.SNPs[snpL[1]] = snp
-	#	
-	#	return snp
-	
+
 	def hasGene(self, symbol) :
 		return symbol in self.geneSymbolIndex.keys()
 	
@@ -178,24 +144,7 @@ class Chromosome :
 		(contains the sequences for all chros)"""
 		for symbol in self.geneSymbolIndex.keys() :
 			self.loadGene(symbol, SNVsFilter, verbose)
-		
-	#def loadGene_bck(self, symbolOrId) :
-	#	"""Loads a gene and returns it"""
-	#	if symbolOrId not in self.genes.keys() :
-	#
-	#		try :
-	#			f = open('ncbi/%s/sequences/genes/chr%s_%s.gtf'%(self.genome.name, self.number, symbolOrId))
-	#			geneData = f.read()
-	#			f.close()
-	#		except :
-	#			geneData = "".join(re.findall('.+"%s".+\n'%(symbolOrId), self.gtf))
-	#			f = open('ncbi/%s/sequences/genes/chr%s_%s.gtf'%(self.genome.name, self.number, symbolOrId), 'w')
-	#			f.write(geneData)
-	#			f.close()
-	#		#print geneData
-	#		self.genes[symbolOrId] = Gene(symbolOrId, self, geneData)
-	#	
-	#	return self.genes[symbolOrId]
+
 	
 	def getGenes(self, SNVsFilter = None) :
 		self.loadAllGenes(SNVsFilter)
@@ -294,50 +243,6 @@ class Chromosome :
 	def getPolymorphismsInRange(self, x1, x2) :
 		return self.casavaSNPs.findSnpsInRange(x1, x2)
 		
-	def getSequence_bck(self, x1, x2, SNVsFilter = None) :
-		"""SNVsFilter is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
-		(contains the sequences for all chros)"""
-		
-		if x1 > x2 :
-			start, end = x2, x1 
-		else :
-			start, end = x1, x2
-			
-		#print "str:", self.data[end:start], len(self.data), start, end, self.data[end:start]
-		if not self.isLight :
-			if start <= end :
-				return self.data[start:end]
-			return self.data[end:start]
-		else :
-			if (SNVsFilter != None) :
-				fct = SNVsFilter
-			else :
-				fct = defaultSNVsFilter
-			
-			snps = self.casavaSNPs.findSnpsInRange(start, end)
-			#print snps
-			data = list(self.data[start:end])
-			data2 = list(self.data[start:end])
-			if snps != None :
-				for snp in snps:					
-					if fct(snp) :
-						pos = snp['pos'] - start-1
-						data[pos] = snp['max_gt']
-					if defaultSNVsFilter(snp):
-						pos = snp['pos'] - start-1
-						data2[pos] = snp['max_gt']
-						
-			if data != data2 :
-				for i in range(len(data)) :
-					if data[i] != data2[i] :
-						print i, data[i], data2[i]
-					
-			if data != None :
-				return ''.join(data)
-			else :
-				return self.data[start:end]
-				
 	def getRandomCDS(self) :
 		cds = CDS()
 		found = False
@@ -345,20 +250,13 @@ class Chromosome :
 			found = cds.setFromGTFLine(random.sample(self.gtfLines, 1)[0])
 		
 		return cds
-
-	#def getRegionIndex(self, name = '') :
-	#	return None
 	
 	def getSNPsInRange(self, x1, x2 = None, dbSNPsFilter = None) :
 		"""dbSNPsFilter is a fct that takes a dbSNP as input a returns true if it correpsond to the rule.
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		res = []
-		#if x1 > x2 :
-		#	start, end = x2, x1 
-		#else :
-		#	start, end = x1, x2
-			
+
 		if self.dbSNPs == None :
 			raise RequestError("No dbSNP database loaded, recrete the chromosome or use loadSNPs()")
 			#return res
@@ -367,8 +265,7 @@ class Chromosome :
 				fct = dbSNPsFilter
 			else :
 				fct = defaultDbSNPsFilter
-			
-			#snps = self.dbSNPs.findSnpsInRange(start, end)
+
 			snps = self.dbSNPs.findSnpsInRange(x1, x2)
 			
 			if snps != None :
@@ -382,10 +279,6 @@ class Chromosome :
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		res = []
-		#if x1 > x2 :
-		#	start, end = x2, x1 
-		#else :
-		#	start, end = x1, x2
 			
 		if not self.isLight :
 			raise RequestError("Genome is light, there's no information on separate SNVs")
@@ -395,8 +288,7 @@ class Chromosome :
 				fct = SNVsFilter
 			else :
 				fct = defaultSNVsFilter
-			
-			#snps = self.casavaSNPs.findSnpsInRange(start, end)
+
 			snps = self.casavaSNPs.findSnpsInRange(x1, x2)
 			
 			if snps != None :
