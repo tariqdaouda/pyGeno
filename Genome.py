@@ -3,7 +3,7 @@ from tools import UsefulFunctions as uf
 
 from Chromosome import Chromosome
 import sys, pickle, random, shutil, os, glob
-
+from tools import SingletonManager
 	
 class ChromosomeNotFound(Exception) :
 	def __init__(self, msg) :
@@ -19,9 +19,12 @@ class ChrData_Struct :
 		self.number = number
 		self.length = int(length)
 	
-		#f = open(conf.DATA_PATH+'/ensembl/%s/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number))
-		f = open(conf.DATA_PATH+'%s/gene_sets/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number))
-		self.geneSymbolIndex = pickle.load(f)
+		indexFp = conf.DATA_PATH+'%s/gene_sets/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number)
+		f = open(indexFp)
+		if not SingletonManager.contains(indexFp) :
+			SingletonManager.add(f.pickle.load(f), indexFp)	
+		
+		self.geneSymbolIndex = SingletonManager.get(indexFp)
 		f.close()
 	
 	def hasGene(self, symbol) :

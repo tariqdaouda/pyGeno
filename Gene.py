@@ -30,14 +30,12 @@ class InvalidExonComponent(Exception):
 
 class Exon:
 
-	def __init__(self, x1, x2, number, transcript, type, SNVsFilter = None, startCodon = -1, stopCodon = -1) :
+	def __init__(self, x1, x2, number, transcript, typ, SNVsFilter = None, startCodon = -1, stopCodon = -1) :
 		r"""An exon, the sequence is set according to gene strand, if it's '-' the sequence is the complement.
 		A CDS is a couple of coordinates that lies inside of the exon.
-		SNVsFilter is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
-		(contains the sequences for all chros)"""
+		SNVsFilter is a fct that defines wich SNVs are included in the sequence"""
 		
-		self.type = type
+		self.type = typ
 		self.transcript = transcript
 		self.startCodonPos = startCodon
 		self.stopCodonPos = stopCodon

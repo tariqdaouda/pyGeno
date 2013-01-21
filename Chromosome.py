@@ -85,9 +85,11 @@ class Chromosome :
 				
 			self.isLight = False
 
-		f = open('%s/chr%s.gtf'%(self.genome.getGeneSetsPath(), self.number), 'r')
-
-		self.gtfLines = f.readlines()
+		gtfFp = '%s/chr%s.gtf'%(self.genome.getGeneSetsPath(), self.number)
+		f = open(gtfFp, 'r')
+		if not SingletonManager.contains(gtfFp) :
+			SingletonManager.add(f.readlines(), gtfFp)	
+		self.gtfLines = SingletonManager.get(gtfFp)
 		f.close()
 		
 		self.geneSymbolIndex = self.genome.chrsData[self.number].geneSymbolIndex
