@@ -180,7 +180,7 @@ class BinarySequence :
 		for p in self.polymorphisms:
 			if p[0] >= xx2 :
 				break
-			#print x1, xx2, p
+			
 			if x1 <= p[0] :
 				if polyStart == None :
 					polyStart = j
@@ -190,11 +190,11 @@ class BinarySequence :
 				if nbP > maxVariantNumber :
 					stopped = True
 					break
-				j += 1
+			j += 1
 		
 		if polyStart == None :
 			return (stopped, [self.defaultSequence[x1:xx2]])
-
+		
 		return (stopped, self.__getSequenceVariants(x1, polyStart, j, list(self.defaultSequence[x1:xx2])))
 	
 	

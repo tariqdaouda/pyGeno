@@ -22,7 +22,7 @@ class ChrData_Struct :
 		indexFp = conf.DATA_PATH+'%s/gene_sets/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number)
 		f = open(indexFp)
 		if not SingletonManager.contains(indexFp) :
-			SingletonManager.add(f.pickle.load(f), indexFp)	
+			SingletonManager.add(pickle.load(f), indexFp)	
 		
 		self.geneSymbolIndex = SingletonManager.get(indexFp)
 		f.close()

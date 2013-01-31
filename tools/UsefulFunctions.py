@@ -62,6 +62,35 @@ def strToList(stri) :
 """	
 def saveResults(directoryName, results, errors = '', params = '', fileName = ''):
 	
+	if not os.path.exists(directoryName):
+		os.makedirs(directoryName)
+	
+	resPath = "%s/%s"%(directoryName, fileName)
+	resFile = open(resPath, 'w')
+	print "Saving results :\n\t%s..."%resPath
+	resFile.write(results)
+	resFile.close()
+
+	if errors != '' :
+		errPath = "%s/%s.err.txt"%(directoryName, fileName)
+		errFile = open(errPath, 'w')
+
+		print "Saving error log :\n\t%s..." %errPath
+		errFile.write(errors)
+		errFile.close()
+	
+	if params != '' :
+		paramPath = "%s/%s.params.txt"%(directoryName, fileName)
+		paramFile = open(paramPath, 'w')
+
+		print "Saving params :\n\t%s..." %paramPath
+		paramFile.write(params)
+		paramFile.close()
+		
+	return "%s/"%(directoryName)
+
+def saveResults_bck(directoryName, results, errors = '', params = '', fileName = ''):
+	
 	if not os.path.exists("results/" + directoryName):
 		os.makedirs("results/" + directoryName)
 	
@@ -88,7 +117,7 @@ def saveResults(directoryName, results, errors = '', params = '', fileName = '')
 		paramFile.close()
 		
 	return "results/%s/"%(directoryName)
-
+	
 def saveResults_pkl(filename, obj):
 	fn = ''
 	if filename.find('.pygeno-pklresults') > 1:
@@ -97,7 +126,7 @@ def saveResults_pkl(filename, obj):
 		fn = filename+'.pygeno-pklresults'
 	
 	if os.path.exists(fn) :
-		fn = fn.replace('.pygeno-pklresults', '_%s.pygeno-pklresults' %(time.ctine()))
+		fn = fn.replace('.pygeno-pklresults', '_%s.pygeno-pklresults' %(time.ctime()))
 
 	f = open(fn, 'w')
 	pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)	
@@ -269,10 +298,17 @@ def polymorphicCondonCombinaisons_bck(dnaSeq, startId = 0) :
 def getPolymorphicNucleotide(strSeq) :
 	"""Seq is a string like : ATG or A/T/G"""
 	
-	seq = list(strSeq.replace('/', ''))
-	for i in range(len(seq)) :
-		if seq[i] in polymorphicNucleotides :
-			seq[i] = ''.join(polymorphicNucleotides[seq[i]])
+	#seq = list(strSeq.replace('/', ''))
+	#for i in range(len(seq)) :
+	#	if seq[i] in polymorphicNucleotides :
+	#		seq[i] = ''.join(polymorphicNucleotides[seq[i]])
+	
+	seq = []
+	for c in strSeq :
+		if c in polymorphicNucleotides :
+			seq.extend(polymorphicNucleotides[c])
+		else :
+			seq.append(c)
 	
 	seq = set(seq)
 	if len(seq) == 4:
