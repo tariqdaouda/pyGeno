@@ -64,7 +64,7 @@ class Genome :
 		
 		self.empty()
 	
-	def getChromosomesList(self):
+	def getChromosomesNumberList(self):
 		return self.chrsData.keys()
 	
 	def getSequencePath(self) :
