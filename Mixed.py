@@ -124,6 +124,9 @@ class MixedChromosome :
 		for symbol in self.geneSymbolIndex.keys() :
 			self.loadGene(symbol, SNVsFilter, verbose)
 	
+	def getGenes(self) :
+		return self.genes.values()
+		
 	def getSNVsInRange(self, x1, x2, SNVsFilter) :
 		"""SNVsFilter is ftc that takes a dictionnary of SNVs : genomePath => list of snvs, and then returns a list of the
 		selected snvs"""
