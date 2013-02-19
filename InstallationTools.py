@@ -345,18 +345,18 @@ def install_dbSNP(packageFolder, specie, versionName) :
 		f.write(header)
 		f.close()
 	
-if __name__ == "__main__" :
-	#installGenome("~/py/mous", 'antoine', 'tariq')
+#if __name__ == "__main__" :
+	#installGenome("~/py/mous", 'mouse', 'B6')
 	#install_dbSNP('/u/daoudat/py/pyGeno/pyGenoData/installationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
 	#installGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
-	#makeGenome_casava('human', 'lightM_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_M/snps.txt')
-	#makeGenome_casava('human', 'lightR_Exome', '/u/corona/Project_DSP008a/Build_Diana_ADN_R/snps.with_removed.txt')
-	#makeGenome_casava('human', 'lightM_Exome', '/u/corona/Project_DSP008a/Build_Diana_ADN_M/snps.with_removed.txt')
+	#installGenome_casava('human', 'lightM_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_M/snps.txt')
+	#installGenome_casava('human', 'lightR_Exome', '/u/corona/Project_DSP008a/Build_Diana_ADN_R/snps.with_removed.txt')
+	#installGenome_casava('human', 'lightM_Exome', '/u/corona/Project_DSP008a/Build_Diana_ADN_M/snps.with_removed.txt')
 
 	#print 'install mouse'
 	#installGenome('/u/daoudat/py/pyGeno/mouse', 'mouse', 'reference2')
 	#print 'install b6'
-	#makeGenome_casava('mouse', 'B6', '/u/corona/Project_DSP014/120313_SN942_0105_AD093KACXX/Build_B6/snps.txt')
+	#installGenome_casava('mouse', 'B6', '/u/corona/Project_DSP014/120313_SN942_0105_AD093KACXX/Build_B6/snps.txt')
 	#makeGeneSymbolIndex('pyGenoData/installs/mouse/Mus_musculus.NCBIM37.64.gtf', 'mouse')
 	#installGenome('/u/daoudat/py/pyGeno/pyGenoData/installationPackages/mouse', 'mouse', 'reference')
 

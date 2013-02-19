@@ -198,6 +198,7 @@ class Chromosome :
 							if data == None :
 								data = list(self.data[start:end])
 							pos = snp['pos'] - start#-1
+							snp['max_gt'] = uf.getPolymorphicNucleotide(snp['max_gt'])
 							data[pos] = snp['max_gt']
 
 				if data != None :

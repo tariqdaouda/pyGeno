@@ -222,12 +222,12 @@ def translateDNA(sequence, frame = 1) :
 	elif frame == 3 :
 		dna = sequence[2:]
 	elif frame == -1 :
-		dna = complement(sequence)
+		dna = reverseComplement(sequence)
 	elif frame == -2 :
-		dna = complement(sequence)
+		dna = reverseComplement(sequence)
 		dna = dna[1:]
 	elif frame == -3 :
-		dna = complement(sequence)
+		dna = reverseComplement(sequence)
 		dna = dna[2:]
 
 	for i in range(0, len(dna),  3) :

@@ -159,6 +159,9 @@ class MixedChromosome :
 		if len(finalSNPS) > 0 :
 			data = list(self.data[start:end])
 			for snp in finalSNPS:
+				#if len(snp['max_gt']) != 1 :
+				#	raise ValueError("len(snp['max_gt']) != 1 (= %s), it should be one single nucleotide (single or polymorphic)" % snp['max_gt'])
+				snp['max_gt'] = uf.getPolymorphicNucleotide(snp['max_gt'])
 				pos = snp['pos'] - start#-1
 				data[pos] = snp['max_gt']
 			return ''.join(data)
