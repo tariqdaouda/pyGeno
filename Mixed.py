@@ -4,6 +4,18 @@ from tools import UsefulFunctions as uf
 from Chromosome import *
 from Genome import *
 import sys, pickle, random, shutil, os, glob
+
+def defaultMixedSNVFilter(snvDict) :
+	"""Default function returns a concatenation of all snvs"""
+	snvs = {}
+	for p in snvsDict:
+		for snv in snvsDict[p] :
+			if snv['Qmax_gt'] >= 20 :
+				if snv['pos'] not in snvs :
+					snvs[snv['pos']] = snv
+				else :
+					snvs[snv['pos']]['max_gt'] = uf.getPolymorphicNucleotide(snvs[snv['pos']]['max_gt']+snv['max_gt'])
+	return snvs.values()
 	
 class MixedGenome :
 	"""With this class you can mix serveral light genomes an tune the getSequence to set the way the polymorphims
@@ -100,10 +112,15 @@ class MixedChromosome :
 		
 	def loadGene(self, symbol, SNVsFilter = None, verbose = False) :
 		"""SNVsFilter is ftc that takes a dictionnary of SNVs : genomePath => list of snvs, and then returns a list of the
-		selected snvs"""
+		selected snvs. If None, the function defaultMixedSNVFilter will be used"""
 		
-		if symbol not in self.genes.keys() and SNVsFilter == None :
-			raise ValueError('Gene %s has not been loaded before, please specify a SNVsFilter function' % symbol)
+		if SNVsFilter == None :
+			fct = defaultMixedSNVFilter
+		else :
+			fct = SNVsFilter
+			
+		#if symbol not in self.genes.keys() and SNVsFilter == None :
+		#	raise ValueError('Gene %s has not been loaded before, please specify a SNVsFilter function' % symbol)
 		
 		if symbol not in self.genes.keys():
 			try :
@@ -114,23 +131,28 @@ class MixedChromosome :
 		
 			gtf = GTFFile()
 			gtf.parseStr(geneData)
-			self.genes[symbol] = Gene(self, gtf, SNVsFilter , verbose)
+			self.genes[symbol] = Gene(self, gtf, fct , verbose)
 		
 		return self.genes[symbol]
 	
-	def loadAllGenes(self, SNVsFilter, verbose = False ):
+	def loadAllGenes(self, SNVsFilter = None, verbose = False ):
 		"""SNVsFilter is ftc that takes a dictionnary of SNVs : genomePath => list of snvs, and then returns a list of the
-		selected snvs"""
+		selected snvs. If None, the function defaultMixedSNVFilter will be used"""
 		for symbol in self.geneSymbolIndex.keys() :
 			self.loadGene(symbol, SNVsFilter, verbose)
 	
 	def getGenes(self) :
 		return self.genes.values()
 		
-	def getSNVsInRange(self, x1, x2, SNVsFilter) :
+	def getSNVsInRange(self, x1, x2, SNVsFilter = None) :
 		"""SNVsFilter is ftc that takes a dictionnary of SNVs : genomePath => list of snvs, and then returns a list of the
-		selected snvs"""
+		selected snvs. If None, the function defaultMixedSNVFilter will be used"""
 		
+		if SNVsFilter == None :
+			fct = defaultMixedSNVFilter
+		else :
+			fct = SNVsFilter
+			
 		if x2 == None :
 			start, end = x1, x1 + 1
 		elif x1 > x2 :
@@ -142,11 +164,11 @@ class MixedChromosome :
 		for p in self.chromosomes:
 			individualSNPS[p] = self.chromosomes[p].getSNVsInRange(start, end)
 		
-		return SNVsFilter(individualSNPS)
-			
-	def getSequence(self, x1, x2, SNVsFilter) :
+		return fct(individualSNPS)
+		
+	def getSequence(self, x1, x2, SNVsFilter = None) :
 		"""SNVsFilter is ftc that takes a dictionnary of SNVs : genomePath => list of snvs, and then returns a list of the
-		selected snvs"""
+		selected snvs. If None, the function defaultMixedSNVFilter will be used"""
 		
 		if x2 == None :
 			start, end = x1, x1 + 1
@@ -155,38 +177,18 @@ class MixedChromosome :
 		else :
 			start, end = x1, x2
 		
-		finalSNPS = self.getSNVsInRange(start, end, SNVsFilter)
+		if SNVsFilter == None :
+			fct = defaultMixedSNVFilter
+		else :
+			fct = SNVsFilter
+			
+		finalSNPS = self.getSNVsInRange(start, end, fct)
 		if len(finalSNPS) > 0 :
 			data = list(self.data[start:end])
 			for snp in finalSNPS:
 				#if len(snp['max_gt']) != 1 :
 				#	raise ValueError("len(snp['max_gt']) != 1 (= %s), it should be one single nucleotide (single or polymorphic)" % snp['max_gt'])
 				snp['max_gt'] = uf.getPolymorphicNucleotide(snp['max_gt'])
-				pos = snp['pos'] - start#-1
-				data[pos] = snp['max_gt']
-			return ''.join(data)
-		
-		return self.data[start:end]
-
-	def getSequence_bck(self, x1, x2, SNVsFilter) :
-		"""SNVsFilter is ftc that takes a dictionnary of SNVs : genomePath => list of snvs, and then returns a list of the
-		selected snvs"""
-		
-		if x2 == None :
-			start, end = x1, x1 + 1
-		elif x1 > x2 :
-			start, end = x2, x1 
-		else :
-			start, end = x1, x2
-		
-		individualSNPS = {}
-		for p in self.chromosomes:
-			individualSNPS[p] = self.chromosomes[p].getSNVsInRange(start, end)
-		
-		finalSNPS = SNVsFilter(individualSNPS)
-		if len(finalSNPS) > 0 :
-			data = list(self.data[start:end])
-			for snp in finalSNPS:
 				pos = snp['pos'] - start#-1
 				data[pos] = snp['max_gt']
 			return ''.join(data)
