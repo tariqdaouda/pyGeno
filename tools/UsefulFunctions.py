@@ -307,10 +307,11 @@ def getPolymorphicNucleotide(strSeq) :
 	for c in strSeq :
 		if c in polymorphicNucleotides :
 			seq.extend(polymorphicNucleotides[c])
-		else :
+		elif c in nucleotides :
 			seq.append(c)
 	
 	seq = set(seq)
+	#print "===>", seq 
 	if len(seq) == 4:
 		return 'N'
 	elif len(seq) == 3 :
