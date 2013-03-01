@@ -17,14 +17,14 @@ def CDNAToDNA(position, transcript, iWantCDSNumber = False) :
 				poffset = cds[0] + pos
 			else :
 				poffset = cds[1] - pos-1
-			
+		
 			if iWantCDSNumber :
+				#print '---', position, poffset, transcript.codingExons[i].CDS
 				return (poffset,i)
 			return poffset
 		
 		pos -= transcript.codingExons[i].getCDSLength()
 
-	
 	return -1
 
 
@@ -33,6 +33,7 @@ def CDNAToDNA_range(x1, x2, transcript, iWantCDSNumber = False) :
 	xx1 = CDNAToDNA(x1, transcript, True)
 	xx2 = CDNAToDNA(x2, transcript, True)
 	
+	#print 'xx a', xx1, xx2
 	if xx2[1] < xx1[1] :
 		tmp = xx2
 		xx2 = xx1
@@ -41,6 +42,8 @@ def CDNAToDNA_range(x1, x2, transcript, iWantCDSNumber = False) :
 	if transcript.gene.strand == '-' :
 		xx1 = (xx1[0]+1, xx1[1])
 		xx2 = (xx2[0]+1, xx2[1])
+	
+	#print 'xx b', xx1, xx2
 	
 	#print xx1, xx2
 	if xx1[1] == xx2[1] :
@@ -81,8 +84,6 @@ def CDNAToDNA_range(x1, x2, transcript, iWantCDSNumber = False) :
 	
 	if transcript.gene.strand == '-' :
 		return ret[::-1]
-	return ret
-	#print ret
 	return ret
 	
 def CDNAToDNA_range_bck(x1, x2, transcript, iWantCDSNumber = False) :
@@ -151,6 +152,7 @@ def DNAToCDNA(pos, transcript) :
 	cdsLen = 0
 	for e in transcript.exons :
 		if e.hasCDS() :
+			#print pos, e.CDS
 			if e.CDS[0] <= pos and pos < e.CDS[1]:
 				if transcript.gene.strand == '+'  :
 					resPos = pos - e.CDS[0] + cdsLen

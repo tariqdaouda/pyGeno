@@ -1,6 +1,21 @@
-import random
+import random, copy
 
+def __insertTree(childTree, parentTree):
+	"""This a private (You shouldn't have to call it) recursive function that inserts a child tree into a parent tree."""
+	if childTree.x1 != None and childTree.x2 != None :
+		parentTree.insert(childTree.x1, childTree.x2, childTree.name, childTree.referedObject)
 
+	for c in childTree.children:
+		__insertTree(c, parentTree)
+		
+def __moveTree(newX1, tree):
+	"""This a private recursive (You shouldn't have to call it) function that translates tree(and it's children) to a given x1"""
+	if tree.x1 != None and tree.x2 != None :
+		tree.x1, tree.x2 = newX1, tree.x2-newX1
+
+	for c in childTree.children:
+		__moveTree(parentTree, c)
+		
 class SegmentTree :
 	"""This is like an R-tree but with segments
 	Root : 0-15
@@ -85,7 +100,11 @@ class SegmentTree :
 				self.__addChild(rt)
 		
 		return rt
-		
+	
+	def insertTree(self, segTree):
+		"""inserts segTree in the right position (regions will rearanged to fit the organisation of self)"""
+		__insertTree(self, segTree)
+	
 	def intersect(self, x1, x2= None) :
 		"""Returns all the segments intersected by x1, x2"""
 		if x2 == None :
@@ -107,6 +126,22 @@ class SegmentTree :
 
 		return ret
 
+	def bridgeGaps(self) :
+		"""returns a tree similar to self but where the gaps between succesive indexed regions have been removed:
+		Regions are moved so they adajcent to the one before, the transfornations also affect children"""
+		res = SegmentTree()
+		
+		cc = copy.copy(self.children[0])
+		res.insertTree(cc)
+		previousC = cc
+		for i in range(1, len(self.children)) :
+			cc = copy.copy(self.children[i])
+			if self.children[i].x1 > previousC.x2:				
+				__moveTree(previousC.x2, cc)
+			res.insertTree(cc)
+			previousC = cc
+		return res
+		
 	def getX1(self) :
 		if self.x1 != None :
 			return self.x1
@@ -118,7 +153,8 @@ class SegmentTree :
 		return self.children[-1].x2
 	
 	def getIndexedLength(self) :
-		if self.x1 == None and self.x2 == None:
+		"""Returns the total length of indexed regions"""
+		if self.x1 != None and self.x2 != None:
 			return self.x2 - self.x1
 		else :
 			if len(self.children) == 0 :
@@ -180,30 +216,6 @@ class SegmentTree :
 		#return res
 		return root
 		
-	def flattened_bck(self) :
-		'same as getFirstLevel, but overlapping children are merged'
-		#print "Warning: flattened a checker"
-		res = []
-		if len(self.children) == 1 :
-			res.append((self.children[0].x1, self.children[0].x2))
-		elif len(self.children) > 1 :
-			x1 = self.children[0].x1
-			x2 = self.children[0].x2
-			for c in self.children[1:]:
-				if x2 > c.x1 :
-					x2 = c.x2
-				else :
-					res.append((x1, x2))
-					x1 = c.x1
-					x2 = c.x2
-			res.append((x1, x2))
-		else :
-			if self.x1 != None :
-				res = [(self.x1, self.x2)]
-			else :
-				res = None
-		return res
-		
 	def __str__(self) :
 		strRes = self.__str()
 		
@@ -227,7 +239,7 @@ class SegmentTree :
 			
 	
 	def __len__(self) :
-		self.getIndexedLength()
+		return self.getIndexedLength()
 		
 	def __len__bck(self) :
 		r"""if root returns whole region of interest length. if not it is identical to getIndexedRegionsLength()"""
@@ -242,38 +254,9 @@ class SegmentTree :
 			
 			return xx2 - xx1
 	
-	def lengthOfLeafs_bck(self) :
-		r"returns the sum of the total length of the leafs without overlap"
-		#print "flattenedLength a cheker"
-		#print len(self.children)	
-
-		if self.x1 == None and len(self.children) == 0 :
-			return 0
-		
-		if len(self.children) == 0 :
-			return self.x2 - self.x1
-		else :
-			if len(self.children) == 1 :
-				return self.children[0].x2 - self.children[0].x1
-			else :
-				l = 0
-				for i in range(0, len(self.children)-1) :
-					l += self.children[i].lengthOfLeafs() - max(self.children[i].x2 - self.children[i+1].x1, 0)		
-				
-				return l+self.children[-1].lengthOfLeafs()
-	
 	def getMergedLeafs(self) :
 		#TODO
 		pass
-	
-	def getIndexedRegionsLength_bck(self) :
-		if self.x1 != None :
-			return self.x2 - self.x1
-		else :
-			if len(self.children) == 0 :
-				return 0
-			else :
-				return self.children[-1].x2 - self.children[0].x1
 
 '''
 s = SegmentTree()

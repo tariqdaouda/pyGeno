@@ -7,140 +7,15 @@ from tools import UsefulFunctions as uf
 from expyutils.CSVTools import CSVFile
 #from expyutils.GTFTools import GTFFile
 
-def installSequences(fastaDir, specie, genomeName) :
-	print r"""Converting fastas from dir: %s into pyGeno's data format
-	resulting files will be part of genome: %s/%s
-	This may take some time, please wait...""" %(fastaDir, specie, genomeName)
-	
-	
-	#path = conf.DATA_PATH+'/ncbi/%s/sequences/%s/'%(specie, genomeName)
-	path = conf.DATA_PATH+'/%s/genomes/%s/'%(specie, genomeName)
-
-	if not os.path.exists(path):
-		os.makedirs(path)
-		
-	chrs = glob.glob(fastaDir+'/chr*.fa')
-	if len(chrs) < 1 :
-		raise Exception('No Fastas found in directort, installation aborted')
-		
-	#chrs.extend(glob.glob(DATA_PATH/+'*.fasta'))
-	startPos = 0
-	genomeChrPos = {} 
-	headers = ''
-	
-	for chro in chrs :
-		print 'making data for Chr', chro
-		
-		f = open(chro)
-		headers += f.readline()
-		s = f.read().upper().replace('\n', '').replace('\r', '')
-		f.close()
-		
-		fn = chro.replace('.fa', '.dat').replace(fastaDir, path)
-		f = open(fn, 'w')
-		f.write(s)
-		f.close()
-		
-		ch = chro.replace(fastaDir, '').replace('/chr', '').replace('.fa', '')
-		genomeChrPos[ch] = [str(ch), str(startPos), str(startPos+len(s)), str(len(s))]
-		startPos = startPos+len(s)
-		
-	#fh = open(path+'/fasta_headers.txt', 'w')
-	#fh.write(headers)
-	#fh.close()
-
-	print 'making index file genomeChrPos'
-	fh = open(path+'/genomeChrPos.index', 'w')
-	fh.write('chromosome;chr_start;chr_end;length\n')
-	for k in genomeChrPos.keys() :
-		fh.write(';'.join(genomeChrPos[k])+'\n')
-	fh.close()
-
-	print 'writing build info file'
-	f=open('%s/build_infos.txt' % (path), 'w')
-	f.write('source package directory: %s' % fastaDir)
-	f.write('\nheaders:\n------\n %s' % headers)
-	f.close()
-
-def installGeneSymbolIndex(gtfFile, specie) :
-	#gtf = GTFFile()
-	#gtf.parseFile(gtfFile)
-	
-	path = conf.DATA_PATH+'/%s/gene_sets/'%(specie)
-	if not os.path.exists(path):
-		os.makedirs(path)
-		
-	f = open(gtfFile)
-	gtf = f.readlines()
-	f.close()
-	
-	chroLine = 0
-	chro = -1
-	currChro = -1
-	gtfStr = ''
-	pickIndex = {}
-	symbol = -1
-	currSymbol = -1
-	for i in range(len(gtf)) :
-		sl = gtf[i].split('\t')
-		currChro = sl[0]
-		if chro != currChro :
-			if chro != -1 :
-				print '\tsaving chromosme gtf file...'
-				f = open('%s/chr%s.gtf' % (path, chro), 'w')
-				f.write(gtfStr)
-				f.close()
-				print '\tsaving chromosme pickled index...'
-				f=open('%s/chr%s_gene_symbols.index.pickle' % (path, chro), 'w')
-				pickle.dump(pickIndex, f, 2)
-				f.close()
-				print '\tdone.'
-			print 'making gene symbol index for chr %s...' %chro
-			
-			gtfStr = ''
-			pickIndex = {}
-			chro = currChro
-			currSymbol = -1
-			symbol = -1
-			chroLine = 0
-			
-		currSymbol = gtf[i].split('\t')[8].split(';')[3]
-		currSymbol = currSymbol[currSymbol.find('"') + 1:].replace('"', '').strip()
-		#print currSymbol
-		
-		if currSymbol != symbol :
-			if symbol != -1 :
-				pickIndex[symbol] = "%d;%d" %(startL, chroLine)
-			
-			symbol = currSymbol
-			startL = chroLine
-		
-		gtfStr += gtf[i]
-		chroLine += 1
-
-	pickIndex[symbol] = "%d;%d" %(startL, chroLine)
-	print '\tsaving chromosme gtf file...'
-	f = open('%s/chr%s.gtf' % (path, chro), 'w')
-	f.write(gtfStr)
-	f.close()
-	print '\tsaving chromosme pickled index...'
-	f=open('%s/chr%s_gene_symbols.index.pickle' % (path, chro), 'w')
-	pickle.dump(pickIndex, f, 2)
-	f.close()
-	print '\tdone.'
-	print 'writing build info file'
-	f=open('%s/build_infos.txt' % (path), 'w')
-	f.write('source file: %s' % gtfFile)
-	f.close()
-
+"""===These are the only function that you will need to install new features in pyGen==="""
 def installGenome(packageDir, specie, genomeName) :
 	gtfs = glob.glob(packageDir+'/*.gtf')
 	print gtfs
 	if len(gtfs) != 1 :
 		raise Exception('There should be one and only one gtf index file in the package')
 	
-	installSequences(packageDir, specie, genomeName)
-	installGeneSymbolIndex(gtfs[0], specie)
+	_installSequences(packageDir, specie, genomeName)
+	_installGeneSymbolIndex(gtfs[0], specie)
 	
 def installGenome_casava(specie, genomeName, snpsTxtFile) :
 	"""Creates a light genome (contains only snps infos and no sequence from the reference genome)
@@ -344,7 +219,134 @@ def install_dbSNP(packageFolder, specie, versionName) :
 		f = open(headerFile, 'w')
 		f.write(header)
 		f.close()
+
+"""===These are the private functions that you should not call, unless you really know what you're doing==="""
+def _installSequences(fastaDir, specie, genomeName) :
+	print r"""Converting fastas from dir: %s into pyGeno's data format
+	resulting files will be part of genome: %s/%s
+	This may take some time, please wait...""" %(fastaDir, specie, genomeName)
 	
+	
+	#path = conf.DATA_PATH+'/ncbi/%s/sequences/%s/'%(specie, genomeName)
+	path = conf.DATA_PATH+'/%s/genomes/%s/'%(specie, genomeName)
+
+	if not os.path.exists(path):
+		os.makedirs(path)
+		
+	chrs = glob.glob(fastaDir+'/chr*.fa')
+	if len(chrs) < 1 :
+		raise Exception('No Fastas found in directort, installation aborted')
+		
+	#chrs.extend(glob.glob(DATA_PATH/+'*.fasta'))
+	startPos = 0
+	genomeChrPos = {} 
+	headers = ''
+	
+	for chro in chrs :
+		print 'making data for Chr', chro
+		
+		f = open(chro)
+		headers += f.readline()
+		s = f.read().upper().replace('\n', '').replace('\r', '')
+		f.close()
+		
+		fn = chro.replace('.fa', '.dat').replace(fastaDir, path)
+		f = open(fn, 'w')
+		f.write(s)
+		f.close()
+		
+		ch = chro.replace(fastaDir, '').replace('/chr', '').replace('.fa', '')
+		genomeChrPos[ch] = [str(ch), str(startPos), str(startPos+len(s)), str(len(s))]
+		startPos = startPos+len(s)
+		
+	#fh = open(path+'/fasta_headers.txt', 'w')
+	#fh.write(headers)
+	#fh.close()
+
+	print 'making index file genomeChrPos'
+	fh = open(path+'/genomeChrPos.index', 'w')
+	fh.write('chromosome;chr_start;chr_end;length\n')
+	for k in genomeChrPos.keys() :
+		fh.write(';'.join(genomeChrPos[k])+'\n')
+	fh.close()
+
+	print 'writing build info file'
+	f=open('%s/build_infos.txt' % (path), 'w')
+	f.write('source package directory: %s' % fastaDir)
+	f.write('\nheaders:\n------\n %s' % headers)
+	f.close()
+
+def _installGeneSymbolIndex(gtfFile, specie) :
+	#gtf = GTFFile()
+	#gtf.parseFile(gtfFile)
+	
+	path = conf.DATA_PATH+'/%s/gene_sets/'%(specie)
+	if not os.path.exists(path):
+		os.makedirs(path)
+		
+	f = open(gtfFile)
+	gtf = f.readlines()
+	f.close()
+	
+	chroLine = 0
+	chro = -1
+	currChro = -1
+	gtfStr = ''
+	pickIndex = {}
+	symbol = -1
+	currSymbol = -1
+	for i in range(len(gtf)) :
+		sl = gtf[i].split('\t')
+		currChro = sl[0]
+		if chro != currChro :
+			if chro != -1 :
+				print '\tsaving chromosme gtf file...'
+				f = open('%s/chr%s.gtf' % (path, chro), 'w')
+				f.write(gtfStr)
+				f.close()
+				print '\tsaving chromosme pickled index...'
+				f=open('%s/chr%s_gene_symbols.index.pickle' % (path, chro), 'w')
+				pickle.dump(pickIndex, f, 2)
+				f.close()
+				print '\tdone.'
+			print 'making gene symbol index for chr %s...' %chro
+			
+			gtfStr = ''
+			pickIndex = {}
+			chro = currChro
+			currSymbol = -1
+			symbol = -1
+			chroLine = 0
+			
+		currSymbol = gtf[i].split('\t')[8].split(';')[3]
+		currSymbol = currSymbol[currSymbol.find('"') + 1:].replace('"', '').strip()
+		#print currSymbol
+		
+		if currSymbol != symbol :
+			if symbol != -1 :
+				pickIndex[symbol] = "%d;%d" %(startL, chroLine)
+			
+			symbol = currSymbol
+			startL = chroLine
+		
+		gtfStr += gtf[i]
+		chroLine += 1
+
+	pickIndex[symbol] = "%d;%d" %(startL, chroLine)
+	print '\tsaving chromosme gtf file...'
+	f = open('%s/chr%s.gtf' % (path, chro), 'w')
+	f.write(gtfStr)
+	f.close()
+	print '\tsaving chromosme pickled index...'
+	f=open('%s/chr%s_gene_symbols.index.pickle' % (path, chro), 'w')
+	pickle.dump(pickIndex, f, 2)
+	f.close()
+	print '\tdone.'
+	print 'writing build info file'
+	f=open('%s/build_infos.txt' % (path), 'w')
+	f.write('source file: %s' % gtfFile)
+	f.close()
+		
 #if __name__ == "__main__" :
 	#installGenome("~/py/mous", 'mouse', 'B6')
 	#install_dbSNP('/u/daoudat/py/pyGeno/pyGenoData/installationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
