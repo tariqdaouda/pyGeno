@@ -45,10 +45,7 @@ class Genome :
 		
 		self.absolutePath = conf.DATA_PATH+'/%s/genomes/%s' % (self.specie, self.name)
 		self.referencePath = conf.DATA_PATH+'/%s/genomes/reference' % (self.specie)
-		#: WARNING ONLY FOR HUMANS!!!
-		#self.chromosomeList = map(uf.intToStr, range(1, 23))
-		#self.chromosomeList.extend(['x', 'y'])
-		
+
 		try :
 			f = open(self.absolutePath + '/genomeChrPos.index')
 		except IOError:
@@ -58,7 +55,6 @@ class Genome :
 		startPosition = 0
 		for l in f.readlines()[1:] :
 			sl = l.split(';')
-			#print sl
 			self.chrsData[sl[0]] = ChrData_Struct(self, sl[0], sl[1], sl[2], sl[3])
 			self.length = self.chrsData[sl[0]].x2
 		
@@ -70,19 +66,15 @@ class Genome :
 		return self.chrsData.keys()
 	
 	def getSequencePath(self) :
-		#return conf.DATA_PATH+'/ncbi/%s/sequences/%s' % (self.specie, self.name)
 		return conf.DATA_PATH+'/%s/genomes/%s' % (self.specie, self.name)
 	
 	def getReferenceSequencePath(self) :
-		#return conf.DATA_PATH+'/ncbi/%s/sequences/reference' % (self.specie)
 		return conf.DATA_PATH+'/%s/genomes/reference' % (self.specie)
 		
 	def getGeneSetsPath(self) :
-		#return conf.DATA_PATH+'/ensembl/%s' % self.getSpecie()
 		return conf.DATA_PATH+'/%s/gene_sets' % self.getSpecie()
 	
 	def getdbSNPPath(self) :
-		#return conf.DATA_PATH+'/ncbi/%s/dbSNP/' % (self.specie)
 		return conf.DATA_PATH+'/%s/dbSNP/' % (self.specie)
 		
 	def getSpecie(self):
@@ -93,11 +85,9 @@ class Genome :
 	
 	def loadChromosome(self, number, dbSNPVersion = None, verbose = False) :
 		if number not in self.chromosomes.keys():
-			#try :
 			if number != '' :
 				self.chromosomes[number] = Chromosome(number, self, self.chrsData[number].x1, self.chrsData[number].x2, dbSNPVersion, verbose)
-			#except IOError:
-			#	raise ChromosomeNotFound('Unable to load chromosome :' + number)
+
 		return self.chromosomes[number]
 	
 	def getChromosomes(self) :
@@ -154,25 +144,13 @@ class Genome :
 			chros = chromosomes 
 		
 		res = {}
-		#wasLoaded = False
+
 		for g in geneSymbols :
 			res[g] = []
 			for c in chros :
 				if self.chrsData[c].hasGene(g) :
 					res[g].append(c)
-				"""if self.isLoaded(c) :
-					if self.chromosomes[c].hasGene(g) :
-						res[g].append(c)
-				else :
-					f = open('ensembl/%s/chr%s_gene_symbols.index.pickle'%(self.name, c))
-					self.geneSymbolIndex = pickle.load(f)
-					f.close()
-					try :
-						self.geneSymbolIndex[g]
-						res[g].append(c)
-					except KeyError:
-						pass"""
-						
+		
 		return res
 	
 	def loadRandomChromosome(self, loadSnps = True) :

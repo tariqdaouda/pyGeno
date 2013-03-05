@@ -1,4 +1,4 @@
-import string, os, copy, pickle, time
+import string, os, copy
 import numpy as N
 
 class UnknownNucleotide(Exception) :
@@ -51,122 +51,6 @@ intToStr = lambda x:"%d"%(x)
 
 splitStr = lambda x: x.split(';')
 stripSplitStr = lambda x: x.strip().split(';')
-
-"""
-def strToList(stri) :
-	l = []
-	for c in seqtri :
-		l.append(c)
-	
-	return l
-"""	
-def saveResults(directoryName, results, errors = '', params = '', fileName = ''):
-	
-	if not os.path.exists(directoryName):
-		os.makedirs(directoryName)
-	
-	resPath = "%s/%s"%(directoryName, fileName)
-	resFile = open(resPath, 'w')
-	print "Saving results :\n\t%s..."%resPath
-	resFile.write(results)
-	resFile.close()
-
-	if errors != '' :
-		errPath = "%s/%s.err.txt"%(directoryName, fileName)
-		errFile = open(errPath, 'w')
-
-		print "Saving error log :\n\t%s..." %errPath
-		errFile.write(errors)
-		errFile.close()
-	
-	if params != '' :
-		paramPath = "%s/%s.params.txt"%(directoryName, fileName)
-		paramFile = open(paramPath, 'w')
-
-		print "Saving params :\n\t%s..." %paramPath
-		paramFile.write(params)
-		paramFile.close()
-		
-	return "%s/"%(directoryName)
-
-def saveResults_bck(directoryName, results, errors = '', params = '', fileName = ''):
-	
-	if not os.path.exists("results/" + directoryName):
-		os.makedirs("results/" + directoryName)
-	
-	resPath = "results/%s/%s"%(directoryName, fileName)
-	resFile = open(resPath, 'w')
-	print "Saving results :\n\t%s..."%resPath
-	resFile.write(results)
-	resFile.close()
-
-	if errors != '' :
-		errPath = "results/%s/%s.err.txt"%(directoryName, fileName)
-		errFile = open(errPath, 'w')
-
-		print "Saving error log :\n\t%s..." %errPath
-		errFile.write(errors)
-		errFile.close()
-	
-	if params != '' :
-		paramPath = "results/%s/%s.params.txt"%(directoryName, fileName)
-		paramFile = open(paramPath, 'w')
-
-		print "Saving params :\n\t%s..." %paramPath
-		paramFile.write(params)
-		paramFile.close()
-		
-	return "results/%s/"%(directoryName)
-	
-def saveResults_pkl(filename, obj):
-	fn = ''
-	if filename.find('.pygeno-pklresults') > 1:
-		fn = filename
-	else :
-		fn = filename+'.pygeno-pklresults'
-	
-	if os.path.exists(fn) :
-		fn = fn.replace('.pygeno-pklresults', '_%s.pygeno-pklresults' %(time.ctime()))
-
-	f = open(fn, 'w')
-	pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)	
-	f.close()
-
-def unescapeHtml(html) :
-	h = html
-	h = h.replace('&lt;', '<')
-	h = h.replace('&gt;', '>')
-	h = h.replace('&amp;', '&')
-	h = h.replace('&quot;', '"')
-	h = h.replace('&apos;', "'")
-
-	return h
-
-def removeHtmlFromEfetch(html) :
-	pos = html.find('<pre>')
-	fpos = html.find('</pre>')
-	return html[pos+5:fpos].strip()
-
-def toXML(template, data, addHeader = False):
-	"""
-	@param template
-		<snpDistribution>
-			<geneSymbol>#GENESYMB#</geneSymbol>
-			<proteinId>#PROTID#</proteinId>
-			<distribution>#DIST#</distribution>
-			#SNPLIST#
-		</snpDistribution>
-	@param data : data['#GENESYMB#'] = xxxx;...
-	@param addHeader : appends <?xml version="1.0" encoding="UTF-8"?> at begining of the file
-	@returns : data formated in an xml fashion"""
-	t = template
-	for k in data.keys():
-		t = t.replace(k, data[k])
-	
-	if addHeader :
-		return '<?xml version="1.0" encoding="UTF-8"?>\n\t'+t
-
-	return t
 
 
 """returns a list of all the ocurances"""
@@ -234,10 +118,8 @@ def translateDNA(sequence, frame = 1) :
 		if (len(dna[i:i+3]) == 3) :
 			try :
 				protein += codonTable[dna[i:i+3]]
-				#print i, dna[i:i+3], codonTable[dna[i:i+3]]
 			except KeyError :
-				#print dna[i:i+3]
-				combinaisons = polymorphicCondonCombinaisons(list(dna[i:i+3]))
+				combinaisons = polymorphicCodonCombinaisons(list(dna[i:i+3]))
 				translations = set()
 				for ci in range(len(combinaisons)):
 					translations.add(codonTable[combinaisons[ci]])
@@ -261,8 +143,7 @@ def getSequenceCombinaisons(polymorphipolymorphicDnaSeqSeq, pos = 0) :
 		chars = decodePolymorphicNucleotide(seq[pos]).split('/')
 	else :
 		chars = seq[pos].split('/')
-		
-	#print chars
+
 	for c in chars :
 		rseq = copy.copy(seq)
 		rseq[pos] = c
@@ -270,10 +151,10 @@ def getSequenceCombinaisons(polymorphipolymorphicDnaSeqSeq, pos = 0) :
 	
 	return variants
 	
-def polymorphicCondonCombinaisons(codon) :
+def polymorphicCodonCombinaisons(codon) :
 	return getSequenceCombinaisons(codon, 0)
 	
-def polymorphicCondonCombinaisons_bck(dnaSeq, startId = 0) :
+def polymorphicCodonCombinaisons_bck(dnaSeq, startId = 0) :
 	if type(dnaSeq).__name__ != 'list' :
 		dna = list(dnaSeq)
 	else :
@@ -288,21 +169,16 @@ def polymorphicCondonCombinaisons_bck(dnaSeq, startId = 0) :
 		chars = polymorphicNucleotides[dna[startId]]
 		for c in chars :
 			rDna[startId] = c
-			res.extend(polymorphicCondonCombinaisons(rDna, startId +1))
+			res.extend(polymorphicCodonCombinaisons(rDna, startId +1))
 		
 	except KeyError:
-		res.extend(polymorphicCondonCombinaisons(rDna, startId +1))
+		res.extend(polymorphicCodonCombinaisons(rDna, startId +1))
 
 	return res
 
 def getPolymorphicNucleotide(strSeq) :
 	"""Seq is a string like : ATG or A/T/G"""
-	
-	#seq = list(strSeq.replace('/', ''))
-	#for i in range(len(seq)) :
-	#	if seq[i] in polymorphicNucleotides :
-	#		seq[i] = ''.join(polymorphicNucleotides[seq[i]])
-	
+
 	seq = []
 	for c in strSeq :
 		if c in polymorphicNucleotides :
@@ -349,7 +225,6 @@ def decodePolymorphicNucleotide(nuc) :
 		return nuc
 	
 	raise ValueError('nuc: %s, is not a valid nucleotide' % nuc)
-	#return nuc
 	
 def getCodon(sequence, x1) :
 	"Returns the entire codon of the nucleotide at pos x1 in the cdna, and the position of that nocleotide in the codon"

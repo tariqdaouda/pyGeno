@@ -8,7 +8,7 @@ import configuration as conf
 from Gene import Gene
 from SNP import *
 
-from expyutils.GTFTools import GTFFile
+from tools.GTFTools import GTFFile
 
 class GeneNotFound(Exception):
 	def __init__(self, chromosome, geneSymbol, message = ''):
@@ -252,7 +252,6 @@ class Chromosome :
 
 		if self.dbSNPs == None :
 			raise RequestError("No dbSNP database loaded through loadSNPs()")
-			#return res
 		else :
 			if (dbSNPsFilter != None) :
 				fct = dbSNPsFilter
@@ -275,7 +274,6 @@ class Chromosome :
 			
 		if not self.isLight :
 			raise RequestError("Genome is light, there's no information on separate SNVs")
-			#return res
 		else :
 			if (SNVsFilter != None) :
 				fct = SNVsFilter

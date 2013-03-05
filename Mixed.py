@@ -99,8 +99,6 @@ class MixedChromosome :
 			print "Loading mixed chromosomes", number
 	
 		for p in self.mixedGenomes.getGenomePaths() :	
-			#if verbose :
-			#	print '\t for genome', p
 			self.chromosomes[p] = self.mixedGenomes[p].loadChromosome(number, dbSNPVersion, verbose)
 			if not self.chromosomes[p].isLight :
 				raise ValueError("Only light chromosomes can be mixed, chromosomes %s of genome %s is not light" % (number, p))
@@ -121,10 +119,7 @@ class MixedChromosome :
 			fct = defaultMixedSNVFilter
 		else :
 			fct = SNVsFilter
-			
-		#if symbol not in self.genes.keys() and SNVsFilter == None :
-		#	raise ValueError('Gene %s has not been loaded before, please specify a SNVsFilter function' % symbol)
-		
+
 		if symbol not in self.genes.keys():
 			try :
 				l1, l2 = self.geneSymbolIndex[symbol].split(';')
@@ -189,8 +184,6 @@ class MixedChromosome :
 		if len(finalSNPS) > 0 :
 			data = list(self.data[start:end])
 			for snp in finalSNPS:
-				#if len(snp['max_gt']) != 1 :
-				#	raise ValueError("len(snp['max_gt']) != 1 (= %s), it should be one single nucleotide (single or polymorphic)" % snp['max_gt'])
 				snp['max_gt'] = uf.getPolymorphicNucleotide(snp['max_gt'])
 				pos = snp['pos'] - start#-1
 				data[pos] = snp['max_gt']

@@ -1,5 +1,6 @@
 from tools import UsefulFunctions as uf
 from tools.BinarySequence import AABinarySequence
+import copy
 
 class InvalidProtein(Exception):
 	def __init__(self, protein, message):
@@ -20,7 +21,6 @@ class Protein :
 	def __init__(self, sequence, protId, transcript = None):
 
 		self.sequence = sequence
-		#self.splitSequence = None
 		self.transcript = transcript
 		self.id = protId
 		self.binarySequence = AABinarySequence(self.sequence)
@@ -30,7 +30,7 @@ class Protein :
 		return self.sequence
 	
 	def getDefaultSequence(self) :
-		#returns a version str sequence where only the last allele of each polymorphisms is shown 
+		"""returns a version str sequence where only the last allele of each polymorphisms is shown"""
 		return self.binarySequence.defaultSequence
 	
 	def getPolymorphisms(self) :
@@ -58,6 +58,13 @@ class Protein :
 		"""return all first occurences of sequence using simple string search in sequence doesn't care about polymorphisme"""
 		return uf.findAll(self.sequence, sequence)
 	
+	def pluck(self) :
+		"""Plucks the protein off the tree. Returns a protein identical to self but where the field .transcript has str(self.transcipt) as value,
+		This makes the protein much more lighter in case you'd like to pickle it"""
+		np = copy.copy(self)
+		np.transcript  = str(self.transcript)
+		return np
+		
 	def __getitem__(self, i) :
 		return self.binarySequence.getChar(i)
 
