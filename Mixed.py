@@ -107,8 +107,11 @@ class MixedChromosome :
 		
 		tmpChro = self.chromosomes.values()[0]
 		self.geneSymbolIndex = tmpChro.geneSymbolIndex
-		self.gtfLines =tmpChro.gtfLines
-		self.data =  tmpChro.data
+		self.length = len(tmpChro)
+		self.x1 = tmpChro.x1
+		self.x2 = tmpChro.x2
+		self.gtfLines = tmpChro.gtfLines
+		self.data = tmpChro.data
 		
 	def loadGene(self, symbol, SNVsFilter = None, verbose = False) :
 		"""SNVsFilter is ftc that takes a dictionnary of SNVs : genomePath => list of snvs, and then returns a list of the
@@ -194,3 +197,9 @@ class MixedChromosome :
 			return ''.join(data)
 		
 		return self.data[start:end]
+
+	def __len__(self) :
+		return self.length
+		
+	def __str__(self) :
+		return "Mixed Chromosome: %s" %(self.number)

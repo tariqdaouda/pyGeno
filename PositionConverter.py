@@ -180,4 +180,19 @@ def proteinToDNA_range(x1, x2, protein, iWantCDSNumbers = False) :
 	
 def DNAToProtein(pos, protein):
 	return CDNAToProtein(DNAToCDNA(pos, protein.transcript))
+
+def chromosomeToGenome(pos, chromosome):
+	if pos > len(chromosome) or pos < 0:
+		raise IndexError('%d not in chromosome %s of len %d' % (pos, chromosome.number, len(chromosome)))
+
+	return pos + chromosome.x1
 	
+def genomeToChromosome(pos, chromosome):
+	if pos > len(chromosome.genome) or pos < 0:
+		raise IndexError('%d not in genome %s of len %d' % (pos, chromosome.genome.name, len(chromosome.genome)))
+
+	p = pos - chromosome.x1
+	if p < 0 :
+		raise IndexError('%d not in chromosome %s of len %d' % (pos, chromosome.number, len(chromosome.genome)))
+		
+	return pos - chromosome.x1

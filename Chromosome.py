@@ -43,28 +43,19 @@ class Chromosome :
 	"""A class that represents a Chromosome
 	Attention: private region support en retard par rapport au public"""
 
-	def __init__(self, number, genome, dbSNPVersion = None, verbose = False) :
-		self.reset(number, genome, dbSNPVersion, verbose)
-
-	def emptyRegions(self) :
-		"""Erases regions """
-		self.SNPs = {}
-		self.SNPData = None
-		self.SNPIndexTree = None
+	def __init__(self, number, genome, x1, x2, dbSNPVersion = None, verbose = False) :
+		"""x1, x2 are the prosition of the chromosome in the genome"""
+		self.reset(number, genome, x1, x2, dbSNPVersion, verbose)
 		
-	def empty(self) :
-		"""Erases genes and regions"""
-		self.dbSNPs = None
-		self.genes = {}
-		self.emptyRegions()
-		
-	def reset(self, number, genome, dbSNPVersion = None, verbose = False) :
-		
+	def reset(self, number, genome, x1, x2, dbSNPVersion = None, verbose = False) :
+		"""x1, x2 are the prosition of the chromosome in the genome"""
 		if verbose :
 			print "Loading chromosome %s..."%(number)
 		
 		self.number = str(number).upper()
 		self.genome = genome
+		self.x1 = int(x1)
+		self.x2 = int(x2)
 		
 		try :
 			self.casavaSNPs = SNPFile('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number), CasavaSNP)
@@ -93,8 +84,7 @@ class Chromosome :
 		f.close()
 		
 		self.geneSymbolIndex = self.genome.chrsData[self.number].geneSymbolIndex
-		
-		self.empty()
+
 		
 		if dbSNPVersion != None and dbSNPVersion != False and dbSNPVersion != '':
 			self.loadSNPs(dbSNPVersion, verbose)
@@ -261,7 +251,7 @@ class Chromosome :
 		res = []
 
 		if self.dbSNPs == None :
-			raise RequestError("No dbSNP database loaded, recrete the chromosome or use loadSNPs()")
+			raise RequestError("No dbSNP database loaded through loadSNPs()")
 			#return res
 		else :
 			if (dbSNPsFilter != None) :

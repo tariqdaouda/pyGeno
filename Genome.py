@@ -18,7 +18,7 @@ class ChrData_Struct :
 		self.x2 = int(x2)
 		self.number = number
 		self.length = int(length)
-	
+		
 		indexFp = conf.DATA_PATH+'%s/gene_sets/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number)
 		f = open(indexFp)
 		if not SingletonManager.contains(indexFp) :
@@ -55,11 +55,13 @@ class Genome :
 			f = open(self.referencePath + '/genomeChrPos.index')
 			
 		self.chrsData = {}
+		startPosition = 0
 		for l in f.readlines()[1:] :
 			sl = l.split(';')
 			#print sl
-			self.chrsData[sl[0]] = ChrData_Struct(self, sl[0], sl[1], sl[2], sl[3]) 
+			self.chrsData[sl[0]] = ChrData_Struct(self, sl[0], sl[1], sl[2], sl[3])
 			self.length = self.chrsData[sl[0]].x2
+		
 		f.close()
 		
 		self.empty()
@@ -93,7 +95,7 @@ class Genome :
 		if number not in self.chromosomes.keys():
 			#try :
 			if number != '' :
-				self.chromosomes[number] = Chromosome(number, self, dbSNPVersion, verbose)
+				self.chromosomes[number] = Chromosome(number, self, self.chrsData[number].x1, self.chrsData[number].x2, dbSNPVersion, verbose)
 			#except IOError:
 			#	raise ChromosomeNotFound('Unable to load chromosome :' + number)
 		return self.chromosomes[number]

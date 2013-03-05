@@ -66,6 +66,3 @@ class Protein :
 
 	def __str__(self) :
 		return "Protein, id: %s -|- %s" %(self.id, str(self.transcript))
-
-	def __repr__(self):
-		return self.sequence
