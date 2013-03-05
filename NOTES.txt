@@ -1,2 +1,5 @@
 TODO
-But in the meanwhile: the entry point is always the Genome class, from it you can use loadChromosome to load chromosomes, then from the chromosomes loadGene for loading a gene, etc...
+
+But in the meanwhile:
+the version name and number can be obtained using version() in configuration.py
+the entry point is always the Genome class, from it you can use loadChromosome to load chromosomes, then from the chromosomes loadGene for loading a gene, etc...à 
