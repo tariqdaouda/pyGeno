@@ -4,7 +4,6 @@ import configuration as conf
 from Genome import Genome
 from tools import UsefulFunctions as uf
 from tools.CSVTools import CSVFile
-#from expyutils.GTFTools import GTFFile
 
 def getVersion():
 	"""returns pyGeno's current version"""

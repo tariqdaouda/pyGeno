@@ -241,9 +241,10 @@ class SegmentTree :
 		"""Moves tree to a new starting position, updates x1s of children"""
 		if self.x1 != None and self.x2 != None :
 			aux_moveTree(newX1-self.x1, self)
-		else :
+		elif len(self.children) > 0:
+			offset = newX1-self.children[0].x1
 			for c in self.children :
-				aux_moveTree(newX1-c.x1, c)
+				aux_moveTree(offset, c)
 
 	def translate(self, offset) :
 		aux_moveTree(offset, self)

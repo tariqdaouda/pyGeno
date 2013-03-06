@@ -56,6 +56,7 @@ class Chromosome :
 		self.genome = genome
 		self.x1 = int(x1)
 		self.x2 = int(x2)
+		self.genes = {}
 		
 		try :
 			self.casavaSNPs = SNPFile('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number), CasavaSNP)
