@@ -83,7 +83,8 @@ class Genome :
 	def empty(self) :
 		self.chromosomes = {}
 	
-	def loadChromosome(self, number, dbSNPVersion = None, verbose = False) :
+	def loadChromosome(self, numberStr, dbSNPVersion = None, verbose = False) :
+		number = numberStr.upper()
 		if number not in self.chromosomes.keys():
 			if number != '' :
 				self.chromosomes[number] = Chromosome(number, self, self.chrsData[number].x1, self.chrsData[number].x2, dbSNPVersion, verbose)
