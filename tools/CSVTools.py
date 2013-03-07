@@ -47,7 +47,8 @@ class CSVFile :
 		self.notSplitted = []
 		self.currentPos = 0
 		
-	def parse(self, file, separator = ';') :
+	def parse(self, file, separator = ';', stringSeparator = '"') :
+		#print "!Champs avec "" mal geres!"
 		f = open(file)
 		self.data = f.readlines()
 		f.close()
@@ -66,7 +67,7 @@ class CSVFile :
 		self.data = self.data[1:]
 		self.notSplitted = range(len(self.data))
 		
-		self.separtorInStrings = separtorInStrings
+		#self.separtorInStrings = separtorInStrings
 		for i in range(len(self.data)) :
 			self.__splitLine(i)
 		
