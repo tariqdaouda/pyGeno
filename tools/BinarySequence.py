@@ -92,61 +92,6 @@ class BinarySequence :
 		"returns a version str sequence where only the last allele of each polymorphisms is shown" 
 		return self.defaultSequence
 	
-	def __getSequenceVariants_bck_old(self, x1, x2, sequence, polymorphismsKeys) :
-		ret = []
-		for pk in polymorphismsKeys :
-			if pk >= x1 or pk < x2 :
-				for c in self.polymorphisms[pk] :
-					sequence[pk-x1] = c
-					ret.extend(self.__getSequenceVariants(self, x1, x2, sequence, polymorphismsKeys))
-	
-	def __getSequenceVariants_bck(self, x1, polyStart, polyStop, listSequence) :
-		"""polyStop, is the polymorphisme at wixh number where the calcul of combinaisons stops"""
-		if polyStart < len(self.polymorphisms) and polyStart < polyStop: 
-			sequence = copy.copy(listSequence)
-			ret = []
-			
-			polyStartNext = polyStart
-			pk = self.polymorphisms[polyStartNext]
-			if pk[0]-x1 < len(listSequence) : 
-				while pk[0] < x1 :
-					pk = self.polymorphisms[polyStartNext]
-					polyStartNext += 1
-					
-				ret.extend(self.__getSequenceVariants_bck(x1, polyStartNext +1, polyStop, sequence))
-				for allele in pk[1][:-1] :
-					sequence[pk[0]-x1] = allele
-					ret.extend(self.__getSequenceVariants_bck(x1, polyStartNext +1, polyStop, sequence))
-			else :
-				return [''.join(listSequence)]
-		else :
-			return [''.join(listSequence)]
-			
-		return ret
-	
-	def getSequenceVariants_bck(self, x1 = 0, x2 = -1, maxVariantNumber = 128) :
-		"""returns the sequences resulting from all combinaisons of all polymorphismes between x1 and x2
-		@return a couple (bool, variants of sequence between x1 and x2), bool == true if there's more combinaisons than maxVariantNumber"""
-		if x2 == -1 :
-			xx2 = len(self.defaultSequence)
-		else :
-			xx2 = x2
-		
-		polyStop = 0
-		nbP = 1
-		stopped = False
-		for p in self.polymorphisms:
-			if x1 <= p[0] and p[0] <= xx2 :
-				nbP *= len(p[1])
-				if nbP > maxVariantNumber :
-					stopped = True
-					break
-				polyStop += 1
-		#print polyStop, nbP
-		#if nbP <= maxVariantNumber :
-		return (stopped, self.__getSequenceVariants_bck(x1, 0, polyStop, list(self.defaultSequence[x1:xx2])))
-	
-	
 	def __getSequenceVariants(self, x1, polyStart, polyStop, listSequence) :
 		"""polyStop, is the polymorphisme at wixh number where the calcul of combinaisons stops"""
 		if polyStart < len(self.polymorphisms) and polyStart < polyStop: 
@@ -301,12 +246,7 @@ class BinarySequence :
 		self.binSequence.extend(arr)
 
 	def decode(self, binSequence):
-		#if type(binSequence[0]).__name__ == 'list' :
-		#	binSeq = binSequence[0]
-		#else :
-		#	binSeq = binSequence
-		#print type(binSequence[0]), binSequence
-		
+
 		try:
 			binSeq = iter(binSequence[0])
 		except TypeError, te:
@@ -316,17 +256,15 @@ class BinarySequence :
 		for b in binSeq :
 			ch = ''
 			for c in self.charToBin :
-				#print b, self.forma[self.charToBin[c]], c
 				if b & self.forma[self.charToBin[c]] > 0 :
 					ch += c +'/'
 			if ch == '' :
 				raise KeyError('Key %d unkowom, bad format' % b)
 			
-			ret += ch[:-1] #remove last '/'
+			ret += ch[:-1]
 		return ret
 		
 	def getChar(self, i):
-		#print i, len(self.binSequence) 
 		return self.decode([self.binSequence[i]])
 		
 	def __len__(self):
