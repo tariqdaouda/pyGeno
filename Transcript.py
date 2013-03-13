@@ -147,17 +147,18 @@ class Transcript :
 		"""Returns a lits of all positions where sequence was found"""
 		return self.binCDNA.findAll(sequence)
 
+	def getCDNALength(self):
+		return len(self.CDNA)
+		
+	"""
 	def getCDNAStartPosition(self):
-		""""Returns the start position of the coding sequence of the transcript"""
+		"Returns the start position of the coding sequence of the transcript"
 		return self.exons[self.firstCDSExon].CDS[0]
 	
 	def getStartPosition(self):
-		""""Returns the start position of the transcript in the genome"""
+		"Returns the start position of the transcript in the chromosome"
 		return self.exons[0].x1
-
-	def getCDNALength(self):
-		return len(self.CDNA)
-
+	
 	def get5PrimeUtr(self) :
 		try :
 			return self.sequence[:self.startCodon.x1 - self.exons[0].x1]
@@ -168,12 +169,13 @@ class Transcript :
 			return self.sequence[self.stopCodon.x1 - self.exons[0].x1:]
 		except :
 			return ''	
-	#def getFivePrimeUtrLength(self):
-	#	return len(self.fivePrimeUtr)
-		
-	#def getThreePrimeUtrLength(self):
-	#	return len(self.threePrimeUtr)
 	
+	def getFivePrimeUtrLength(self):
+		return len(self.fivePrimeUtr)
+		
+	def getThreePrimeUtrLength(self):
+		return len(self.threePrimeUtr)
+	"""
 	#<7iyed>
 	def getCodonAffinityMap(self, chunkRatio = 0.05) :
 		chunks = []
@@ -263,6 +265,9 @@ class Transcript :
 		return self.codonUsage
 	#</7iyed>
 	
+	def getExons():
+		return self.exons
+		
 	def pluck(self):
 		"""Plucks the transcript off the tree. Returns a protein identical to self but where the field .gene has str(self.gene) as value,
 		This makes the transcript much more lighter in case you'd like to pickle it"""

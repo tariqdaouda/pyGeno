@@ -81,15 +81,8 @@ class Gene :
 		key = self.transcripts.keys()[k]
 		return self.loadTranscript(key)
 	
-	def getStartPosition(self) :
-		return self.regionIndex.getX1()
-	
-	def getStopPosition(self) :
-		return self.regionIndex.getX2()
-	
-	def __len__(self) :
-		"""Sum of coding regions lengths"""
-		return self.regionIndex.stree.getEffectiveLength()
+	def getExons():
+		return self.exons
 		
 	def loadProtein(self, protId) :
 		"""Browse the transcript list looking for the one that code for the protein and returns
