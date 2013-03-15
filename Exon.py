@@ -18,7 +18,7 @@ class Exon:
 		self.startCodonPos = startCodon
 		self.stopCodonPos = stopCodon
 		
-		xx1, xx2 = int(x1), int(x2)
+		xx1, xx2 = int(x1), int(x2)+1
 		if xx1 < xx2 :
 			self.x1, self.x2 = xx1, xx2
 		else :
@@ -43,7 +43,7 @@ class Exon:
 		if self.CDS != None and (self.CDS[0] != x1 or self.CDS[1] != x2+1):
 			print "==>Warning, Exon.setCDS() : exon %s already has a CDS defined, new CDS: %s " % (self, (x1, x2+1))
 		
-		xx1, xx2 = int(x1), int(x2)
+		xx1, xx2 = int(x1), int(x2)+1
 		if xx1 < xx2 :
 			self.CDS = (xx1, xx2)
 		else :
