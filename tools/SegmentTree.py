@@ -116,24 +116,49 @@ class SegmentTree :
 
 		return ret
 
+	def intersect_opt(self, x1, x2= None) :
+		"""Returns all the segments intersected by x1, x2"""
+		if x2 == None :
+			xx1, xx2 = x1, x1
+		elif x1 > x2 :
+			xx1, xx2 = x2, x1
+		else :
+			xx1, xx2 = x1, x2
+		
+		ret = []
+		if (self.x1 != None and self.x2 != None) and (self.x1 <= xx1 and xx2 <= self.x2) :
+			ret.append(self)
+		
+		if len(self.children) > 0 :
+			currChild = len(self.children)/2
+			baseX1 = self.children[currChild].x1
+			baseX2 = self.children[currChild].x2
+			
+			if xx1 <= baseX1 :
+				goUp = False
+			else:
+				goUp = True
+				
+			stop = False
+			while not stop :
+				if (goUp and xx2 < self.children[currChild].x1) or (not goUp and self.children[currChild].x2 < xx1) :
+					stop = True
+				else :
+					if self.children[currChild].x1 <= xx1 and xx1 < self.children[currChild].x2 or self.children[currChild].x1 <= xx2 and xx2 < self.children[currChild].x2 :
+						ret.extend(self.children[currChild].intersect(x1, x2))
+				
+					if goUp :
+						currChild += 1
+					else :
+						currChild -= 1
+				
+					if currChild >= len(self.children) or currChild < 0 :
+						stop = True
+
+		return ret
+		
 	def emptyChildren(self) :
 		self.children = []
-		
-	def removeGaps_bck(self) :
-		"""returns a tree similar to self but where the gaps between succesive indexed regions have been removed:
-		Regions are moved so they adajcent to the one before, the transfornations also affect children"""
-		res = SegmentTree()
-		
-		cc = copy.copy(self.children[0])
-		res.insertTree(cc)
-		previousC = cc
-		for i in range(1, len(self.children)) :
-			cc = copy.copy(self.children[i])
-			if self.children[i].x1 > previousC.x2:				
-				aux_moveTree(previousC.x2-cc.x1, cc)
-			res.insertTree(cc)
-			previousC = cc
-		return res
 	
 	def removeGaps(self) :
 		"""Remove all gaps between regions"""
@@ -177,32 +202,6 @@ class SegmentTree :
 			else :
 				res = None
 		return res
-
-
-	def flattened_bck(self) :
-		r"""Returns a flattend version of the tree. A list of SegmentTrees where all overlapping children have been merged together"""
-		root = SegmentTree()
-		if self.x1 == None and self.x2 == None:
-			if len(self.children) == 1 :
-				root.insert(self.children[0].x1, self.children[0].x2, '', [self.children[0].referedObject])
-			elif len(self.children) > 1 :
-				x1 = self.children[0].x1
-				x2 = self.children[0].x2
-				refObjs = [self.children[0].referedObject]
-				for c in self.children[1:]:
-					if x2 >= c.x1 :
-						x2 = c.x2
-						refObjs.append(c.referedObject)
-					else :
-						root.insert(x1, x2, '', referedObject = refObjs)
-						x1 = c.x1
-						x2 = c.x2
-						refObjs = [c.referedObject]
-						
-				root.insert(x1, x2, '', referedObject = refObjs)
-		else :
-			return self
-		return root
 		
 	def flatten(self) :
 		r"""Flattens the tree. The tree become a tree of depth 1 where overlapping regions have been merged together"""
@@ -272,20 +271,11 @@ class SegmentTree :
 			
 	
 	def __len__(self) :
-		return self.getIndexedLength()
-		
-	def __len__bck(self) :
-		r"""if root returns whole region of interest length. if not it is identical to getIndexedRegionsLength()"""
-		
-		if self.x1 != None :
-			return self.getIndexedRegionsLength()
+		"returns the size of the complete indexed region"
+		if self.x1 != None and self.x2 != None :
+			return self.x2-self.x1
 		else :
-			if len(self.children) == 0 :
-				return 0
-			else :
-				xx1, xx2 = self.children[0].x1, self.children[-1].x2
-			
-			return xx2 - xx1
+			return self.children[-1].x2 - self.children[0].x1
 	
 	def getMergedLeafs(self) :
 		#TODO
