@@ -98,7 +98,7 @@ class SegmentTree :
 		"""inserts segTree in the right position (regions will rearanged to fit the organisation of self)"""
 		aux_insertTree(childTree, self)
 	
-	def intersect(self, x1, x2= None) :
+	def intersect_bck(self, x1, x2=None) :
 		"""Returns all the segments intersected by x1, x2"""
 		if x2 == None :
 			xx1, xx2 = x1, x1
@@ -116,7 +116,7 @@ class SegmentTree :
 
 		return ret
 
-	def intersect_opt(self, x1, x2= None) :
+	def __intersect(self, x1, condition, x2=None) :
 		"""Returns all the segments intersected by x1, x2"""
 		if x2 == None :
 			xx1, xx2 = x1, x1
@@ -126,7 +126,8 @@ class SegmentTree :
 			xx1, xx2 = x1, x2
 		
 		ret = []
-		if (self.x1 != None and self.x2 != None) and (self.x1 <= xx1 and xx2 <= self.x2) :
+		#if (self.x1 != None and self.x2 != None) and (self.x1 <= xx1 and xx1 < self.x2 or self.x1 <= xx2 and xx2 < self.x2) :
+		if condition(self, xx1, xx2) :
 			ret.append(self)
 		
 		if len(self.children) > 0 :
@@ -134,19 +135,18 @@ class SegmentTree :
 			baseX1 = self.children[currChild].x1
 			baseX2 = self.children[currChild].x2
 			
-			if xx1 <= baseX1 :
-				goUp = False
-			else:
-				goUp = True
-				
+			upi, downi = currChild, currChild
+
 			stop = False
 			while not stop :
-				if (goUp and xx2 < self.children[currChild].x1) or (not goUp and self.children[currChild].x2 < xx1) :
+				if (xx2 < self.children[currChild].x1) or (self.children[currChild].x2 < xx1) :
 					stop = True
 				else :
-					if self.children[currChild].x1 <= xx1 and xx1 < self.children[currChild].x2 or self.children[currChild].x1 <= xx2 and xx2 < self.children[currChild].x2 :
+					#if self.children[currChild].x1 <= xx1 and xx1 < self.children[currChild].x2 or self.children[currChild].x1 <= xx2 and xx2 < self.children[currChild].x2 :
+					if condition(self.children[currChild], xx1, xx2) :
 						ret.extend(self.children[currChild].intersect(x1, x2))
 				
+					
 					if goUp :
 						currChild += 1
 					else :
@@ -156,7 +156,24 @@ class SegmentTree :
 						stop = True
 
 		return ret
-		
+	
+	def intersect(self, x1, x2=None) :
+		"""Returns all the segments intersected by x1, x2"""
+		def condition(tree, x1, x2) :
+			print self.id, tree.x1, tree.x2, x1, x2
+			if (tree.x1 != None and tree.x2 != None) and (tree.x1 <= x1 and x1 < tree.x2 or tree.x1 <= x2 and x2 < tree.x2) :
+				return True
+			return False
+		return self.__intersect(x1, condition, x2)
+	
+	def included(self, x1, x2=None) :
+		"""Returns all the segments intersected by x1, x2"""
+		def condition(tree, x1, x2) :
+			if (tree.x1 != None and tree.x2 != None) and (tree.x1 <= x1 and x2 < tree.x2) :
+				return True
+			return False
+		return self.__intersect(x1, condition, x2)
+	
 	def emptyChildren(self) :
 		self.children = []
 	
@@ -277,6 +294,9 @@ class SegmentTree :
 		else :
 			return self.children[-1].x2 - self.children[0].x1
 	
+	def __repr__(self):
+		return 'Segment Tree, id:%s, father id:%s' %(self.id, self.father.id)
+		
 	def getMergedLeafs(self) :
 		#TODO
 		pass
@@ -292,10 +312,16 @@ if __name__== "__main__" :
 	print "Tree:"
 	print s
 	print "removing gaps"
-	s.removeGaps()
+	#s.removeGaps()
 	#print "flatten"
 	#s.flatten()
 	print s
 	print s.getIndexedLength()
-	print s.intersect(16)
+	print s.intersect(9)
+	#print s.intersect_bck(i)
+	#for i in range(15) :
+	#	print '-----'
+	#	print s.intersect(i)
+	#	print s.intersect_bck(i)
+	#	print i, (s.intersect(i) == s.intersect_bck(i), s.included(i) == s.intersect(i))
 	

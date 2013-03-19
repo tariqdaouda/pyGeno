@@ -155,12 +155,15 @@ class dbSNP(SNP) :
 		self.values['chr'] = sl[1]
 		self.values['rs'] = int(sl[2])
 		self.values['type'] = sl[3]
-		self.values['alleles'] = uf.getPolymorphicNucleotide(sl[4])
-		self.values['validated'] = sl[5]
+		if sl[4].find('-') < 0 :
+			self.values['alleles'] = uf.getPolymorphicNucleotide(sl[4])
+		else :
+			self.values['alleles'] = sl[4]
+		self.values['validated'] = (sl[5].upper() == 'YES')
 		self.values['assembly'] = sl[6]
 		self.values['original_orientation'] = sl[7]
 		self.values['maf_allele'] = sl[8]
-		self.values['maf_count'] = int(sl[9])
+		self.values['maf_count'] = int(float(sl[9]))
 		self.values['maf'] = float(sl[10])
 		self.values['het'] = float(sl[11])
 		self.values['se(het)'] = float(sl[12])
