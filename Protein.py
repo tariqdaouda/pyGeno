@@ -59,11 +59,9 @@ class Protein :
 		return uf.findAll(self.sequence, sequence)
 	
 	def pluck(self) :
-		"""Plucks the protein off the tree. Returns a protein identical to self but where the field .transcript has str(self.transcipt) as value,
-		This makes the protein much more lighter in case you'd like to pickle it"""
-		np = copy.copy(self)
-		np.transcript  = str(self.transcript)
-		return np
+		"""Plucks the protein off the tree, set the value of self.transcript into str(self.transcript). This effectively disconnects the object and
+		makes it much more lighter in case you'd like to pickle it"""
+		self.transcript = str(self.transcript)
 		
 	def __getitem__(self, i) :
 		return self.binarySequence.getChar(i)
