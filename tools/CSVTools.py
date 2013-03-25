@@ -51,6 +51,7 @@ class CSVFile :
 		#print "!Champs avec "" mal geres!"
 		f = open(file)
 		self.data = f.readlines()
+		
 		f.close()
 		self.separator = separator
 		self.stringSeparator = stringSeparator

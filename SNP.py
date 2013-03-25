@@ -22,12 +22,6 @@ class SNPFile :
 
 		self.snps = {}
 		self.SNPObj = SNPObj
-		#print self.filePath
-		#try :
-		#	for l in self.lines[15922:15923+1]:
-		#		print l
-		#except :
-		#	pass
 	
 	def __findSnp(self, x1):
 		r1 = 0
@@ -56,9 +50,7 @@ class SNPFile :
 				xx1, xx2 = x1, x2
 			else :
 				xx1, xx2 = x2, x1
-				
-		#print self.__findSnp(xx1)
-		#print self.__findSnp(xx2)
+	
 		l1, val1 = self.__findSnp(xx1)
 		l2, val2 = self.__findSnp(xx2)
 		
@@ -85,7 +77,6 @@ class SNPFile :
 		try :
 			return self.snps[lineNumber]
 		except KeyError :
-			#self.snps[lineNumber] = CasavaSNP(self.lines[lineNumber])
 			self.snps[lineNumber] = self.SNPObj(self.lines[lineNumber])
 			return self.snps[lineNumber]
 	
@@ -159,38 +150,22 @@ class dbSNP(SNP) :
 		self.__make(line.split(';'))
 	
 	def __make(self, sl) :
-		#print 'make', sl
 		self.values = {}
 		self.values['pos'] = int(sl[0])
 		self.values['chr'] = sl[1]
 		self.values['rs'] = int(sl[2])
 		self.values['type'] = sl[3]
-		self.values['alleles'] = sl[4]
-		self.values['validated'] = sl[5]
+		if sl[4].find('-') < 0 :
+			self.values['alleles'] = uf.getPolymorphicNucleotide(sl[4])
+		else :
+			self.values['alleles'] = sl[4]
+		self.values['validated'] = (sl[5].upper() == 'YES')
 		self.values['assembly'] = sl[6]
-		
-	def __make_bck(self, sl) :
-		#Fror chr reports when dbSNP fixes it's formats
-		self.values = {}
-		self.values['pos'] = int(sl[0])
-		self.values['mapwgt'] = int(sl[1])
-		self.values['snp_type'] = int(sl[2])
-		self.values['chr_hits'] = int(sl[3])
-		self.values['ctg_hits'] = int(sl[4])
-		self.values['total_hits'] = int(sl[5])
-		self.values['chr'] = sl[6]
-		self.values['ctg_acc'] = sl[7]
-		self.values['ctg_ver'] = int(sl[8])
-		self.values['ctg_ID'] = sl[9]
-		self.values['ctg_pos'] = int(sl[10])
-		self.values['rs'] = int(sl[11])
-		self.values['local_loci'] = int(sl[12])
-		self.values['avg_het'] = int(sl[13])
-		self.values['s.e._het'] = int(sl[14])
-		self.values['max_prob'] = int(sl[15])
-		self.values['validated'] = int(sl[16])
-		self.values['genotypes'] = int(sl[17])
-		self.values['links_out'] = int(sl[18])
-		self.values['orig_build'] = sl[19]
-		self.values['upd_build'] = int(sl[20])
+		self.values['original_orientation'] = sl[7]
+		self.values['maf_allele'] = sl[8]
+		self.values['maf_count'] = int(float(sl[9]))
+		self.values['maf'] = float(sl[10])
+		self.values['het'] = float(sl[11])
+		self.values['se(het)'] = float(sl[12])
+
 

@@ -72,87 +72,139 @@ def install_dbSNP(packageFolder, specie, versionName) :
 	Launch this function and go make yourself a cup of coffee, this function has absolutly not been written to be fast
 	
 	versionName is name with wich you want to call this specific version of dbSNP
+	
+	pyGeno snp format is somewhat different from dbSNP's :
+		- all SNPs that have a chromosome different from the one of the file, or chromosome number of '?' are discarded
+		- the default value for numeric values (ex: het, se(het), 'MAF', 'GMAf count') is 0.0
+		- no '?' allowed.If a numeric has a value of '?' (ex: het, se(het), 'MAF', 'GMAf count') the value is set to 0.0
+		- all snps have an orientation of +. If a snp has an orientation of -, it's alleles are replaced by their complements
+		- positions are 0 based
+		- the only value extracted from the files are : 'posistion', 'rs', 'type', 'assembly', 'chromosome', 'validated', 'alleles', 'original_orientation', 'maf_allele', 'maf_count', 'maf', 'het', 'se(het)' 
 	"""
+	
+	legend = ['//pos', 'chromosome', 'rs', 'type', 'alleles', 'validated', 'assembly', 'original_orientation', 'maf_allele', 'maf_count', 'maf', 'het', 'se(het)']
 	#Fcts
 	def fillCSV(res, csv) :
+		print '\t\t sorting snps by position in chromosome...'
 		l = res.keys()
 		l.sort()
-		for k in l :
+		print '\t\t filling CSV...'
+		for pos in l :
 			li = csv.addLine()
-			csv.setElement(li, '//pos', res[k]['pos'])
-			csv.setElement(li, 'chro', res[k]['chro'])
-			csv.setElement(li, 'rs', res[k]['rs'])
-			csv.setElement(li, 'type', res[k]['type'])
-			csv.setElement(li, 'alleles', res[k]['alleles'])
-			csv.setElement(li, 'validated', res[k]['validated'])
-			csv.setElement(li, 'assembly', res[k]['assembly'])
+			for field in csv.legend :
+				csv.set(li, field, res[pos][field.lower()])
 		
-	def parse(s, chroNumber, res) :
+	def parse(s, chroNumber, legend) :
 		lines = s.split('\n')
 		
-		rs = None
-		typ = None
-		pos = None
-		assembly = None
-		chro = None
-		validated = None
-		alleles = None
+		res = {}
+		
+		for field in legend :
+			res[field] = None
+			
+		criticalFields = ['rs', 'chromosome', '//pos', 'alleles', 'assembly', 'validated']
+		numericFields = ['maf_count', 'maf', 'het', 'se(het)']
+		numericFieldsWithNonNumericValues = 0
 		
 		for l in lines :
 			sl = l.split('|')
 			if sl[0][:2] == 'rs' :
-				rs = sl[0][2:].strip()
-				typ = sl[3].strip()
+				res['rs'] = sl[0][2:].strip()
+				res['type'] = sl[3].strip()
 			
-			elif sl[0][:3] == 'SNP' and rs != None :
-				alleles = sl[1].strip().replace('alleles=', '').replace("'", "")
-			
-			elif sl[0][:3] == 'VAL' and rs != None :
-				validated = sl[1].strip().replace("validated=", '')
+			elif sl[0][:3] == 'SNP' and res['rs'] != None :
+				res['alleles'] = sl[1].strip().replace('alleles=', '').replace("'", "")
+				res['het'] = sl[2].strip().replace('het=', '')				
+				res['se(het)'] = sl[3].strip().replace('se(het)=', '')
 				
-			elif sl[0][:3] == 'CTG' and sl[1].find('GRCh') > -1 and rs != None :
-				assembly = sl[1].replace('assembly=', '').strip()
-				chro = sl[2].replace('chr=', '').strip()
+			elif sl[0][:3] == 'VAL' and res['rs'] != None :
+				res['validated'] = sl[1].strip().replace("validated=", '')
+				
+			elif sl[0][:3] == 'CTG' and sl[1].find('GRCh') > -1 and res['rs'] != None and (res['chromosome'] == None or res['//pos'] == None):
+				res['original_orientation'] = sl[-1].replace('orient=', '').strip()
+				res['assembly'] = sl[1].replace('assembly=', '').strip()
+				res['chromosome'] = sl[2].replace('chr=', '').strip()
 				pos = sl[3].replace('chr-pos=', '').strip()
-				if chro != chroNumber or pos == '?' :
-					chro = None
-					pos = None
-				else :
-					pos = int(pos)-1
 				
-			if rs != None and chro != None and pos != None and alleles != None and assembly != None and validated != None:
-				res[pos] = {'pos' : pos, 'chro' : chro, 'rs' : rs, 'type' : typ, 'alleles' : alleles, 'validated' : validated, 'assembly' : assembly}
-				break
+				try:
+					pos = int(pos)
+					posOk = True
+				except :
+					posOk = False
+					
+				if res['chromosome'] != chroNumber or not posOk :
+					res['chromosome'] = None
+					res['//pos'] = None
+					return (None, numericFieldsWithNonNumericValues)
+				
+				res['//pos'] = int(pos) -1
+				
+			elif sl[0][:4] == 'GMAF' and res['rs'] != None :
+				res['maf_allele'] = sl[1].strip().replace('allele=', '')
+				res['maf_count'] = sl[2].strip().replace('count=', '')
+				res['maf'] = sl[3].strip().replace('MAF=', '')
+					
+		for field in criticalFields :
+			if res[field] == None :
+				return (None, numericFieldsWithNonNumericValues)
+		
+		for field in numericFields :
+			try :
+				res[field] = float(res[field])
+			except :
+				res[field] = 0.0
+				numericFieldsWithNonNumericValues += 1
+				
+		if res['original_orientation'] == '-' :
+			res['alleles'] = uf.complement(res['alleles'])
+			
+		return (res, numericFieldsWithNonNumericValues)
+		
 	#Fcts
+	desc = 	"""pyGeno snp format is somewhat different from dbSNP's :
+		- all SNPs that have a chromosome different from the one of the file, or chromosome number of '?' were discarded
+		- the default value for numeric values (ex: het, se(het), 'MAF', 'GMAf count') is 0.0
+		- no '?' allowed. If a numeric had a value of '?' (ex: het, se(het), 'MAF', 'GMAf count') the value was set to 0.0
+		- all snps have an orientation of +. If a snp had an orientation of -, it's alleles were replaced by their complements
+		- positions are 0 based
+		- the only values extracted dbSNP files were from the files were : 'posistion', 'rs', 'type', 'assembly', 'chromosome', 'validated', 'alleles', 'original_orientation', 'maf_allele', 'maf_count', 'maf', 'het', 'se(het)'"""
+
+
 	files = glob.glob(packageFolder+'/*.flat.gz')
 	outPath = conf.DATA_PATH+'/%s/dbSNP/%s/' %(specie, versionName)
 	if not os.path.exists(outPath):
 		os.makedirs(outPath)
-
+	
 	for fil in files :
 		chrStrStartPos = fil.find('ch')
 		chrStrStopPos = fil.find('.flat')
-
+		numericFieldsWithNonNumericValues = 0
+		
 		chroNumber = fil[chrStrStartPos+2: chrStrStopPos]
 		outFile = fil.replace(packageFolder, outPath).replace('ds_flat_', '').replace('ch'+chroNumber, 'chr'+chroNumber).replace('.flat.gz', '.pygeno-dbSNP')
-		headerFile = outFile.replace('.pygeno-dbSNP', '-header.txt')
 		
 		print "extracting file :", fil, "..."
 		f = gzip.open(fil)
 		snps = f.read().split('\n\n')
 		f.close()
 		print snps[0]
+		
 		print "\tparsing..."
+		
+		resCSV = CSVFile(legend)
 		res = {}
-		resCSV = CSVFile(['//pos', 'chro', 'rs', 'type', 'alleles', 'validated', 'assembly'])
 		for snp in snps[1:] :
-			parse(snp, chroNumber, res)
+			snpVals = parse(snp, chroNumber, legend)
+			if snpVals[0] != None :
+				res[snpVals[0]['//pos']] = snpVals[0]
+			
+			numericFieldsWithNonNumericValues += snpVals[1]
 			
 		print "\tformating data..."
 		fillCSV(res, resCSV)
 
 		print "\tsaving..."
-		header = "source file : %s\n%s" % (fil, snps[0])
+		header = "source file : %s\n%s\n# of numeric fields with non mumeric values: %s (their values has been set to default 0.0)" % (fil, snps[0], numericFieldsWithNonNumericValues)
 		header = header.split('\n')
 		for i in range(len(header)) :
 			header[i] = '//'+header[i]+'\n'
@@ -160,11 +212,11 @@ def install_dbSNP(packageFolder, specie, versionName) :
 		
 		resCSV.setHeader(header)
 		resCSV.save(outFile)
-		
-		
-		f = open(headerFile, 'w')
-		f.write(header)
-		f.close()
+
+	readMeFile = outPath + 'README_format-description.txt'
+	f = open(readMeFile, 'w')
+	f.write(desc)
+	f.close()
 
 """===These are the private functions that you should not call, unless you really know what you're doing==="""
 def _installSequences(fastaDir, specie, genomeName) :
@@ -284,8 +336,8 @@ def _installGeneSymbolIndex(gtfFile, specie) :
 	f.write('source file: %s' % gtfFile)
 	f.close()
 
-#if __name__ == "__main__" :
-	#install_dbSNP('/u/daoudat/py/pyGeno/pyGenoData/installationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
+if __name__ == "__main__" :
+	install_dbSNP('/u/daoudat/py/pyGeno/installationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
 	#installGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
 	
 	#print 'install mouse'

@@ -17,8 +17,13 @@ class Exon:
 		self.transcript = transcript
 		self.startCodonPos = startCodon
 		self.stopCodonPos = stopCodon
-		self.x1 = int(x1)
-		self.x2 = int(x2+1)
+		
+		xx1, xx2 = int(x1), int(x2)+1
+		if xx1 < xx2 :
+			self.x1, self.x2 = xx1, xx2
+		else :
+			self.x1, self.x2 = xx2, xx1
+		
 		self.number = int(number)
 		self.CDS = None
 		
@@ -37,7 +42,12 @@ class Exon:
 
 		if self.CDS != None and (self.CDS[0] != x1 or self.CDS[1] != x2+1):
 			print "==>Warning, Exon.setCDS() : exon %s already has a CDS defined, new CDS: %s " % (self, (x1, x2+1))
-		self.CDS = (int(x1), int(x2+1))
+		
+		xx1, xx2 = int(x1), int(x2)+1
+		if xx1 < xx2 :
+			self.CDS = (xx1, xx2)
+		else :
+			self.CDS = (xx2, xx1)
 		
 	def getCDSLength(self) :
 		return len(self.getCDSSequence())
