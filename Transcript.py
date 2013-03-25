@@ -19,8 +19,6 @@ class Transcript :
 		self.codingExons = []
 		self.sequence = ''
 		self.CDNA = ''
-		#self.threePrimeUtr = ''
-		#self.fivePrimeUtr = ''
 		
 		self.binCDNA = None
 		self.binSequence = None
@@ -54,15 +52,7 @@ class Transcript :
 			if seq != '' :
 				self.codingExons.append(exon)
 				self.CDNA += seq
-			
-			#seq = exon.getFivePrimeUtrSequence()
-			#if seq != '' :
-			#	self.fivePrimeUtr += seq
-			
-			#seq = exon.getThreePrimeUtrSequence()
-			#if seq != '' :
-			#	self.threePrimeUtr += seq
-		
+
 		if self.closed :
 			self.__updateBinarySequences()
 	
@@ -124,20 +114,17 @@ class Transcript :
 		if self.protein == '' :
 			return None
 		else :
-			#print "================", self.proteinId
 			if self.protein == None :
 				self.protein =  Protein(uf.translateDNA(self.CDNA), self.proteinId, self)
 			return self.protein
 	
 	def find(self, sequence) :
 		"""return the position of the first occurance of sequence"""
-		#return self.sequence.find(sequence)
 		return self.binSequence.find(sequence)
 	
 	def findAll(self, seqence):
 		"""Returns a lits of all positions where sequence was found"""
 		return self.binSequence.findAll(sequence)
-		#return uf.findAll(sequence, self.sequence)
 
 	def findInCDNA(self, sequence) :
 		"""return the position of the first occurance of sequence"""
@@ -150,39 +137,38 @@ class Transcript :
 	def getCDNALength(self):
 		return len(self.CDNA)
 		
-	"""
-	def getCDNAStartPosition(self):
-		"Returns the start position of the coding sequence of the transcript"
-		return self.exons[self.firstCDSExon].CDS[0]
-	
-	def getStartPosition(self):
-		"Returns the start position of the transcript in the chromosome"
-		return self.exons[0].x1
-	
-	def get5PrimeUtr(self) :
-		try :
-			return self.sequence[:self.startCodon.x1 - self.exons[0].x1]
-		except :
-			return ''
-	def get3PrimeUtr(self) :
-		try :
-			return self.sequence[self.stopCodon.x1 - self.exons[0].x1:]
-		except :
-			return ''	
-	
-	def getFivePrimeUtrLength(self):
-		return len(self.fivePrimeUtr)
+
+	def getCDNAStartPosition_todo(self):
+		#TODO
+		pass
 		
-	def getThreePrimeUtrLength(self):
-		return len(self.threePrimeUtr)
-	"""
+	
+	def getStartPosition_todo(self):
+		#TODO
+		pass
+	
+	def get5PrimeUtr_todo(self) :
+		#TODO
+		pass
+		
+	def get3PrimeUtr_todo(self) :
+		#TODO
+		pass
+		
+	def getFivePrimeUtrLength_todo(self):
+		#TODO
+		pass
+		
+	def getThreePrimeUtrLength_todo(self):
+		#TODO
+		pass
+		
 	#<7iyed>
 	def getCodonAffinityMap(self, chunkRatio = 0.05) :
 		chunks = []
 		if len(self.CDNA) < 3 :
 			return None
 			
-		#print len(self.CDNA)
 		for i in range(int(1/chunkRatio)) :
 			chunks.append({'low_aff':0, 'high_aff':0})
 		
@@ -191,7 +177,7 @@ class Transcript :
 			if len(self.CDNA[i:i+3]) == 3 :
 				effI = i/3.
 				c = int(N.floor(effI/(efflen*chunkRatio)))
-				#print i, effI/(efflen*chunkRatio), effI, c, len(chunks), efflen, len(self.CDNA)
+
 				if self.CDNA[i:i+3] in uf.codonTable.keys():
 					if self.CDNA[i:i+3] in uf.lowAffinityCodons :
 						chunks[c]['low_aff'] += 1
@@ -215,7 +201,6 @@ class Transcript :
 		if len(self.CDNA) < 3 :
 			return None
 			
-		#print len(self.CDNA)
 		for i in range(int(1/chunkRatio)) :
 			chunks.append({'low_aff':0, 'high_aff':0})
 		
@@ -223,8 +208,7 @@ class Transcript :
 		for i in range(0, len(self.CDNA), 3) :
 			if len(self.CDNA[i:i+3]) == 3 :
 				effI = i/3.
-				c = int(effI/(efflen*chunkRatio))#int(i/float(len(self.CDNA))*1/chunkRatio)
-				#print i, i/3, (i/3)/(efflen*chunkRatio), c
+				c = int(effI/(efflen*chunkRatio))
 				if self.CDNA[i:i+3] in uf.codonTable.keys():
 					if self.CDNA[i:i+3] in uf.lowAffinityCodons :
 						chunks[c]['low_aff'] += 1
@@ -236,8 +220,6 @@ class Transcript :
 							chunks[c]['low_aff'] += 1
 						else  :
 							chunks[c]['high_aff'] += 1
-			#else:
-			#	print self.CDNA[i:i+3]
 		return chunks
 		
 	def getCodonUsage(self) :
@@ -269,11 +251,9 @@ class Transcript :
 		return self.exons
 		
 	def pluck(self):
-		"""Plucks the transcript off the tree. Returns a protein identical to self but where the field .gene has str(self.gene) as value,
-		This makes the transcript much more lighter in case you'd like to pickle it"""
-		nt = copy.copy(self)
-		nt.gene = str(self.gene)
-		return nt
+		"""Plucks the transcript off the tree, set the value of self.gene into str(self.gene). This effectively disconnects the object and
+		makes it much more lighter in case you'd like to pickle it"""
+		self.gene = str(self.gene)
 		
 	def __getitem__(self, i) :
 		return self.sequence[i]
