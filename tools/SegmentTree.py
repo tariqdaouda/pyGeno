@@ -97,27 +97,13 @@ class SegmentTree :
 	def insertTree(self, childTree):
 		"""inserts segTree in the right position (regions will rearanged to fit the organisation of self)"""
 		aux_insertTree(childTree, self)
-	
-	def intersect_bck(self, x1, x2=None) :
-		"""Returns all the segments intersected by x1, x2"""
-		if x2 == None :
-			xx1, xx2 = x1, x1
-		elif x1 > x2 :
-			xx1, xx2 = x2, x1
-		else :
-			xx1, xx2 = x1, x2
-		
-		ret = []
-		if (self.x1 != None and self.x2 != None) and (self.x1 <= xx1 and xx2 <= self.x2) :
-			ret.append(self)
-
-		for c in self.children :
-			ret.extend(c.intersect(x1, x2))
-
-		return ret
 
 	def __intersect(self, x1, condition, x2=None) :
-		"""Returns all the segments intersected by x1, x2"""
+		"""Returns all the segments intersected by x1, x2
+		The algo: dichtomic shearch until None or one intersetcion is found
+		If found one intersection then 'radiate' (the neighbours succesivly on both sides until they no longer intersect)
+		For each intersected tree, launch on children"""
+		
 		if x2 == None :
 			xx1, xx2 = x1, x1
 		elif x1 > x2 :
@@ -312,16 +298,8 @@ if __name__== "__main__" :
 	print "Tree:"
 	print s
 	print "removing gaps"
-	#s.removeGaps()
-	#print "flatten"
-	#s.flatten()
 	print s
 	print s.getIndexedLength()
 	print s.intersect(9)
-	#print s.intersect_bck(i)
-	#for i in range(15) :
-	#	print '-----'
-	#	print s.intersect(i)
-	#	print s.intersect_bck(i)
-	#	print i, (s.intersect(i) == s.intersect_bck(i), s.included(i) == s.intersect(i))
+	
 	

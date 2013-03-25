@@ -97,11 +97,13 @@ def install_dbSNP(packageFolder, specie, versionName) :
 		lines = s.split('\n')
 		
 		res = {}
+		
 		for field in legend :
-			res[field] = ''
+			res[field] = None
 			
 		criticalFields = ['rs', 'chromosome', '//pos', 'alleles', 'assembly', 'validated']
 		numericFields = ['maf_count', 'maf', 'het', 'se(het)']
+		numericFieldsWithNonNumericValues = 0
 		
 		for l in lines :
 			sl = l.split('|')
@@ -117,16 +119,22 @@ def install_dbSNP(packageFolder, specie, versionName) :
 			elif sl[0][:3] == 'VAL' and res['rs'] != None :
 				res['validated'] = sl[1].strip().replace("validated=", '')
 				
-			elif sl[0][:3] == 'CTG' and sl[1].find('GRCh') > -1 and res['rs'] != None :
+			elif sl[0][:3] == 'CTG' and sl[1].find('GRCh') > -1 and res['rs'] != None and (res['chromosome'] == None or res['//pos'] == None):
 				res['original_orientation'] = sl[-1].replace('orient=', '').strip()
 				res['assembly'] = sl[1].replace('assembly=', '').strip()
 				res['chromosome'] = sl[2].replace('chr=', '').strip()
 				pos = sl[3].replace('chr-pos=', '').strip()
 				
-				if res['chromosome'] != chroNumber or pos == '?' :
+				try:
+					pos = int(pos)
+					posOk = True
+				except :
+					posOk = False
+					
+				if res['chromosome'] != chroNumber or not posOk :
 					res['chromosome'] = None
 					res['//pos'] = None
-					return None
+					return (None, numericFieldsWithNonNumericValues)
 				
 				res['//pos'] = int(pos) -1
 				
@@ -136,19 +144,20 @@ def install_dbSNP(packageFolder, specie, versionName) :
 				res['maf'] = sl[3].strip().replace('MAF=', '')
 					
 		for field in criticalFields :
-			if res[field] == '' :
-				return None
+			if res[field] == None :
+				return (None, numericFieldsWithNonNumericValues)
 		
 		for field in numericFields :
-			if res[field] == '' or res[field] == '?' :
-				res[field] = 0.0
-			else :
+			try :
 				res[field] = float(res[field])
+			except :
+				res[field] = 0.0
+				numericFieldsWithNonNumericValues += 1
 				
 		if res['original_orientation'] == '-' :
 			res['alleles'] = uf.complement(res['alleles'])
 			
-		return res
+		return (res, numericFieldsWithNonNumericValues)
 		
 	#Fcts
 	desc = 	"""pyGeno snp format is somewhat different from dbSNP's :
@@ -168,7 +177,8 @@ def install_dbSNP(packageFolder, specie, versionName) :
 	for fil in files :
 		chrStrStartPos = fil.find('ch')
 		chrStrStopPos = fil.find('.flat')
-
+		numericFieldsWithNonNumericValues = 0
+		
 		chroNumber = fil[chrStrStartPos+2: chrStrStopPos]
 		outFile = fil.replace(packageFolder, outPath).replace('ds_flat_', '').replace('ch'+chroNumber, 'chr'+chroNumber).replace('.flat.gz', '.pygeno-dbSNP')
 		
@@ -184,14 +194,16 @@ def install_dbSNP(packageFolder, specie, versionName) :
 		res = {}
 		for snp in snps[1:] :
 			snpVals = parse(snp, chroNumber, legend)
-			if snpVals != None :
-				res[snpVals['//pos']] = snpVals
+			if snpVals[0] != None :
+				res[snpVals[0]['//pos']] = snpVals[0]
+			
+			numericFieldsWithNonNumericValues += snpVals[1]
 			
 		print "\tformating data..."
 		fillCSV(res, resCSV)
 
 		print "\tsaving..."
-		header = "source file : %s\n%s" % (fil, snps[0])
+		header = "source file : %s\n%s\n# of numeric fields with non mumeric values: %s (their values has been set to default 0.0)" % (fil, snps[0], numericFieldsWithNonNumericValues)
 		header = header.split('\n')
 		for i in range(len(header)) :
 			header[i] = '//'+header[i]+'\n'
