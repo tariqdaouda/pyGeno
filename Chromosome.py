@@ -304,6 +304,11 @@ class Chromosome :
 		k = int(random.random()*len(self.geneSymbolIndex.keys()))
 		key = self.geneSymbolIndex.keys()[k]
 		return self.loadGene(key, SNVsFilter)
+	
+	def pluck(self) :
+		"""Plucks the chromosome off the tree, set the value of self.genome into str(self.genome). This effectively disconnects the object and
+		makes it much more lighter in case you'd like to pickle it"""
+		self.genome = str(self.genome)
 		
 	def __getitem__(self, i) :
 		return self.genes[i]
