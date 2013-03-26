@@ -106,5 +106,10 @@ class Gene :
 			ret.extend(e.getPolymorphisms())
 		return ret
 
+	def pluck(self) :
+		"""Plucks the gene off the tree, set the value of self.chromosome into str(self.chromosome). This effectively disconnects the object and
+		makes it much more lighter in case you'd like to pickle it"""
+		self.chromosome = str(self.chromosome)
+		
 	def __str__(self) :
 		return "Gene, symbol: %s, id: %s, strand: %s / %s" %(self.symbol, self.id, self.strand, str(self.chromosome))
