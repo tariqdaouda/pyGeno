@@ -7,7 +7,37 @@ class UnknownNucleotide(Exception) :
 
 	def __str__(self) :
 		return self.msg
+
+#This will probably be moved somewhere else in the futur
+def saveResults(directoryName, fileName, strResults, log = '', args = ''):
+	
+	if not os.path.exists(directoryName):
+		os.makedirs(directoryName)
+	
+	resPath = "%s/%s"%(directoryName, fileName)
+	resFile = open(resPath, 'w')
+	print "Saving results :\n\t%s..."%resPath
+	resFile.write(strResults)
+	resFile.close()
+
+	if log != '' :
+		errPath = "%s.err.txt"%(resPath)
+		errFile = open(errPath, 'w')
+
+		print "Saving log :\n\t%s..." %errPath
+		errFile.write(log)
+		errFile.close()
+	
+	if args != '' :
+		paramPath = "%s.args.txt"%(resPath)
+		paramFile = open(paramPath, 'w')
+
+		print "Saving arguments :\n\t%s..." %paramPath
+		paramFile.write(args)
+		paramFile.close()
 		
+	return "%s/"%(directoryName)
+	
 nucleotides = ['A', 'T', 'C', 'G']
 polymorphicNucleotides = {
 			'R' : ['A','G'], 'Y' : ['C','T'], 'M': ['A','C'],

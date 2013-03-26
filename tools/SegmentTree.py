@@ -17,7 +17,13 @@ def aux_moveTree(offset, tree):
 		aux_moveTree(offset, c)
 		
 class SegmentTree :
-	"""This is like an R-tree but with segments
+	"""A segment tree in arborescence of segments. First position in inclusive, second one exlusive, respectively refered to as x1 and x2.
+	A segment tree has the following properties :
+	-The root has no x1 or x2 (both set to None).
+	-Segment are arrangend in an ascending order
+	-For two segment S1 and S2 : [S2.x1, S2.x2[ C [S1.x1, S1.x2[ <=> S2 is a child of S1
+	
+	It looks like this :
 	Root : 0-15
 	---->Segment : 0-12
 	------->Segment : 1-6
@@ -98,7 +104,7 @@ class SegmentTree :
 		"""inserts segTree in the right position (regions will rearanged to fit the organisation of self)"""
 		aux_insertTree(childTree, self)
 
-	def __intersect(self, x1, condition, x2=None) :
+	def __intersect_bck(self, x1, condition, x2 = None) :
 		"""Returns all the segments intersected by x1, x2
 		The algo: dichtomic shearch until None or one intersetcion is found
 		If found one intersection then 'radiate' (the neighbours succesivly on both sides until they no longer intersect)
@@ -131,8 +137,7 @@ class SegmentTree :
 					#if self.children[currChild].x1 <= xx1 and xx1 < self.children[currChild].x2 or self.children[currChild].x1 <= xx2 and xx2 < self.children[currChild].x2 :
 					if condition(self.children[currChild], xx1, xx2) :
 						ret.extend(self.children[currChild].intersect(x1, x2))
-				
-					
+						
 					if goUp :
 						currChild += 1
 					else :
@@ -142,23 +147,89 @@ class SegmentTree :
 						stop = True
 
 		return ret
-	
-	def intersect(self, x1, x2=None) :
-		"""Returns all the segments intersected by x1, x2"""
-		def condition(tree, x1, x2) :
-			print self.id, tree.x1, tree.x2, x1, x2
+		
+	def included_todo(self, x1, x2=None) :
+		"Returns all the segments where [x1, x2] is included"""
+		pass
+		
+	def intersect(self, x1, x2 = None) :
+		"Returns all the segments intersected by [x1, x2]"
+		def condition(x1, x2, tree) :
+			#print self.id, tree.x1, tree.x2, x1, x2
 			if (tree.x1 != None and tree.x2 != None) and (tree.x1 <= x1 and x1 < tree.x2 or tree.x1 <= x2 and x2 < tree.x2) :
 				return True
 			return False
-		return self.__intersect(x1, condition, x2)
+			
+		if x2 == None :
+			xx1, xx2 = x1, x1
+		elif x1 > x2 :
+			xx1, xx2 = x2, x1
+		else :
+			xx1, xx2 = x1, x2
+			
+		c1 = self.__dichotomicSearch(xx1)
+		c2 = self.__dichotomicSearch(xx2)
+		
+		if c1 == -1 or c2 == -1 :
+			return []
+			
+		#print self.children[c1].id, self.children[c2].id
+		if xx1 < self.children[c1].x1 :
+			c1 -= 1
+			
+		inter = self.__radiateDown(x1, x2, c1, condition)
+		if self.children[c1].id == self.children[c2].id :
+			inter.extend(self.__radiateUp(x1, x2, c2+1, condition))
+		else :
+			inter.extend(self.__radiateUp(x1, x2, c2, condition))
+		
+		ret = []
+		for c in inter :
+			ret.extend(c.intersect(x1, x2))
+		
+		inter.extend(ret)
+		return inter
+		
+	def __dichotomicSearch(self, x1) :
+		r1 = 0
+		r2 = len(self.children)-1
+		pos = -1
+		while (r1 <= r2) :
+			pos = (r1+r2)/2
+			val = self.children[pos].x1
+
+			if val == x1 :
+				return pos
+			elif x1 < val :
+				r2 = pos -1
+			else :
+				r1 = pos +1
+		
+		return pos
 	
-	def included(self, x1, x2=None) :
-		"""Returns all the segments intersected by x1, x2"""
-		def condition(tree, x1, x2) :
-			if (tree.x1 != None and tree.x2 != None) and (tree.x1 <= x1 and x2 < tree.x2) :
-				return True
-			return False
-		return self.__intersect(x1, condition, x2)
+	def __radiateDown(self, x1, x2, childId, condition) :
+		"Radiates down: walks self.children downward until condition is no longer verifed or there's no childrens left "
+		ret = []
+		i = childId
+		while 0 <= i :
+			if condition(x1, x2, self.children[i]) :
+				ret.append(self.children[i])
+			else :
+				break
+			i -= 1
+		return ret
+	
+	def __radiateUp(self, x1, x2, childId, condition) :
+		"Radiates uo: walks self.children upward until condition is no longer verifed or there's no childrens left "
+		ret = []
+		i = childId
+		while i < len(self.children):
+			if condition(x1, x2, self.children[i]) :
+				ret.append(self.children[i])
+			else :
+				break
+			i += 1
+		return ret
 	
 	def emptyChildren(self) :
 		self.children = []
@@ -281,7 +352,7 @@ class SegmentTree :
 			return self.children[-1].x2 - self.children[0].x1
 	
 	def __repr__(self):
-		return 'Segment Tree, id:%s, father id:%s' %(self.id, self.father.id)
+		return 'Segment Tree, id:%s, father id:%s, (x1, x2): (%s, %s)' %(self.id, self.father.id, self.x1, self.x2)
 		
 	def getMergedLeafs(self) :
 		#TODO
@@ -297,9 +368,13 @@ if __name__== "__main__" :
 	s.insert(36, 37, 'region 6')
 	print "Tree:"
 	print s
-	print "removing gaps"
+	print "removing gaps and adding region 7 : [13-37["
+	s.removeGaps()
+	s.insert(13, 37, 'region 7')
 	print s
-	print s.getIndexedLength()
-	print s.intersect(9)
+	print "indexed length", s.getIndexedLength()
+	print "intersections"
+	for c in [6, 10, 14, 1000] :
+		print c, s.intersect(c)
 	
 	
