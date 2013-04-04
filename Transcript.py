@@ -251,9 +251,11 @@ class Transcript :
 		return self.exons
 		
 	def pluck(self):
-		"""Plucks the transcript off the tree, set the value of self.gene into str(self.gene). This effectively disconnects the object and
+		"""Returns a plucked object. Plucks the transcript off the tree, set the value of self.gene into str(self.gene). This effectively disconnects the object and
 		makes it much more lighter in case you'd like to pickle it"""
-		self.gene = str(self.gene)
+		e = copy.copy(self)
+		e.gene = str(self.gene)
+		return e
 		
 	def __getitem__(self, i) :
 		return self.sequence[i]

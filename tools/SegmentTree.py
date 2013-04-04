@@ -103,50 +103,6 @@ class SegmentTree :
 	def insertTree(self, childTree):
 		"""inserts segTree in the right position (regions will rearanged to fit the organisation of self)"""
 		aux_insertTree(childTree, self)
-
-	def __intersect_bck(self, x1, condition, x2 = None) :
-		"""Returns all the segments intersected by x1, x2
-		The algo: dichtomic shearch until None or one intersetcion is found
-		If found one intersection then 'radiate' (the neighbours succesivly on both sides until they no longer intersect)
-		For each intersected tree, launch on children"""
-		
-		if x2 == None :
-			xx1, xx2 = x1, x1
-		elif x1 > x2 :
-			xx1, xx2 = x2, x1
-		else :
-			xx1, xx2 = x1, x2
-		
-		ret = []
-		#if (self.x1 != None and self.x2 != None) and (self.x1 <= xx1 and xx1 < self.x2 or self.x1 <= xx2 and xx2 < self.x2) :
-		if condition(self, xx1, xx2) :
-			ret.append(self)
-		
-		if len(self.children) > 0 :
-			currChild = len(self.children)/2
-			baseX1 = self.children[currChild].x1
-			baseX2 = self.children[currChild].x2
-			
-			upi, downi = currChild, currChild
-
-			stop = False
-			while not stop :
-				if (xx2 < self.children[currChild].x1) or (self.children[currChild].x2 < xx1) :
-					stop = True
-				else :
-					#if self.children[currChild].x1 <= xx1 and xx1 < self.children[currChild].x2 or self.children[currChild].x1 <= xx2 and xx2 < self.children[currChild].x2 :
-					if condition(self.children[currChild], xx1, xx2) :
-						ret.extend(self.children[currChild].intersect(x1, x2))
-						
-					if goUp :
-						currChild += 1
-					else :
-						currChild -= 1
-				
-					if currChild >= len(self.children) or currChild < 0 :
-						stop = True
-
-		return ret
 		
 	def included_todo(self, x1, x2=None) :
 		"Returns all the segments where [x1, x2] is included"""

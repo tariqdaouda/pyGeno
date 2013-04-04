@@ -107,9 +107,11 @@ class Gene :
 		return ret
 
 	def pluck(self) :
-		"""Plucks the gene off the tree, set the value of self.chromosome into str(self.chromosome). This effectively disconnects the object and
+		"""Returns a plucked object. Plucks the gene off the tree, set the value of self.chromosome into str(self.chromosome). This effectively disconnects the object and
 		makes it much more lighter in case you'd like to pickle it"""
-		self.chromosome = str(self.chromosome)
-		
+		e = copy.copy(self)
+		e.chromosome = str(self.chromosome)
+		return e
+	
 	def __str__(self) :
 		return "Gene, symbol: %s, id: %s, strand: %s / %s" %(self.symbol, self.id, self.strand, str(self.chromosome))

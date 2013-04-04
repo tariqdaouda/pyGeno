@@ -65,9 +65,11 @@ class Exon:
 			return ''
 	
 	def pluck(self) :
-		"""Plucks the exon off the tree, set the value of self.transcript into str(self.transcript). This effectively disconnects the object and
+		"""Returns a plucked object. Plucks the exon off the tree, set the value of self.transcript into str(self.transcript). This effectively disconnects the object and
 		makes it much more lighter in case you'd like to pickle it"""
-		self.transcript = str(self.transcript)
+		e = copy.copy(self)
+		e.transcript = str(self.transcript)
+		return e
 		
 	def __getitem__(self, i) :
 		return self.sequence[i]

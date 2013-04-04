@@ -150,18 +150,21 @@ class dbSNP(SNP) :
 		self.__make(line.split(';'))
 	
 	def __make(self, sl) :
+		print sl
 		self.values = {}
 		self.values['pos'] = int(sl[0])
 		self.values['chr'] = sl[1]
 		self.values['rs'] = int(sl[2])
 		self.values['type'] = sl[3]
-		if sl[4].find('-') < 0 :
+
+		try :
 			self.values['alleles'] = uf.getPolymorphicNucleotide(sl[4])
-		else :
+		except uf.UnknownNucleotide :	
 			self.values['alleles'] = sl[4]
+
 		self.values['validated'] = (sl[5].upper() == 'YES')
 		self.values['assembly'] = sl[6]
-		self.values['original_orientation'] = sl[7]
+		self.values['original_strand'] = sl[7]
 		self.values['maf_allele'] = sl[8]
 		self.values['maf_count'] = int(float(sl[9]))
 		self.values['maf'] = float(sl[10])
