@@ -306,9 +306,11 @@ class Chromosome :
 		return self.loadGene(key, SNVsFilter)
 	
 	def pluck(self) :
-		"""Plucks the chromosome off the tree, set the value of self.genome into str(self.genome). This effectively disconnects the object and
+		"""Returns a plucked object. Plucks the chromosome off the tree, set the value of self.genome into str(self.genome). This effectively disconnects the object and
 		makes it much more lighter in case you'd like to pickle it"""
-		self.genome = str(self.genome)
+		e = copy.copy(self)
+		e.genome = str(self.genome)
+		return e
 		
 	def __getitem__(self, i) :
 		return self.genes[i]
