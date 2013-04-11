@@ -6,9 +6,13 @@ from tools import UsefulFunctions as uf
 from tools.CSVTools import CSVFile
 #from expyutils.GTFTools import GTFFile
 
-def getVersion():
-	"""returns pyGeno's current version"""
-	return conf.pyGeno_VERSION
+def currentVersion():
+	"""returns a tuple describing pyGeno's current version"""
+	return pyGeno_VERSION_TUPLE
+
+def currentVersion_str():
+	"""returns pyGeno's current version in a human redable way"""
+	return conf.pyGeno_VERSION_STR
 	
 """===These are the only function that you will need to install new features in pyGen==="""
 def installGenome(packageDir, specie, genomeName) :

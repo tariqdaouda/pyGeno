@@ -4,7 +4,9 @@ from tools import UsefulFunctions as uf
 from Chromosome import Chromosome
 import sys, pickle, random, shutil, os, glob
 from tools import SingletonManager
-	
+
+print "---\npyGeno ~-~-~-:>", conf.pyGeno_VERSION_STR, '\n---'
+
 class ChromosomeNotFound(Exception) :
 	def __init__(self, msg) :
 		self.msg = msg

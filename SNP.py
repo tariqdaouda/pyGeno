@@ -1,6 +1,14 @@
 import configuration as conf
 from tools import UsefulFunctions as uf
 
+class SNPError(Exception) :
+	def __init__(self, message, line):
+		self.message = message
+		self.line = line
+	
+	def __str__(self):
+		return "Invalid SNP, %s" % self.message
+
 class SNPFile :
 	"""This represent a file containing a list of snps sorted by position, the position must be in the first column"""
 	def __init__(self, filePath, SNPObj) :
@@ -126,22 +134,27 @@ class CasavaSNP(SNP) :
 		self.formatDecriptionFile = 'casavaSNP_FormatDescription.txt'
 		self.__make(line.split(';'))
 		
-	def __make(self, sl) :		
-		self.values = {}
-		self.values['pos'] = int(sl[0])
-		self.values['bcalls_used'] = sl[1]
-		self.values['bcalls_filt'] = sl[2]
-		self.values['ref'] = sl[3]
-		self.values['QSNP'] = int(sl[4])
-		self.values['max_gt'] = uf.getPolymorphicNucleotide(sl[5])
-		self.values['Qmax_gt'] = int(sl[6])
-		self.values['max_gt-poly_site'] = sl[7]
-		self.values['Qmax_gt-poly_site'] = int(sl[8])
-		self.values['A_used'] = int(sl[9])
-		self.values['C_used'] = int(sl[10])
-		self.values['G_used'] = int(sl[11])
-		self.values['T_used'] = int(sl[12])
-
+	def __make(self, sl) :
+		if len(sl) != 13 :
+			raise SNPError("a Casava SNP should have 13 fields, got: %d" % len(sl), sl)
+		
+		try :
+			self.values = {}
+			self.values['pos'] = int(sl[0])
+			self.values['bcalls_used'] = sl[1]
+			self.values['bcalls_filt'] = sl[2]
+			self.values['ref'] = sl[3]
+			self.values['QSNP'] = int(sl[4])
+			self.values['max_gt'] = uf.getPolymorphicNucleotide(sl[5])
+			self.values['Qmax_gt'] = int(sl[6])
+			self.values['max_gt-poly_site'] = sl[7]
+			self.values['Qmax_gt-poly_site'] = int(sl[8])
+			self.values['A_used'] = int(sl[9])
+			self.values['C_used'] = int(sl[10])
+			self.values['G_used'] = int(sl[11])
+			self.values['T_used'] = int(sl[12])
+		except :
+			raise SNPError("Unkown problem, see self.line")
 
 class dbSNP(SNP) :
 	def __init__(self, line) :
@@ -150,25 +163,30 @@ class dbSNP(SNP) :
 		self.__make(line.split(';'))
 	
 	def __make(self, sl) :
-		print sl
-		self.values = {}
-		self.values['pos'] = int(sl[0])
-		self.values['chr'] = sl[1]
-		self.values['rs'] = int(sl[2])
-		self.values['type'] = sl[3]
-
+		#print sl
+		if len(sl) != 13 :
+			raise SNPError("a dbSNP SNP should have 13 fields, got: %d" % len(sl), sl)
+		
 		try :
-			self.values['alleles'] = uf.getPolymorphicNucleotide(sl[4])
-		except uf.UnknownNucleotide :	
-			self.values['alleles'] = sl[4]
+			self.values = {}
+			self.values['pos'] = int(sl[0])
+			self.values['chr'] = sl[1]
+			self.values['rs'] = int(sl[2])
+			self.values['type'] = sl[3]
 
-		self.values['validated'] = (sl[5].upper() == 'YES')
-		self.values['assembly'] = sl[6]
-		self.values['original_strand'] = sl[7]
-		self.values['maf_allele'] = sl[8]
-		self.values['maf_count'] = int(float(sl[9]))
-		self.values['maf'] = float(sl[10])
-		self.values['het'] = float(sl[11])
-		self.values['se(het)'] = float(sl[12])
+			try :
+				self.values['alleles'] = uf.getPolymorphicNucleotide(sl[4])
+			except uf.UnknownNucleotide :	
+				self.values['alleles'] = sl[4]
 
+			self.values['validated'] = (sl[5].upper() == 'YES')
+			self.values['assembly'] = sl[6]
+			self.values['original_strand'] = sl[7]
+			self.values['maf_allele'] = sl[8]
+			self.values['maf_count'] = int(float(sl[9]))
+			self.values['maf'] = float(sl[10])
+			self.values['het'] = float(sl[11])
+			self.values['se(het)'] = float(sl[12])
+		except :
+			raise SNPError("Unkown problem, see self.line")
 
