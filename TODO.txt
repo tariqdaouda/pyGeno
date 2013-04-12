@@ -1,0 +1,19 @@
+pyGeno TODO List:
+===================
+Theses are the things i'm currently working on.
+
+2013-04-12
+
+- Change SNP format to VCF (variant call format). Used by 10000 genome, seems like a goor format
+	- Write VCFtools
+	- Open VCF files using using a SecureMMap
+		- Create a light index to reference position of SNPs in file according to their position in the chromosome/genome
+		- Or use a SQL database for the reference. This approach might be more flexible in the sens that it might allow for more flexible searches of SNP
+		- In this case i might also move all dbSNP infos to a SQL db.
+
+- Simplify the importation of data
+	- Make it as easy as possible to make packages (fasta + gene annotation set)
+	- Make one big data file for all the genome
+
+- The current way of defining the data path is highly dependent on the loader and doesn't seen to work with MAC
+	- Use a environement variable for the data path, if the variable is not set create a folder in the Home 

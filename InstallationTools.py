@@ -14,23 +14,22 @@ def currentVersion_str():
 	"""returns pyGeno's current version in a human redable way"""
 	return conf.pyGeno_VERSION_STR
 	
-"""===These are the only function that you will need to install new features in pyGen==="""
-def installGenome(packageDir, specie, genomeName) :
+"""===These are the only function that you will need to import new features in pyGen==="""
+def importGenome(packageDir, specie, genomeName) :
 	gtfs = glob.glob(packageDir+'/*.gtf')
-	print gtfs
 	if len(gtfs) != 1 :
 		raise Exception('There should be one and only one gtf index file in the package')
 	
-	_installSequences(packageDir, specie, genomeName)
-	_installGeneSymbolIndex(gtfs[0], specie)
+	_importSequences(packageDir, specie, genomeName)
+	_importGeneSymbolIndex(gtfs[0], specie)
 	
-def installGenome_casava(specie, genomeName, snpsTxtFile) :
+def importGenome_casava(specie, genomeName, snpsTxtFile) :
 	"""Creates a light genome (contains only snps infos and no sequence from the reference genome)
 	The .casavasnps files generated are identical to the casava snps but with ';' instead of tabs and 
 	a single position instead of a range"""
 
 	path = conf.DATA_PATH+'/%s/genomes/%s/'%(specie, genomeName)
-	print 'Installing genome %s...' %path
+	print 'importing genome %s...' %path
 	
 	if not os.path.exists(path):
 		os.makedirs(path)
@@ -49,7 +48,7 @@ def installGenome_casava(specie, genomeName, snpsTxtFile) :
 					f = open('%s/%s.casavasnps'%(path, currChr), 'w')
 					f.write(strRes)
 					f.close()
-				print 'Installing snp data for %s...' % sl[0]
+				print 'importing snp data for %s...' % sl[0]
 				currChr = sl[0]
 				strRes = ''
 			del(sl[0]) #remove chr
@@ -66,11 +65,11 @@ def installGenome_casava(specie, genomeName, snpsTxtFile) :
 	f.write(snpsTxtFile)
 	f.close()
 	
-	print 'Installation of genome %s/%s done.' %(specie, genomeName)
+	print 'importation of genome %s/%s done.' %(specie, genomeName)
 
 
-def install_dbSNP(packageFolder, specie, versionName) :
-	"""To install dbSNP informations, download ASN1_flat files from the 
+def import_dbSNP(packageFolder, specie, versionName) :
+	"""To import dbSNP informations, download ASN1_flat files from the 
 	dbSNP ftp : ftp://ftp.ncbi.nih.gov/snp/organisms/ and place them all in one single folder. This folder
 	will be considered as a package.
 	Launch this function and go make yourself a cup of coffee, this function has absolutly not been written to be fast
@@ -223,7 +222,7 @@ def install_dbSNP(packageFolder, specie, versionName) :
 	f.close()
 
 """===These are the private functions that you should not call, unless you really know what you're doing==="""
-def _installSequences(fastaDir, specie, genomeName) :
+def _importSequences(fastaDir, specie, genomeName) :
 	print r"""Converting fastas from dir: %s into pyGeno's data format
 	resulting files will be part of genome: %s/%s
 	This may take some time, please wait...""" %(fastaDir, specie, genomeName)
@@ -236,7 +235,7 @@ def _installSequences(fastaDir, specie, genomeName) :
 		
 	chrs = glob.glob(fastaDir+'/chr*.fa')
 	if len(chrs) < 1 :
-		raise Exception('No Fastas found in directort, installation aborted')
+		raise Exception('No Fastas found in directort, importation aborted')
 		
 	startPos = 0
 	genomeChrPos = {} 
@@ -272,7 +271,7 @@ def _installSequences(fastaDir, specie, genomeName) :
 	f.write('\nheaders:\n------\n %s' % headers)
 	f.close()
 
-def _installGeneSymbolIndex(gtfFile, specie) :
+def _importGeneSymbolIndex(gtfFile, specie) :
 
 	path = conf.DATA_PATH+'/%s/gene_sets/'%(specie)
 	if not os.path.exists(path):
@@ -341,11 +340,11 @@ def _installGeneSymbolIndex(gtfFile, specie) :
 	f.close()
 
 if __name__ == "__main__" :
-	install_dbSNP('/u/daoudat/py/pyGeno/installationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
-	#installGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
+	import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
+	#importGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
 	
-	#print 'install mouse'
-	#installGenome('/u/daoudat/py/pyGeno/mouse', 'mouse', 'reference2')
-	#print 'install b6'
-	#installGenome_casava('mouse', 'B6', '/u/corona/Project_DSP014/120313_SN942_0105_AD093KACXX/Build_B6/snps.txt')
+	#print 'import mouse'
+	#importGenome('/u/daoudat/py/pyGeno/mouse', 'mouse', 'reference2')
+	#print 'import b6'
+	#importGenome_casava('mouse', 'B6', '/u/corona/Project_DSP014/120313_SN942_0105_AD093KACXX/Build_B6/snps.txt')
 	
