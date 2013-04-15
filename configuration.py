@@ -1,6 +1,6 @@
 import sys, os, time
 
-DATA_PATH = os.path.dirname(__file__)+ "/pyGenoData"
+DATA_PATH = os.path.dirname(__file__)+ "/pyGenoData/"
 
 pyGeno_BRANCH = "Medusa"
 pyGeno_VERSION_NAME = 'Skiny Cobra'
@@ -18,11 +18,15 @@ def currentVersion():
 def currentVersion_str():
 	"""returns pyGeno's current version in a human redable way"""
 	return conf.pyGeno_VERSION_STR
+
+def __loadConfiguration():
+	pass
 	
-def configure():
+def __configure():
+	"This function is automaticly called at launch"
 	if sys.version_info[0] < 2 or (sys.version_info[0] > 2  and sys.version_info[1] < 7) :
 		print "==> FATAL : pyGeno only works with python 2.7 and above, please upgrade your version"
 		sys.exit(1)
 
-configure()
+__configure()
 
