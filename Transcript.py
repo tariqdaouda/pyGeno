@@ -247,7 +247,7 @@ class Transcript :
 		return self.codonUsage
 	#</7iyed>
 	
-	def getExons():
+	def getExons(self):
 		return self.exons
 		
 	def pluck(self):

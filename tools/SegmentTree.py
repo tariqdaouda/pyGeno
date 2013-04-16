@@ -1,4 +1,4 @@
-import random, copy
+import random, copy, types
 
 def aux_insertTree(childTree, parentTree):
 	"""This a private (You shouldn't have to call it) recursive function that inserts a child tree into a parent tree."""
@@ -34,9 +34,13 @@ class SegmentTree :
 	---->Segment : 11-14
 	------->Segment : 12-14
 	---->Segment : 13-15
+	
+	Each segment tree can have a name to make it easily recognizable and a referedObject, an object who instance is stored for future usage.
+	referedObject are always stored in lists no matter what you pass as an argument. If referedObject is already a list it will be stored as is, if
+	not it will first be placed in a list and then stored.
 	"""
 	
-	def __init__(self, x1 = None, x2 = None, name = '', referedObject = None, father = None, level = 0) :
+	def __init__(self, x1 = None, x2 = None, name = '', referedObject = [], father = None, level = 0) :
 		if x1 > x2 :
 			self.x1, self.x2 = x2, x1
 		else :
@@ -57,8 +61,11 @@ class SegmentTree :
 		else :
 			self.children.insert(index, segmentTree)
 	
-	def insert(self, x1, x2, name = '', referedObject = None) :
-		"""Insert the segment at its correct place and returns it"""
+	def insert(self, x1, x2, name = '', referedObject = []) :
+		"""Insert the segment in it's right place and returns it
+		If there's already a segment S as S.x1 == x1 and S.x2 == x2. S.name will be changed to S.name U name and the
+		referedObject will be appended the current one"""
+		
 		if x1 > x2 :
 			xx1, xx2 = x2, x1
 		else :
@@ -69,6 +76,8 @@ class SegmentTree :
 		childrenToRemove = []
 		for i in range(len(self.children)) :
 			if self.children[i].x1 == xx1 and xx2 == self.children[i].x2 :
+				self.children[i].name = self.children[i].name + ' U ' + name
+				self.children[i].referedObject.append(referedObject)
 				return self.children[i]
 			
 			if self.children[i].x1 <= xx1 and xx2 <= self.children[i].x2 :
@@ -76,7 +85,11 @@ class SegmentTree :
 			
 			elif xx1 <= self.children[i].x1 and self.children[i].x2 <= xx2 :
 				if rt == None :
-					rt = SegmentTree(xx1, xx2, name, referedObject, self, self.level+1)
+					if type(referedObject) is types.ListType :
+						rt = SegmentTree(xx1, xx2, name, referedObject, self, self.level+1)
+					else :
+						rt = SegmentTree(xx1, xx2, name, [referedObject], self, self.level+1)
+					
 					insertId = i
 					
 				rt.__addChild(self.children[i])
@@ -92,7 +105,11 @@ class SegmentTree :
 			for c in childrenToRemove :
 				self.children.remove(c)
 		else :
-			rt = SegmentTree(xx1, xx2, name, referedObject, self, self.level+1)
+			if type(referedObject) is types.ListType :
+				rt = SegmentTree(xx1, xx2, name, referedObject, self, self.level+1)
+			else :
+				rt = SegmentTree(xx1, xx2, name, [referedObject], self, self.level+1)
+			
 			if insertId != None :
 				self.__addChild(rt, insertId)
 			else :
@@ -109,7 +126,7 @@ class SegmentTree :
 		pass
 		
 	def intersect(self, x1, x2 = None) :
-		"Returns all the segments intersected by [x1, x2]"
+		"Returns a list of all segments intersected by [x1, x2]"
 		def condition(x1, x2, tree) :
 			#print self.id, tree.x1, tree.x2, x1, x2
 			if (tree.x1 != None and tree.x2 != None) and (tree.x1 <= x1 and x1 < tree.x2 or tree.x1 <= x2 and x2 < tree.x2) :
@@ -269,10 +286,11 @@ class SegmentTree :
 	def move(self, newX1) :
 		"""Moves tree to a new starting position, updates x1s of children"""
 		if self.x1 != None and self.x2 != None :
-			aux_moveTree(newX1-self.x1, self)
-		else :
-			for c in self.children :
-				aux_moveTree(newX1-c.x1, c)
+			offset = newX1-self.x1
+			aux_moveTree(offset, self)
+		elif len(self.children) > 0 :
+			offset = newX1-self.children[0].x1
+			aux_moveTree(offset, self)
 
 	def translate(self, offset) :
 		aux_moveTree(offset, self)
@@ -315,21 +333,26 @@ class SegmentTree :
 
 if __name__== "__main__" :
 	s = SegmentTree()
-	s.insert(0, 10, 'region 1')
+	s.insert(5, 10, 'region 1')
 	s.insert(8, 12, 'region 2')
 	s.insert(5, 8, 'region 3')
 	s.insert(34, 40, 'region 4')
 	s.insert(35, 38, 'region 5')
-	s.insert(36, 37, 'region 6')
+	s.insert(36, 37, 'region 6', 'aaa')
+	s.insert(36, 37, 'region 6', 'aaa2')
 	print "Tree:"
 	print s
+	print "indexed length", s.getIndexedLength()
 	print "removing gaps and adding region 7 : [13-37["
 	s.removeGaps()
-	s.insert(13, 37, 'region 7')
+	#s.insert(13, 37, 'region 7')
 	print s
 	print "indexed length", s.getIndexedLength()
-	print "intersections"
-	for c in [6, 10, 14, 1000] :
-		print c, s.intersect(c)
+	#print "intersections"
+	#for c in [6, 10, 14, 1000] :
+	#	print c, s.intersect(c)
 	
-	
+	print "Move"
+	s.move(0)
+	print s
+	print "indexed length", s.getIndexedLength()
