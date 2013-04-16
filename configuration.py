@@ -2,7 +2,7 @@ import sys, os, time
 
 DATA_PATH = os.path.dirname(__file__)+ "/pyGenoData/"
 
-pyGeno_BRANCH = "Medusa"
+pyGeno_BRANCH = "Stasis"
 pyGeno_VERSION_NAME = 'Skiny Cobra'
 pyGeno_VERSION_RELEASE_LEVEL = 'Beta'
 pyGeno_VERSION_NUMBER = 13.04
