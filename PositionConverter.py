@@ -1,10 +1,12 @@
 from tools import UsefulFunctions as uf
-import copy
+from types import *
 
 def CDNAToDNA(position, transcript, iWantCDSNumber = False) :
 	"""Returns -1 if pos is outside the transcript
 	if iWantCDSNumber = returns a tuple (position, cds), if false returns only the postion"""
 
+	assert type(position) is IntType
+		
 	pos = position		
 	poffset = 0
 
@@ -29,7 +31,9 @@ def CDNAToDNA(position, transcript, iWantCDSNumber = False) :
 
 
 def CDNAToDNA_range(x1, x2, transcript, iWantCDSNumber = False) :
-	
+	assert type(x1) is IntType
+	assert type(x2) is IntType
+		
 	xx1 = CDNAToDNA(x1, transcript, True)
 	xx2 = CDNAToDNA(x2, transcript, True)
 	
@@ -87,7 +91,9 @@ def CDNAToDNA_range(x1, x2, transcript, iWantCDSNumber = False) :
 	return ret
 	
 def CDNAToDNA_range_bck(x1, x2, transcript, iWantCDSNumber = False) :
-
+	assert type(x1) is IntType
+	assert type(x2) is IntType
+	
 	xx1 = CDNAToDNA(x1, transcript, True)
 	xx2 = CDNAToDNA(x2, transcript, True)
 	if transcript.gene.strand == '-' :
@@ -163,30 +169,38 @@ def DNAToCDNA(pos, transcript) :
 	return None
 	
 def proteinToCDNA(pos) :
+	assert type(pos) is IntType
 	return int(pos*3)
 
 def CDNAToProtein(pos) :
+	assert type(pos) is IntType
 	return int(pos)/3
 
 def proteinToDNA(pos, protein) :
+	assert type(pos) is IntType
 	return CDNAToDNA(proteinToCDNA(pos), protein.transcript) 
 
 def proteinToDNA_range(x1, x2, protein, iWantCDSNumbers = False) :
+	assert type(x1) is IntType
+	assert type(x2) is IntType
 	xx1 = proteinToCDNA(x1)
 	xx2 = proteinToCDNA(x2)
 	
 	return CDNAToDNA_range(xx1, xx2, protein.transcript, iWantCDSNumbers) 
 	
 def DNAToProtein(pos, protein):
+	assert type(pos) is IntType
 	return CDNAToProtein(DNAToCDNA(pos, protein.transcript))
 
 def chromosomeToGenome(pos, chromosome):
+	assert type(pos) is IntType
 	if pos > len(chromosome) or pos < 0:
 		raise IndexError('%d not in chromosome %s of len %d' % (pos, chromosome.number, len(chromosome)))
 
 	return pos + chromosome.x1
 	
 def genomeToChromosome(pos, chromosome):
+	assert type(pos) is IntType
 	if pos > len(chromosome.genome) or pos < 0:
 		raise IndexError('%d not in genome %s of len %d' % (pos, chromosome.genome.name, len(chromosome.genome)))
 

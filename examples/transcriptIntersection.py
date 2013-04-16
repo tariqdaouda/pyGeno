@@ -27,9 +27,9 @@ for gene in chro.getGenes():
 			#index.insert(exon.x1, exon.x2, name = str(exon), referedObject = [trans])
 			
 			#You may want to pickle the index, so you don't have to regenerate it at each time
-			#This can result in a pretty large objects due to the chain references. One way to avoir that
+			#This can result in a pretty large object due to the chain references. One way to avoid that
 			#problem is to use trans.pluck() as the referedObject. By plucking the object you remove
-			#all chain references effectively saving the transcript alone
+			#all chain references, effectively saving the transcript alone
 			
 print "intersections..."
 for pos in positions :
@@ -41,4 +41,4 @@ for pos in positions :
 			print trans.CDNA #trans.sequence for the whole sequence
 			cdnaPos = PC.DNAToCDNA(pos, trans)
 			codon = trans.getCodon(cdnaPos)
-			print "codon %s, aa : %s" %(codon, uf.translateDNA(codon[0]))
+			print "dna position %s, cdna position %s, codon %s, aa %s" %(pos, cdnaPos, codon, uf.translateDNA(codon[0]))

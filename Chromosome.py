@@ -1,4 +1,5 @@
 import re, random, sys,pickle
+from types import *
 from tools.SegmentTree import SegmentTree as SegmentTree
 from tools.SecureMmap import SecureMmap as SecureMmap
 from tools import UsefulFunctions as uf
@@ -165,6 +166,9 @@ class Chromosome :
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		
+		assert type(x1) is IntType
+		assert type(x2) is IntType
+		
 		if x1 != None :
 			if x2 == None :
 				start, end = x1, x1 + 1
@@ -200,6 +204,9 @@ class Chromosome :
 	def getSequence_dbSNP(self, x1, x2 = None, SNPsFilter = None) :
 		"""SNPsFilter is a fct that takes a dbSNP SNP as input a returns true if it correpsond to the rule.
 		If left to none Chromosome.defaulDbSNPsFilter is used."""
+		
+		assert type(x1) is IntType
+		assert type(x2) is IntType
 		
 		if x1 != None :
 			if x2 == None :
@@ -249,6 +256,9 @@ class Chromosome :
 		"""dbSNPsFilter is a fct that takes a dbSNP as input a returns true if it correpsond to the rule.
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
+		assert type(x1) is IntType
+		assert type(x2) is IntType
+		
 		res = []
 
 		if self.dbSNPs == None :
@@ -271,6 +281,9 @@ class Chromosome :
 		"""SNVsFilter is a fct that takes a CasavaSnp as input a returns true if it correpsond to the rule.
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
+		assert type(x1) is IntType
+		assert type(x2) is IntType
+		
 		res = []
 			
 		if not self.isLight :
