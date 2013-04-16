@@ -1,6 +1,5 @@
 from pyGeno.tools.SegmentTree import SegmentTree
 from pyGeno.Genome import Genome
-import pyGeno.PositionConverter as PC
 
 positions = [2982666, 2982870]
 
