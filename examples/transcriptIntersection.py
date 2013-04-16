@@ -28,8 +28,8 @@ for gene in chro.getGenes():
 			
 print "intersections..."
 for pos in positions :
-	#retourne une liste de tout les segment intersectes par pos
+	#get the list of all segments intersected by pos
 	interections = index.intersect(pos)
 	for inter in interections :
 		for trans in inter.referedObject :
-			print trans.sequence # trans.CDNA pour la sequence codante
+			print trans.sequence # trans.CDNA for the CDNA
