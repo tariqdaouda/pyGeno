@@ -1,9 +1,11 @@
 from pyGeno.tools.SegmentTree import SegmentTree
 from pyGeno.Genome import Genome
+import pyGeno.PositionConverter as PC
+from pyGeno.tools import UsefulFunctions as uf
 
-print "Example: print the sequences of all transcripts that intersect given posotions"
+print "Example: print the cdna of all transcripts that intersect given positions. print the corresponding codon and the amino acid"
 
-positions = [2982666, 2982870]
+positions = [77170087, 77170095]
 
 genome = Genome('human/reference')
 chro = genome.loadChromosome('18')
@@ -16,10 +18,13 @@ for gene in chro.getGenes():
 	for trans in gene.getTranscripts():
 		for exon in trans.getExons() :
 			
-			index.insert(exon.x1, exon.x2, name = str(exon), referedObject = [trans])
 			#To only index the coding sequences
-			#if exon.hasCDS :
-			#	index.insert(exon.CDS[0], exon.CDS[1], name = str(exon), referedObject = [trans])
+			if exon.hasCDS() :
+				index.insert(exon.CDS[0], exon.CDS[1], name = str(exon), referedObject = [trans])
+				#print exon.CDS
+				
+			#the whole exon
+			#index.insert(exon.x1, exon.x2, name = str(exon), referedObject = [trans])
 			
 			#You may want to pickle the index, so you don't have to regenerate it at each time
 			#This can result in a pretty large objects due to the chain references. One way to avoir that
@@ -28,8 +33,12 @@ for gene in chro.getGenes():
 			
 print "intersections..."
 for pos in positions :
-	#retourne une liste de tout les segment intersectes par pos
+	#get the list of segments intersected by pos
 	interections = index.intersect(pos)
 	for inter in interections :
 		for trans in inter.referedObject :
-			print trans.sequence # trans.CDNA pour la sequence codante
+			print "-----"
+			print trans.CDNA #trans.sequence for the whole sequence
+			cdnaPos = PC.DNAToCDNA(pos, trans)
+			codon = trans.getCodon(cdnaPos)
+			print "codon %s, aa : %s" %(codon, uf.translateDNA(codon[0]))
