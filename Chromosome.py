@@ -43,7 +43,7 @@ class Chromosome :
 		
 		self.__loadSequence()
 		
-		gtfFp = __getAnnotations(self)
+		gtfFp = self.__getAnnotations()
 		f = open(gtfFp, 'r')
 		if not SingletonManager.contains(gtfFp) :
 			SingletonManager.add(f.readlines(), gtfFp)	
@@ -61,6 +61,7 @@ class Chromosome :
 		if os.path.exists('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number)) :
 			self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number))
 			if self.data != None :
+				self.isLight = False
 				return True
 		elif os.path.exists('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number)) :
 			self.casavaSNPs = SNPFile('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number), CasavaSNP)
@@ -68,10 +69,11 @@ class Chromosome :
 		else :
 			sys.stderr.write('Warning : couldn\'t find local version of chromosome %s, attempting load reference instead...' % self.number)
 		
-		self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number))
+		self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
 		if self.data == None :
 			raise ChromosomeError("Unable to load chromosome %s! Impossible to find reference sequence" % self.number, self.number)
-	
+		
+		self.isLight = False
 		return True
 	
 	def __getHeavySequence(self, path) :

@@ -41,7 +41,7 @@ def checkReferenceGenome(self, specie) :
 	return True
 
 def update_REFERENCE_GENOME(specie, newRef) :	
-	pyGeno_SETTINGS['REFERENCE_GENOMES'][specie] = ret
+	pyGeno_SETTINGS['REFERENCE_GENOMES'][specie] = newRef
 	cPickle.dump(pyGeno_SETTINGS, open(pyGeno_SETTINGS_FILENAME, 'w'))
 	
 	return True
@@ -75,9 +75,9 @@ def update_REFERENCE_GENOME_prompt(specie) :
 def get_REFERENCE_GENOME(specie) :
 	"returns the reference genome of the specie if one is set. If not prompt"
 	try :
-		self.reference = conf.pyGeno_SETTINGS['REFERENCE_GENOMES'][specie]
+		return pyGeno_SETTINGS['REFERENCE_GENOMES'][specie]
 	except KeyError:
-		if not conf.update_REFERENCE_GENOME_prompt(specie) :
+		if not update_REFERENCE_GENOME_prompt(specie) :
 			raise ConfigurationError("Unable to set a reference a Genome for specie %s" % specie)
 	
 def update_DATA_PATH(newPath) :	

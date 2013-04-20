@@ -3,7 +3,7 @@ from tools import UsefulFunctions as uf
 
 from Chromosome import Chromosome
 #import sys, pickle, random, shutil, os, glob
-import os
+import os, pickle
 from tools import SingletonManager
 from exceptions import *
 
@@ -16,7 +16,7 @@ class ChrData_Struct :
 		self.length = int(length)
 		
 		#indexFp = conf.DATA_PATH+'%s/gene_sets/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number)
-		indexFp = conf.pyGeno_SETTINGS['DATA_PATH']+'%s/gene_sets/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number)
+		indexFp = conf.pyGeno_SETTINGS['DATA_PATH']+'%s/gene_sets/chr%s_gene_symbols.index.pickle'%(genome.specie, number)
 		f = open(indexFp)
 		if not SingletonManager.contains(indexFp) :
 			SingletonManager.add(pickle.load(f), indexFp)	
@@ -31,7 +31,8 @@ class Genome :
 	
 	def __init__(self, path, reference = None, verbose = False) :
 		"""path is a string that must have the following form: specie/genomeName ex: 'human/GRCh37.p2' or 'human/patient1'
-		To know more about how to import new genomes please have a look at Importation.py.
+		To know more about how to import new genomes please have a look at Importation.py. Beside if the genome name is
+		'reference', ex : 'human/reference' the default reference genome will be loaded
 		
 		In case the genome is not complete (missing data for some chromosomes) or if your genome only contains a list of snps,
 		(ex: sequencing results). To fill in the missing data pyGeno needs a complete genome to use as reference. As the specie
@@ -40,7 +41,7 @@ class Genome :
 		as defined in pyGeno_SETTINGS['REFERENCE_GENOMES'][specie] (or more infos on defaults, see update_REFERENCE_GENOME() in configuration.py). 
 		"""
 		
-		self.reset(path, verbose, reference)
+		self.reset(path, reference, verbose)
 	
 	def reset(self, path, reference = None, verbose = False) :
 		if verbose :
@@ -50,13 +51,16 @@ class Genome :
 		self.specie = path.split('/')[0]
 		self.name = path.split('/')[1]
 		
-		self.absolutePath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.name)
-		self.referenceAbsolutePath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.reference)	
-		
+		if self.name == 'reference' :
+			self.name = conf.get_REFERENCE_GENOME(self.specie)
+			
 		if reference != None :
 			self.reference = reference
 		else :
-			conf.get_REFERENCE_GENOME(self.specie)
+			self.reference = conf.get_REFERENCE_GENOME(self.specie)
+		
+		self.absolutePath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.name)
+		self.referenceAbsolutePath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.reference)	
 		
 		if os.path.exists(self.absolutePath + '/genomeChrPos.index') :
 			f = open(self.absolutePath + '/genomeChrPos.index')
@@ -165,4 +169,4 @@ class Genome :
 		return self.length
 
 	def __str__(self) :
-		return "Genome: %s (reference: %s)" %(self.name, self.reference)
+		return "Genome: %s, ref: %s" %(self.path, self.reference)
