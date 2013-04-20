@@ -2,17 +2,11 @@ import configuration as conf
 from tools import UsefulFunctions as uf
 
 from Chromosome import Chromosome
-import sys, pickle, random, shutil, os, glob
+#import sys, pickle, random, shutil, os, glob
+import os
 from tools import SingletonManager
+from exceptions import *
 
-print "---\npyGeno ~-~-~-:>", conf.pyGeno_VERSION_STR, '\n---'
-
-class ChromosomeNotFound(Exception) :
-	def __init__(self, msg) :
-		self.msg = msg
-	def __str__(self) :
-		return self.msg + '\n'
-		
 class ChrData_Struct :
 	
 	def __init__(self, genome, number, x1, x2, length) :
@@ -21,7 +15,8 @@ class ChrData_Struct :
 		self.number = number
 		self.length = int(length)
 		
-		indexFp = conf.DATA_PATH+'%s/gene_sets/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number)
+		#indexFp = conf.DATA_PATH+'%s/gene_sets/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number)
+		indexFp = conf.pyGeno_SETTINGS['DATA_PATH']+'%s/gene_sets/chr%s_gene_symbols.index.pickle'%(genome.getSpecie(), number)
 		f = open(indexFp)
 		if not SingletonManager.contains(indexFp) :
 			SingletonManager.add(pickle.load(f), indexFp)	
@@ -34,10 +29,20 @@ class ChrData_Struct :
 
 class Genome :
 	
-	def __init__(self, path = 'human/reference', verbose = False) :
-		self.reset(path, verbose)
+	def __init__(self, path, reference = None, verbose = False) :
+		"""path is a string that must have the following form: specie/genomeName ex: 'human/GRCh37.p2' or 'human/patient1'
+		To know more about how to import new genomes please have a look at Importation.py.
 		
-	def reset(self, path = 'human/reference', verbose = False) :
+		In case the genome is not complete (missing data for some chromosomes) or if your genome only contains a list of snps,
+		(ex: sequencing results). To fill in the missing data pyGeno needs a complete genome to use as reference. As the specie
+		has already been specified in path, you only need to pass the name of the reference genome ex: "GRCh37.p2".
+		If no reference genome is specified and one is needed pyGeno will try to load the default reference genome for the specie
+		as defined in pyGeno_SETTINGS['REFERENCE_GENOMES'][specie] (or more infos on defaults, see update_REFERENCE_GENOME() in configuration.py). 
+		"""
+		
+		self.reset(path, verbose, reference)
+	
+	def reset(self, path, reference = None, verbose = False) :
 		if verbose :
 			print "Creating genome: " + path + "..."
 		
@@ -45,14 +50,21 @@ class Genome :
 		self.specie = path.split('/')[0]
 		self.name = path.split('/')[1]
 		
-		self.absolutePath = conf.DATA_PATH+'/%s/genomes/%s' % (self.specie, self.name)
-		self.referencePath = conf.DATA_PATH+'/%s/genomes/reference' % (self.specie)
-
-		try :
+		self.absolutePath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.name)
+		self.referenceAbsolutePath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.reference)	
+		
+		if reference != None :
+			self.reference = reference
+		else :
+			conf.get_REFERENCE_GENOME(self.specie)
+		
+		if os.path.exists(self.absolutePath + '/genomeChrPos.index') :
 			f = open(self.absolutePath + '/genomeChrPos.index')
-		except IOError:
-			f = open(self.referencePath + '/genomeChrPos.index')
-			
+		elif os.path.exists(self.referenceAbsolutePath + '/genomeChrPos.index') :
+			f = open(self.referenceAbsolutePath + '/genomeChrPos.index')
+		else :
+			raise GenomeError("Can't find genomeChrPos.index in neither %s nor the reference genome %s" % (path, self.reference), self.path)
+		
 		self.chrsData = {}
 		startPosition = 0
 		for l in f.readlines()[1:] :
@@ -68,20 +80,20 @@ class Genome :
 		return self.chrsData.keys()
 	
 	def getSequencePath(self) :
-		return conf.DATA_PATH+'/%s/genomes/%s' % (self.specie, self.name)
+		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.name)
 	
 	def getReferenceSequencePath(self) :
-		return conf.DATA_PATH+'/%s/genomes/reference' % (self.specie)
+		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.reference)
 		
 	def getGeneSetsPath(self) :
-		return conf.DATA_PATH+'/%s/gene_sets' % self.getSpecie()
+		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s/gene_sets' % (self.specie, self.name)
 	
+	def getReferenceGeneSetsPath(self) :
+		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s/gene_sets' % (self.specie, self.reference)
+		
 	def getdbSNPPath(self) :
-		return conf.DATA_PATH+'/%s/dbSNP/' % (self.specie)
-		
-	def getSpecie(self):
-		return self.specie
-		
+		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/dbSNP/' % (self.specie)
+
 	def empty(self) :
 		self.chromosomes = {}
 	
@@ -94,6 +106,7 @@ class Genome :
 		return self.chromosomes[number]
 	
 	def getChromosomes(self) :
+		self.loadAllChromosomes()
 		return self.chromosomes.values()
 	
 	def loadAllChromosomes(self, dbSNPVersion = None, verbose = False) :
@@ -104,21 +117,15 @@ class Genome :
 		del(self.chromosomes[number])
 	
 	def getSequence(self, x1, x2) :
-		ret = ''
-		c = self.chrsData[self.whereIs(x1)]
-		loaded = False	
-		if not self.isLoaded(c.number) :
-			loaded = True
-		chr = self.loadChromosome(c.number)
-		
-		ret = chr.getSequence(x1 - c.x1, min(x2 - c.x1, len(chr)-1))
-		
-		if loaded :
-			self.unloadChromosome(c.number)
-		
-		return ret
+		c = self.chrsData[self.whereIsPosition(x1)]
+		chro = self.loadChromosome(c.number)
+		return chro.getSequence(x1 - c.x1, x2 - c.x1)
 	
-	def whereIs(self, x1) :
+	def loadGene(self, symbol) :
+		chro = whereIsGene(symbol)
+		return chro.loadGene(symbol)
+		
+	def whereIsPosition(self, x1) :
 		"""returns the nimber of the chormosome that correspond to pos x1"""
 		for c in self.chrsData.values() :
 			if c.x1 <= x1 <= c.x2 :
@@ -126,19 +133,9 @@ class Genome :
 	
 	def whereIsGene(self, geneSymbol, chromosomes = None) :
 		""""Special request from Diana:
-		Returns a list of chormosomes indicating where the gene has been found
+		Returns the chromosome that contains a given gene
 		@param: geneSymbol a string
 		@param: chromosomes list of chromosomes numbers
-		if chromosomes is None, the whole list of genome's chromosome will be checked
-		"""
-		return self.whereAreGenes([geneSymbol], chromosomes)[geneSymbol]
-		
-	def whereAreGenes(self, geneSymbols, chromosomes = None) :
-		""""Special request from Diana:
-		Returns a dictionary indicating where the genes have been found
-		{Gene : chromosome list}
-		@param: geneSymbols list of gene symbols
-		@param: chromosomes list of chromosomes to look into (strings)
 		if chromosomes is None, the whole list of genome's chromosome will be checked
 		"""
 		if chromosomes == None : 
@@ -148,18 +145,14 @@ class Genome :
 		
 		res = {}
 
-		for g in geneSymbols :
-			res[g] = []
-			for c in chros :
-				if self.chrsData[c].hasGene(g) :
-					res[g].append(c)
-		
-		return res
-	
+		for c in chros :
+			if self.chrsData[c].hasGene(geneSymbol) :
+				return self.loadChromosomes(c.number)
+				
 	def loadRandomChromosome(self, loadSnps = True) :
 		"""Picks a random position in the genome and returns it's chromosome"""
 		x1 = int(random.random()*self.length)
-		return self.loadChromosome(self.whereIs(x1), loadSnps)
+		return self.loadChromosome(self.whereIsPosition(x1), loadSnps)
 		
 	def isLoaded(self, number) :
 		return number in self.chromosomes.keys()
@@ -172,4 +165,4 @@ class Genome :
 		return self.length
 
 	def __str__(self) :
-		return "Genome: %s" %(self.path)
+		return "Genome: %s (reference: %s)" %(self.name, self.reference)

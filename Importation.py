@@ -46,7 +46,7 @@ def importGenome(packageDir, specie, genomeName) :
 	manifestLines = f.readlines()
 	f.close()
 	
-	targetDir = conf.DATA_PATH+'/%s/genomes/%s'%(specie, genomeName)
+	targetDir = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s'%(specie, genomeName)
 	if not os.path.exists(targetDir):
 		os.makedirs(targetDir)
 	
@@ -164,7 +164,7 @@ def importGenome_casava(specie, genomeName, snpsTxtFile) :
 	The .casavasnps files generated are identical to the casava snps but with ';' instead of tabs and 
 	a single position instead of a range"""
 
-	path = conf.DATA_PATH+'/%s/genomes/%s/'%(specie, genomeName)
+	path = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s/'%(specie, genomeName)
 	print 'importing genome %s...' %path
 	
 	if not os.path.exists(path):
@@ -310,7 +310,7 @@ def import_dbSNP(packageFolder, specie, versionName) :
 
 
 	files = glob.glob(packageFolder+'/*.flat.gz')
-	outPath = conf.DATA_PATH+'/%s/dbSNP/%s/' %(specie, versionName)
+	outPath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/dbSNP/%s/' %(specie, versionName)
 	if not os.path.exists(outPath):
 		os.makedirs(outPath)
 	
@@ -365,7 +365,7 @@ def __importSequence(number, fastaFile, targetDir) :
 	strRes = f.read().upper().replace('\n', '').replace('\r', '')
 	f.close()
 	
-	fn = fastaFile.replace('.fa.gz', '.dat').replace(os.path.dirname(fastaFile), targetDir)
+	fn = '%s/chr%s.dat' % (targetDir, number)#fastaFile.replace('.fa.gz', '.dat').replace(os.path.dirname(fastaFile), targetDir)
 	f = open(fn, 'w')
 	f.write(strRes)
 	f.close()
