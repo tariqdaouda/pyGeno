@@ -1,34 +1,170 @@
-import os, glob, gzip, pickle
+import os, glob, gzip, pickle, shutil
 import configuration as conf
 
 from Genome import Genome
 from tools import UsefulFunctions as uf
 from tools.CSVTools import CSVFile
 #from expyutils.GTFTools import GTFFile
-
-def currentVersion():
-	"""returns a tuple describing pyGeno's current version"""
-	return pyGeno_VERSION_TUPLE
-
-def currentVersion_str():
-	"""returns pyGeno's current version in a human redable way"""
-	return conf.pyGeno_VERSION_STR
 	
-"""===These are the only function that you will need to import new features in pyGen==="""
+"""===These are the only function that you will need to import new features  in pyGeno==="""
 def importGenome(packageDir, specie, genomeName) :
-	gtfs = glob.glob(packageDir+'/*.gtf')
+	"""To import a new genome from scratch simply put all the compressed (in fa.gz) fasta files and the gtf (.gtf.gz) gene annotation file in the same folder. Then pass
+	the path to this folder as the packageDir. Such files can be downloaded for example from ensembl: http://useast.ensembl.org/info/data/ftp/index.html
+	
+	In addition to thoses files the package should also contain a file named manifest.txt that contains the description of which file is associated to which chromosome,
+	and the name of the gtf file.
+	
+	The format of the manifest is simply:
+	>chormosomes
+	1[\t]fileName
+	2[\t]fileName
+	3[\t]fileName
+	....
+	>gtf
+	filename
+	
+	chromosomes must be in ordered in an inscreasing fashion
+	You can add comments to the file with #. The manifest must end with an empty line
+	
+	If no manifest.txt is found in the package, pyGeno will try to create one. In order for this to work there should be only one .gtf.gz file in the package, and each chromosome
+	fasta files (.fa.gz) must have the exact same nomenclature with only the chromosome name changing among the file names.
+	"""
+	
+	try :
+		f = open(packageDir+"/manifest.txt")
+	except IOError:
+		print "couldn't find the file manifest.txt in package"
+		print "Here's the manifset:"
+		print __createManifest(packageDir)
+		
+		while True :
+			userInput = raw_input("\nIf the manifest is OK please enter 'yes'. If not please modify the file and then enter 'yes':\n")
+			if userInput.upper() == 'YES' :
+				break
+	
+	f = open(packageDir+"/manifest.txt")
+	manifestLines = f.readlines()
+	f.close()
+	
+	targetDir = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s'%(specie, genomeName)
+	if not os.path.exists(targetDir):
+		os.makedirs(targetDir)
+	
+	fastaHeaders = []
+	chromosomePosIndex = []
+	currGenomePos = 0
+	
+	parsing = None
+	for line in manifestLines:
+		if line == '\n' or line[0] == '#' :
+			parsing = None
+		elif line[:-1] == '>chromosomes' :
+			parsing = 'chro'
+		elif line[:-1] == '>gtf' :
+			parsing = 'gtf'
+			
+		elif parsing == 'chro' :
+			sl = line.split('\t')
+			chroNumber = sl[0]
+			res = __importSequence(chroNumber, "%s/%s" % (packageDir, sl[1][:-1]), targetDir)
+			fastaHeaders.append(res[0])
+			chromosomePosIndex.append("%s;%s;%s;%s" % (chroNumber, currGenomePos, currGenomePos + res[1], res[1]))
+			currGenomePos = currGenomePos + res[1]
+			
+		elif parsing == 'gtf' :
+			__importGeneSymbolIndex("%s/%s" % (packageDir, line[:-1]), targetDir)
+	
+	fastaHeadersFN = targetDir+'/fasta_headers.txt'
+	print "saving fasta headers to %s..." % fastaHeadersFN
+	f = open(fastaHeadersFN, 'w')
+	f.write(''.join(fastaHeaders))
+	f.close()
+	
+	genomeChroIndexFN = targetDir+'/genomeChrPos.index'
+	print "saving saving chromosome position index to %s..." % genomeChroIndexFN
+	f = open(genomeChroIndexFN, 'w')
+	f.write('chromosome;chr_start;chr_end;length\n' + '\n'.join(chromosomePosIndex))
+	f.close()	
+	
+	print "copying manifest to target directory..."
+	shutil.copyfile(packageDir+"/manifest.txt", targetDir+"/manifest.txt")
+	print 'done.'
+
+
+def __createManifest(packageDir) :
+	
+	fastas = glob.glob(packageDir+'/*.fa.gz')
+	fastaStr = ">chromosomes\n"
+	if len(fastas) == 1 :
+		sf = fastas[0].replace(".fa.gz", '')
+		number = sf[-1].upper()
+		fastaStr += "%s\t%s" % (number, os.path.basename(fastas[0]))
+	elif len(fastas) > 1 :
+		commonSup = ""
+		commonInf = ""
+		i = 0
+		add = True
+		while add and i < len(fastas[0]) :
+			for fasta in fastas[1:] :
+				if i >= len(fasta) or fastas[0][i] != fasta[i] :
+					add = False
+					break
+			if add :
+				commonSup += fastas[0][i]
+			i += 1
+		
+		i = 1
+		add = True
+		while add and i < len(fastas[0]) :
+			for fasta in fastas[1:] :
+				#print fastas[0][len(fastas[0])-i], fasta[len(fasta)-i], len(fastas[0])-i, len(fasta)-i
+				if i < 0 or fastas[0][len(fastas[0])-i] != fasta[len(fasta)-i] :
+					add = False
+					break
+			if add :
+				commonInf += fastas[0][len(fastas[0])-i]
+			i += 1
+		commonInf = commonInf[::-1]
+	
+		chros = {}
+		for fasta in fastas :
+			number = fasta.replace(commonSup, '').replace(commonInf, '')
+			try :
+				chros[int(number)] = os.path.basename(fasta)
+			except :
+				chros[number] = os.path.basename(fasta)
+			
+		sortedNumbers = chros.keys()
+		sortedNumbers.sort()
+		fastaStr = ">chromosomes\n"
+		for k in sortedNumbers :
+			fastaStr += "%s\t%s\n" % (k, chros[k])
+
+	gtfs = glob.glob(packageDir+'/*.gtf.gz')
+	
 	if len(gtfs) != 1 :
 		raise Exception('There should be one and only one gtf index file in the package')
 	
-	_importSequences(packageDir, specie, genomeName)
-	_importGeneSymbolIndex(gtfs[0], specie)
+	gtfStr = ">gtf\n%s" % os.path.basename(gtfs[0])
+	
+	comments = """#This file has been generated automaticly
+#A manifest file must end with an empty line
+#>[category] indicates the start of a new category of files to be parsed
+#Empty lines are ok everywhere but within categories"""
+	
+	manifestStr = "%s\n%s\n\n%s\n" % (comments, fastaStr, gtfStr)
+	f = open(packageDir+"/manifest.txt", "w")
+	f.write(manifestStr)
+	f.close()
+
+	return manifestStr
 	
 def importGenome_casava(specie, genomeName, snpsTxtFile) :
 	"""Creates a light genome (contains only snps infos and no sequence from the reference genome)
 	The .casavasnps files generated are identical to the casava snps but with ';' instead of tabs and 
 	a single position instead of a range"""
 
-	path = conf.DATA_PATH+'/%s/genomes/%s/'%(specie, genomeName)
+	path = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s/'%(specie, genomeName)
 	print 'importing genome %s...' %path
 	
 	if not os.path.exists(path):
@@ -174,7 +310,7 @@ def import_dbSNP(packageFolder, specie, versionName) :
 
 
 	files = glob.glob(packageFolder+'/*.flat.gz')
-	outPath = conf.DATA_PATH+'/%s/dbSNP/%s/' %(specie, versionName)
+	outPath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/dbSNP/%s/' %(specie, versionName)
 	if not os.path.exists(outPath):
 		os.makedirs(outPath)
 	
@@ -221,66 +357,32 @@ def import_dbSNP(packageFolder, specie, versionName) :
 	f.write(desc)
 	f.close()
 
-"""===These are the private functions that you should not call, unless you really know what you're doing==="""
-def _importSequences(fastaDir, specie, genomeName) :
-	print r"""Converting fastas from dir: %s into pyGeno's data format
-	resulting files will be part of genome: %s/%s
-	This may take some time, please wait...""" %(fastaDir, specie, genomeName)
+def __importSequence(number, fastaFile, targetDir) :
+	print 'making data for chromsome %s, source file: %s...' %(number, fastaFile)
 	
-
-	path = conf.DATA_PATH+'/%s/genomes/%s/'%(specie, genomeName)
-
-	if not os.path.exists(path):
-		os.makedirs(path)
-		
-	chrs = glob.glob(fastaDir+'/chr*.fa')
-	if len(chrs) < 1 :
-		raise Exception('No Fastas found in directort, importation aborted')
-		
-	startPos = 0
-	genomeChrPos = {} 
-	headers = ''
-	
-	for chro in chrs :
-		print 'making data for Chr', chro
-		
-		f = open(chro)
-		headers += f.readline()
-		s = f.read().upper().replace('\n', '').replace('\r', '')
-		f.close()
-		
-		fn = chro.replace('.fa', '.dat').replace(fastaDir, path)
-		f = open(fn, 'w')
-		f.write(s)
-		f.close()
-		
-		ch = chro.replace(fastaDir, '').replace('/chr', '').replace('.fa', '')
-		genomeChrPos[ch] = [str(ch), str(startPos), str(startPos+len(s)), str(len(s))]
-		startPos = startPos+len(s)
-
-	print 'making index file genomeChrPos'
-	fh = open(path+'/genomeChrPos.index', 'w')
-	fh.write('chromosome;chr_start;chr_end;length\n')
-	for k in genomeChrPos.keys() :
-		fh.write(';'.join(genomeChrPos[k])+'\n')
-	fh.close()
-
-	print 'writing build info file'
-	f=open('%s/build_infos.txt' % (path), 'w')
-	f.write('source package directory: %s' % fastaDir)
-	f.write('\nheaders:\n------\n %s' % headers)
+	f = gzip.open(fastaFile)
+	header = f.readline()
+	strRes = f.read().upper().replace('\n', '').replace('\r', '')
 	f.close()
+	
+	fn = '%s/chr%s.dat' % (targetDir, number)#fastaFile.replace('.fa.gz', '.dat').replace(os.path.dirname(fastaFile), targetDir)
+	f = open(fn, 'w')
+	f.write(strRes)
+	f.close()
+	
+	return (header, len(strRes))
 
-def _importGeneSymbolIndex(gtfFile, specie) :
-
-	path = conf.DATA_PATH+'/%s/gene_sets/'%(specie)
-	if not os.path.exists(path):
-		os.makedirs(path)
-		
-	f = open(gtfFile)
+def __importGeneSymbolIndex(gtfFile, targetDirectory) :
+	
+	f = gzip.open(gtfFile)
 	gtf = f.readlines()
 	f.close()
 	
+	targetDir = targetDirectory+'/gene_sets/'
+	
+	if not os.path.exists(targetDir):
+		os.makedirs(targetDir)
+		
 	chroLine = 0
 	chro = -1
 	currChro = -1
@@ -294,11 +396,11 @@ def _importGeneSymbolIndex(gtfFile, specie) :
 		if chro != currChro :
 			if chro != -1 :
 				print '\tsaving chromosme gtf file...'
-				f = open('%s/chr%s.gtf' % (path, chro), 'w')
+				f = open('%s/chr%s.gtf' % (targetDir, chro), 'w')
 				f.write(gtfStr)
 				f.close()
 				print '\tsaving chromosme pickled index...'
-				f=open('%s/chr%s_gene_symbols.index.pickle' % (path, chro), 'w')
+				f=open('%s/chr%s_gene_symbols.index.pickle' % (targetDir, chro), 'w')
 				pickle.dump(pickIndex, f, 2)
 				f.close()
 				print '\tdone.'
@@ -326,21 +428,19 @@ def _importGeneSymbolIndex(gtfFile, specie) :
 
 	pickIndex[symbol] = "%d;%d" %(startL, chroLine)
 	print '\tsaving chromosme gtf file...'
-	f = open('%s/chr%s.gtf' % (path, chro), 'w')
+	f = open('%s/chr%s.gtf' % (targetDir, chro), 'w')
 	f.write(gtfStr)
 	f.close()
 	print '\tsaving chromosme pickled index...'
-	f=open('%s/chr%s_gene_symbols.index.pickle' % (path, chro), 'w')
+	f=open('%s/chr%s_gene_symbols.index.pickle' % (targetDir, chro), 'w')
 	pickle.dump(pickIndex, f, 2)
 	f.close()
 	print '\tdone.'
-	print 'writing build info file'
-	f=open('%s/build_infos.txt' % (path), 'w')
-	f.write('source file: %s' % gtfFile)
-	f.close()
+	
 
 if __name__ == "__main__" :
-	import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
+	importGenome("/u/daoudat/py/pyGeno/installationPackages/genomes/mouse", 'mouse', 'GRCm38')
+	#import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
 	#importGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
 	
 	#print 'import mouse'

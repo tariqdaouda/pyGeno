@@ -1,13 +1,6 @@
 import configuration as conf
 from tools import UsefulFunctions as uf
-
-class SNPError(Exception) :
-	def __init__(self, message, line):
-		self.message = message
-		self.line = line
-	
-	def __str__(self):
-		return "Invalid SNP, %s" % self.message
+from exceptions import *
 
 class SNPFile :
 	"""This represent a file containing a list of snps sorted by position, the position must be in the first column"""

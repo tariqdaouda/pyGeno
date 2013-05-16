@@ -2,21 +2,6 @@ from tools import UsefulFunctions as uf
 from tools.BinarySequence import AABinarySequence
 import copy
 
-class InvalidProtein(Exception):
-	def __init__(self, protein, message):
-		self.proteinId = protein.id
-		self.protein = protein.sequence
-		self.gene = protein.gene.symbol
-		self.message = message
-		self.binarySequence = AABinarySequence(self.sequence)
-		
-	def __str__(self):
-		return """
-		Description : %s
-		protein_id : %s
-		protein : %s
-		gene_symbol : %s"""%(self.message, self.proteinId, self.protein, self.gene.symbol)
-
 class Protein :
 	def __init__(self, sequence, protId, transcript = None):
 

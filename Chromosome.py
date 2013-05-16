@@ -1,34 +1,17 @@
-import re, random, sys,pickle
+import os, sys, random
 from types import *
-from tools.SegmentTree import SegmentTree as SegmentTree
-from tools.SecureMmap import SecureMmap as SecureMmap
-from tools import UsefulFunctions as uf
-from tools import SingletonManager
 
 import configuration as conf
 from Gene import Gene
 from SNP import *
+from exceptions import *
 
+from tools.SegmentTree import SegmentTree as SegmentTree
+from tools.SecureMmap import SecureMmap as SecureMmap
+from tools import UsefulFunctions as uf
+from tools import SingletonManager
 from tools.GTFTools import GTFFile
 
-class GeneNotFound(Exception):
-	def __init__(self, chromosome, geneSymbol, message = ''):
-		self.message = message
-		self.symbol = geneSymbol
-		self.chromosome = chromosome
-		
-	def __str__(self):
-		return """
-		Description : %s
-		gene_symbol : %s
-		chromosome : %s\n"""%(self.message, self.symbol, self.chromosome)
-
-class RequestError(Exception):
-	def __init__(self, message = ''):
-		self.message = message
-		
-	def __str__(self):
-		return """Request Error: %s"""%(self.message)
 
 def defaultSNVsFilter(casavaSnp) :
 	"""The default rule to decide wether to take the most probable genotype or the
@@ -59,26 +42,9 @@ class Chromosome :
 		self.x2 = int(x2)
 		self.genes = {}
 		
-		try :
-			self.casavaSNPs = SNPFile('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number), CasavaSNP)
-			refSeq = '%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number)
-			
-			if not SingletonManager.contains(refSeq) :
-				SingletonManager.add(SecureMmap(refSeq), refSeq)
-				
-			self.data = SingletonManager.get(refSeq)
-				
-			self.isLight = True
-		except IOError:
-			try :
-				self.data = SecureMmap('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number))
-			except IOError:
-				print 'Warning : couldn\'t find local version of chromosome %s, loading reference instead...' % self.number
-				self.data = SecureMmap('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
-				
-			self.isLight = False
-
-		gtfFp = '%s/chr%s.gtf'%(self.genome.getGeneSetsPath(), self.number)
+		self.__loadSequence()
+		
+		gtfFp = self.__getAnnotations()
 		f = open(gtfFp, 'r')
 		if not SingletonManager.contains(gtfFp) :
 			SingletonManager.add(f.readlines(), gtfFp)	
@@ -87,11 +53,48 @@ class Chromosome :
 		
 		self.geneSymbolIndex = self.genome.chrsData[self.number].geneSymbolIndex
 
-		
 		if dbSNPVersion != None and dbSNPVersion != False and dbSNPVersion != '':
 			self.loadSNPs(dbSNPVersion, verbose)
 		elif verbose :
 			print 'Not loading SNPs because told to...'
+	
+	def __loadSequence(self):
+		if os.path.exists('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number)) :
+			self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number))
+			if self.data != None :
+				self.isLight = False
+				return True
+		elif os.path.exists('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number)) :
+			self.casavaSNPs = SNPFile('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number), CasavaSNP)
+			self.isLight = True
+		else :
+			sys.stderr.write('Warning : couldn\'t find local version of chromosome %s, attempting load reference instead...' % self.number)
+		
+		self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
+		if self.data == None :
+			raise ChromosomeError("Unable to load chromosome %s! Impossible to find reference sequence" % self.number, self.number)
+		
+		self.isLight = False
+		return True
+	
+	def __getHeavySequence(self, path) :
+		try :
+			if not SingletonManager.contains(path) :
+				SingletonManager.add(SecureMmap(path), path)
+				
+			return SingletonManager.get(path)
+		except :
+			return None
+	
+	def __getAnnotations(self) :
+		p = '%s/chr%s.gtf'%(self.genome.getGeneSetsPath(), self.number)
+		rp = '%s/chr%s.gtf'%(self.genome.getReferenceGeneSetsPath(), self.number)
+		if os.path.exists(p) :
+			return p
+		elif os.path.exists(rp) :
+			return rp
+		
+		raise ChromosomeError("Unable to load chromosome %s! Can't find gene annotion sequence neither in %s or %s" % (self.number, p, rp), self.number)
 		
 	def loadSNPs(self, version, verbose = False) :
 		try :
