@@ -1,2 +1,0 @@
-DATA_PATH = None
-REFERENCE_GENOMES = {}

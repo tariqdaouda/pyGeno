@@ -21,14 +21,47 @@ def removeDuplicates(fIn, fOut) :
 	f.write(legend+data)
 	f.close()
 
-def catCSV(folder, output, removeDups = False) :
+def catCSVs(folder, output, removeDups = False) :
 
 	strCmd = r"""cat %s/*.csv > %s""" %(folder, output)
 	os.system(strCmd)
 
 	if removeDups :
 		removeDuplicates(output, output)
+
+def joinCSVs(csvFilePaths, column, output, separator = ';') :
+	"csvFilePaths should be an iterable"
 	
+	res = ''
+	legend = []
+	csvs = []
+	
+	for f in csvFilePaths :
+		c = CSVFile()
+		c.parse(f)
+		csvs.append(c)
+		legend.append(separator.join(c.legend.keys()))
+	legend = separator.join(legend)
+	
+	lines = []
+	for i in range(len(csvs[0])) :
+		val = csvs[0].get(i, column)
+		line = separator.join(csvs[0][i])
+		for c in csvs[1:] :
+			for j in range(len(c)) :
+				if val == c.get(j, column) :
+					line += separator + separator.join(c[j])
+					
+		lines.append( line )
+	print len(lines)
+	res = legend + '\n' + '\n'.join(lines)
+	
+	f = open(output, 'w')
+	f.write(res)
+	f.close()
+	
+	return res
+
 class CSVFile :
 	
 	def __init__(self, legend = [], separator = ';') :
