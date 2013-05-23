@@ -20,21 +20,12 @@ def version() :
 	"""returns a tuple describing pyGeno's current version"""
 	return (pyGeno_BRANCH, pyGeno_VERSION_NAME, pyGeno_VERSION_RELEASE_LEVEL, pyGeno_VERSION_NUMBER, pyGeno_VERSION_BUILD_TIME )
 
-<<<<<<< HEAD
-def version():
-	print pyGeno_VERSION_TUPLE
 
-def prettyVersion():
-	print "---\npyGeno ~-~-~-:>", conf.pyGeno_VERSION_STR, '\n---'
-	
-def configure():
-=======
 def prettyVersion() :
 	"""returns pyGeno's current version in a pretty human redable way"""
 	return "pyGeno %s Branch: %s, Name: %s, Release Level: %s, Version: %s, Build time: %s" % (pyGeno_FACE, pyGeno_VERSION_TUPLE)
 
 def checkPythonVersion() :
->>>>>>> medusa-instal
 	if sys.version_info[0] < 2 or (sys.version_info[0] > 2  and sys.version_info[1] < 7) :
 		return False
 	return True
@@ -112,9 +103,6 @@ def pyGeno_init() :
 		print "==> FATAL : pyGeno only works with python 2.7 and above, please upgrade your version"
 		sys.exit(1)
 
-<<<<<<< HEAD
-configure()
-=======
 	if not os.path.exists(pyGeno_SETTINGS_DIR) :
 		os.makedirs(os.path.expanduser(pyGeno_SETTINGS_DIR))
 	
@@ -132,4 +120,3 @@ pyGeno_init()
 #if __name__== '__main__' :
 #	update_REFERENCE_GENOME('human')#configure()
 
->>>>>>> medusa-instal
