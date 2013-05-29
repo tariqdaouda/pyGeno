@@ -63,20 +63,23 @@ class Chromosome :
 			self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number))
 			if self.data != None :
 				self.isLight = False
-				return True
+			else :
+				raise ChromosomeError("Unable to load chromosome %s! Impossible to find sequence" % self.number, self.number)
+
 		elif os.path.exists('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number)) :
 			self.casavaSNPs = SNPFile('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number), CasavaSNP)
+			self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
+			if self.data == None :
+				raise ChromosomeError("Unable to load chromosome %s! Impossible to find reference sequence" % self.number, self.number)
 			self.isLight = True
 		else :
-			sys.stderr.write('Warning : couldn\'t find local version of chromosome %s, attempting load reference instead...' % self.number)
+			sys.stderr.write('Warning : couldn\'t find local version of chromosome %s, attempting load reference instead...' % self.number)	
+			self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
+			if self.data == None :
+				raise ChromosomeError("Unable to load chromosome %s! Impossible to find reference sequence" % self.number, self.number)
 		
-		self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
-		if self.data == None :
-			raise ChromosomeError("Unable to load chromosome %s! Impossible to find reference sequence" % self.number, self.number)
+			self.isLight = False
 		
-		self.isLight = False
-		return True
-	
 	def __getHeavySequence(self, path) :
 		try :
 			if not SingletonManager.contains(path) :
@@ -94,7 +97,7 @@ class Chromosome :
 		elif os.path.exists(rp) :
 			return rp
 		
-		raise ChromosomeError("Unable to load chromosome %s! Can't find gene annotion sequence neither in %s or %s" % (self.number, p, rp), self.number)
+		raise ChromosomeError("Unable to load chromosome %s! Can't find gene annotion sequence neither in %s or %s\n" % (self.number, p, rp), self.number)
 		
 	def loadSNPs(self, version, verbose = False) :
 		try :
@@ -106,8 +109,8 @@ class Chromosome :
 			self.dbSNPs = SingletonManager.get(snpFile)
 			
 		except IOError :
-			sys.stderr.write('Unable to load snp data for chr %s of genome %s' %(self.number, self.genome.name))
-			sys.stderr.write('\t->Unable to resolve path: %s/chr%s.pygeno-dbSNP'%(self.genome.getdbSNPPath(), self.number))
+			sys.stderr.write('Unable to load snp data for chr %s of genome %s\n' %(self.number, self.genome.name))
+			sys.stderr.write('\t->Unable to resolve path: %s/chr%s.pygeno-dbSNP\n'%(self.genome.getdbSNPPath(), self.number))
 			
 
 	def hasGene(self, symbol) :
@@ -332,7 +335,7 @@ class Chromosome :
 		return self.genes[i]
 		
 	def __len__(self):
-		return len(self.data)
+		return self.genome.chrsData[self.number].length
 
 	def __str__(self) :
 		return "Chromosome: number %s / %s" %(self.number, str(self.genome))

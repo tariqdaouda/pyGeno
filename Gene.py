@@ -81,7 +81,7 @@ class Gene :
 		key = self.transcripts.keys()[k]
 		return self.loadTranscript(key)
 	
-	def getExons():
+	def getExons(self):
 		return self.exons
 		
 	def loadProtein(self, protId) :
