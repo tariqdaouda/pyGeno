@@ -340,8 +340,8 @@ def _importGeneSymbolIndex(gtfFile, specie) :
 	f.close()
 
 if __name__ == "__main__" :
-	import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
-	#importGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
+	#import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
+	importGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
 	
 	#print 'import mouse'
 	#importGenome('/u/daoudat/py/pyGeno/mouse', 'mouse', 'reference2')
