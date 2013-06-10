@@ -47,7 +47,8 @@ polymorphicNucleotides = {
 
 #<7iyed>
 #from Molecular Systems Biology 8; Article number 572; doi:10.1038/msb.2012.3
-lowAffinityCodons = ['GCA', 'GCT', 'AGA', 'CGA', 'CGT', 'AAT', 'GAT', 'TGT', 'CAA', 'GAA', 'GGA', 'GGT', 'CAT', 'ATA', 'ATT', 'CTA', 'CTT', 'TTA', 'AAA', 'TTT', 'CCA', 'CCT', 'AGT', 'TCA', 'TCT', 'ACA', 'ACT', 'TAT', 'GTA', 'GTT']
+codonAffinity = {'CTT': 'low', 'ACC': 'high', 'ACA': 'low', 'ACG': 'high', 'ATC': 'high', 'AAC': 'high', 'ATA': 'low', 'AGG': 'high', 'CCT': 'low', 'ACT': 'low', 'AGC': 'high', 'AAG': 'high', 'AGA': 'low', 'CAT': 'low', 'AAT': 'low', 'ATT': 'low', 'CTG': 'high', 'CTA': 'low', 'CTC': 'high', 'CAC': 'high', 'AAA': 'low', 'CCG': 'high', 'AGT': 'low', 'CCA': 'low', 'CAA': 'low', 'CCC': 'high', 'TAT': 'low', 'GGT': 'low', 'TGT': 'low', 'CGA': 'low', 'CAG': 'high', 'TCT': 'low', 'GAT': 'low', 'CGG': 'high', 'TTT': 'low', 'TGC': 'high', 'GGG': 'high', 'TAG': 'high', 'GGA': 'low', 'TGG': 'high', 'GGC': 'high', 'TAC': 'high', 'TTC': 'high', 'TCG': 'high', 'TTA': 'low', 'TTG': 'high', 'TCC': 'high', 'GAA': 'low', 'TAA': 'high', 'GCA': 'low', 'GTA': 'low', 'GCC': 'high', 'GTC': 'high', 'GCG': 'high', 'GTG': 'high', 'GAG': 'high', 'GTT': 'low', 'GCT': 'low', 'TGA': 'high', 'GAC': 'high', 'CGT': 'low', 'TCA': 'low', 'ATG': 'high', 'CGC': 'high'}
+
 #</7iyed>
 
 codonTable = {
@@ -113,34 +114,34 @@ def complement(seq) :
   
 def translateDNA_6Frames(sequence) :
 	trans = [
-				translateDNA(sequence, 1),
-				translateDNA(sequence, 2),
-				translateDNA(sequence, 3),
+				translateDNA(sequence, 'f1'),
+				translateDNA(sequence, 'f2'),
+				translateDNA(sequence, 'f3'),
 				
-				translateDNA(sequence, -1),
-				translateDNA(sequence, -2),
-				translateDNA(sequence, -3),
+				translateDNA(sequence, 'r1'),
+				translateDNA(sequence, 'r2'),
+				translateDNA(sequence, 'r3'),
 			]
 
 	return trans
 
-"""Translates DNA code, frame : 1, 2, 3, -1, -2, -3"""
-def translateDNA(sequence, frame = 1) :
+"""Translates DNA code, frame : f1, f2, f3, r1, r2, r3"""
+def translateDNA(sequence, frame = 'f1') :
 
 	protein = ""
 	
-	if frame == 1 :
+	if frame == 'f1' :
 		dna = sequence
-	elif frame == 2:
+	elif frame == 'f2':
 		dna = sequence[1:]
-	elif frame == 3 :
+	elif frame == 'f3' :
 		dna = sequence[2:]
-	elif frame == -1 :
+	elif frame == 'r1' :
 		dna = reverseComplement(sequence)
-	elif frame == -2 :
+	elif frame == 'r2' :
 		dna = reverseComplement(sequence)
 		dna = dna[1:]
-	elif frame == -3 :
+	elif frame == 'r3' :
 		dna = reverseComplement(sequence)
 		dna = dna[2:]
 
@@ -256,7 +257,7 @@ def decodePolymorphicNucleotide(nuc) :
 	
 	raise ValueError('nuc: %s, is not a valid nucleotide' % nuc)
 	
-def getCodon(sequence, x1) :
+def getNucleotideCodon(sequence, x1) :
 	"Returns the entire codon of the nucleotide at pos x1 in the cdna, and the position of that nocleotide in the codon"
 	
 	if x1 < 0 or x1 >= len(sequence) :
