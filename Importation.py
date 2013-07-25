@@ -1,4 +1,4 @@
-import os, glob, gzip, pickle, shutil
+import os, glob, gzip, pickle, shutil, zlib
 import configuration as conf
 
 from Genome import Genome
@@ -218,10 +218,11 @@ def import_dbSNP(packageFolder, specie, versionName) :
 		- no '?' allowed.If a numeric has a value of '?' (ex: het, se(het), 'MAF', 'GMAf count') the value is set to 0.0
 		- all snps have an orientation of +. If a snp has an orientation of -, it's alleles are replaced by their complements
 		- positions are 0 based
-		- the only value extracted from the files are : 'posistion', 'rs', 'type', 'assembly', 'chromosome', 'validated', 'alleles', 'original_orientation', 'maf_allele', 'maf_count', 'maf', 'het', 'se(het)' 
+		- the only value extracted from the files are : 'posistion', 'rs', 'type', 'assembly', 'chromosome', 'validated', 'alleles', 'original_orientation', 'maf_allele', 'maf_count', 'maf', 'het', 'se(het)
+		-loc is a dictionary allele wise that simplifies the line loc' 
 	"""
-	
-	legend = ['//pos', 'chromosome', 'rs', 'type', 'alleles', 'validated', 'assembly', 'original_orientation', 'maf_allele', 'maf_count', 'maf', 'het', 'se(het)']
+
+	legend = ['//pos', 'chromosome', 'rs', 'type', 'alleles', 'validated', 'assembly', 'original_orientation', 'maf_allele', 'maf_count', 'maf', 'het', 'se(het)', 'loc']
 	#Fcts
 	def fillCSV(res, csv) :
 		print '\t\t sorting snps by position in chromosome...'
@@ -244,7 +245,7 @@ def import_dbSNP(packageFolder, specie, versionName) :
 		criticalFields = ['rs', 'chromosome', '//pos', 'alleles', 'assembly', 'validated']
 		numericFields = ['maf_count', 'maf', 'het', 'se(het)']
 		numericFieldsWithNonNumericValues = 0
-		
+		locs = {}
 		for l in lines :
 			sl = l.split('|')
 			if sl[0][:2] == 'rs' :
@@ -282,6 +283,16 @@ def import_dbSNP(packageFolder, specie, versionName) :
 				res['maf_allele'] = sl[1].strip().replace('allele=', '')
 				res['maf_count'] = sl[2].strip().replace('count=', '')
 				res['maf'] = sl[3].strip().replace('MAF=', '')
+			
+			elif sl[0][:3] == 'LOC' and res['rs'] != None :
+				allele = sl[4].strip().replace('allele=', '')
+				locs[allele] = {}
+				locs[allele]['gene'] = sl[1].strip()
+				locs[allele]['function'] = sl[3].strip().replace('fxn-class=', '')
+				try :
+					locs[allele]['residue'] = sl[6].strip().replace('residue=', '')
+				except :
+					locs[allele]['residue'] = None
 					
 		for field in criticalFields :
 			if res[field] == None :
@@ -296,7 +307,9 @@ def import_dbSNP(packageFolder, specie, versionName) :
 				
 		if res['original_orientation'] == '-' :
 			res['alleles'] = uf.complement(res['alleles'])
-			
+		
+		#res['loc'] = zlib.compress(pickle.dumps(locs))
+		res['loc'] = pickle.dumps(locs).replace('\n', '/rje3/').replace(';', '/qte3/')
 		return (res, numericFieldsWithNonNumericValues)
 		
 	#Fcts
@@ -313,7 +326,7 @@ def import_dbSNP(packageFolder, specie, versionName) :
 	outPath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/dbSNP/%s/' %(specie, versionName)
 	if not os.path.exists(outPath):
 		os.makedirs(outPath)
-	
+
 	for fil in files :
 		chrStrStartPos = fil.find('ch')
 		chrStrStopPos = fil.find('.flat')
@@ -356,7 +369,7 @@ def import_dbSNP(packageFolder, specie, versionName) :
 	f = open(readMeFile, 'w')
 	f.write(desc)
 	f.close()
-
+	
 def __importSequence(number, fastaFile, targetDir) :
 	print 'making data for chromsome %s, source file: %s...' %(number, fastaFile)
 	
@@ -439,8 +452,8 @@ def __importGeneSymbolIndex(gtfFile, targetDirectory) :
 	
 
 if __name__ == "__main__" :
-	importGenome("/u/daoudat/py/pyGeno/installationPackages/genomes/mouse", 'mouse', 'GRCm38')
-	#import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
+	#importGenome("/u/daoudat/py/pyGeno/installationPackages/genomes/mouse", 'mouse', 'GRCm38')
+	import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
 	#importGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
 	
 	#print 'import mouse'

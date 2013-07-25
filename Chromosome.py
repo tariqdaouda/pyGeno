@@ -231,7 +231,7 @@ class Chromosome :
 					fct = defaultDbSNPsFilter
 				
 				snps = self.dbSNPs.findSnpsInRange(start, end)
-				print snps
+				#print snps
 				data = None
 				if snps != None :
 					for snp in snps:
@@ -239,7 +239,7 @@ class Chromosome :
 							if data == None :
 								data = list(self.data[start:end])
 							pos = snp['pos'] - start#-1
-							print uf.getPolymorphicNucleotide(snp['alleles'])
+							#print uf.getPolymorphicNucleotide(snp['alleles'])
 							data[pos] = uf.getPolymorphicNucleotide(snp['alleles'])
 
 				if data != None :

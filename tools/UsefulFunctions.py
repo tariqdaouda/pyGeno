@@ -125,26 +125,28 @@ def translateDNA_6Frames(sequence) :
 
 	return trans
 
-"""Translates DNA code, frame : f1, f2, f3, r1, r2, r3"""
-def translateDNA(sequence, frame = 'f1') :
+"""Translates DNA code, frame : fwd1, fwd2, fwd3, rev1, rev2, rev3"""
+def translateDNA(sequence, frame = 'fwd1') :
 
 	protein = ""
 	
-	if frame == 'f1' :
+	if frame == 'fwd1' :
 		dna = sequence
-	elif frame == 'f2':
+	elif frame == 'fwd2':
 		dna = sequence[1:]
-	elif frame == 'f3' :
+	elif frame == 'fwd3' :
 		dna = sequence[2:]
-	elif frame == 'r1' :
+	elif frame == 'rev1' :
 		dna = reverseComplement(sequence)
-	elif frame == 'r2' :
+	elif frame == 'rev2' :
 		dna = reverseComplement(sequence)
 		dna = dna[1:]
-	elif frame == 'r3' :
+	elif frame == 'rev3' :
 		dna = reverseComplement(sequence)
 		dna = dna[2:]
-
+	else :
+		raise ValueError('unknown reading frame: %s, should be one of the following: fwd1, fwd2, fwd3, rev1, rev2, rev3' % frame)
+		
 	for i in range(0, len(dna),  3) :
 		if (len(dna[i:i+3]) == 3) :
 			try :

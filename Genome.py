@@ -148,12 +148,9 @@ class Genome :
 			chros = chromosomes 
 		
 		res = {}
-
 		for c in chros :
-			
 			if self.chrsData[c].hasGene(geneSymbol) :
-				print 'aaaa', c, chros
-				return self.loadChromosome(c.number)
+				return self.loadChromosome(c)
 				
 	def loadRandomChromosome(self, loadSnps = True) :
 		"""Picks a random position in the genome and returns it's chromosome"""

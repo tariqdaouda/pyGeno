@@ -184,7 +184,7 @@ class Transcript :
 				elif uf.codonAffinity[codon] == 'high' :
 					chunks[c]['high_aff'] += 1
 			else :
-				for polyCodon in uf.polymorphicCondonCombinaisons(codon) :
+				for polyCodon in uf.polymorphicCodonCombinaisons(codon) :
 					if uf.codonAffinity[polyCodon] == 'low' :
 						chunks[c]['low_aff'] += 1
 					elif uf.codonAffinity[polyCodon] == 'high' :
@@ -203,7 +203,7 @@ class Transcript :
 			if codon in uf.codonTable.keys():
 				codonUsage[codon] += 1
 			else :
-				for polyCodon in uf.polymorphicCondonCombinaisons(codon) :
+				for polyCodon in uf.polymorphicCodonCombinaisons(codon) :
 					codonUsage[polyCodon] += 1
 		return codonUsage
 	#</7iyed>

@@ -1,6 +1,7 @@
 import configuration as conf
 from tools import UsefulFunctions as uf
 from exceptions import *
+import zlib, pickle
 
 class SNPFile :
 	"""This represent a file containing a list of snps sorted by position, the position must be in the first column"""
@@ -30,8 +31,8 @@ class SNPFile :
 		while (r1 <= r2) :
 			pos = (r1+r2)/2
 			sl = self.lines[pos].split(';')
+			
 			val = int(sl[0])
-
 			if val == x1 :
 				return (pos, val)
 			elif x1 < val :
@@ -78,6 +79,7 @@ class SNPFile :
 		try :
 			return self.snps[lineNumber]
 		except KeyError :
+			#print '-->', lineNumber, self.lines[lineNumber]
 			self.snps[lineNumber] = self.SNPObj(self.lines[lineNumber])
 			return self.snps[lineNumber]
 	
@@ -116,7 +118,7 @@ class SNP :
 		f = open(conf.DATA_PATH+'/'+self.formatDecriptionFile)
 		s = f.read()
 		f.close()
-		print s
+		#print s
 	
 	def __hash__(self):
 		return hash(self.__class__.__name__) ^ hash(self.values)
@@ -147,7 +149,7 @@ class CasavaSNP(SNP) :
 			self.values['G_used'] = int(sl[11])
 			self.values['T_used'] = int(sl[12])
 		except :
-			raise SNPError("Unkown problem, see self.line")
+			raise  SNPError("Unkown problem, here's the line: %s" % sl)
 
 class dbSNP(SNP) :
 	def __init__(self, line) :
@@ -156,9 +158,9 @@ class dbSNP(SNP) :
 		self.__make(line.split(';'))
 	
 	def __make(self, sl) :
-		#print sl
-		if len(sl) != 13 :
-			raise SNPError("a dbSNP SNP should have 13 fields, got: %d" % len(sl), sl)
+		#print '---<', sl
+		if len(sl) != 14 :
+			raise SNPError("a dbSNP SNP should have 14 fields, got: %d" % len(sl), sl)
 		
 		try :
 			self.values = {}
@@ -180,6 +182,8 @@ class dbSNP(SNP) :
 			self.values['maf'] = float(sl[10])
 			self.values['het'] = float(sl[11])
 			self.values['se(het)'] = float(sl[12])
+			#print pickle.loads(zlib.decompress(sl[13]))
+			self.values['loc'] = pickle.loads(sl[13].replace('/rje3/', '\n').replace('/qte3/', ';'))
 		except :
-			raise SNPError("Unkown problem, see self.line")
+			raise SNPError("Unkown problem, here's the line: %s" % sl)
 
