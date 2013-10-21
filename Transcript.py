@@ -184,44 +184,14 @@ class Transcript :
 					else :
 						chunks[c]['high_aff'] += 1
 				else :
-					for codon in uf.polymorphicCondonCombinaisons(self.CDNA[i:i+3]) :
+					for codon in uf.polymorphicCodonCombinaisons(self.CDNA[i:i+3]) :
 						if codon in uf.lowAffinityCodons :
 							chunks[c]['low_aff'] += 1
 						else  :
 							chunks[c]['high_aff'] += 1
-		
-		for i in range(len(chunks)) :
-			if chunks[i]['high_aff']+chunks[i]['low_aff'] == 0 :
-				chunks[i] = chunks[i-1]
 	
 		return chunks
-		
-	def getCodonAffinityMap_bck(self, chunkRatio = 0.05) :
-		chunks = []
-		if len(self.CDNA) < 3 :
-			return None
-			
-		for i in range(int(1/chunkRatio)) :
-			chunks.append({'low_aff':0, 'high_aff':0})
-		
-		efflen = len(self.CDNA)/3
-		for i in range(0, len(self.CDNA), 3) :
-			if len(self.CDNA[i:i+3]) == 3 :
-				effI = i/3.
-				c = int(effI/(efflen*chunkRatio))
-				if self.CDNA[i:i+3] in uf.codonTable.keys():
-					if self.CDNA[i:i+3] in uf.lowAffinityCodons :
-						chunks[c]['low_aff'] += 1
-					else :
-						chunks[c]['high_aff'] += 1
-				else :
-					for codon in uf.polymorphicCondonCombinaisons(self.CDNA[i:i+3]) :
-						if codon in uf.lowAffinityCodons :
-							chunks[c]['low_aff'] += 1
-						else  :
-							chunks[c]['high_aff'] += 1
-		return chunks
-		
+	
 	def getCodonUsage(self) :
 		if self.codonUsage != None :
 			return self.codonUsage
@@ -237,7 +207,7 @@ class Transcript :
 				else :
 					self.highAffinityCodonsNb += 1
 			else :
-				for c in uf.polymorphicCondonCombinaisons(self.sequence[i:i+3]) :
+				for c in uf.polymorphicCodonCombinaisons(self.sequence[i:i+3]) :
 					self.codonUsage[c] += 1
 					if c in uf.lowAffinityCodons :
 						self.lowAffinityCodonsNb += 1

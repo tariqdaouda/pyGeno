@@ -8,7 +8,7 @@ import sys, pickle, random, shutil, os, glob
 def defaultMixedSNVFilter(snvDict) :
 	"""Default function returns a concatenation of all snvs"""
 	snvs = {}
-	for p in snvsDict:
+	for p in snvDict:
 		for snv in snvsDict[p] :
 			if snv['Qmax_gt'] >= 20 :
 				if snv['pos'] not in snvs :
@@ -69,6 +69,7 @@ class MixedGenome :
 		return self.chromosomesNumberList
 	
 	def getChromosomes(self):
+		self.loadAllChromosomes()
 		return self.chromosomes.values()
 		
 	def __getitem__(self, val) :
@@ -139,7 +140,8 @@ class MixedChromosome :
 		for symbol in self.geneSymbolIndex.keys() :
 			self.loadGene(symbol, SNVsFilter, verbose)
 	
-	def getGenes(self) :
+	def getGenes(self, SNVsFilter = None) :
+		self.loadAllGenes(SNVsFilter)
 		return self.genes.values()
 		
 	def getSNVsInRange(self, x1, x2, SNVsFilter = None) :
