@@ -1,4 +1,10 @@
 import configuration as conf
+
+from rabaDB.setup import *
+RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, './pyGenoRaba.db')
+from rabaDB.Raba import *
+import rabaDB.fields as rf
+
 from tools import UsefulFunctions as uf
 
 from Chromosome import Chromosome
@@ -30,22 +36,21 @@ class ChrData_Struct :
 	def hasGene(self, symbol) :
 		return symbol in self.geneSymbolIndex.keys()
 
-class Genome :
+class Genome(Raba) :
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	id = rf.PrimitiveField()
+	name = rf.PrimitiveField()
+	specie = rf.PrimitiveField()
+	chromosomes = rf.RabaListField()
 	
-	def __init__(self, path = 'human/reference', verbose = False) :
-		self.reset(path, verbose)
+	def __init__(self, **fieldsSet) :
+		Raba.__init__(self, **fieldsSet)
+		print 'specie, name', self.specie, self.name
 		
-	def reset(self, path = 'human/reference', verbose = False) :
-		if verbose :
-			print "Creating genome: " + path + "..."
-		
-		self.path = path
-		self.specie = path.split('/')[0]
-		self.name = path.split('/')[1]
-		
+		self.verbose = False
 		self.absolutePath = conf.DATA_PATH+'/%s/genomes/%s' % (self.specie, self.name)
 		self.referencePath = conf.DATA_PATH+'/%s/genomes/reference' % (self.specie)
-
+		
 		try :
 			f = open(self.absolutePath + '/genomeChrPos.index')
 		except IOError:
