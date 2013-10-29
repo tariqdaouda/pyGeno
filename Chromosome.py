@@ -1,38 +1,22 @@
-import re, random, sys,pickle
-from tools.SegmentTree import SegmentTree as SegmentTree
-from tools.SecureMmap import SecureMmap as SecureMmap
-from tools import UsefulFunctions as uf
-from tools import SingletonManager
+import os, sys, random
+from types import *
 
 import configuration as conf
 from Gene import Gene
 from SNP import *
+from exceptions import *
 
+from tools.SegmentTree import SegmentTree as SegmentTree
+from tools.SecureMmap import SecureMmap as SecureMmap
+from tools import UsefulFunctions as uf
+from tools import SingletonManager
 from tools.GTFTools import GTFFile
+
 
 from rabaDB.setup import *
 RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
 from rabaDB.Raba import *
 import rabaDB.fields as rf
-
-class GeneNotFound(Exception):
-	def __init__(self, chromosome, geneSymbol, message = ''):
-		self.message = message
-		self.symbol = geneSymbol
-		self.chromosome = chromosome
-		
-	def __str__(self):
-		return """
-		Description : %s
-		gene_symbol : %s
-		chromosome : %s\n"""%(self.message, self.symbol, self.chromosome)
-
-class RequestError(Exception):
-	def __init__(self, message = ''):
-		self.message = message
-		
-	def __str__(self):
-		return """Request Error: %s"""%(self.message)
 
 def defaultSNVsFilter(casavaSnp) :
 	"""The default rule to decide wether to take the most probable genotype or the
@@ -62,26 +46,9 @@ class Chromosome(Raba) :
 	def __init__(self, *args, **fieldsSet) :
 		Raba.__init__(self, **fieldsSet)
 		
-		try :
-			self.casavaSNPs = SNPFile('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number), CasavaSNP)
-			refSeq = '%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number)
-			
-			if not SingletonManager.contains(refSeq) :
-				SingletonManager.add(SecureMmap(refSeq), refSeq)
-				
-			self.data = SingletonManager.get(refSeq)
-				
-			self.isLight = True
-		except IOError:
-			try :
-				self.data = SecureMmap('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number))
-			except IOError:
-				print 'Warning : couldn\'t find local version of chromosome %s, loading reference instead...' % self.number
-				self.data = SecureMmap('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
-				
-			self.isLight = False
-
-		gtfFp = '%s/chr%s.gtf'%(self.genome.getGeneSetsPath(), self.number)
+		self.__loadSequence()
+		
+		gtfFp = self.__getAnnotations()
 		f = open(gtfFp, 'r')
 		if not SingletonManager.contains(gtfFp) :
 			SingletonManager.add(f.readlines(), gtfFp)	
@@ -90,11 +57,51 @@ class Chromosome(Raba) :
 		
 		self.geneSymbolIndex = self.genome.chrsData[self.number].geneSymbolIndex
 
-		
 		if dbSNPVersion != None and dbSNPVersion != False and dbSNPVersion != '':
 			self.loadSNPs(dbSNPVersion, verbose)
 		elif verbose :
 			print 'Not loading SNPs because told to...'
+	
+	def __loadSequence(self):
+		if os.path.exists('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number)) :
+			self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number))
+			if self.data != None :
+				self.isLight = False
+			else :
+				raise ChromosomeError("Unable to load chromosome %s! Impossible to find sequence" % self.number, self.number)
+
+		elif os.path.exists('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number)) :
+			self.casavaSNPs = SNPFile('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number), CasavaSNP)
+			self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
+			if self.data == None :
+				raise ChromosomeError("Unable to load chromosome %s! Impossible to find reference sequence" % self.number, self.number)
+			self.isLight = True
+		else :
+			sys.stderr.write('Warning : couldn\'t find local version of chromosome %s, attempting load reference instead...' % self.number)	
+			self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
+			if self.data == None :
+				raise ChromosomeError("Unable to load chromosome %s! Impossible to find reference sequence" % self.number, self.number)
+		
+			self.isLight = False
+		
+	def __getHeavySequence(self, path) :
+		try :
+			if not SingletonManager.contains(path) :
+				SingletonManager.add(SecureMmap(path), path)
+				
+			return SingletonManager.get(path)
+		except :
+			return None
+	
+	def __getAnnotations(self) :
+		p = '%s/chr%s.gtf'%(self.genome.getGeneSetsPath(), self.number)
+		rp = '%s/chr%s.gtf'%(self.genome.getReferenceGeneSetsPath(), self.number)
+		if os.path.exists(p) :
+			return p
+		elif os.path.exists(rp) :
+			return rp
+		
+		raise ChromosomeError("Unable to load chromosome %s! Can't find gene annotion sequence neither in %s or %s\n" % (self.number, p, rp), self.number)
 		
 	def loadSNPs(self, version, verbose = False) :
 		try :
@@ -106,8 +113,8 @@ class Chromosome(Raba) :
 			self.dbSNPs = SingletonManager.get(snpFile)
 			
 		except IOError :
-			sys.stderr.write('Unable to load snp data for chr %s of genome %s' %(self.number, self.genome.name))
-			sys.stderr.write('\t->Unable to resolve path: %s/chr%s.pygeno-dbSNP'%(self.genome.getdbSNPPath(), self.number))
+			sys.stderr.write('Unable to load snp data for chr %s of genome %s\n' %(self.number, self.genome.name))
+			sys.stderr.write('\t->Unable to resolve path: %s/chr%s.pygeno-dbSNP\n'%(self.genome.getdbSNPPath(), self.number))
 			
 
 	def hasGene(self, symbol) :
@@ -169,6 +176,9 @@ class Chromosome(Raba) :
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
 		
+		assert type(x1) is IntType
+		assert type(x2) is IntType
+		
 		if x1 != None :
 			if x2 == None :
 				start, end = x1, x1 + 1
@@ -205,6 +215,9 @@ class Chromosome(Raba) :
 		"""SNPsFilter is a fct that takes a dbSNP SNP as input a returns true if it correpsond to the rule.
 		If left to none Chromosome.defaulDbSNPsFilter is used."""
 		
+		assert type(x1) is IntType
+		assert type(x2) is IntType
+		
 		if x1 != None :
 			if x2 == None :
 				start, end = x1, x1 + 1
@@ -222,7 +235,7 @@ class Chromosome(Raba) :
 					fct = defaultDbSNPsFilter
 				
 				snps = self.dbSNPs.findSnpsInRange(start, end)
-				print snps
+				#print snps
 				data = None
 				if snps != None :
 					for snp in snps:
@@ -230,7 +243,7 @@ class Chromosome(Raba) :
 							if data == None :
 								data = list(self.data[start:end])
 							pos = snp['pos'] - start#-1
-							print uf.getPolymorphicNucleotide(snp['alleles'])
+							#print uf.getPolymorphicNucleotide(snp['alleles'])
 							data[pos] = uf.getPolymorphicNucleotide(snp['alleles'])
 
 				if data != None :
@@ -253,6 +266,9 @@ class Chromosome(Raba) :
 		"""dbSNPsFilter is a fct that takes a dbSNP as input a returns true if it correpsond to the rule.
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
+		assert type(x1) is IntType
+		assert type(x2) is IntType
+		
 		res = []
 
 		if self.dbSNPs == None :
@@ -275,6 +291,9 @@ class Chromosome(Raba) :
 		"""SNVsFilter is a fct that takes a CasavaSnp as input a returns true if it correpsond to the rule.
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
+		assert type(x1) is IntType
+		assert type(x2) is IntType
+		
 		res = []
 			
 		if not self.isLight :
@@ -320,7 +339,7 @@ class Chromosome(Raba) :
 		return self.genes[i]
 		
 	def __len__(self):
-		return len(self.data)
+		return self.genome.chrsData[self.number].length
 
 	def __str__(self) :
 		return "Chromosome: number %s / %s" %(self.number, str(self.genome))

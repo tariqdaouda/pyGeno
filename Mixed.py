@@ -21,10 +21,10 @@ class MixedGenome :
 	"""With this class you can mix serveral light genomes an tune the getSequence to set the way the polymorphims
 	of different genomes are mixed"""
 	
-	def __init__(self, paths, verbose = False) :
-		self.reset(paths, verbose)
+	def __init__(self, paths, reference = None, verbose = False) :
+		self.reset(paths, reference, verbose)
 		
-	def reset(self, paths, verbose = False) :
+	def reset(self, paths, reference = None, verbose = False) :
 		
 		if len(paths) < 1 :
 			raise ValueError("No genome path defined")
@@ -38,7 +38,7 @@ class MixedGenome :
 			if verbose :
 				print 'loading Genome', p
 				
-			self.genomes[p] = Genome(p, verbose)
+			self.genomes[p] = Genome(p, reference, verbose)
 			if self.specie == None :
 				self.specie = self.genomes[p].specie
 			elif self.specie != self.genomes[p].specie :

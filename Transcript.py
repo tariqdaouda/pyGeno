@@ -29,13 +29,6 @@ class Transcript :
 		self.startCodon = None
 		self.stopCodon = None
 		
-		#<7iyed>
-		#this is set to None until getCodonUsage is called once
-		self.codonUsage = None
-		#</7iyed>
-		self.lowAffinityCodonsNb = -1
-		self.highAffinityCodonsNb = -1
-		
 		#This dict contains a set au flags about the transcript
 		#and his updated automaticly, and in theory should be modified directly.
 		#the flag DUBIOUS is on if : LEN_NOT_MULT_3
@@ -66,8 +59,8 @@ class Transcript :
 		return (self.protein != '')
 	"""
 	
-	def getExons(self, dnaX1, dnaX2 = None) :
-		"Returns the exons that the range dnaX1, dnaX2 belongs to. dnaX2 = None only dnaX1 is taken into account"
+	def getRangeExons(self, dnaX1, dnaX2 = None) :
+		"Returns the exons where dnaX1, dnaX2 is included. dnaX2 = None only dnaX1 is taken into account"
 		ret = []
 		if dnaX2 == None :
 			for e in self.exons :
@@ -79,10 +72,13 @@ class Transcript :
 					ret.append(e)
 		return ret
 	
-	def getCodon(self, cdnaX1) :
+	def getNucleotideCodon(self, cdnaX1) :
 		"Returns the entire codon of the nucleotide at pos cdnaX1 in the cdna, and the position of that nocleotide in the codon"
-		return uf.getCodon(self.CDNA, cdnaX1)
+		return uf.getNucleotideCodon(self.CDNA, cdnaX1)
 
+	def getCodon(self, codonNumber) :
+		return self.getNucleotideCodon(codonNumber*3)
+		
 	def close(self) :
 		"""After a transcript has been closed youcan still add exons but each new append would cause it
 		recompute it's binary sequences, resulting in a overhead. A transcript that has not been closed
@@ -172,49 +168,37 @@ class Transcript :
 		for i in range(int(1/chunkRatio)) :
 			chunks.append({'low_aff':0, 'high_aff':0})
 		
-		efflen = len(self.CDNA)/3
-		for i in range(0, len(self.CDNA), 3) :
-			if len(self.CDNA[i:i+3]) == 3 :
-				effI = i/3.
-				c = int(N.floor(effI/(efflen*chunkRatio)))
-
-				if self.CDNA[i:i+3] in uf.codonTable.keys():
-					if self.CDNA[i:i+3] in uf.lowAffinityCodons :
-						chunks[c]['low_aff'] += 1
-					else :
-						chunks[c]['high_aff'] += 1
-				else :
-					for codon in uf.polymorphicCodonCombinaisons(self.CDNA[i:i+3]) :
-						if codon in uf.lowAffinityCodons :
-							chunks[c]['low_aff'] += 1
-						else  :
-							chunks[c]['high_aff'] += 1
-	
-		return chunks
-	
-	def getCodonUsage(self) :
-		if self.codonUsage != None :
-			return self.codonUsage
-		
-		for k in uf.codonTable.keys() :
-			self.codonUsage[k] = 0
-			
-		for i in range(0, len(self.sequence), 3) :
-			if self.sequence[i:i+3] in uf.codonTable.keys() :
-				self.codonUsage[self.sequence[i:i+3]] += 1
-				if self.sequence[i:i+3] in uf.lowAffinityCodons :
-					self.lowAffinityCodonsNb += 1
-				else :
-					self.highAffinityCodonsNb += 1
+		for i in range(self.getNbCodons()) :
+			c = int(N.floor(i/(self.getNbCodons()*chunkRatio)))
+			codon = self.getCodon(i)[0]
+			if codon in uf.codonTable.keys():
+				if uf.codonAffinity[codon] == 'low' :
+					chunks[c]['low_aff'] += 1
+				elif uf.codonAffinity[codon] == 'high' :
+					chunks[c]['high_aff'] += 1
 			else :
-				for c in uf.polymorphicCodonCombinaisons(self.sequence[i:i+3]) :
-					self.codonUsage[c] += 1
-					if c in uf.lowAffinityCodons :
-						self.lowAffinityCodonsNb += 1
-					else :
-						self.highAffinityCodonsNb += 1
-	
-		return self.codonUsage
+				for polyCodon in uf.polymorphicCodonCombinaisons(codon) :
+					if uf.codonAffinity[polyCodon] == 'low' :
+						chunks[c]['low_aff'] += 1
+					elif uf.codonAffinity[polyCodon] == 'high' :
+						chunks[c]['high_aff'] += 1
+		
+		return chunks
+		
+	def getCodonUsage(self) :
+		
+		codonUsage = {}
+		for k in uf.codonTable.keys() :
+			codonUsage[k] = 0
+			
+		for i in range(self.getNbCodons()) :
+			codon = self.getCodon(i)[0]
+			if codon in uf.codonTable.keys():
+				codonUsage[codon] += 1
+			else :
+				for polyCodon in uf.polymorphicCodonCombinaisons(codon) :
+					codonUsage[polyCodon] += 1
+		return codonUsage
 	#</7iyed>
 	
 	def getExons(self):
@@ -226,6 +210,9 @@ class Transcript :
 		e = copy.copy(self)
 		e.gene = str(self.gene)
 		return e
+	
+	def getNbCodons(self) :
+		return len(self.CDNA)/3
 		
 	def __getitem__(self, i) :
 		return self.sequence[i]
