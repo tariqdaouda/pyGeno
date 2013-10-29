@@ -39,9 +39,9 @@ class Genome(Raba) :
 	name = rf.PrimitiveField()
 	specie = rf.PrimitiveField()
 	chromosomes = rf.RabaListField()
-	packageDir = rf.PrimitiveField()
+	genomeSource = rf.PrimitiveField()
+	packageInfos = rf.PrimitiveField()
 	
-<<<<<<< HEAD
 	def __init__(self, *args, **fieldsSet) :
 		Raba.__init__(self, **fieldsSet)
 		
@@ -53,56 +53,6 @@ class Genome(Raba) :
 			f = open(self.absolutePath + '/genomeChrPos.index')
 		except IOError:
 			f = open(self.referencePath + '/genomeChrPos.index')
-=======
-	def __init__(self, path, reference = None, verbose = False) :
-		"""path is a string that must have the following form: specie/genomeName ex: 'human/GRCh37.p2' or 'human/patient1'
-		To know more about how to import new genomes please have a look at Importation.py. Beside if the genome name is
-		'reference', ex : 'human/reference' the default reference genome will be loaded
-		
-		In case the genome is not complete (missing data for some chromosomes) or if your genome only contains a list of snps,
-		(ex: sequencing results). To fill in the missing data pyGeno needs a complete genome to use as reference. As the specie
-		has already been specified in path, you only need to pass the name of the reference genome ex: "GRCh37.p2".
-		If no reference genome is specified and one is needed pyGeno will try to load the default reference genome for the specie
-		as defined in pyGeno_SETTINGS['REFERENCE_GENOMES'][specie] (or more infos on defaults, see update_REFERENCE_GENOME() in configuration.py). 
-		"""
-		
-		self.reset(path, reference, verbose)
-	
-	def reset(self, path, reference = None, verbose = False) :
-		if verbose :
-			print "Creating genome: " + path + "..."
-		
-		self.path = path
-		self.specie = path.split('/')[0]
-		self.name = path.split('/')[1]
-		
-		if self.name == 'reference' :
-			self.name = conf.get_REFERENCE_GENOME(self.specie)
->>>>>>> medusa
-			
-		if reference != None :
-			self.reference = reference
-		else :
-			self.reference = conf.get_REFERENCE_GENOME(self.specie)
-		
-		self.absolutePath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.name)
-		self.referenceAbsolutePath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.reference)	
-		
-		if os.path.exists(self.absolutePath + '/genomeChrPos.index') :
-			f = open(self.absolutePath + '/genomeChrPos.index')
-		elif os.path.exists(self.referenceAbsolutePath + '/genomeChrPos.index') :
-			f = open(self.referenceAbsolutePath + '/genomeChrPos.index')
-		else :
-			raise GenomeError("Can't find genomeChrPos.index in neither %s nor the reference genome %s" % (path, self.reference), self.path)
-		
-		self.chrsData = {}
-		startPosition = 0
-		for l in f.readlines()[1:] :
-			sl = l.split(';')
-			self.chrsData[sl[0]] = ChrData_Struct(self, sl[0], sl[1], sl[2], sl[3])
-			self.length = self.chrsData[sl[0]].x2
-		
-		f.close()
 	
 	def getChromosomesNumberList(self):
 		return self.chrsData.keys()
@@ -119,19 +69,8 @@ class Genome(Raba) :
 	def getReferenceGeneSetsPath(self) :
 		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s/gene_sets' % (self.specie, self.reference)
 		
-<<<<<<< HEAD
 	def loadChromosome(self, number, dbSNPVersion = None) :
 		number = number.upper()
-=======
-	def getdbSNPPath(self) :
-		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/dbSNP/' % (self.specie)
-
-	def empty(self) :
-		self.chromosomes = {}
-	
-	def loadChromosome(self, numberStr, dbSNPVersion = None, verbose = False) :
-		number = numberStr.upper()
->>>>>>> medusa
 		if number not in self.chromosomes.keys():
 			if number != '' :
 				self.chromosomes[number] = Chromosome(number = number, genome = self, dbSNPVersion = dbSNPVersion)

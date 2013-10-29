@@ -24,6 +24,9 @@ class GTFFile :
 		self.splittedFlag = range(len(self.data))
 		
 	def __splitLine(self, l) :
+		if self.data[l][0] == '#' :
+			return False
+		
 		if self.splittedFlag[l] >= 0 :
 			self.data[l] = self.data[l].split('\t')
 			
@@ -36,8 +39,13 @@ class GTFFile :
 			
 			self.splittedFlag[l] = -l
 		
+		return True
+	
 	def get(self, line, elt) :
-		self.__splitLine(line)
+		i = line
+		while self.__splitLine(i) :
+			i += 1
+		
 		try :
 			return self.data[line][elmt]
 		except IndexError :
