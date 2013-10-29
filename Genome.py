@@ -1,7 +1,7 @@
 import configuration as conf
 
 from rabaDB.setup import *
-RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, './pyGenoRaba.db')
+RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
 from rabaDB.Raba import *
 import rabaDB.fields as rf
 
@@ -42,10 +42,10 @@ class Genome(Raba) :
 	name = rf.PrimitiveField()
 	specie = rf.PrimitiveField()
 	chromosomes = rf.RabaListField()
+	packageDir = rf.PrimitiveField()
 	
-	def __init__(self, **fieldsSet) :
+	def __init__(self, *args, **fieldsSet) :
 		Raba.__init__(self, **fieldsSet)
-		print 'specie, name', self.specie, self.name
 		
 		self.verbose = False
 		self.absolutePath = conf.DATA_PATH+'/%s/genomes/%s' % (self.specie, self.name)
@@ -64,8 +64,6 @@ class Genome(Raba) :
 			self.length = self.chrsData[sl[0]].x2
 		
 		f.close()
-		
-		self.empty()
 	
 	def getChromosomesNumberList(self):
 		return self.chrsData.keys()
@@ -85,14 +83,11 @@ class Genome(Raba) :
 	def getSpecie(self):
 		return self.specie
 		
-	def empty(self) :
-		self.chromosomes = {}
-	
-	def loadChromosome(self, numberStr, dbSNPVersion = None, verbose = False) :
-		number = numberStr.upper()
+	def loadChromosome(self, number, dbSNPVersion = None) :
+		number = number.upper()
 		if number not in self.chromosomes.keys():
 			if number != '' :
-				self.chromosomes[number] = Chromosome(number, self, self.chrsData[number].x1, self.chrsData[number].x2, dbSNPVersion, verbose)
+				self.chromosomes[number] = Chromosome(number = number, genome = self, dbSNPVersion = dbSNPVersion)
 
 		return self.chromosomes[number]
 	

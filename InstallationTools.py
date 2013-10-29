@@ -2,9 +2,15 @@ import os, glob, gzip, pickle
 import configuration as conf
 
 from Genome import Genome
+from Chromosome import Chromosome
+from Gene import Gene
+from Transcript import Transcript
+from Exon import Exon
+from Protein import Protein
+
 from tools import UsefulFunctions as uf
 from tools.CSVTools import CSVFile
-#from expyutils.GTFTools import GTFFile
+from expyutils.GTFTools import GTFFile
 
 def currentVersion():
 	"""returns a tuple describing pyGeno's current version"""
@@ -20,8 +26,16 @@ def importGenome(packageDir, specie, genomeName) :
 	if len(gtfs) != 1 :
 		raise Exception('There should be one and only one gtf index file in the package')
 	
-	_importSequences(packageDir, specie, genomeName)
-	_importGeneSymbolIndex(gtfs[0], specie)
+	genome = Genome(name = genomeName, specie = specie, packageDir = packageDir)
+	chroInfos = _importSequences(packageDir, genome)
+	_importGenomeObjects(gtfs[0], chroInfos, genome)
+	
+	for chromosome in genomes.chromosomes :
+		chromosome.header = chroInfos[chromosome.number][0]
+		chromosome.x1 = chroInfos[chromosome.number][1]
+		chromosome.x2 = chroInfos[chromosome.number][2]
+
+	genome.save()
 	
 def importGenome_casava(specie, genomeName, snpsTxtFile) :
 	"""Creates a light genome (contains only snps infos and no sequence from the reference genome)
@@ -222,56 +236,52 @@ def import_dbSNP(packageFolder, specie, versionName) :
 	f.close()
 
 """===These are the private functions that you should not call, unless you really know what you're doing==="""
-def _importSequences(fastaDir, specie, genomeName) :
+def _importSequences(fastaDir, genome) :
 	print r"""Converting fastas from dir: %s into pyGeno's data format
 	resulting files will be part of genome: %s/%s
-	This may take some time, please wait...""" %(fastaDir, specie, genomeName)
+	This may take some time, please wait...""" %(fastaDir, genome.specie, genome.name)
 	
 
-	path = conf.DATA_PATH+'/%s/genomes/%s/'%(specie, genomeName)
+	path = conf.DATA_PATH+'/%s/genomes/%s/'%(genome.specie, genome.name)
 
 	if not os.path.exists(path):
 		os.makedirs(path)
 		
-	chrs = glob.glob(fastaDir+'/chr*.fa')
-	if len(chrs) < 1 :
-		raise Exception('No Fastas found in directort, importation aborted')
+	chrsFiles = glob.glob(fastaDir+'/chr*.fa')
+	print chrsFiles, fastaDir+'/chr*.fa'
+	if len(chrsFiles) < 1 :
+		raise Exception('No Fasta found in directory, importation aborted')
 		
 	startPos = 0
-	genomeChrPos = {} 
+	chroInfos = {} 
 	headers = ''
 	
-	for chro in chrs :
-		print 'making data for Chr', chro
+	for chroFile in chrsFiles :
+		print 'making sequence file for Chr', chroFile
+		header = f.readline()
 		
-		f = open(chro)
+		f = open(chroFile)
 		headers += f.readline()
 		s = f.read().upper().replace('\n', '').replace('\r', '')
 		f.close()
 		
-		fn = chro.replace('.fa', '.dat').replace(fastaDir, path)
+		fn = chroFile.replace('.fa', '.dat').replace(fastaDir, path)
 		f = open(fn, 'w')
 		f.write(s)
 		f.close()
 		
-		ch = chro.replace(fastaDir, '').replace('/chr', '').replace('.fa', '')
-		genomeChrPos[ch] = [str(ch), str(startPos), str(startPos+len(s)), str(len(s))]
 		startPos = startPos+len(s)
-
-	print 'making index file genomeChrPos'
-	fh = open(path+'/genomeChrPos.index', 'w')
-	fh.write('chromosome;chr_start;chr_end;length\n')
-	for k in genomeChrPos.keys() :
-		fh.write(';'.join(genomeChrPos[k])+'\n')
-	fh.close()
-
+		chroInfos[chroNumber] = [header, str(startPos), str(startPos+len(s))]
+	
 	print 'writing build info file'
 	f=open('%s/build_infos.txt' % (path), 'w')
 	f.write('source package directory: %s' % fastaDir)
 	f.write('\nheaders:\n------\n %s' % headers)
 	f.close()
 
-def _importGeneSymbolIndex(gtfFile, specie) :
+	return chroInfos
+	
+def _importGeneSymbolIndex_purgatory(gtfFile, specie) :
 
 	path = conf.DATA_PATH+'/%s/gene_sets/'%(specie)
 	if not os.path.exists(path):
@@ -339,12 +349,83 @@ def _importGeneSymbolIndex(gtfFile, specie) :
 	f.write('source file: %s' % gtfFile)
 	f.close()
 
+def _importGenomeObjects(gtfFilePath, chroInfos, genome) :
+
+	gtf = GTFFile()
+	gtf.parseFile(gtfFilePath)
+	
+	chromosomes = {}
+	genes = {}
+	transcripts = {}
+	proteins = {}
+	exons = {}
+	for i in range(len(gtf)) :
+		chroNumber = gtf.get(i, 'source')
+		if chroNumber in chroInfos :
+			if chroNumber not in chromosomes :
+				print chroNumber, gtf.get(i, 'source')
+				chromosomes[chroNumber] = Chromosome(genome = genome, number = chroNumber)
+			
+			geneId = gtf.get(i, 'gene_id')
+			geneName = gtf.get(i, 'gene_name')
+			strand = gtf.get(i, 'strand')
+			if geneId not in genes :
+				genes[geneId] = Gene(genome = genome, chromosome = chromosomes[chroNumber], id = geneId, name = geneName, strand = strand)
+			
+			transId = gtf.get(i, 'transcript_id')
+			transName = gtf.get(i, 'transcript_name')
+			protId = gtf.get(i, 'protein_id')
+			protName = transName
+			if transId not in transcripts :
+				transcripts[transId] = Transcript(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], id = transId, name = transName)
+				protein[protId] = Protein(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], id = protId, name = protName)
+				transcripts[transId].protein = protein[protId]
+				
+			regionType = gtf.get(i, 'feature')
+			x1 = gtf.get(i, 'start')
+			x2 = gtf.get(i, 'end')
+			if regionType == 'exon' :
+				exonNumber = gtf.get(i, 'exon_number')
+				codingType = gtf.get(i, 'gene_biotype')
+				exonKey = '%s%s%s' % (chroNumber, x1, x2)
+				exonId = gtf.get(i, 'exon_id')
+				if exonId not in exons :
+					exons[exonKey] = Exon(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], strand = strand, number = exonNumber, gene_biotype = gene_biotype, id = exonId)
+			
+			elif regionType == 'CDS' :
+				exons[exonKey].setCDS(x1, x2)
+			elif regionType == 'start_codon' :
+				exons[exonKey].startCodon = x1
+			elif regionType == 'stop_codon' :
+				exons[exonKey].stopCodon = x2
+		
+		for transcript in transcripts :		
+			f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
+			f.addFilter(**{'transcript' : transcript})
+			transcript.exons = f.run()
+		
+		for gene in genes :
+			f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Transcript)
+			f.addFilter(**{'gene' : gene})
+			gene.transcripts = f.run()
+			
+			f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
+			f.addFilter(**{'gene' : gene})
+			gene.exons = f.run()
+			
+		for chro in chromosomes :
+			f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Gene)
+			f.addFilter(**{'chromosome' : chro})
+			chro.genes = f.run()
+		
+	genome.chromosomes = RabaList(chromosomes.values())
+	genome.sourceGTF = gtfFilePath
+	
 if __name__ == "__main__" :
 	#import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/dbSNP137', 'human', 'dbSNP137')
-	importGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
-	
-	#print 'import mouse'
-	#importGenome('/u/daoudat/py/pyGeno/mouse', 'mouse', 'reference2')
+	#importGenome_casava('human', 'lightR_Transcriptome', '/u/corona/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
+	print 'import mouse'
+	importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse', 'mouse', 'mouseRaba')
 	#print 'import b6'
 	#importGenome_casava('mouse', 'B6', '/u/corona/Project_DSP014/120313_SN942_0105_AD093KACXX/Build_B6/snps.txt')
 	

@@ -11,6 +11,8 @@ pyGeno_VERSION_BUILD_TIME = time.ctime(os.path.getmtime(__file__))
 pyGeno_VERSION_TUPLE = (pyGeno_BRANCH, pyGeno_VERSION_NAME, pyGeno_VERSION_RELEASE_LEVEL, pyGeno_VERSION_NUMBER, pyGeno_VERSION_BUILD_TIME )
 pyGeno_VERSION_STR = "Branch: %s, Name: %s, Release Level: %s, Version: %s, Build time: %s" % pyGeno_VERSION_TUPLE
 pyGeno_RABA_NAMESPACE = 'pyGenoRaba'
+pyGeno_RABA_DBFILE = './pyGenoRaba.db'
+
 
 def version():
 	print pyGeno_VERSION_TUPLE

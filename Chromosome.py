@@ -10,6 +10,11 @@ from SNP import *
 
 from tools.GTFTools import GTFFile
 
+from rabaDB.setup import *
+RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
+from rabaDB.Raba import *
+import rabaDB.fields as rf
+
 class GeneNotFound(Exception):
 	def __init__(self, chromosome, geneSymbol, message = ''):
 		self.message = message
@@ -39,24 +44,23 @@ def defaultDbSNPsFilter(dbSnp) :
 	snp, always returns true"""
 	return True
 	
-class Chromosome :
+class Chromosome(Raba) :
 	"""A class that represents a Chromosome
 	Attention: private region support en retard par rapport au public"""
 
-	def __init__(self, number, genome, x1, x2, dbSNPVersion = None, verbose = False) :
-		"""x1, x2 are the prosition of the chromosome in the genome"""
-		self.reset(number, genome, x1, x2, dbSNPVersion, verbose)
-		
-	def reset(self, number, genome, x1, x2, dbSNPVersion = None, verbose = False) :
-		"""x1, x2 are the prosition of the chromosome in the genome"""
-		if verbose :
-			print "Loading chromosome %s..."%(number)
-		
-		self.number = str(number).upper()
-		self.genome = genome
-		self.x1 = int(x1)
-		self.x2 = int(x2)
-		self.genes = {}
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	
+	number = rf.PrimitiveField()
+	#x1, x2 are the prosition of the chromosome in the genome
+	x1 = rf.PrimitiveField()
+	x2 = rf.PrimitiveField()
+	
+	genome = rf.RabaObjectField('Genome')
+	genes = rf.RabaListField()
+	dbSNPVersion = rf.PrimitiveField()
+	
+	def __init__(self, *args, **fieldsSet) :
+		Raba.__init__(self, **fieldsSet)
 		
 		try :
 			self.casavaSNPs = SNPFile('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number), CasavaSNP)
