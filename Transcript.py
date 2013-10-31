@@ -1,6 +1,13 @@
 import numpy as N
 import re, copy, sys, random
 
+import configuration as conf
+
+from rabaDB.setup import *
+RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
+from rabaDB.Raba import *
+import rabaDB.fields as rf
+
 from tools import UsefulFunctions as uf
 from Protein import Protein
 from Exon import Exon
@@ -8,9 +15,21 @@ from Exon import Exon
 from tools.BinarySequence import NucBinarySequence
 
 
-class Transcript :
-	def __init__(self, gene, id, name, proteinId = '') :
-		self.gene = gene
+class Transcript(Raba) :
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	
+	id = rf.PrimitiveField()
+	name = rf.PrimitiveField()
+	
+	genome = rf.RabaObjectField('Genome')
+	chromosome = rf.RabaObjectField('Chromosome')
+	gene = rf.RabaObjectField('Gene')
+	protein = rf.RabaObjectField('Protein')
+	exons = rf.RabaListField()
+	
+	def __init__(self, *args, **fieldsSet) :
+		Raba.__init__(self, **fieldsSet)
+		"""self.gene = gene
 		self.id = id
 		self.name = name
 		self.proteinId = proteinId
@@ -33,7 +52,7 @@ class Transcript :
 		#and his updated automaticly, and in theory should be modified directly.
 		#the flag DUBIOUS is on if : LEN_NOT_MULT_3
 		self.flags = {'DUBIOUS' : False, 'CDNA_LEN_NOT_MULT_3': False} 
-		self.unclose()
+		self.unclose()"""
 	
 	def appendExon(self, exon) :
 		self.exons.append(exon)
@@ -221,5 +240,5 @@ class Transcript :
 		return len(self.sequence)
 	
 	def __str__(self) :
-		return """Transcript, id: %s, name: %s / %s""" %(self.id, self.name, str(self.gene))
+		return """Transcript, id: %s, name: %s > %s""" %(self.id, self.name, str(self.gene))
 		

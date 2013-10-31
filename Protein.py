@@ -1,15 +1,33 @@
+import configuration as conf
+
+from rabaDB.setup import *
+RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
+from rabaDB.Raba import *
+import rabaDB.fields as rf
+
 from tools import UsefulFunctions as uf
 from tools.BinarySequence import AABinarySequence
 import copy
 
-class Protein :
-	def __init__(self, sequence, protId, transcript = None):
+class Protein(Raba) :
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	
+	id = rf.PrimitiveField()
+	name = rf.PrimitiveField()
+	
+	genome = rf.RabaObjectField('Genome')
+	chromosome = rf.RabaObjectField('Chromosome')
+	gene = rf.RabaObjectField('Gene')
+	transcript = rf.RabaObjectField('Transcript')
+	
+	def __init__(self, *args, **fieldsSet) :
+		Raba.__init__(self, **fieldsSet)
 
-		self.sequence = sequence
+		"""self.sequence = sequence
 		self.transcript = transcript
 		self.id = protId
 		self.binarySequence = AABinarySequence(self.sequence)
-		self.updateBinarySequence = False
+		self.updateBinarySequence = False"""
 		
 	def getSequence(self):
 		return self.sequence
@@ -57,4 +75,4 @@ class Protein :
 		return len(self.binarySequence)
 
 	def __str__(self) :
-		return "Protein, id: %s -|- %s" %(self.id, str(self.transcript))
+		return "Protein, id: %s > %s" %(self.id, str(self.transcript))

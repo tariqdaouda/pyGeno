@@ -1,5 +1,12 @@
-import numpy as N
+#import numpy as N
 import re, copy, sys, random
+
+import configuration as conf
+
+from rabaDB.setup import *
+RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
+from rabaDB.Raba import *
+import rabaDB.fields as rf
 
 from tools import UsefulFunctions as uf
 from Protein import Protein
@@ -8,13 +15,26 @@ from Transcript import Transcript
 
 from tools.BinarySequence import NucBinarySequence
 
-class Gene :
+class Gene(Raba) :
 	
-	def __init__(self, chromosome, gtfFile, SNVsFilter = None, verbose = False) :
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	
+	id = rf.PrimitiveField()
+	name = rf.PrimitiveField()
+	strand = rf.PrimitiveField()
+	biotype = rf.PrimitiveField()
+	
+	genome = rf.RabaObjectField('Genome')
+	chromosome = rf.RabaObjectField('Chromosome')
+	transcripts = rf.RabaListField()
+	
+	def __init__(self, *args, **fieldsSet) :
 		"""SNVsFilter is a fct tha takes a CasavaSnp as input a returns true if it correpsond to the rule.
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
+		Raba.__init__(self, **fieldsSet)
 		
+		"""
 		if verbose :
 			print "Loading gene %s..."%(symbol)
 		self.chromosome = chromosome
@@ -70,7 +90,7 @@ class Gene :
 				print "closing transcript : %s..."%(tid)
 			self.transcripts[tid].close()
 			if not self.transcripts[tid].flags['DUBIOUS'] :
-				self.unDubiousTranscripts.append(self.transcripts[tid])
+				self.unDubiousTranscripts.append(self.transcripts[tid])"""
 	
 	def loadTranscript(self, transId) :
 		return self.transcripts[transId]
@@ -114,4 +134,4 @@ class Gene :
 		return e
 	
 	def __str__(self) :
-		return "Gene, symbol: %s, id: %s, strand: %s / %s" %(self.symbol, self.id, self.strand, str(self.chromosome))
+		return "Gene, symbol: %s, id: %s, strand: %s / %s" %(self.name, self.id, self.strand, str(self.chromosome))

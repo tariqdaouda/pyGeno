@@ -3,6 +3,10 @@ from ConfigParser import SafeConfigParser
 
 import configuration as conf
 
+from rabaDB.Raba import *
+import rabaDB.fields as rf
+from rabaDB.filters import RabaQuery
+
 from Genome import Genome
 from Chromosome import Chromosome
 from Gene import Gene
@@ -13,35 +17,37 @@ from Protein import Protein
 from tools import UsefulFunctions as uf
 from tools.CSVTools import CSVFile
 
-from expyutils.GTFTools import GTFFile
+from tools.GTFTools import GTFFile
 import cPickle
 
 #from expyutils.GTFTools import GTFFile
 
 """===These are the only function that you will need to import new features  in pyGeno==="""
-def importGenome(packageDir) :
-	"""To import a new genome from scratch simply put all the compressed (in fa.gz) fasta files and the gtf (.gtf.gz) gene annotation file in the same folder along with
-	a pickled dictionary : manifest.pkl.
-	manifest's format must be as such :
-	manifest['chromosomes']['1'] = chromomse1's filename
-	manifest['chromosomes']['2'] = chromomse2's filename
-	manifest['chromosomes']['3'] = chromomse3's filename
-	manifest['gtf'] = gtf file filename
-	"""
+def importGenome(packageDir, verbose = False) :
+	"""TODO: Write description!"""
 	
+	def reformatItems(items) :
+		s = str(items)
+		s = s.replace('[', '').replace(']', '').replace("',", ': ').replace('), ', '\n').replace("'", '').replace('(', '').replace(')', '')
+		return s
+		
 	parser = SafeConfigParser()
 	parser.read(packageDir+'/manifest.ini')
+	
+	packageInfos = parser.items('package_infos')
 	
 	genomeName = parser.get('genome', 'name')
 	specie = parser.get('genome', 'specie')	
 	genomeSource = parser.get('genome', 'source')
-	packageInfos = parser.items('package_infos')
+	gtfFile = parser.get('gene_set', 'gtf')
+	chromosomesFiles = parser.items('chromosome_files')
+	chromosomeSet = set(dict(chromosomesFiles).keys())
 	
-	print "Installing:\n%s\n%s\n..."  % (packageInfos, parser.items('genome'))
+	print "Installing:\n\t%s\nGenome:\n\t%s\n..."  % (reformatItems(packageInfos).replace('\n', '\n\t'), reformatItems(parser.items('genome')).replace('\n', '\n\t'))
 	
 	genome = Genome(name = genomeName, specie = specie, genomeSource = genomeSource)
 	genome.packageInfos = packageInfos
-	_importGenomeObjects(manifest['gtf'], genome)
+	_importGenomeObjects(packageDir+'/'+gtfFile, chromosomeSet, genome, verbose)
 	
 	chros = parser.items('chromosomes')
 	for number, fileName in chros  :
@@ -50,10 +56,11 @@ def importGenome(packageDir) :
 	#for chrNumber in manifest :
 	#	
 
-def _importGenomeObjects(gtfFilePath, chroInfos, genome) :
-
+def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
+	print 'Importing gene set infos from %s...' % gtfFilePath
+	
 	gtf = GTFFile()
-	gtf.parseFile(gtfFilePath)
+	gtf.parseFile(gtfFilePath, gziped = True)
 	
 	chromosomes = {}
 	genes = {}
@@ -61,67 +68,101 @@ def _importGenomeObjects(gtfFilePath, chroInfos, genome) :
 	proteins = {}
 	exons = {}
 	for i in range(len(gtf)) :
-		chroNumber = gtf.get(i, 'source')
-		if chroNumber in chroInfos :
+		#print '000000', chroSet
+		chroNumber = gtf.get(i, 'seqname')
+		if chroNumber.upper() in chroSet or chroNumber.lower() in chroSet:
+			
+			chroNumber = chroNumber.upper()
 			if chroNumber not in chromosomes :
-				print chroNumber, gtf.get(i, 'source')
+				print 'Chromosome %s...' % chroNumber
 				chromosomes[chroNumber] = Chromosome(genome = genome, number = chroNumber)
-			
-			geneId = gtf.get(i, 'gene_id')
-			geneName = gtf.get(i, 'gene_name')
-			strand = gtf.get(i, 'strand')
-			if geneId not in genes :
-				genes[geneId] = Gene(genome = genome, chromosome = chromosomes[chroNumber], id = geneId, name = geneName, strand = strand)
-			
-			transId = gtf.get(i, 'transcript_id')
-			transName = gtf.get(i, 'transcript_name')
-			protId = gtf.get(i, 'protein_id')
-			protName = transName
-			if transId not in transcripts :
-				transcripts[transId] = Transcript(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], id = transId, name = transName)
-				protein[protId] = Protein(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], id = protId, name = protName)
-				transcripts[transId].protein = protein[protId]
-				
-			regionType = gtf.get(i, 'feature')
-			x1 = gtf.get(i, 'start')
-			x2 = gtf.get(i, 'end')
-			if regionType == 'exon' :
-				exonNumber = gtf.get(i, 'exon_number')
-				codingType = gtf.get(i, 'gene_biotype')
-				exonKey = '%s%s%s' % (chroNumber, x1, x2)
-				exonId = gtf.get(i, 'exon_id')
-				if exonId not in exons :
-					exons[exonKey] = Exon(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], strand = strand, number = exonNumber, gene_biotype = gene_biotype, id = exonId)
-			
-			elif regionType == 'CDS' :
-				exons[exonKey].setCDS(x1, x2)
-			elif regionType == 'start_codon' :
-				exons[exonKey].startCodon = x1
-			elif regionType == 'stop_codon' :
-				exons[exonKey].stopCodon = x2
-		
-		for transcript in transcripts :		
-			f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
-			f.addFilter(**{'transcript' : transcript})
-			transcript.exons = f.run()
-		
-		for gene in genes :
-			f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Transcript)
-			f.addFilter(**{'gene' : gene})
-			gene.transcripts = f.run()
-			
-			f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
-			f.addFilter(**{'gene' : gene})
-			gene.exons = f.run()
-			
-		for chro in chromosomes :
-			f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Gene)
-			f.addFilter(**{'chromosome' : chro})
-			chro.genes = f.run()
-		
-	genome.chromosomes = RabaList(chromosomes.values())
-	genome.sourceGTF = gtfFilePath
+				#chromosomes[chroNumber].save()
+			try :
+				geneId = gtf.get(i, 'gene_id')
+				geneName = gtf.get(i, 'gene_name')
+				strand = gtf.get(i, 'strand')
+				gene_biotype = gtf.get(i, 'gene_biotype')
+				regionType = gtf.get(i, 'feature')
+				x1 = gtf.get(i, 'start')
+				x2 = gtf.get(i, 'end')
 
+				if geneId not in genes :
+					if verbose :
+						print 'Gene %s...' % geneId
+					genes[geneId] = Gene(genome = genome, chromosome = chromosomes[chroNumber], id = geneId, name = geneName, strand = strand, biotype = gene_biotype)
+					#genes[geneId].save()
+				try :
+					transId = gtf.get(i, 'transcript_id')
+					transName = gtf.get(i, 'transcript_name')
+					protName = transName
+					if transId not in transcripts :
+						if verbose :
+							print 'Transcript %s...' % (transId)
+						transcripts[transId] = Transcript(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], id = transId, name = transName)
+						#transcripts[transId].save()
+					try :
+						protId = gtf.get(i, 'protein_id')
+						if protId not in proteins :
+							if verbose :
+								print 'Protein %s...' % (protId)
+							proteins[protId] = Protein(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], id = protId, name = protName)
+							transcripts[transId].protein = proteins[protId]
+							#proteins[protId].save()
+					except KeyError :
+						if verbose :
+							print 'Warning: no protein_id found in line %d' % i
+					
+					exonKey = '%s%s%s' % (chroNumber, x1, x2)
+					if regionType == 'exon' :
+						try :
+							exonNumber = gtf.get(i, 'exon_number')
+							exonId = gtf.get(i, 'exon_id')
+							if exonId not in exons :
+								exons[exonKey] = Exon(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], strand = strand, id = exonId, number = exonNumber, x1 = x1, x2 = x2)
+								exons[exonKey].save()
+						except KeyError :
+							print 'Warning: no exon_id/number found in line %d' % i
+			
+					elif regionType == 'CDS' :
+						exons[exonKey].setCDS(x1, x2)
+					elif regionType == 'start_codon' :
+						exons[exonKey].startCodon = x1
+					elif regionType == 'stop_codon' :
+						exons[exonKey].stopCodon = x2
+							
+				except KeyError :
+					if verbose :
+						print 'Warning: no transcript_id/name found in line %d' % i
+
+			except KeyError :
+				if verbose :
+					print 'Warning: no gene_id/name found in line %d' % i				
+	
+	
+	for transcript in transcripts.values() :		
+		f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
+		f.addFilter(**{'transcript' : transcript})
+		print transcript, f.run()
+		transcript.exons = f.run()
+	
+	for gene in genes.values() :
+		f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Transcript)
+		f.addFilter(**{'gene' : gene})
+		gene.transcripts = f.run()
+		
+		f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
+		f.addFilter(**{'gene' : gene})
+		gene.exons = f.run()
+		
+	for chro in chromosomes.values() :
+		f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Gene)
+		f.addFilter(**{'chromosome' : chro})
+		chro.genes = f.run()
+	
+	genome.chromosomes = RabaList(chromosomes.values())
+	
+	genome.save()
+	
 def __importSequence(number, fastaFile, targetDir) :
 	print 'making data for chromsome %s, source file: %s...' %(number, fastaFile)
 	

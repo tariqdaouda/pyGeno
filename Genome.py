@@ -35,24 +35,27 @@ class ChrData_Struct :
 
 class Genome(Raba) :
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	
 	id = rf.PrimitiveField()
 	name = rf.PrimitiveField()
 	specie = rf.PrimitiveField()
+	reference = rf.PrimitiveField()
 	chromosomes = rf.RabaListField()
 	genomeSource = rf.PrimitiveField()
 	packageInfos = rf.PrimitiveField()
+	
 	
 	def __init__(self, *args, **fieldsSet) :
 		Raba.__init__(self, **fieldsSet)
 		
 		self.verbose = False
-		self.absolutePath = conf.DATA_PATH+'/%s/genomes/%s' % (self.specie, self.name)
-		self.referencePath = conf.DATA_PATH+'/%s/genomes/reference' % (self.specie)
+		#self.absolutePath = conf.DATA_PATH+'/%s/genomes/%s' % (self.specie, self.name)
+		#self.referencePath = conf.DATA_PATH+'/%s/genomes/reference' % (self.specie)
 		
-		try :
-			f = open(self.absolutePath + '/genomeChrPos.index')
-		except IOError:
-			f = open(self.referencePath + '/genomeChrPos.index')
+		#try :
+		#	f = open(self.absolutePath + '/genomeChrPos.index')
+		#except IOError:
+		#	f = open(self.referencePath + '/genomeChrPos.index')
 	
 	def getChromosomesNumberList(self):
 		return self.chrsData.keys()
@@ -136,4 +139,5 @@ class Genome(Raba) :
 		return self.length
 
 	def __str__(self) :
-		return "Genome: %s, ref: %s" %(self.path, self.reference)
+		return "Genome: %s/%s" %(self.specie, self.name)
+		#return "Genome: %s, ref: %s" %(self.path, self.reference)

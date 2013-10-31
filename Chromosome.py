@@ -1,22 +1,20 @@
 import os, sys, random
-from types import *
-
+#from types import *
 import configuration as conf
-from Gene import Gene
-from SNP import *
-from exceptions import *
-
-from tools.SegmentTree import SegmentTree as SegmentTree
-from tools.SecureMmap import SecureMmap as SecureMmap
-from tools import UsefulFunctions as uf
-from tools import SingletonManager
-from tools.GTFTools import GTFFile
-
 
 from rabaDB.setup import *
 RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
 from rabaDB.Raba import *
 import rabaDB.fields as rf
+
+from Gene import Gene
+from SNP import *
+
+from tools.SegmentTree import SegmentTree as SegmentTree
+from tools.SecureMmap import SecureMmap as SecureMmap
+from tools import UsefulFunctions as uf
+from tools import SingletonManager
+#from tools.GTFTools import GTFFile
 
 def defaultSNVsFilter(casavaSnp) :
 	"""The default rule to decide wether to take the most probable genotype or the
@@ -43,9 +41,11 @@ class Chromosome(Raba) :
 	genes = rf.RabaListField()
 	dbSNPVersion = rf.PrimitiveField()
 	
+	dataType = rf.PrimitiveField() #heavy/light
+	
 	def __init__(self, *args, **fieldsSet) :
 		Raba.__init__(self, **fieldsSet)
-		
+		"""
 		self.__loadSequence()
 		
 		gtfFp = self.__getAnnotations()
@@ -60,7 +60,7 @@ class Chromosome(Raba) :
 		if dbSNPVersion != None and dbSNPVersion != False and dbSNPVersion != '':
 			self.loadSNPs(dbSNPVersion, verbose)
 		elif verbose :
-			print 'Not loading SNPs because told to...'
+			print 'Not loading SNPs because told to...'"""
 	
 	def __loadSequence(self):
 		if os.path.exists('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number)) :
@@ -68,19 +68,19 @@ class Chromosome(Raba) :
 			if self.data != None :
 				self.isLight = False
 			else :
-				raise ChromosomeError("Unable to load chromosome %s! Impossible to find sequence" % self.number, self.number)
+				raise ValueError("Unable to load chromosome %s! Impossible to find sequence" % self.number)
 
 		elif os.path.exists('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number)) :
 			self.casavaSNPs = SNPFile('%s/chr%s.casavasnps'%(self.genome.getSequencePath(), self.number), CasavaSNP)
 			self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
 			if self.data == None :
-				raise ChromosomeError("Unable to load chromosome %s! Impossible to find reference sequence" % self.number, self.number)
+				raise ValueError("Unable to load chromosome %s! Impossible to find reference sequence" % self.number)
 			self.isLight = True
 		else :
 			sys.stderr.write('Warning : couldn\'t find local version of chromosome %s, attempting load reference instead...' % self.number)	
 			self.data = self.__getHeavySequence('%s/chr%s.dat'%(self.genome.getReferenceSequencePath(), self.number))
 			if self.data == None :
-				raise ChromosomeError("Unable to load chromosome %s! Impossible to find reference sequence" % self.number, self.number)
+				raise ValueError("Unable to load chromosome %s! Impossible to find reference sequence" % self.number)
 		
 			self.isLight = False
 		
@@ -342,4 +342,4 @@ class Chromosome(Raba) :
 		return self.genome.chrsData[self.number].length
 
 	def __str__(self) :
-		return "Chromosome: number %s / %s" %(self.number, str(self.genome))
+		return "Chromosome: number %s > %s" %(self.number, str(self.genome))

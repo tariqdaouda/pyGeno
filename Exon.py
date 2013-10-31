@@ -1,19 +1,56 @@
-import numpy as N
+#import numpy as N
 import re, copy, sys, random
+
+import configuration as conf
+
+from rabaDB.setup import *
+RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
+from rabaDB.Raba import *
+import rabaDB.fields as rf
 
 from tools import UsefulFunctions as uf
 from Protein import Protein
 
 from tools.BinarySequence import NucBinarySequence
 
-class Exon:
+class Exon(Raba):
+	
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 
-	def __init__(self, x1, x2, number, transcript, typ, SNVsFilter = None, startCodon = -1, stopCodon = -1) :
+	id = rf.PrimitiveField()
+	number = rf.PrimitiveField()
+	x1 = rf.PrimitiveField()
+	x2 = rf.PrimitiveField()
+	CDS_x1 = rf.PrimitiveField()
+	CDS_x2 = rf.PrimitiveField()
+	
+	genome = rf.RabaObjectField('Genome')
+	chromosome = rf.RabaObjectField('Chromosome')
+	gene = rf.RabaObjectField('Gene')
+	transcript = rf.RabaObjectField('Transcript')
+	strand = rf.PrimitiveField()
+	
+	def __init__(self, *args, **fieldsSet) :
 		r"""An exon, the sequence is set according to gene strand, if it's '-' the sequence is the complement.
 		A CDS is a couple of coordinates that lies inside of the exon.
 		SNVsFilter is a fct that defines wich SNVs are included in the sequence"""
+		Raba.__init__(self, **fieldsSet)
 		
-		self.type = typ
+		try :
+			xx1, xx2 = int(self.x1), int(self.x2)+1
+			if xx1 < xx2 :
+				self.x1, self.x2 = xx1, xx2
+			else :
+				self.x1, self.x2 = xx2, xx1
+		except TypeError :
+			pass
+		
+		try :
+			self.number = int(self.number)
+		except TypeError :
+			pass
+		
+		"""self.type = typ
 		self.transcript = transcript
 		self.startCodonPos = startCodon
 		self.stopCodonPos = stopCodon
@@ -31,7 +68,7 @@ class Exon:
 		if self.transcript.gene.strand == '+' :
 			self.sequence = seq
 		else :
-			self.sequence = uf.reverseComplement(seq)
+			self.sequence = uf.reverseComplement(seq)"""
 
 	def hasCDS(self) :
 		if self.CDS != None :
@@ -39,16 +76,17 @@ class Exon:
 		return False
 	
 	def setCDS(self, x1, x2):
-
-		if self.CDS != None and (self.CDS[0] != x1 or self.CDS[1] != x2+1):
+		"Beware! i expect [x1, x2] (ensembl format), and i will tramsfprm it to [x1, x2[ (python) by doing x2 = x2+1"
+		
+		if self.CDS_x1 != None and self.CDS_x2 != None and (self.CDS_x1 != x1 or self.CDS_x2 != x2+1):
 			print "==>Warning, Exon.setCDS() : exon %s already has a CDS defined, new CDS: %s " % (self, (x1, x2+1))
 		
 		xx1, xx2 = int(x1), int(x2)+1
 		if xx1 < xx2 :
-			self.CDS = (xx1, xx2)
+			self.CDS_x1, self.CDS_x2 = xx1, xx2
 		else :
-			self.CDS = (xx2, xx1)
-		
+			self.CDS_x1, self.CDS_x2 = xx2, xx1
+	
 	def getCDSLength(self) :
 		return len(self.getCDSSequence())
 
@@ -75,7 +113,7 @@ class Exon:
 		return self.sequence[i]
 	
 	def __str__(self) :
-		return """EXON, number: %d, (x1, x2): (%d, %d), cds: %s / %s """ %(self.number, self.x1, self.x2, str(self.CDS), str(self.transcript))
+		return """EXON, number: %s, (x1, x2): (%s, %s), cds: (%s, %s) > %s """ %(self.number, self.x1, self.x2, self.CDS_x1, self.CDS_x2, str(self.transcript))
 		
 	def __len__(self) :
 		return len(self.sequence)
