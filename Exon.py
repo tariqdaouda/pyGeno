@@ -36,19 +36,15 @@ class Exon(Raba):
 		SNVsFilter is a fct that defines wich SNVs are included in the sequence"""
 		Raba.__init__(self, **fieldsSet)
 		
-		try :
+		if self.x1 != None and self.x2 != None :
 			xx1, xx2 = int(self.x1), int(self.x2)+1
 			if xx1 < xx2 :
 				self.x1, self.x2 = xx1, xx2
 			else :
 				self.x1, self.x2 = xx2, xx1
-		except TypeError :
-			pass
 		
-		try :
+		if self.number != None :
 			self.number = int(self.number)
-		except TypeError :
-			pass
 		
 		"""self.type = typ
 		self.transcript = transcript
@@ -78,10 +74,11 @@ class Exon(Raba):
 	def setCDS(self, x1, x2):
 		"Beware! i expect [x1, x2] (ensembl format), and i will tramsfprm it to [x1, x2[ (python) by doing x2 = x2+1"
 		
-		if self.CDS_x1 != None and self.CDS_x2 != None and (self.CDS_x1 != x1 or self.CDS_x2 != x2+1):
-			print "==>Warning, Exon.setCDS() : exon %s already has a CDS defined, new CDS: %s " % (self, (x1, x2+1))
-		
 		xx1, xx2 = int(x1), int(x2)+1
+		
+		if self.CDS_x1 != None and self.CDS_x2 != None and (self.CDS_x1 != xx1 or self.CDS_x2 != xx2):
+			print "==>Warning, Exon.setCDS() : exon %s already has a CDS defined, new CDS: %s " % (self, (xxx1, xx2))
+		
 		if xx1 < xx2 :
 			self.CDS_x1, self.CDS_x2 = xx1, xx2
 		else :

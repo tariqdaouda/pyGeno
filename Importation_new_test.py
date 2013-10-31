@@ -76,7 +76,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 			if chroNumber not in chromosomes :
 				print 'Chromosome %s...' % chroNumber
 				chromosomes[chroNumber] = Chromosome(genome = genome, number = chroNumber)
-				#chromosomes[chroNumber].save()
+		
 			try :
 				geneId = gtf.get(i, 'gene_id')
 				geneName = gtf.get(i, 'gene_name')
@@ -89,8 +89,8 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 				if geneId not in genes :
 					if verbose :
 						print 'Gene %s...' % geneId
-					genes[geneId] = Gene(genome = genome, chromosome = chromosomes[chroNumber], id = geneId, name = geneName, strand = strand, biotype = gene_biotype)
-					#genes[geneId].save()
+					genes[geneId] = Gene(genome = genome, id = geneId)
+					genes[geneId].set(chromosome = chromosomes[chroNumber], name = geneName, strand = strand, biotype = gene_biotype)
 				try :
 					transId = gtf.get(i, 'transcript_id')
 					transName = gtf.get(i, 'transcript_name')
@@ -98,27 +98,30 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 					if transId not in transcripts :
 						if verbose :
 							print 'Transcript %s...' % (transId)
-						transcripts[transId] = Transcript(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], id = transId, name = transName)
-						#transcripts[transId].save()
+						transcripts[transId] = Transcript(genome = genome, id = transId)
+						transcripts[transId].set(chromosome = chromosomes[chroNumber], gene = genes[geneId], name = transName)
+						
 					try :
 						protId = gtf.get(i, 'protein_id')
 						if protId not in proteins :
 							if verbose :
 								print 'Protein %s...' % (protId)
-							proteins[protId] = Protein(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], id = protId, name = protName)
+							proteins[protId] = Protein(genome = genome, id = protId)
+							proteins[protId].set(chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], name = protName)
 							transcripts[transId].protein = proteins[protId]
-							#proteins[protId].save()
+							proteins[protId].save()
 					except KeyError :
 						if verbose :
 							print 'Warning: no protein_id found in line %d' % i
 					
-					exonKey = '%s%s%s' % (chroNumber, x1, x2)
+					exonKey = (chroNumber, x1, x2)
 					if regionType == 'exon' :
 						try :
 							exonNumber = gtf.get(i, 'exon_number')
 							exonId = gtf.get(i, 'exon_id')
 							if exonId not in exons :
-								exons[exonKey] = Exon(genome = genome, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], strand = strand, id = exonId, number = exonNumber, x1 = x1, x2 = x2)
+								exons[exonKey] = Exon(genome = genome, id = exonId)
+								exons[exonKey].set(chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], strand = strand, number = exonNumber, x1 = x1, x2 = x2)
 								exons[exonKey].save()
 						except KeyError :
 							print 'Warning: no exon_id/number found in line %d' % i
@@ -136,15 +139,15 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 
 			except KeyError :
 				if verbose :
-					print 'Warning: no gene_id/name found in line %d' % i				
+					print 'Warning: no gene_id/name found in line %d' % i
 	
 	
 	for transcript in transcripts.values() :		
 		f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
 		f.addFilter(**{'transcript' : transcript})
-		print transcript, f.run()
 		transcript.exons = f.run()
-	
+		#print transcript, transcript.exons
+		
 	for gene in genes.values() :
 		f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Transcript)
 		f.addFilter(**{'gene' : gene})
