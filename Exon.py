@@ -33,11 +33,13 @@ class Exon(Raba):
 	def __init__(self, *args, **fieldsSet) :
 		r"""An exon, the sequence is set according to gene strand, if it's '-' the sequence is the complement.
 		A CDS is a couple of coordinates that lies inside of the exon.
-		SNVsFilter is a fct that defines wich SNVs are included in the sequence"""
+		SNVsFilter is a fct that defines wich SNVs are included in the sequence.
+		I expect [x1, x2[ (python) not something like [x1, x2](ensembl format)"""
 		Raba.__init__(self, **fieldsSet)
 		
 		if self.x1 != None and self.x2 != None :
-			xx1, xx2 = int(self.x1), int(self.x2)+1
+			#xx1, xx2 = int(self.x1), int(self.x2)+1
+			xx1, xx2 = int(self.x1), int(self.x2)
 			if xx1 < xx2 :
 				self.x1, self.x2 = xx1, xx2
 			else :
@@ -72,10 +74,10 @@ class Exon(Raba):
 		return False
 	
 	def setCDS(self, x1, x2):
-		"Beware! i expect [x1, x2] (ensembl format), and i will tramsfprm it to [x1, x2[ (python) by doing x2 = x2+1"
+		"Beware! i expect [x1, x2[ (python) not something like [x1, x2](ensembl format)"
 		
-		xx1, xx2 = int(x1), int(x2)+1
-		
+		#xx1, xx2 = int(x1), int(x2)+1
+		xx1, xx2 = int(x1), int(x2)
 		if self.CDS_x1 != None and self.CDS_x2 != None and (self.CDS_x1 != xx1 or self.CDS_x2 != xx2):
 			print "==>Warning, Exon.setCDS() : exon %s already has a CDS defined, new CDS: %s " % (self, (xxx1, xx2))
 		

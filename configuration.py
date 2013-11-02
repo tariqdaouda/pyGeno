@@ -23,7 +23,7 @@ pyGeno_RABA_DBFILE = './pyGenoRaba.db'
 
 #=======
 #This dictionnary is filled by the function pyGeno_init()
-pyGeno_SETTINGS = pyGeno_SETTINGS = {'DATA_PATH' : '%s/data' % pyGeno_SETTINGS_DIR, 'REFERENCE_GENOMES' : {}}
+pyGeno_SETTINGS = {'DATA_PATH' : '%s/data' % pyGeno_SETTINGS_DIR, 'REFERENCE_GENOMES' : {}}
 #>>>>>>> medusa
 
 def version() :

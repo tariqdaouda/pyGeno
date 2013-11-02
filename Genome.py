@@ -61,16 +61,16 @@ class Genome(Raba) :
 		return self.chrsData.keys()
 	
 	def getSequencePath(self) :
-		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.name)
+		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/%s' % (self.specie, self.name)
 	
 	def getReferenceSequencePath(self) :
-		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s' % (self.specie, self.reference)
+		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/%s' % (self.specie, self.reference)
 		
-	def getGeneSetsPath(self) :
-		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s/gene_sets' % (self.specie, self.name)
+	#def getGeneSetsPath(self) :
+	#	return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/%s/gene_sets' % (self.specie, self.name)
 	
-	def getReferenceGeneSetsPath(self) :
-		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s/gene_sets' % (self.specie, self.reference)
+	#def getReferenceGeneSetsPath(self) :
+	#	return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/%s/gene_sets' % (self.specie, self.reference)
 		
 	def loadChromosome(self, number, dbSNPVersion = None) :
 		number = number.upper()

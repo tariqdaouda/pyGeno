@@ -32,19 +32,21 @@ class Chromosome(Raba) :
 
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	
+	header = rf.PrimitiveField()
 	number = rf.PrimitiveField()
 	#x1, x2 are the prosition of the chromosome in the genome
 	x1 = rf.PrimitiveField()
 	x2 = rf.PrimitiveField()
+	dataFile = rf.PrimitiveField() #heavy .dat/light .polys
 	
 	genome = rf.RabaObjectField('Genome')
 	genes = rf.RabaListField()
-	dbSNPVersion = rf.PrimitiveField()
-	
-	dataType = rf.PrimitiveField() #heavy/light
 	
 	def __init__(self, *args, **fieldsSet) :
 		Raba.__init__(self, **fieldsSet)
+		if self.number != None :
+			self.number = str(self.number)
+		
 		"""
 		self.__loadSequence()
 		
@@ -339,7 +341,7 @@ class Chromosome(Raba) :
 		return self.genes[i]
 		
 	def __len__(self):
-		return self.genome.chrsData[self.number].length
+		return self.x2-self.x1#self.genome.chrsData[self.number].length
 
 	def __str__(self) :
 		return "Chromosome: number %s > %s" %(self.number, str(self.genome))

@@ -134,4 +134,4 @@ class Gene(Raba) :
 		return e
 	
 	def __str__(self) :
-		return "Gene, symbol: %s, id: %s, strand: %s / %s" %(self.name, self.id, self.strand, str(self.chromosome))
+		return "Gene, name: %s, id: %s, strand: %s > %s" %(self.name, self.id, self.strand, str(self.chromosome))
