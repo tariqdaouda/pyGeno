@@ -425,8 +425,10 @@ def import_dbSNP(packageFolder, specie, versionName) :
 if __name__ == "__main__" :
 	#importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse', verbose = False)
 	g = Genome(specie = 'Mus_musculus', name = 'GRCm38_test')
-	print g.chromosomes
-	f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
-	f.addFilter(**{'genome' : g, 'x1 <' : 797276})
-	for e in f.run() :
-		print e.x1, e.x1 - 797276
+	print g.get(Exon, {'x1 <' : 797276})
+	
+	#print g.chromosomes
+	#f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
+	#f.addFilter(**{'genome' : g, 'x1 <' : 797276})
+	#for e in f.run() :
+	#	print e.x1, e.x1 - 797276

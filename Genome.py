@@ -4,6 +4,7 @@ from rabaDB.setup import *
 RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
 from rabaDB.Raba import *
 import rabaDB.fields as rf
+from rabaDB.filters import RabaQuery
 
 from tools import UsefulFunctions as uf
 
@@ -127,7 +128,13 @@ class Genome(Raba) :
 		"""Picks a random position in the genome and returns it's chromosome"""
 		x1 = int(random.random()*self.length)
 		return self.loadChromosome(self.whereIsPosition(x1), loadSnps)
-		
+	
+	def get(self, cls, params) :
+		f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, cls)
+		params['genome'] = self
+		f.addFilter(**params)
+		return f.run()
+	
 	def isLoaded(self, number) :
 		return number in self.chromosomes.keys()
 		
