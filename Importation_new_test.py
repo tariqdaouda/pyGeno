@@ -13,13 +13,9 @@ from Gene import Gene
 from Transcript import Transcript
 from Exon import Exon
 from Protein import Protein
+from SNP import *
 
-#from tools import UsefulFunctions as uf
-#from tools.CSVTools import CSVFile
-
-from tools.GTFTools import GTFFile
-
-#from expyutils.GTFTools import GTFFile
+from pyGeno.tools.GTFTools import GTFFile
 
 def backUpDB() :
 	st = time.ctime().replace(' ', '_')
@@ -27,8 +23,6 @@ def backUpDB() :
 	shutil.copy2(conf.pyGeno_RABA_DBFILE, fn)
 	
 	return fn
-
-#===These are the only function that you will need to import new features  in pyGeno===
 
 def importGenome(packageDir, verbose = False) :
 	"""TODO: Write description!"""
@@ -41,7 +35,6 @@ def importGenome(packageDir, verbose = False) :
 
 	parser = SafeConfigParser()
 	parser.read(packageDir+'/manifest.ini')
-	
 	packageInfos = parser.items('package_infos')
 	
 	genomeName = parser.get('genome', 'name')
@@ -55,25 +48,22 @@ def importGenome(packageDir, verbose = False) :
 	bckFn = backUpDB()
 	print "=====\nIf anything goes wrong, the db has been backuped here: %s\nSimply rename it to: %s\n=====" %(bckFn, conf.pyGeno_RABA_DBFILE)
 
-	genome = Genome(name = genomeName, specie = specie, genomeSource = genomeSource)
-	genome.packageInfos = packageInfos
+	genome = Genome()
+	genome.set(name = genomeName, specie = specie, source = genomeSource, packageInfos = packageInfos)
 	seqTargetDir = genome.getSequencePath()
 	
-	#if os.path.isdir(seqTargetDir) :
-	#	raise ValueError("The directory %s already exists. If you want to reinstall a package delete the folder first" % seqTargetDir)
-	
-	#os.makedirs(seqTargetDir)
+	if os.path.isdir(seqTargetDir) :
+		raise ValueError("The directory %s already exists. If you want to reinstall a package delete the folder first" % seqTargetDir)
+	os.makedirs(seqTargetDir)
 	
 	_importGenomeObjects(packageDir+'/'+gtfFile, chromosomeSet, genome, verbose)
-	#print genome.chromosomes
 	x1Chro = 0
 	for chro in genome.chromosomes :
-		#print chro
 		length = __importSequence(chro, packageDir+'/'+chromosomesFiles[chro.number.lower()], seqTargetDir)
 		chro.x1 = x1Chro
 		chro.x2 = x1Chro+length
 		x1Chro = chro.x2
-		#chro.save()
+	
 	genome.save()
 	
 def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
@@ -94,7 +84,9 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 			chroNumber = chroNumber#.lower()
 			if chroNumber not in chromosomes :
 				print 'Chromosome %s...' % chroNumber
-				chromosomes[chroNumber] = Chromosome(genome = genome, number = chroNumber)
+				chromosomes[chroNumber] = Chromosome()
+				chromosomes[chroNumber].set(genome = genome, number = chroNumber)
+				chromosomes[chroNumber].dataType = 'heavy'
 			try :
 				geneId = gtf.get(i, 'gene_id')
 				geneName = gtf.get(i, 'gene_name')
@@ -111,8 +103,8 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 			if geneId not in genes :
 				#if verbose :
 				print '\tGene %s, %s...' % (geneId, geneName)
-				genes[geneId] = Gene(genome = genome, id = geneId)
-				genes[geneId].set(chromosome = chromosomes[chroNumber], name = geneName, strand = strand, biotype = gene_biotype)
+				genes[geneId] = Gene()
+				genes[geneId].set(genome = genome, id = geneId, chromosome = chromosomes[chroNumber], name = geneName, strand = strand, biotype = gene_biotype)
 			
 			try :
 				transId = gtf.get(i, 'transcript_id')
@@ -124,17 +116,15 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 			if transId not in transcripts :
 				if verbose :
 					print '\tTranscript %s, %s...' % (transId, transName)
-				transcripts[transId] = Transcript(genome = genome, id = transId)
-				##print transcripts[transId]
-				transcripts[transId].set(chromosome = chromosomes[chroNumber], gene = genes[geneId], name = transName)
-				#print transcripts[transId].exons
+				transcripts[transId] = Transcript()
+				transcripts[transId].set(genome = genome, id = transId, chromosome = chromosomes[chroNumber], gene = genes[geneId], name = transName)
 			try :
 				protId = gtf.get(i, 'protein_id')
 				if protId not in proteins :
 					if verbose :
 						print '\tProtein %s...' % (protId)
-					proteins[protId] = Protein(genome = genome, id = protId)
-					proteins[protId].set(chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], name = transName)
+					proteins[protId] = Protein()
+					proteins[protId].set(genome = genome, id = protId, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], name = transName)
 					transcripts[transId].protein = proteins[protId]
 					proteins[protId].save()
 			except KeyError :
@@ -152,8 +142,8 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 				try :
 					exonId = gtf.get(i, 'exon_id')
 					if exonId not in exons :
-						exons[exonKey] = Exon(genome = genome, id = exonId)
-						exons[exonKey].set(chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], strand = strand, number = exonNumber, x1 = x1, x2 = x2)
+						exons[exonKey] = Exon()
+						exons[exonKey].set(genome = genome, id = exonId, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], strand = strand, number = exonNumber, x1 = x1, x2 = x2)
 						exons[exonKey].save()
 				except KeyError :
 					print 'Warning: no exon_id found in line %d' % i
@@ -191,8 +181,15 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 	print '\tgenome.chromosomes...'
 	genome.chromosomes = RabaList(chromosomes.values())
 	print 'saving...'
-	genome.save()
 	print 'Done.'
+	genome.save()
+	try :
+		refGenomeName = conf.getReferenceGenome(genome.specie)
+	except KeyError:
+		refGenomeName = genome.name
+		conf.setReferenceGenome(genome.specie, genome.name)
+	
+	print 'Current reference genome for specie %s is %s' %(genome.specie, genome.name)
 	
 def __importSequence(chromosome, fastaFile, targetDir) :
 	print 'making data for chromsome %s, source file: %s...' %(chromosome.number, fastaFile)
@@ -211,48 +208,52 @@ def __importSequence(chromosome, fastaFile, targetDir) :
 	return len(strRes)
 
 def importGenome_casava(specie, genomeName, snpsTxtFile) :
-	"""Creates a light genome (contains only snps infos and no sequence from the reference genome)
-	The .casavasnps files generated are identical to the casava snps but with ';' instead of tabs and 
-	a single position instead of a range"""
+	"""TODO: TEST"""
 
-	path = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/genomes/%s/'%(specie, genomeName)
-	print 'importing genome %s...' %path
+	print 'importing %s genome %s...' % (specie, genomeName)
 	
-	if not os.path.exists(path):
-		os.makedirs(path)
-	
+	genome = Genome(name = genomeName, specie = specie)
+	genome.name = genomeName
+	genome.specie = specie
+	genome.source = snpsTxtFile
+		
 	f = open(snpsTxtFile)
 	lines = f.readlines()
 	f.close()
 	
-	currChr = '-1'
-	strRes = ''
+	currChrNumber = '-1'
 	for l in lines :
 		if l[0] != '#' : #ignore comments
 			sl = l.replace('\t\t', '\t').split('\t')
-			if sl[0] != currChr :
-				if currChr != '-1' :
-					f = open('%s/%s.casavasnps'%(path, currChr), 'w')
-					f.write(strRes)
-					f.close()
-				print 'importing snp data for %s...' % sl[0]
-				currChr = sl[0]
-				strRes = ''
-			del(sl[0]) #remove chr
-			del(sl[1]) #remove first position of the range
-			strRes += ';'.join(sl)
-
-	if currChr != '-1' :
-		f = open('%s/%s.casavasnps'%(path, currChr), 'w')
-		f.write(strRes)
-		f.close()
+			if sl[0] != currChrNumber :
+				print 'importing snp data for chromosome %s...' % sl[0]
+				currChrNumber = sl[0]
+				chromosome = Chromosome()
+				chromosome.number = currChrNumber
+				chromosome.genome = genome
+				chromosome.dataType = 'light'
+				
+			snp = Casava_SNP()
+			snp.chromosome = chromosome
+			snp.genome = genome
+			#first column: chro, second first of range (identical to second column)
+			snp.values['pos'] = int(sl[2])
+			snp.values['bcalls_used'] = sl[3]
+			snp.values['bcalls_filt'] = sl[4]
+			snp.values['ref'] = sl[5]
+			snp.values['QSNP'] = int(sl[6])
+			snp.values['max_gt'] = uf.getPolymorphicNucleotide(sl[7])
+			snp.values['Qmax_gt'] = int(sl[8])
+			snp.values['max_gt_poly_site'] = sl[9]
+			snp.values['Qmax_gt_poly_site'] = int(sl[10])
+			snp.values['A_used'] = int(sl[11])
+			snp.values['C_used'] = int(sl[12])
+			snp.values['G_used'] = int(sl[13])
+			snp.values['T_used'] = int(sl[14])
 	
-	#print '%s/sourceFile.txt'%(path)
-	f = open('%s/sourceFile.txt'%(path), 'w')
-	f.write(snpsTxtFile)
-	f.close()
-	
-	print 'importation of genome %s/%s done.' %(specie, genomeName)
+	print 'saving...'
+	genome.save()
+	print 'importation %s of genome %s done.' %(specie, genomeName)
 
 
 def import_dbSNP(packageFolder, specie, versionName) :
@@ -272,111 +273,84 @@ def import_dbSNP(packageFolder, specie, versionName) :
 		- the only value extracted from the files are : 'posistion', 'rs', 'type', 'assembly', 'chromosome', 'validated', 'alleles', 'original_orientation', 'maf_allele', 'maf_count', 'maf', 'het', 'se(het)
 		-loc is a dictionary allele wise that simplifies the line loc' 
 	"""
-
-	legend = ['//pos', 'chromosome', 'rs', 'type', 'alleles', 'validated', 'assembly', 'original_orientation', 'maf_allele', 'maf_count', 'maf', 'het', 'se(het)', 'loc']
-	#Fcts
-	def fillCSV(res, csv) :
-		print '\t\t sorting snps by position in chromosome...'
-		l = res.keys()
-		l.sort()
-		print '\t\t filling CSV...'
-		for pos in l :
-			li = csv.addLine()
-			for field in csv.legend :
-				csv.set(li, field, res[pos][field.lower()])
+	
+	RabaConnection(conf.pyGeno_RABA_NAMESPACE).manualCommitOnly = True
+	
+	def parseSNP(snpLines, specie, chroNumber, version) :
+		lines = snpLines.split('\n')
 		
-	def parse(s, chroNumber, legend) :
-		lines = s.split('\n')
+		snp = dbSNP_SNP()
+		snp.version = version
+		snp.specie = specie
+		snp.chromosomeNumber = chroNumber
 		
-		res = {}
-		
-		for field in legend :
-			res[field] = None
-			
-		criticalFields = ['rs', 'chromosome', '//pos', 'alleles', 'assembly', 'validated']
-		numericFields = ['maf_count', 'maf', 'het', 'se(het)']
-		numericFieldsWithNonNumericValues = 0
-		locs = {}
+		#numericFields: maf_count', 'maf', 'het', 'se(het)'
 		for l in lines :
 			sl = l.split('|')
 			if sl[0][:2] == 'rs' :
-				res['rs'] = sl[0][2:].strip()
-				res['type'] = sl[3].strip()
+				snp.rsid = sl[0][2:].strip()
+				snp.type = sl[3].strip()
 			
-			elif sl[0][:3] == 'SNP' and res['rs'] != None :
-				res['alleles'] = sl[1].strip().replace('alleles=', '').replace("'", "")
-				res['het'] = sl[2].strip().replace('het=', '')				
-				res['se(het)'] = sl[3].strip().replace('se(het)=', '')
+			elif sl[0][:3] == 'SNP' : # and snp.rsid != None :
+				#snp.alleles = uf.getPolymorphicNucleotide(sl[1].strip().replace('alleles=', '').replace("'", ""))
+				snp.alleles = sl[1].strip().replace('alleles=', '').replace("'", "")
+				het = sl[2].strip().replace('het=', '')
+				try :
+					snp.het = float(het)
+				except :
+					pass
+					
+				se_het = sl[3].strip().replace('se(het)=', '')
+				try :
+					snp.se_het = float(se_het)
+				except :
+					pass
+					
+			elif sl[0][:3] == 'VAL' : #and snp.rsid != None :
+				snp.validated = sl[1].strip().replace("validated=", '')
 				
-			elif sl[0][:3] == 'VAL' and res['rs'] != None :
-				res['validated'] = sl[1].strip().replace("validated=", '')
-				
-			elif sl[0][:3] == 'CTG' and sl[1].find('GRCh') > -1 and res['rs'] != None and (res['chromosome'] == None or res['//pos'] == None):
-				res['original_orientation'] = sl[-1].replace('orient=', '').strip()
-				res['assembly'] = sl[1].replace('assembly=', '').strip()
-				res['chromosome'] = sl[2].replace('chr=', '').strip()
+			elif sl[0][:3] == 'CTG' and sl[1].find('GRCh') > -1 : #and snp.rsid != None and (res['chromosome'] == None or res['//pos'] == None):
+				snp.original_orientation = sl[-1].replace('orient=', '').strip()
+				snp.assembly = sl[1].replace('assembly=', '').strip()
+				snp.chromosome = sl[2].replace('chr=', '').strip()
 				pos = sl[3].replace('chr-pos=', '').strip()
 				
 				try:
-					pos = int(pos)
-					posOk = True
+					snp.pos = int(pos) -1
 				except :
-					posOk = False
-					
-				if res['chromosome'] != chroNumber or not posOk :
-					res['chromosome'] = None
-					res['//pos'] = None
-					return (None, numericFieldsWithNonNumericValues)
+					pass
 				
-				res['//pos'] = int(pos) -1
-				
-			elif sl[0][:4] == 'GMAF' and res['rs'] != None :
-				res['maf_allele'] = sl[1].strip().replace('allele=', '')
-				res['maf_count'] = sl[2].strip().replace('count=', '')
-				res['maf'] = sl[3].strip().replace('MAF=', '')
-			
-			elif sl[0][:3] == 'LOC' and res['rs'] != None :
-				allele = sl[4].strip().replace('allele=', '')
-				locs[allele] = {}
-				locs[allele]['gene'] = sl[1].strip()
-				locs[allele]['function'] = sl[3].strip().replace('fxn-class=', '')
+			elif sl[0][:4] == 'GMAF' : # and res['rs'] != None :
+				snp.maf_allele = sl[1].strip().replace('allele=', '')
+				maf_count = sl[2].strip().replace('count=', '')
 				try :
-					locs[allele]['residue'] = sl[6].strip().replace('residue=', '')
+					snp.maf_count = float(maf_count)
 				except :
-					locs[allele]['residue'] = None
-					
-		for field in criticalFields :
-			if res[field] == None :
-				return (None, numericFieldsWithNonNumericValues)
-		
-		for field in numericFields :
-			try :
-				res[field] = float(res[field])
-			except :
-				res[field] = 0.0
-				numericFieldsWithNonNumericValues += 1
+					pass
 				
-		if res['original_orientation'] == '-' :
-			res['alleles'] = uf.complement(res['alleles'])
+				maf = sl[3].strip().replace('MAF=', '')
+				try :
+					snp.maf = float(maf)
+				except :
+					pass
+			
+			elif sl[0][:3] == 'LOC' : #and res['rs'] != None :
+				loc = dbSNP_SNPLOC()
+				#loc.allele = uf.getPolymorphicNucleotide(sl[4].strip().replace('allele=', ''))
+				loc.allele = sl[4].strip().replace('allele=', '')
+				loc.gene = sl[1].strip()
+				loc.fxn_class = sl[3].strip().replace('fxn-class=', '')
+				try :
+					loc.residue = sl[6].strip().replace('residue=', '')
+				except IndexError :
+					pass
+					
+		if snp.original_orientation == '-' :
+			snp.alleles = uf.complement(snp.alleles)
 		
-		#res['loc'] = zlib.compress(pickle.dumps(locs))
-		res['loc'] = pickle.dumps(locs).replace('\n', '/rje3/').replace(';', '/qte3/')
-		return (res, numericFieldsWithNonNumericValues)
-		
-	#Fcts
-	desc = 	"""pyGeno snp format is somewhat different from dbSNP's :
-		- all SNPs that have a chromosome different from the one of the file, or chromosome number of '?' were discarded
-		- the default value for numeric values (ex: het, se(het), 'MAF', 'GMAf count') is 0.0
-		- no '?' allowed. If a numeric had a value of '?' (ex: het, se(het), 'MAF', 'GMAf count') the value was set to 0.0
-		- all snps have an orientation of +. If a snp had an orientation of -, it's alleles were replaced by their complements
-		- positions are 0 based
-		- the only values extracted dbSNP files were from the files were : 'posistion', 'rs', 'type', 'assembly', 'chromosome', 'validated', 'alleles', 'original_orientation', 'maf_allele', 'maf_count', 'maf', 'het', 'se(het)'"""
-
+		#snp.save()
 
 	files = glob.glob(packageFolder+'/*.flat.gz')
-	outPath = conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/dbSNP/%s/' %(specie, versionName)
-	if not os.path.exists(outPath):
-		os.makedirs(outPath)
 
 	for fil in files :
 		chrStrStartPos = fil.find('ch')
@@ -384,49 +358,28 @@ def import_dbSNP(packageFolder, specie, versionName) :
 		numericFieldsWithNonNumericValues = 0
 		
 		chroNumber = fil[chrStrStartPos+2: chrStrStopPos]
-		outFile = fil.replace(packageFolder, outPath).replace('ds_flat_', '').replace('ch'+chroNumber, 'chr'+chroNumber).replace('.flat.gz', '.pygeno-dbSNP')
 		
 		print "extracting file :", fil, "..."
 		f = gzip.open(fil)
 		snps = f.read().split('\n\n')
 		f.close()
-		print snps[0]
 		
-		print "\tparsing..."
-		
-		resCSV = CSVFile(legend)
-		res = {}
+		print "\timporting snps..."
 		for snp in snps[1:] :
-			snpVals = parse(snp, chroNumber, legend)
-			if snpVals[0] != None :
-				res[snpVals[0]['//pos']] = snpVals[0]
-			
-			numericFieldsWithNonNumericValues += snpVals[1]
-			
-		print "\tformating data..."
-		fillCSV(res, resCSV)
+			parseSNP(snp, specie, chroNumber, versionName)
 
-		print "\tsaving..."
-		header = "source file : %s\n%s\n# of numeric fields with non mumeric values: %s (their values has been set to default 0.0)" % (fil, snps[0], numericFieldsWithNonNumericValues)
-		header = header.split('\n')
-		for i in range(len(header)) :
-			header[i] = '//'+header[i]+'\n'
-		header = ''.join(header)
-		
-		resCSV.setHeader(header)
-		resCSV.save(outFile)
-
-	readMeFile = outPath + 'README_format-description.txt'
-	f = open(readMeFile, 'w')
-	f.write(desc)
-	f.close()
-
+	print 'saving...'
+	RabaConnection(conf.pyGeno_RABA_NAMESPACE).commit()
+	RabaConnection(conf.pyGeno_RABA_NAMESPACE).manualCommitOnly = False
+	print 'done.'
 	
 if __name__ == "__main__" :
-	#importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse', verbose = False)
-	g = Genome(specie = 'Mus_musculus', name = 'GRCm38_test')
-	print g.get(Exon, {'x1 >' : 797276})
+	#importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse/mus_muslcus/', verbose = False)
+	#g = Genome(specie = 'Mus_musculus', name = 'GRCm38_test')
+	#print g.get(Exon, {'x1 >' : 797276})
+	#importGenome_casava('Mus_musculus', 'musCasava', 'http://www.bioinfo.iric.ca/seq/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
 	
+	import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/test', 'Mus_musculus', 'test')
 	#print g.chromosomes
 	#f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
 	#f.addFilter(**{'genome' : g, 'x1 <' : 797276})

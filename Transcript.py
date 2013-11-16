@@ -152,7 +152,9 @@ class Transcript(Raba) :
 	def getCDNALength(self):
 		return len(self.CDNA)
 		
-
+	def CDNALenMultOf3(self) :
+		return len(self.CDNA)%3 == 0
+		
 	def getCDNAStartPosition_todo(self):
 		#TODO
 		pass

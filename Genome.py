@@ -14,6 +14,7 @@ import os, pickle
 from tools import SingletonManager
 from exceptions import *
 
+"""
 class ChrData_Struct :
 	
 	def __init__(self, genome, number, x1, x2, length) :
@@ -33,16 +34,17 @@ class ChrData_Struct :
 	
 	def hasGene(self, symbol) :
 		return symbol in self.geneSymbolIndex.keys()
+"""
 
 class Genome(Raba) :
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	
-	id = rf.PrimitiveField()
 	name = rf.PrimitiveField()
 	specie = rf.PrimitiveField()
 	reference = rf.PrimitiveField()
 	chromosomes = rf.RabaListField()
-	genomeSource = rf.PrimitiveField()
+	
+	source = rf.PrimitiveField()
 	packageInfos = rf.PrimitiveField()
 	
 	
@@ -62,6 +64,7 @@ class Genome(Raba) :
 		return self.chrsData.keys()
 	
 	def getSequencePath(self) :
+		print '-->', conf.pyGeno_SETTINGS['DATA_PATH']
 		return conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/%s' % (self.specie, self.name)
 	
 	def getReferenceSequencePath(self) :

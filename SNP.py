@@ -1,128 +1,76 @@
 import configuration as conf
+
+from rabaDB.setup import *
+RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
+from rabaDB.Raba import *
+import rabaDB.fields as rf
+
 from tools import UsefulFunctions as uf
 from exceptions import *
-import zlib, pickle
 
-class SNPFile :
-	"""This represent a file containing a list of snps sorted by position, the position must be in the first column"""
-	def __init__(self, filePath, SNPObj) :
-		self.filePath = filePath
-		f = open(filePath)
-		self.lines = f.readlines()
-		f.close()
-		if self.lines[0][:2] == '//' :
-			j = 0
-			for i in range(len(self.lines)) :
-				if self.lines[i][:6] =='//pos;' :
-					break
-				j += 1
-				
-			self.lines = self.lines[j+1:]
-			
-		if len(self.lines) < 1 :
-			raise ValueError("file %s is empty" % filePath)
-
-		self.snps = {}
-		self.SNPObj = SNPObj
+class Casava_SNP(Raba) :
 	
-	def __findSnp(self, x1):
-		r1 = 0
-		r2 = len(self)-1
-		while (r1 <= r2) :
-			pos = (r1+r2)/2
-			sl = self.lines[pos].split(';')
-			
-			val = int(sl[0])
-			if val == x1 :
-				return (pos, val)
-			elif x1 < val :
-				r2 = pos -1
-			else :
-				r1 = pos +1
-
-		return (pos, val)
-
-	def findSnpsInRange(self, x1, x2 = None) :
-		"""X1 inclusive, x2 exc"""
-		if x2 == None or x1 == x2:
-			xx1 = x1
-			xx2 = x1+1
-		else :
-			if x1 < x2 :
-				xx1, xx2 = x1, x2
-			else :
-				xx1, xx2 = x2, x1
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	pos = rf.PrimitiveField()
+	bcalls_used = rf.PrimitiveField()
+	bcalls_filt = rf.PrimitiveField()
+	ref = rf.PrimitiveField()
+	QSNP = rf.PrimitiveField()
+	max_gt = rf.PrimitiveField()
+	max_gt_poly_site = rf.PrimitiveField()
+	Qmax_gt_poly_site = rf.PrimitiveField()
+	A_used = rf.PrimitiveField()
+	C_used = rf.PrimitiveField()
+	G_used = rf.PrimitiveField()
+	T_used = rf.PrimitiveField()
 	
-		l1, val1 = self.__findSnp(xx1)
-		l2, val2 = self.__findSnp(xx2)
+	genome = rf.RabaObjectField('Genome')
+	chromosome = rf.RabaObjectField('Chromosome')
+	
+	def __init__(self, *args, **fieldsSet) :
+		Raba.__init__(self, **fieldsSet) 
+
+class dbSNP_SNP(Raba) :
+	
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	version = rf.PrimitiveField()
+	
+	rsid = rf.PrimitiveField()
+	pos = rf.PrimitiveField()
+	type = rf.PrimitiveField()
+	alleles = rf.PrimitiveField()
+	validated = rf.PrimitiveField()
+	
+	assembly = rf.PrimitiveField()
+	original_orientation = rf.PrimitiveField()
+	maf_allele = rf.PrimitiveField()
+	maf_count = rf.PrimitiveField()
+	maf = rf.PrimitiveField()
+	het = rf.PrimitiveField()
+	se_het = rf.PrimitiveField()
+	
+	loc = rf.RabaListField()
+	
+	specie = rf.PrimitiveField()
+	chromosomeNumber = rf.PrimitiveField()
+	
+	def __init__(self, *args, **fieldsSet) :
+		Raba.__init__(self, **fieldsSet) 
+
+class dbSNP_SNPLOC(Raba) :
+	
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	allele = rf.PrimitiveField()
+	fxn_class = rf.PrimitiveField()
+	gene = rf.PrimitiveField()
+	residue = rf.PrimitiveField()
+	
+	snp = rf.RabaObjectField('dbSNP_SNP')
+	
+	def __init__(self, *args, **fieldsSet) :
+		Raba.__init__(self, **fieldsSet)
 		
-		ret = []
-		for l in range(l1, l2+1) :
-			snp = self.__getSNP(l)
-			if  xx1<= snp['pos'] and snp['pos'] < xx2 :
-				ret.append(snp)
-
-		return ret
-	
-	def findSnp(self, x1) :
-		l1, val1 = self.__findSnp(x1)
-
-		if val1 == x1 :
-			return self.__getSNP(l1)
-		else :
-			return None
-			
-	def __getSNP(self, lineNumber) :
-		if lineNumber > len(self) or lineNumber < 0:
-			return None
-		
-		try :
-			return self.snps[lineNumber]
-		except KeyError :
-			#print '-->', lineNumber, self.lines[lineNumber]
-			self.snps[lineNumber] = self.SNPObj(self.lines[lineNumber])
-			return self.snps[lineNumber]
-	
-	def __len__(self) :
-		return len(self.lines)
-
-class SNP :
-	def __init__(self, line) :
-		self.reset(line)
-	
-	def reset(self, line) :
-		"""An abstract class representing a SNP, see __make()"""
-		self.values = {}
-		self.formatDecriptionFile = ''
-		
-	def __make(self, sl) :
-		"""This function should be rewritten in child, i fills the self.value dictionary from a list"""
-		raise TypeError("SNP Class is abstact and should never get instanciated")
-		
-	def __getitem__(self, i) :
-		return self.values[i]
-	
-	def __setitem__(self, i, v) :
-		self.values[i] = v
-		
-	def __str__(self) :
-		return str(self.values)
-	
-	def __repr__(self):
-		return str(self)
-		
-	def __eq__(self, s) :
-		return self.values == s.values
-	
-	def printFormatDescription() :
-		f = open(conf.DATA_PATH+'/'+self.formatDecriptionFile)
-		s = f.read()
-		f.close()
-		#print s
-	
-	def __hash__(self):
-		return hash(self.__class__.__name__) ^ hash(self.values)
-	
+"""
 class CasavaSNP(SNP) :
 	def __init__(self, line) :
 		SNP.__init__(self, line)
@@ -142,8 +90,8 @@ class CasavaSNP(SNP) :
 			self.values['QSNP'] = int(sl[4])
 			self.values['max_gt'] = uf.getPolymorphicNucleotide(sl[5])
 			self.values['Qmax_gt'] = int(sl[6])
-			self.values['max_gt-poly_site'] = sl[7]
-			self.values['Qmax_gt-poly_site'] = int(sl[8])
+			self.values['max_gt_poly_site'] = sl[7]
+			self.values['Qmax_gt_poly_site'] = int(sl[8])
 			self.values['A_used'] = int(sl[9])
 			self.values['C_used'] = int(sl[10])
 			self.values['G_used'] = int(sl[11])
@@ -186,4 +134,4 @@ class dbSNP(SNP) :
 			self.values['loc'] = pickle.loads(sl[13].replace('/rje3/', '\n').replace('/qte3/', ';'))
 		except :
 			raise SNPError("Unkown problem, here's the line: %s" % sl)
-
+"""

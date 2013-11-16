@@ -37,7 +37,7 @@ class Chromosome(Raba) :
 	#x1, x2 are the prosition of the chromosome in the genome
 	x1 = rf.PrimitiveField()
 	x2 = rf.PrimitiveField()
-	dataFile = rf.PrimitiveField() #heavy .dat/light .polys
+	dataType = rf.PrimitiveField() #'heavy' => .dat file, 'light' => polys in databse
 	
 	genome = rf.RabaObjectField('Genome')
 	genes = rf.RabaListField()
