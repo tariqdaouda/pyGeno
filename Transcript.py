@@ -20,12 +20,15 @@ class Transcript(Raba) :
 	
 	id = rf.PrimitiveField()
 	name = rf.PrimitiveField()
+	length = rf.PrimitiveField()
 	
 	genome = rf.RabaObjectField('Genome')
 	chromosome = rf.RabaObjectField('Chromosome')
 	gene = rf.RabaObjectField('Gene')
 	protein = rf.RabaObjectField('Protein')
-	exons = rf.RabaListField()
+	exons = rf.RabaRelationField('Exon')
+	
+	_raba_uniques = [('genome', 'id')]
 	
 	def __init__(self, *args, **fieldsSet) :
 		Raba.__init__(self, **fieldsSet)

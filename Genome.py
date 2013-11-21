@@ -42,11 +42,12 @@ class Genome(Raba) :
 	name = rf.PrimitiveField()
 	specie = rf.PrimitiveField()
 	reference = rf.PrimitiveField()
-	chromosomes = rf.RabaListField()
+	chromosomes = rf.RabaRelationField('Chromosome')
 	
 	source = rf.PrimitiveField()
 	packageInfos = rf.PrimitiveField()
 	
+	_raba_uniques = [('name', 'specie')]
 	
 	def __init__(self, *args, **fieldsSet) :
 		Raba.__init__(self, **fieldsSet)

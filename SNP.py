@@ -35,7 +35,7 @@ class dbSNP_SNP(Raba) :
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	version = rf.PrimitiveField()
 	
-	rsid = rf.PrimitiveField()
+	rsId = rf.PrimitiveField()
 	pos = rf.PrimitiveField()
 	type = rf.PrimitiveField()
 	alleles = rf.PrimitiveField()

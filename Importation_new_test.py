@@ -52,9 +52,9 @@ def importGenome(packageDir, verbose = False) :
 	genome.set(name = genomeName, specie = specie, source = genomeSource, packageInfos = packageInfos)
 	seqTargetDir = genome.getSequencePath()
 	
-	if os.path.isdir(seqTargetDir) :
-		raise ValueError("The directory %s already exists. If you want to reinstall a package delete the folder first" % seqTargetDir)
-	os.makedirs(seqTargetDir)
+	#if os.path.isdir(seqTargetDir) :
+	#	raise ValueError("The directory %s already exists. If you want to reinstall a package delete the folder first" % seqTargetDir)
+	#os.makedirs(seqTargetDir)
 	
 	_importGenomeObjects(packageDir+'/'+gtfFile, chromosomeSet, genome, verbose)
 	x1Chro = 0
@@ -274,7 +274,7 @@ def import_dbSNP(packageFolder, specie, versionName) :
 		-loc is a dictionary allele wise that simplifies the line loc' 
 	"""
 	
-	RabaConnection(conf.pyGeno_RABA_NAMESPACE).manualCommitOnly = True
+	RabaConnection(conf.pyGeno_RABA_NAMESPACE).autoOnSaveCommit(False)
 	
 	def parseSNP(snpLines, specie, chroNumber, version) :
 		lines = snpLines.split('\n')
@@ -288,11 +288,10 @@ def import_dbSNP(packageFolder, specie, versionName) :
 		for l in lines :
 			sl = l.split('|')
 			if sl[0][:2] == 'rs' :
-				snp.rsid = sl[0][2:].strip()
+				snp.rsId = sl[0][2:].strip()
 				snp.type = sl[3].strip()
 			
-			elif sl[0][:3] == 'SNP' : # and snp.rsid != None :
-				#snp.alleles = uf.getPolymorphicNucleotide(sl[1].strip().replace('alleles=', '').replace("'", ""))
+			elif sl[0][:3] == 'SNP' : 
 				snp.alleles = sl[1].strip().replace('alleles=', '').replace("'", "")
 				het = sl[2].strip().replace('het=', '')
 				try :
@@ -306,10 +305,10 @@ def import_dbSNP(packageFolder, specie, versionName) :
 				except :
 					pass
 					
-			elif sl[0][:3] == 'VAL' : #and snp.rsid != None :
+			elif sl[0][:3] == 'VAL' :
 				snp.validated = sl[1].strip().replace("validated=", '')
 				
-			elif sl[0][:3] == 'CTG' and sl[1].find('GRCh') > -1 : #and snp.rsid != None and (res['chromosome'] == None or res['//pos'] == None):
+			elif sl[0][:3] == 'CTG' and sl[1].find('GRCh') > -1 :
 				snp.original_orientation = sl[-1].replace('orient=', '').strip()
 				snp.assembly = sl[1].replace('assembly=', '').strip()
 				snp.chromosome = sl[2].replace('chr=', '').strip()
@@ -320,7 +319,7 @@ def import_dbSNP(packageFolder, specie, versionName) :
 				except :
 					pass
 				
-			elif sl[0][:4] == 'GMAF' : # and res['rs'] != None :
+			elif sl[0][:4] == 'GMAF' :
 				snp.maf_allele = sl[1].strip().replace('allele=', '')
 				maf_count = sl[2].strip().replace('count=', '')
 				try :
@@ -334,9 +333,8 @@ def import_dbSNP(packageFolder, specie, versionName) :
 				except :
 					pass
 			
-			elif sl[0][:3] == 'LOC' : #and res['rs'] != None :
+			elif sl[0][:3] == 'LOC' :
 				loc = dbSNP_SNPLOC()
-				#loc.allele = uf.getPolymorphicNucleotide(sl[4].strip().replace('allele=', ''))
 				loc.allele = sl[4].strip().replace('allele=', '')
 				loc.gene = sl[1].strip()
 				loc.fxn_class = sl[3].strip().replace('fxn-class=', '')
@@ -370,18 +368,19 @@ def import_dbSNP(packageFolder, specie, versionName) :
 
 	print 'saving...'
 	RabaConnection(conf.pyGeno_RABA_NAMESPACE).commit()
-	RabaConnection(conf.pyGeno_RABA_NAMESPACE).manualCommitOnly = False
+	RabaConnection(conf.pyGeno_RABA_NAMESPACE).autoOnSaveCommit(True)
 	print 'done.'
 	
 if __name__ == "__main__" :
-	#importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse/mus_muslcus/', verbose = False)
-	#g = Genome(specie = 'Mus_musculus', name = 'GRCm38_test')
-	#print g.get(Exon, {'x1 >' : 797276})
+	importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse/mus_muslcus/', verbose = False)
+	g = Genome(specie = 'Mus_musculus', name = 'GRCm38_test')
+	a = g.get(Exon, {'x1 >' : 797276})
+	#print a[0]
 	#importGenome_casava('Mus_musculus', 'musCasava', 'http://www.bioinfo.iric.ca/seq/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
 	
-	import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/test', 'Mus_musculus', 'test')
+	#import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/test', 'Mus_musculus', 'test')
 	#print g.chromosomes
-	#f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
-	#f.addFilter(**{'genome' : g, 'x1 <' : 797276})
+	#f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, dbSNP_SNP)
+	#f.addFilter(**{'version' : 'test'})
 	#for e in f.run() :
-	#	print e.x1, e.x1 - 797276
+	#	print e.rsId

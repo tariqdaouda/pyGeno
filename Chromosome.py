@@ -37,10 +37,13 @@ class Chromosome(Raba) :
 	#x1, x2 are the prosition of the chromosome in the genome
 	x1 = rf.PrimitiveField()
 	x2 = rf.PrimitiveField()
+	length = rf.PrimitiveField()
 	dataType = rf.PrimitiveField() #'heavy' => .dat file, 'light' => polys in databse
 	
 	genome = rf.RabaObjectField('Genome')
-	genes = rf.RabaListField()
+	genes = rf.RabaRelationField('Gene')
+	
+	_raba_uniques = [('genome', 'number')]
 	
 	def __init__(self, *args, **fieldsSet) :
 		Raba.__init__(self, **fieldsSet)
@@ -63,6 +66,11 @@ class Chromosome(Raba) :
 			self.loadSNPs(dbSNPVersion, verbose)
 		elif verbose :
 			print 'Not loading SNPs because told to...'"""
+	
+	def save(self) :
+		if  self.x2 != None and self.x1 != None :
+			self.length = self.x2-self.x1
+		Raba.save(self)
 	
 	def __loadSequence(self):
 		if os.path.exists('%s/chr%s.dat'%(self.genome.getSequencePath(), self.number)) :
@@ -118,7 +126,7 @@ class Chromosome(Raba) :
 			sys.stderr.write('Unable to load snp data for chr %s of genome %s\n' %(self.number, self.genome.name))
 			sys.stderr.write('\t->Unable to resolve path: %s/chr%s.pygeno-dbSNP\n'%(self.genome.getdbSNPPath(), self.number))
 			
-
+	
 	def hasGene(self, symbol) :
 		return symbol in self.geneSymbolIndex.keys()
 	

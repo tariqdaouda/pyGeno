@@ -20,6 +20,8 @@ class Protein(Raba) :
 	gene = rf.RabaObjectField('Gene')
 	transcript = rf.RabaObjectField('Transcript')
 	
+	_raba_uniques = [('genome', 'id')]
+	
 	def __init__(self, *args, **fieldsSet) :
 		Raba.__init__(self, **fieldsSet)
 

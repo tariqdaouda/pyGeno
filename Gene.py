@@ -25,7 +25,9 @@ class Gene(Raba) :
 	
 	genome = rf.RabaObjectField('Genome')
 	chromosome = rf.RabaObjectField('Chromosome')
-	transcripts = rf.RabaListField()
+	transcripts = rf.RabaRelationField('Transcript')
+	
+	_raba_uniques = [('genome', 'id')]
 	
 	def __init__(self, *args, **fieldsSet) :
 		Raba.__init__(self, **fieldsSet) 

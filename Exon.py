@@ -21,6 +21,7 @@ class Exon(Raba):
 	number = rf.PrimitiveField()
 	x1 = rf.PrimitiveField()
 	x2 = rf.PrimitiveField()
+	length = rf.PrimitiveField()
 	CDS_x1 = rf.PrimitiveField()
 	CDS_x2 = rf.PrimitiveField()
 	
@@ -29,6 +30,8 @@ class Exon(Raba):
 	gene = rf.RabaObjectField('Gene')
 	transcript = rf.RabaObjectField('Transcript')
 	strand = rf.PrimitiveField()
+	
+	_raba_uniques = [('genome', 'id')]
 	
 	def __init__(self, *args, **fieldsSet) :
 		r"""An exon, the sequence is set according to gene strand, if it's '-' the sequence is the complement.
@@ -68,6 +71,11 @@ class Exon(Raba):
 		else :
 			self.sequence = uf.reverseComplement(seq)"""
 
+	def save(self) :
+		if  self.x2 != None and self.x1 != None :
+			self.length = self.x2-self.x1
+		Raba.save(self)
+	
 	def hasCDS(self) :
 		if self.CDS != None :
 			return True
