@@ -48,13 +48,20 @@ def importGenome(packageDir, verbose = False) :
 	bckFn = backUpDB()
 	print "=====\nIf anything goes wrong, the db has been backuped here: %s\nSimply rename it to: %s\n=====" %(bckFn, conf.pyGeno_RABA_DBFILE)
 
+	try :
+		genome = Genome(name = genomeName, specie = specie)
+		raise ValueError("There seem to already be a genome (%s, $s), please call deleteGenome() first if you want to reinstall it" % (genomeName, specie))
+	except KeyError:
+		pass
+	
 	genome = Genome()
 	genome.set(name = genomeName, specie = specie, source = genomeSource, packageInfos = packageInfos)
 	seqTargetDir = genome.getSequencePath()
 	
-	#if os.path.isdir(seqTargetDir) :
-	#	raise ValueError("The directory %s already exists. If you want to reinstall a package delete the folder first" % seqTargetDir)
-	#os.makedirs(seqTargetDir)
+	if os.path.isdir(seqTargetDir) :
+		raise ValueError("The directory %s already exists, Please call deleteGenome() first if you want to reinstall" % seqTargetDir)
+	
+	os.makedirs(seqTargetDir)
 	
 	_importGenomeObjects(packageDir+'/'+gtfFile, chromosomeSet, genome, verbose)
 	x1Chro = 0
@@ -65,6 +72,22 @@ def importGenome(packageDir, verbose = False) :
 		x1Chro = chro.x2
 	
 	genome.save()
+
+def deleteGenome(name = genomeName, specie = specie) :
+	"removes all infos about a genome"
+	genome = Genome(name = genomeName, specie = specie)
+	shutils.rmtree(genome.getSequencePath())
+	
+	rq = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Chromosome)
+	rq.addFilter(genome = Genome
+	for e in rq.run() :
+		print e.delete()
+	
+	for typ in (Chromosome, Gene, Transcript, Exon, Protein) :
+		rq = RabaQuery(conf.pyGeno_RABA_NAMESPACE, typ)
+		rq.addFilter(genome = Genome)
+		for e in rq.iterRun() :
+			print e.delete()
 	
 def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 	print 'Importing gene set infos from %s...' % gtfFilePath

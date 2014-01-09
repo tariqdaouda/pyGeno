@@ -1,35 +1,31 @@
-#import numpy as N
-import re, copy, sys, random
+from pyGenoObject import *
 
-import configuration as conf
-
-from rabaDB.setup import *
-RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
-from rabaDB.Raba import *
+#from rabaDB.setup import *
+#RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
+#from rabaDB.Raba import *
+#from rabaDB.filters import RabaQuery
 import rabaDB.fields as rf
 
-from tools import UsefulFunctions as uf
-from Protein import Protein
+#from tools import UsefulFunctions as uf
+#from Protein import Protein
 
 from tools.BinarySequence import NucBinarySequence
 
-class Exon(Raba):
+class Exon(pyGenoObject):
 	
-	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
-
-	id = rf.PrimitiveField()
-	number = rf.PrimitiveField()
-	x1 = rf.PrimitiveField()
-	x2 = rf.PrimitiveField()
-	length = rf.PrimitiveField()
-	CDS_x1 = rf.PrimitiveField()
-	CDS_x2 = rf.PrimitiveField()
+	id = rf.Primitive()
+	number = rf.Primitive()
+	x1 = rf.Primitive()
+	x2 = rf.Primitive()
+	length = rf.Primitive()
+	CDS_x1 = rf.Primitive()
+	CDS_x2 = rf.Primitive()
 	
-	genome = rf.RabaObjectField('Genome')
-	chromosome = rf.RabaObjectField('Chromosome')
-	gene = rf.RabaObjectField('Gene')
-	transcript = rf.RabaObjectField('Transcript')
-	strand = rf.PrimitiveField()
+	genome = rf.RabaObject('Genome')
+	chromosome = rf.RabaObject('Chromosome')
+	gene = rf.RabaObject('Gene')
+	transcript = rf.RabaObject('Transcript')
+	strand = rf.Primitive()
 	
 	_raba_uniques = [('genome', 'id')]
 	
@@ -38,7 +34,6 @@ class Exon(Raba):
 		A CDS is a couple of coordinates that lies inside of the exon.
 		SNVsFilter is a fct that defines wich SNVs are included in the sequence.
 		I expect [x1, x2[ (python) not something like [x1, x2](ensembl format)"""
-		Raba.__init__(self, **fieldsSet)
 		
 		if self.x1 != None and self.x2 != None :
 			#xx1, xx2 = int(self.x1), int(self.x2)+1
@@ -51,35 +46,34 @@ class Exon(Raba):
 		if self.number != None :
 			self.number = int(self.number)
 		
-		"""self.type = typ
-		self.transcript = transcript
-		self.startCodonPos = startCodon
-		self.stopCodonPos = stopCodon
-		
-		xx1, xx2 = int(x1), int(x2)+1
-		if xx1 < xx2 :
-			self.x1, self.x2 = xx1, xx2
-		else :
-			self.x1, self.x2 = xx2, xx1
-		
-		self.number = int(number)
-		self.CDS = None
-		
 		seq = self.transcript.gene.chromosome.getSequence(x1, x2+1, SNVsFilter)
 		if self.transcript.gene.strand == '+' :
 			self.sequence = seq
 		else :
-			self.sequence = uf.reverseComplement(seq)"""
-
+			self.sequence = uf.reverseComplement(seq)
+		
+		self.cdsSequence = ''
+		
 	def save(self) :
 		if  self.x2 != None and self.x1 != None :
 			self.length = self.x2-self.x1
-		Raba.save(self)
+		pyGenoObject.save(self)
 	
 	def hasCDS(self) :
-		if self.CDS != None :
+		if self.CDS_x1 != None and self.CDS_x2 != None:
 			return True
 		return False
+	
+	def _getCDSSequence(self) :
+		try :
+			if self.transcript.gene.strand == '+' :
+				return self.sequence[self.CDS[0]-self.x1:self.CDS[1]-self.x1]
+			else :
+				x1 = self.CDS[0]-self.x1
+				x2 = self.CDS[1]-self.x1
+				return self.sequence[len(self.sequence)-x2:len(self.sequence)-x1]
+		except TypeError:
+			return ''
 	
 	def setCDS(self, x1, x2):
 		"Beware! i expect [x1, x2[ (python) not something like [x1, x2](ensembl format)"
@@ -94,20 +88,10 @@ class Exon(Raba):
 		else :
 			self.CDS_x1, self.CDS_x2 = xx2, xx1
 	
+		self.cdsSequence = self._getCDSSequence()
+		
 	def getCDSLength(self) :
 		return len(self.getCDSSequence())
-
-	
-	def getCDSSequence(self) :
-		try :
-			if self.transcript.gene.strand == '+' :
-				return self.sequence[self.CDS[0]-self.x1:self.CDS[1]-self.x1]
-			else :
-				x1 = self.CDS[0]-self.x1
-				x2 = self.CDS[1]-self.x1
-				return self.sequence[len(self.sequence)-x2:len(self.sequence)-x1]
-		except TypeError:
-			return ''
 	
 	def pluck(self) :
 		"""Returns a plucked object. Plucks the exon off the tree, set the value of self.transcript into str(self.transcript). This effectively disconnects the object and

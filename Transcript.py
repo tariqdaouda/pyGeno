@@ -18,20 +18,20 @@ from tools.BinarySequence import NucBinarySequence
 class Transcript(Raba) :
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	
-	id = rf.PrimitiveField()
-	name = rf.PrimitiveField()
-	length = rf.PrimitiveField()
+	id = rf.Primitive()
+	name = rf.Primitive()
+	length = rf.Primitive()
 	
-	genome = rf.RabaObjectField('Genome')
-	chromosome = rf.RabaObjectField('Chromosome')
-	gene = rf.RabaObjectField('Gene')
-	protein = rf.RabaObjectField('Protein')
-	exons = rf.RabaRelationField('Exon')
+	genome = rf.RabaObject('Genome')
+	chromosome = rf.RabaObject('Chromosome')
+	gene = rf.RabaObject('Gene')
+	protein = rf.RabaObject('Protein')
+	exons = rf.Relation('Exon')
 	
 	_raba_uniques = [('genome', 'id')]
 	
 	def __init__(self, *args, **fieldsSet) :
-		Raba.__init__(self, **fieldsSet)
+		pass
 		"""self.gene = gene
 		self.id = id
 		self.name = name

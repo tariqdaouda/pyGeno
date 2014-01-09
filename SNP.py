@@ -11,64 +11,64 @@ from exceptions import *
 class Casava_SNP(Raba) :
 	
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
-	pos = rf.PrimitiveField()
-	bcalls_used = rf.PrimitiveField()
-	bcalls_filt = rf.PrimitiveField()
-	ref = rf.PrimitiveField()
-	QSNP = rf.PrimitiveField()
-	max_gt = rf.PrimitiveField()
-	max_gt_poly_site = rf.PrimitiveField()
-	Qmax_gt_poly_site = rf.PrimitiveField()
-	A_used = rf.PrimitiveField()
-	C_used = rf.PrimitiveField()
-	G_used = rf.PrimitiveField()
-	T_used = rf.PrimitiveField()
+	pos = rf.Primitive()
+	bcalls_used = rf.Primitive()
+	bcalls_filt = rf.Primitive()
+	ref = rf.Primitive()
+	QSNP = rf.Primitive()
+	max_gt = rf.Primitive()
+	max_gt_poly_site = rf.Primitive()
+	Qmax_gt_poly_site = rf.Primitive()
+	A_used = rf.Primitive()
+	C_used = rf.Primitive()
+	G_used = rf.Primitive()
+	T_used = rf.Primitive()
 	
-	genome = rf.RabaObjectField('Genome')
-	chromosome = rf.RabaObjectField('Chromosome')
+	genome = rf.RabaObject('Genome')
+	chromosome = rf.RabaObject('Chromosome')
 	
 	def __init__(self, *args, **fieldsSet) :
-		Raba.__init__(self, **fieldsSet) 
+		pass
 
 class dbSNP_SNP(Raba) :
 	
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
-	version = rf.PrimitiveField()
+	version = rf.Primitive()
 	
-	rsId = rf.PrimitiveField()
-	pos = rf.PrimitiveField()
-	type = rf.PrimitiveField()
-	alleles = rf.PrimitiveField()
-	validated = rf.PrimitiveField()
+	rsId = rf.Primitive()
+	pos = rf.Primitive()
+	type = rf.Primitive()
+	alleles = rf.Primitive()
+	validated = rf.Primitive()
 	
-	assembly = rf.PrimitiveField()
-	original_orientation = rf.PrimitiveField()
-	maf_allele = rf.PrimitiveField()
-	maf_count = rf.PrimitiveField()
-	maf = rf.PrimitiveField()
-	het = rf.PrimitiveField()
-	se_het = rf.PrimitiveField()
+	assembly = rf.Primitive()
+	original_orientation = rf.Primitive()
+	maf_allele = rf.Primitive()
+	maf_count = rf.Primitive()
+	maf = rf.Primitive()
+	het = rf.Primitive()
+	se_het = rf.Primitive()
 	
-	loc = rf.RabaListField()
+	loc = rf.RList()
 	
-	specie = rf.PrimitiveField()
-	chromosomeNumber = rf.PrimitiveField()
+	specie = rf.Primitive()
+	chromosomeNumber = rf.Primitive()
 	
 	def __init__(self, *args, **fieldsSet) :
-		Raba.__init__(self, **fieldsSet) 
+		pass
 
 class dbSNP_SNPLOC(Raba) :
 	
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
-	allele = rf.PrimitiveField()
-	fxn_class = rf.PrimitiveField()
-	gene = rf.PrimitiveField()
-	residue = rf.PrimitiveField()
+	allele = rf.Primitive()
+	fxn_class = rf.Primitive()
+	gene = rf.Primitive()
+	residue = rf.Primitive()
 	
-	snp = rf.RabaObjectField('dbSNP_SNP')
+	snp = rf.RabaObject('dbSNP_SNP')
 	
 	def __init__(self, *args, **fieldsSet) :
-		Raba.__init__(self, **fieldsSet)
+		pass
 		
 """
 class CasavaSNP(SNP) :

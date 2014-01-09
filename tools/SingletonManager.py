@@ -11,6 +11,8 @@ def add(obj, objName='') :
 	if key not in objects :
 		objects[key] = obj
 
+	return obj
+
 def contains(k) :
 	return k in objects
 	

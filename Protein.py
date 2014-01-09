@@ -12,18 +12,18 @@ import copy
 class Protein(Raba) :
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	
-	id = rf.PrimitiveField()
-	name = rf.PrimitiveField()
+	id = rf.Primitive()
+	name = rf.Primitive()
 	
-	genome = rf.RabaObjectField('Genome')
-	chromosome = rf.RabaObjectField('Chromosome')
-	gene = rf.RabaObjectField('Gene')
-	transcript = rf.RabaObjectField('Transcript')
+	genome = rf.RabaObject('Genome')
+	chromosome = rf.RabaObject('Chromosome')
+	gene = rf.RabaObject('Gene')
+	transcript = rf.RabaObject('Transcript')
 	
 	_raba_uniques = [('genome', 'id')]
 	
 	def __init__(self, *args, **fieldsSet) :
-		Raba.__init__(self, **fieldsSet)
+		pass
 
 		"""self.sequence = sequence
 		self.transcript = transcript
