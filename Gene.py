@@ -15,6 +15,7 @@ import rabaDB.fields as rf
 #from tools.BinarySequence import NucBinarySequence
 
 class Gene(pyGenoObject) :
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	
 	id = rf.Primitive()
 	name = rf.Primitive()

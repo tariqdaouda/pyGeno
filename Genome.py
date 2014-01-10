@@ -8,9 +8,10 @@ from pyGenoObject import *
 import rabaDB.fields as rf
 
 class Genome(pyGenoObject) :
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	
 	name = rf.Primitive()
 	specie = rf.Primitive()
-	reference = rf.Primitive()
 	chromosomes = rf.Relation('Chromosome')
 	
 	source = rf.Primitive()

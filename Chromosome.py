@@ -1,3 +1,4 @@
+import configuration as conf
 from pyGenoObject import *
 
 #from rabaDB.setup import *
@@ -27,6 +28,7 @@ def defaultDbSNPsFilter(dbSnp) :
 class Chromosome(pyGenoObject) :
 	"""A class that represents a Chromosome
 	Attention: private region support en retard par rapport au public"""
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 
 	header = rf.Primitive()
 	number = rf.Primitive()
@@ -127,8 +129,9 @@ class Chromosome(pyGenoObject) :
 	def __getitem__(self, i) :
 		return self.genes[i]
 		
-	def __len__(self):
-		return self.x2-self.x1#self.genome.chrsData[self.number].length
+	def __len__(self) :
+		self.length = self.x2-self.x1 #updated to be saved in db
+		return self.length
 
 	def __str__(self) :
 		return "Chromosome: number %s > %s" %(self.number, str(self.genome))

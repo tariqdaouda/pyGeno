@@ -3,6 +3,8 @@ from ConfigParser import SafeConfigParser
 
 import configuration as conf
 
+import rabaDB.setup
+#rabaDB.setup._DEBUG_MODE = True
 from rabaDB.Raba import *
 import rabaDB.fields as rf
 from rabaDB.filters import RabaQuery
@@ -48,24 +50,25 @@ def importGenome(packageDir, verbose = False) :
 	bckFn = backUpDB()
 	print "=====\nIf anything goes wrong, the db has been backuped here: %s\nSimply rename it to: %s\n=====" %(bckFn, conf.pyGeno_RABA_DBFILE)
 
-	try :
-		genome = Genome(name = genomeName, specie = specie)
-		raise ValueError("There seem to already be a genome (%s, $s), please call deleteGenome() first if you want to reinstall it" % (genomeName, specie))
-	except KeyError:
-		pass
+	#try :
+	#	genome = Genome(name = genomeName, specie = specie)
+	#	raise ValueError("There seem to already be a genome (%s, $s), please call deleteGenome() first if you want to reinstall it" % (genomeName, specie))
+	#except KeyError:
+	#	pass
 	
 	genome = Genome()
 	genome.set(name = genomeName, specie = specie, source = genomeSource, packageInfos = packageInfos)
 	seqTargetDir = genome.getSequencePath()
 	
-	if os.path.isdir(seqTargetDir) :
-		raise ValueError("The directory %s already exists, Please call deleteGenome() first if you want to reinstall" % seqTargetDir)
+	#if os.path.isdir(seqTargetDir) :
+	#	raise ValueError("The directory %s already exists, Please call deleteGenome() first if you want to reinstall" % seqTargetDir)
 	
-	os.makedirs(seqTargetDir)
+	#os.makedirs(seqTargetDir)
 	
 	_importGenomeObjects(packageDir+'/'+gtfFile, chromosomeSet, genome, verbose)
 	x1Chro = 0
 	for chro in genome.chromosomes :
+		print "Importing DNA sequence of chromosome %s..." % chro
 		length = __importSequence(chro, packageDir+'/'+chromosomesFiles[chro.number.lower()], seqTargetDir)
 		chro.x1 = x1Chro
 		chro.x2 = x1Chro+length
@@ -73,13 +76,16 @@ def importGenome(packageDir, verbose = False) :
 	
 	genome.save()
 
-def deleteGenome(name = genomeName, specie = specie) :
+def deleteGenome(name, specie) :
 	"removes all infos about a genome"
-	genome = Genome(name = genomeName, specie = specie)
-	shutils.rmtree(genome.getSequencePath())
+	genome = Genome(name = name, specie = specie)
+	try :
+		shutil.rmtree(genome.getSequencePath())
+	except OSError as e:
+		print 'WARNING, Unable to delete folder =>', e
 	
 	rq = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Chromosome)
-	rq.addFilter(genome = Genome
+	rq.addFilter(genome = Genome)
 	for e in rq.run() :
 		print e.delete()
 	
@@ -165,7 +171,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 				try :
 					exonId = gtf.get(i, 'exon_id')
 					if exonId not in exons :
-						exons[exonKey] = Exon()
+						exons[exonKey] = Exon(importing = True)
 						exons[exonKey].set(genome = genome, id = exonId, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], strand = strand, number = exonNumber, x1 = x1, x2 = x2)
 						exons[exonKey].save()
 				except KeyError :
@@ -181,23 +187,23 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 	print 'creating relations...'
 	print '\ttranscript.exons...'
 	for transcript in transcripts.values() :
-		f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
+		f = RabaQuery(Exon)
 		f.addFilter(**{'transcript' : transcript})
 		transcript.exons = f.run()
 	
 	print '\tgene.transcripts...'
 	for gene in genes.values() :
-		f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Transcript)
+		f = RabaQuery(Transcript)
 		f.addFilter(**{'gene' : gene})
 		gene.transcripts = f.run()
 		
-		f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Exon)
+		f = RabaQuery(Exon)
 		f.addFilter(**{'gene' : gene})
 		gene.exons = f.run()
 	
 	print '\tchromosome.genes...'
 	for chro in chromosomes.values() :
-		f = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Gene)
+		f = RabaQuery(Gene)
 		f.addFilter(**{'chromosome' : chro})
 		chro.genes = f.run()
 	
@@ -395,10 +401,16 @@ def import_dbSNP(packageFolder, specie, versionName) :
 	print 'done.'
 	
 if __name__ == "__main__" :
-	importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse/mus_muslcus/', verbose = False)
+	#deleteGenome(specie = 'Mus_musculus', name = 'GRCm38_test')
+	#importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse/mus_muslcus/', verbose = False)
+	
 	g = Genome(specie = 'Mus_musculus', name = 'GRCm38_test')
-	a = g.get(Exon, {'x1 >' : 797276})
-	#print a[0]
+	a = g.get(Gene, name = 'Gm21742')
+	print a[-1].name
+	print a[-1]
+	#a[0].genome.chromosomes = [a[0]]
+	#g.save()
+	
 	#importGenome_casava('Mus_musculus', 'musCasava', 'http://www.bioinfo.iric.ca/seq/Project_DSP008a/Build_Diana_ARN_R/snps.txt')
 	
 	#import_dbSNP('/u/daoudat/py/pyGeno/importationPackages/dbSNP/human/test', 'Mus_musculus', 'test')

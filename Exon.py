@@ -12,6 +12,7 @@ import rabaDB.fields as rf
 from tools.BinarySequence import NucBinarySequence
 
 class Exon(pyGenoObject):
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	
 	id = rf.Primitive()
 	number = rf.Primitive()
@@ -29,30 +30,32 @@ class Exon(pyGenoObject):
 	
 	_raba_uniques = [('genome', 'id')]
 	
-	def __init__(self, *args, **fieldsSet) :
+	def __init__(self, importing = False, *args, **fieldsSet) :
 		r"""An exon, the sequence is set according to gene strand, if it's '-' the sequence is the complement.
 		A CDS is a couple of coordinates that lies inside of the exon.
 		SNVsFilter is a fct that defines wich SNVs are included in the sequence.
 		I expect [x1, x2[ (python) not something like [x1, x2](ensembl format)"""
-		
-		if self.x1 != None and self.x2 != None :
-			#xx1, xx2 = int(self.x1), int(self.x2)+1
-			xx1, xx2 = int(self.x1), int(self.x2)
-			if xx1 < xx2 :
-				self.x1, self.x2 = xx1, xx2
-			else :
-				self.x1, self.x2 = xx2, xx1
-		
-		if self.number != None :
-			self.number = int(self.number)
-		
-		seq = self.transcript.gene.chromosome.getSequence(x1, x2+1, SNVsFilter)
-		if self.transcript.gene.strand == '+' :
-			self.sequence = seq
+		if importing :
+			self.sequence = ''
 		else :
-			self.sequence = uf.reverseComplement(seq)
-		
-		self.cdsSequence = ''
+			if self.x1 != None and self.x2 != None :
+				#xx1, xx2 = int(self.x1), int(self.x2)+1
+				xx1, xx2 = int(self.x1), int(self.x2)
+				if xx1 < xx2 :
+					self.x1, self.x2 = xx1, xx2
+				else :
+					self.x1, self.x2 = xx2, xx1
+			
+			if self.number != None :
+				self.number = int(self.number)
+			
+			seq = self.transcript.gene.chromosome.getSequence(x1, x2+1, SNVsFilter)
+			if self.transcript.gene.strand == '+' :
+				self.sequence = seq
+			else :
+				self.sequence = uf.reverseComplement(seq)
+			
+			self.cdsSequence = ''
 		
 	def save(self) :
 		if  self.x2 != None and self.x1 != None :
@@ -67,10 +70,10 @@ class Exon(pyGenoObject):
 	def _getCDSSequence(self) :
 		try :
 			if self.transcript.gene.strand == '+' :
-				return self.sequence[self.CDS[0]-self.x1:self.CDS[1]-self.x1]
+				return self.sequence[self.CDS_x1-self.x1:self.CDS_x2-self.x1]
 			else :
-				x1 = self.CDS[0]-self.x1
-				x2 = self.CDS[1]-self.x1
+				x1 = self.CDS_x1-self.x1
+				x2 = self.CDS_x2-self.x1
 				return self.sequence[len(self.sequence)-x2:len(self.sequence)-x1]
 		except TypeError:
 			return ''
