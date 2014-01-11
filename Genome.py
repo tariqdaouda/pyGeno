@@ -38,6 +38,4 @@ class Genome(pyGenoObject) :
 
 	def __str__(self) :
 		return "Genome: %s/%s" %(self.specie, self.name)
-	
-#g = Genome(specie = 'human', name = 'R_sval10')
-#print g.load(Gene, 'PSMB8')
+

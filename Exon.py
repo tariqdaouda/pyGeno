@@ -30,7 +30,7 @@ class Exon(pyGenoObject):
 	
 	_raba_uniques = [('genome', 'id')]
 	
-	def __init__(self, importing = False, *args, **fieldsSet) :
+	def __init__(self, importing = False) :
 		r"""An exon, the sequence is set according to gene strand, if it's '-' the sequence is the complement.
 		A CDS is a couple of coordinates that lies inside of the exon.
 		SNVsFilter is a fct that defines wich SNVs are included in the sequence.
@@ -60,6 +60,9 @@ class Exon(pyGenoObject):
 	def save(self) :
 		if  self.x2 != None and self.x1 != None :
 			self.length = self.x2-self.x1
+		if self.number != None :
+			self.number = int(self.number)
+		
 		pyGenoObject.save(self)
 	
 	def hasCDS(self) :

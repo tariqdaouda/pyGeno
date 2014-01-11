@@ -30,7 +30,7 @@ class Transcript(Raba) :
 	
 	_raba_uniques = [('genome', 'id')]
 	
-	def __init__(self, *args, **fieldsSet) :
+	def __init__(self, importing = False) :
 		pass
 		"""self.gene = gene
 		self.id = id

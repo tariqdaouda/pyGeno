@@ -25,12 +25,13 @@ class Gene(pyGenoObject) :
 	genome = rf.RabaObject('Genome')
 	chromosome = rf.RabaObject('Chromosome')
 	transcripts = rf.Relation('Transcript')
+	exons = rf.Relation('Exon')
 	
 	_raba_uniques = [('genome', 'id')]
 	
 	def __init__(self, *args, **fieldsSet) :
 		pass
-
+	
 	def pluck(self) :
 		"""Returns a plucked object. Plucks the gene off the tree, set the value of self.chromosome into str(self.chromosome). This effectively disconnects the object and
 		makes it much more lighter in case you'd like to pickle it"""
@@ -39,4 +40,4 @@ class Gene(pyGenoObject) :
 		return e
 	
 	def __str__(self) :
-		return "Gene, name: %s, id: %s, strand: %s > %s" %(self.name, self.id, self.strand, str(self.chromosome))
+		return "Gene, name: %s, id: %s, strand: '%s' > %s" %(self.name, self.id, self.strand, str(self.chromosome))

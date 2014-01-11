@@ -54,6 +54,9 @@ class Chromosome(pyGenoObject) :
 	def save(self) :
 		if  self.x2 != None and self.x1 != None :
 			self.length = self.x2-self.x1
+		if self.number != None :
+			self.number = self.number.upper()
+		
 		pyGenoObject.save(self)
 	
 	def getNucleotide(self, x1, SNVsFilter = None) :
@@ -130,7 +133,6 @@ class Chromosome(pyGenoObject) :
 		return self.genes[i]
 		
 	def __len__(self) :
-		self.length = self.x2-self.x1 #updated to be saved in db
 		return self.length
 
 	def __str__(self) :

@@ -52,7 +52,7 @@ def importGenome(packageDir, verbose = False) :
 
 	#try :
 	#	genome = Genome(name = genomeName, specie = specie)
-	#	raise ValueError("There seem to already be a genome (%s, $s), please call deleteGenome() first if you want to reinstall it" % (genomeName, specie))
+	#	raise ValueError("There seems to be already a genome (%s, %s), please call deleteGenome() first if you want to reinstall it" % (genomeName, specie))
 	#except KeyError:
 	#	pass
 	
@@ -62,7 +62,6 @@ def importGenome(packageDir, verbose = False) :
 	
 	#if os.path.isdir(seqTargetDir) :
 	#	raise ValueError("The directory %s already exists, Please call deleteGenome() first if you want to reinstall" % seqTargetDir)
-	
 	#os.makedirs(seqTargetDir)
 	
 	_importGenomeObjects(packageDir+'/'+gtfFile, chromosomeSet, genome, verbose)
@@ -78,23 +77,23 @@ def importGenome(packageDir, verbose = False) :
 
 def deleteGenome(name, specie) :
 	"removes all infos about a genome"
+	print 'deleting genome (%s, %s)...' % (name, specie)
 	genome = Genome(name = name, specie = specie)
 	try :
 		shutil.rmtree(genome.getSequencePath())
 	except OSError as e:
 		print 'WARNING, Unable to delete folder =>', e
-	
-	rq = RabaQuery(conf.pyGeno_RABA_NAMESPACE, Chromosome)
-	rq.addFilter(genome = Genome)
-	for e in rq.run() :
-		print e.delete()
-	
+		
 	for typ in (Chromosome, Gene, Transcript, Exon, Protein) :
-		rq = RabaQuery(conf.pyGeno_RABA_NAMESPACE, typ)
-		rq.addFilter(genome = Genome)
+		print '\tdeleting all %ss ...' % (typ.__name__)
+		rq = RabaQuery(typ)
+		rq.addFilter(genome = genome)
 		for e in rq.iterRun() :
-			print e.delete()
+			e.delete()
 	
+	print '\tdeleting genome information (%s, %s)...' % (name, specie)
+	genome.delete()
+
 def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 	print 'Importing gene set infos from %s...' % gtfFilePath
 	
@@ -106,7 +105,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 	transcripts = {}
 	proteins = {}
 	exons = {}
-	for i in range(len(gtf)) :
+	for i in range(100) : #range(len(gtf)) :
 		chroNumber = gtf.get(i, 'seqname')
 		if chroNumber.upper() in chroSet or chroNumber.lower() in chroSet:
 			
@@ -145,14 +144,14 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 			if transId not in transcripts :
 				if verbose :
 					print '\tTranscript %s, %s...' % (transId, transName)
-				transcripts[transId] = Transcript()
+				transcripts[transId] = Transcript(importing = True)
 				transcripts[transId].set(genome = genome, id = transId, chromosome = chromosomes[chroNumber], gene = genes[geneId], name = transName)
 			try :
 				protId = gtf.get(i, 'protein_id')
 				if protId not in proteins :
 					if verbose :
 						print '\tProtein %s...' % (protId)
-					proteins[protId] = Protein()
+					proteins[protId] = Protein(importing = True)
 					proteins[protId].set(genome = genome, id = protId, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], name = transName)
 					transcripts[transId].protein = proteins[protId]
 					proteins[protId].save()
@@ -186,23 +185,24 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 	
 	print 'creating relations...'
 	print '\ttranscript.exons...'
-	for transcript in transcripts.values() :
+	for transcript in transcripts.itervalues() :
 		f = RabaQuery(Exon)
 		f.addFilter(**{'transcript' : transcript})
+		p = f.run()
 		transcript.exons = f.run()
 	
-	print '\tgene.transcripts...'
-	for gene in genes.values() :
+	print '\tgene.transcripts/.exons...'
+	for gene in genes.itervalues() :
 		f = RabaQuery(Transcript)
 		f.addFilter(**{'gene' : gene})
 		gene.transcripts = f.run()
-		
+	
 		f = RabaQuery(Exon)
 		f.addFilter(**{'gene' : gene})
 		gene.exons = f.run()
 	
 	print '\tchromosome.genes...'
-	for chro in chromosomes.values() :
+	for chro in chromosomes.itervalues() :
 		f = RabaQuery(Gene)
 		f.addFilter(**{'chromosome' : chro})
 		chro.genes = f.run()
@@ -212,6 +212,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 	print 'saving...'
 	print 'Done.'
 	genome.save()
+	#print "=========", transcript.exons
 	try :
 		refGenomeName = conf.getReferenceGenome(genome.specie)
 	except KeyError:
@@ -260,7 +261,7 @@ def importGenome_casava(specie, genomeName, snpsTxtFile) :
 				chromosome = Chromosome()
 				chromosome.number = currChrNumber
 				chromosome.genome = genome
-				chromosome.dataType = 'light'
+				chromosome.dataType = 'CasavaSNP'
 				
 			snp = Casava_SNP()
 			snp.chromosome = chromosome
@@ -402,12 +403,11 @@ def import_dbSNP(packageFolder, specie, versionName) :
 	
 if __name__ == "__main__" :
 	#deleteGenome(specie = 'Mus_musculus', name = 'GRCm38_test')
-	#importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse/mus_muslcus/', verbose = False)
+	importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse/mus_muslcus/', verbose = False)
 	
 	g = Genome(specie = 'Mus_musculus', name = 'GRCm38_test')
-	a = g.get(Gene, name = 'Gm21742')
-	print a[-1].name
-	print a[-1]
+	a = g.get(Gene)
+	print a[0].transcripts#, a[0].help()
 	#a[0].genome.chromosomes = [a[0]]
 	#g.save()
 	
