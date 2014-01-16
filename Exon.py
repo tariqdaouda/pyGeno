@@ -6,7 +6,7 @@ from pyGenoObject import *
 #from rabaDB.filters import RabaQuery
 import rabaDB.fields as rf
 
-#from tools import UsefulFunctions as uf
+from tools import UsefulFunctions as uf
 #from Protein import Protein
 
 from tools.BinarySequence import NucBinarySequence
@@ -35,69 +35,67 @@ class Exon(pyGenoObject):
 		A CDS is a couple of coordinates that lies inside of the exon.
 		SNVsFilter is a fct that defines wich SNVs are included in the sequence.
 		I expect [x1, x2[ (python) not something like [x1, x2](ensembl format)"""
-		if importing :
-			self.sequence = ''
-		else :
-			if self.x1 != None and self.x2 != None :
-				#xx1, xx2 = int(self.x1), int(self.x2)+1
-				xx1, xx2 = int(self.x1), int(self.x2)
-				if xx1 < xx2 :
-					self.x1, self.x2 = xx1, xx2
+
+		if  not importing :
+			self._curate()
+			
+			if self.x1 != None and self.x2 != None :			
+				seq = self.transcript.gene.chromosome.sequence[self.x1:self.x2]
+				if self.transcript.gene.strand == '+' :
+					self.sequence = seq
 				else :
-					self.x1, self.x2 = xx2, xx1
+					self.sequence = uf.reverseComplement(seq)
 			
-			if self.number != None :
-				self.number = int(self.number)
-			
-			seq = self.transcript.gene.chromosome.getSequence(x1, x2+1, SNVsFilter)
-			if self.transcript.gene.strand == '+' :
-				self.sequence = seq
+			if self.hasCDS() :
+				self.CDSSequence = self._extractCDSSequence()
 			else :
-				self.sequence = uf.reverseComplement(seq)
+				self.CDSSequence = ''
 			
-			self.cdsSequence = ''
-		
-	def save(self) :
-		if  self.x2 != None and self.x1 != None :
+			self.bin_sequence = NucBinarySequence(self.sequence)
+			self.bin_CDSSequence = NucBinarySequence(self.CDSSequence)
+			
+	def _curate(self) :
+		if self.x1 != None and self.x2 != None and self.x1 > self.x2 :
+			self.x1, self.x2 = self.x2, self.x1
 			self.length = self.x2-self.x1
+		
+		if self.CDS_x1 != None and self.CDS_x2 != None and self.CDS_x1 > self.CDS_x2 :
+			self.CDS_x1, self.CDS_x2 = self.CDS_x2, self.CDS_x1
+
 		if self.number != None :
 			self.number = int(self.number)
-		
-		pyGenoObject.save(self)
+	
+	def _extractCDSSequence(self) :
+		if self.transcript.gene.strand == '+' :
+			return self.sequence[self.CDS_x1-self.x1:self.CDS_x2-self.x1]
+		else :
+			x1 = self.CDS_x1-self.x1
+			x2 = self.CDS_x2-self.x1
+			return self.sequence[len(self.sequence)-x2:len(self.sequence)-x1]
 	
 	def hasCDS(self) :
 		if self.CDS_x1 != None and self.CDS_x2 != None:
 			return True
 		return False
 	
-	def _getCDSSequence(self) :
-		try :
-			if self.transcript.gene.strand == '+' :
-				return self.sequence[self.CDS_x1-self.x1:self.CDS_x2-self.x1]
-			else :
-				x1 = self.CDS_x1-self.x1
-				x2 = self.CDS_x2-self.x1
-				return self.sequence[len(self.sequence)-x2:len(self.sequence)-x1]
-		except TypeError:
-			return ''
-	
-	def setCDS(self, x1, x2):
-		"Beware! i expect [x1, x2[ (python) not something like [x1, x2](ensembl format)"
-		
-		#xx1, xx2 = int(x1), int(x2)+1
-		xx1, xx2 = int(x1), int(x2)
-		if self.CDS_x1 != None and self.CDS_x2 != None and (self.CDS_x1 != xx1 or self.CDS_x2 != xx2):
-			print "==>Warning, Exon.setCDS() : exon %s already has a CDS defined, new CDS: %s " % (self, (xxx1, xx2))
-		
-		if xx1 < xx2 :
-			self.CDS_x1, self.CDS_x2 = xx1, xx2
-		else :
-			self.CDS_x1, self.CDS_x2 = xx2, xx1
-	
-		self.cdsSequence = self._getCDSSequence()
-		
 	def getCDSLength(self) :
 		return len(self.getCDSSequence())
+	
+	def find(self, sequence) :
+		"""return the position of the first occurance of sequence"""
+		return self.bin_Sequence.find(sequence)
+	
+	def findAll(self, seqence):
+		"""Returns a lits of all positions where sequence was found"""
+		return self.bin_Sequence.findAll(sequence)
+
+	def findInCDS(self, sequence) :
+		"""return the position of the first occurance of sequence"""
+		return self.bin_CDSSequence.find(sequence)
+	
+	def findAllInCDS(self, seqence):
+		"""Returns a lits of all positions where sequence was found"""
+		return self.bin_CDSSequence.findAll(sequence)
 	
 	def pluck(self) :
 		"""Returns a plucked object. Plucks the exon off the tree, set the value of self.transcript into str(self.transcript). This effectively disconnects the object and
@@ -110,7 +108,7 @@ class Exon(pyGenoObject):
 		return self.sequence[i]
 	
 	def __str__(self) :
-		return """EXON, number: %s, (x1, x2): (%s, %s), cds: (%s, %s) > %s """ %(self.number, self.x1, self.x2, self.CDS_x1, self.CDS_x2, str(self.transcript))
+		return """EXON, id %s, number: %s, (x1, x2): (%s, %s), cds: (%s, %s) > %s""" %( self.id, self.number, self.x1, self.x2, self.CDS_x1, self.CDS_x2, str(self.transcript))
 		
 	def __len__(self) :
 		return len(self.sequence)

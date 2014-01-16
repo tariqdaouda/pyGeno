@@ -29,6 +29,9 @@ class Gene(pyGenoObject) :
 	
 	_raba_uniques = [('genome', 'id')]
 	
+	def _curate(self) :
+		self.name = self.name.upper()
+	
 	def __init__(self, *args, **fieldsSet) :
 		pass
 	

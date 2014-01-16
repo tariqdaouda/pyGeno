@@ -1,3 +1,4 @@
+from types import *
 import configuration as conf
 from pyGenoObject import *
 
@@ -14,8 +15,9 @@ import rabaDB.fields as rf
 from tools.SecureMmap import SecureMmap as SecureMmap
 from tools import UsefulFunctions as uf
 from tools import SingletonManager
+import types
 
-def defaultSNVsFilter(casavaSnp) :
+def defaultSNPsFilter(casavaSnp) :
 	"""The default rule to decide wether to take the most probable genotype or the
 	reference, always returns true"""
 	return True
@@ -24,6 +26,37 @@ def defaultDbSNPsFilter(dbSnp) :
 	"""The default rule to decide wether to take the most probable genotype or the
 	snp, always returns true"""
 	return True
+
+class ChrosomeSequence(object) :
+	
+	def __init__(self, data, chromosome) :
+		self.data = data
+		self.chromosome = chromosome
+	
+	def _getSequence(self, slic) :
+		assert type(slic) is SliceType
+		
+		if self.chromosome.dataType == 'heavy' :
+			return self.data[slic]
+		else :			
+			snps = self.casavaSNPs.findSnpsInRange(start, end)
+			data = None
+			if snps != None :
+				for snp in snps:
+					if self.SNVsFilter(snp) :
+						if data == None :
+							data = list(self.sequence[start:end])
+						pos = snp['pos'] - start#-1
+						snp['max_gt'] = uf.getPolymorphicNucleotide(snp['max_gt'])
+						data[pos] = snp['max_gt']
+
+			if data != None :
+				return ''.join(data)
+			else :
+				return self.sequence[start:end]
+	
+	def __getitem__(self, tralala) :
+		return self._getSequence(tralala)
 	
 class Chromosome(pyGenoObject) :
 	"""A class that represents a Chromosome
@@ -43,84 +76,34 @@ class Chromosome(pyGenoObject) :
 	
 	_raba_uniques = [('genome', 'number')]
 	
-	def __init__(self) :
+	def __init__(self, importing = False, SNPsFilter = defaultSNPsFilter) :
+		"""SNVsFilter is a fct that takes a SNP as input a returns true if it correpsond to the rule.
+		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
+		(contains the sequences for all chros)"""
 		if self.number != None :
 			self.number = str(self.number)
-			self._loadSequence()
-			if self.dataType == 'flat' :
-				path = '%s/chr%s.dat'%(self.genome.getSequencePath(), self.number)
-				self.data = SingletonManager.add(SecureMmap(path), path)
-
-	def save(self) :
+		
+		if not importing :
+			if self.dataType == 'heavy' :
+				path = '%s/chromosome%s.dat'%(self.genome.getSequencePath(), self.number)
+				self.sequence = ChrosomeSequence(SingletonManager.add(SecureMmap(path), path), self)
+				
+			self.SNPsFilter = SNPsFilter
+	
+	def _curate(self) :
 		if  self.x2 != None and self.x1 != None :
 			self.length = self.x2-self.x1
 		if self.number != None :
-			self.number = self.number.upper()
-		
-		pyGenoObject.save(self)
+			self.number =  str(self.number).upper()
 	
-	def getNucleotide(self, x1, SNVsFilter = None) :
-		"""SNVsFilter is a fct that takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
-		(contains the sequences for all chros)"""
-		if not self.isLight :
-			return self.data[x1]
-		
-		if (SNVsFilter != None) :
-			fct = SNVsFilter
-		else :
-			fct = defaultSNVsFilter
-			
-		snp = self.casavaSNPs.findSnp(x1)
-		if snp != None :
-			return snp['max_gt']
-		return self.data[x1]
-
-	def getSequence(self, x1, x2 = None, SNVsFilter = None) :
-		"""SNVsFilter is a fct that takes a CasavaSnp as input a returns true if it correpsond to the rule.
-		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
-		(contains the sequences for all chros)"""
-		
-		assert type(x1) is IntType
-		assert type(x2) is IntType
-		
-		if x1 != None :
-			if x2 == None :
-				start, end = x1, x1 + 1
-			elif x1 > x2 :
-				start, end = x2, x1 
-			else :
-				start, end = x1, x2
-				
-			if not self.isLight :
-				return self.data[start:end]
-			else :
-				if (SNVsFilter != None) :
-					fct = SNVsFilter
-				else :
-					fct = defaultSNVsFilter
-				
-				snps = self.casavaSNPs.findSnpsInRange(start, end)
-				data = None
-				if snps != None :
-					for snp in snps:
-						if fct(snp) :
-							if data == None :
-								data = list(self.data[start:end])
-							pos = snp['pos'] - start#-1
-							snp['max_gt'] = uf.getPolymorphicNucleotide(snp['max_gt'])
-							data[pos] = snp['max_gt']
-
-				if data != None :
-					return ''.join(data)
-				else :
-					return self.data[start:end]
+	def setSNPFilter(self, SNPsFilter) :
+		self.SNPsFilter = SNPsFilter
 	
 	def getPolymorphismsInRange(self, x1, x2) :
 		return self.casavaSNPs.findSnpsInRange(x1, x2)
 	
 	def stringFind(self, sequence) :
-		return self.data.find(sequence)
+		return self.sequence.find(sequence)
 
 	def pluck(self) :
 		"""Returns a plucked object. Plucks the chromosome off the tree, set the value of self.genome into str(self.genome). This effectively disconnects the object and
@@ -128,10 +111,10 @@ class Chromosome(pyGenoObject) :
 		e = copy.copy(self)
 		e.genome = str(self.genome)
 		return e
-		
+
 	def __getitem__(self, i) :
-		return self.genes[i]
-		
+		return self.sequence[i]
+	
 	def __len__(self) :
 		return self.length
 

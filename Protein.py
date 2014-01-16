@@ -22,15 +22,14 @@ class Protein(Raba) :
 	
 	_raba_uniques = [('genome', 'id')]
 	
-	def __init__(self, *args, **fieldsSet) :
-		pass
-
-		"""self.sequence = sequence
-		self.transcript = transcript
-		self.id = protId
-		self.binarySequence = AABinarySequence(self.sequence)
-		self.updateBinarySequence = False"""
+	def __init__(self, importing = False) :
+		if not importing :
+			self.sequence = uf.translateDNA(self.transcript.CDNA[:-3])
+			self.binarySequence = AABinarySequence(self.sequence)
 		
+	def _curate(self) :
+		pass
+	
 	def getSequence(self):
 		return self.sequence
 	

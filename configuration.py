@@ -38,7 +38,7 @@ def checkSettingsPath() :
 	if not os.path.exists(pyGeno_SETTINGS_PATH) :
 		return False
 	return True
-	
+
 def checkDataPath() :
 	if not os.path.exists(pyGeno_SETTINGS['DATA_PATH']) :
 		return False
@@ -49,7 +49,7 @@ def checkReferenceGenome(self, specie) :
 		return False
 	return True
 
-def setReferenceGenome(specie, newRef) :	
+def setReferenceGenome(specie, newRef) :
 	pyGeno_SETTINGS['REFERENCE_GENOMES'][specie] = newRef
 	cPickle.dump(pyGeno_SETTINGS, open(pyGeno_SETTINGS_FILENAME, 'w'))
 	return True
@@ -60,26 +60,32 @@ def getReferenceGenome(specie) :
 		return pyGeno_SETTINGS['REFERENCE_GENOMES'][specie]
 	except KeyError:
 		KeyError('specie %s has no defined reference genome, use setReference to manualy set one' % specie)
-	
+
+def getGenomeSequencePath(specie, name) :
+	return os.path.normpath(pyGeno_SETTINGS['DATA_PATH']+'/%s/%s' % (specie, name))
+
+def getReferenceGenomeSequencePath(specie) :
+	return os.path.normpath(conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/%s' % (self.specie, pyGeno_SETTINGS['REFERENCE_GENOMES'][specie]))
+
 def pyGeno_init() :
 	"This function is automaticly called at launch"
 	global pyGeno_SETTINGS
 
 	if not checkPythonVersion() :
 		raise PythonVersionError("==> FATAL: pyGeno only works with python 2.7 and above, please upgrade your python version")
-	
+
 	if not checkSettingsPath() :
 		os.makedirs(pyGeno_SETTINGS_PATH)
-	
-	if not checkDataPath() :	
+
+	if not checkDataPath() :
 		os.makedirs(pyGeno_SETTINGS['DATA_PATH'])
-	
+
 	try :
 		pyGeno_SETTINGS = cPickle.load(open(pyGeno_SETTINGS_FILENAME))
-		
+
 	except :
 		cPickle.dump(pyGeno_SETTINGS, open(pyGeno_SETTINGS_FILENAME, 'w'))
-	
+
 pyGeno_init()
 
 """def update_REFERENCE_GENOME_prompt(specie) :
@@ -92,19 +98,19 @@ pyGeno_init()
 	except StopIteration :
 		print "There's no available genomes for specie: %s. Please import one using ImportTools.importGenome.\n" % specie
 		return False
-	
+
 	stop = False
 	while not stop :
 		enterMsg = "Please enter the name of the genome you want to use as reference for %s, the possible choices are:\n%s\nYour choice: " % (specie, strGenomes)
-		ret = io.enterConfirm_prompt(enterMsg)			
+		ret = io.enterConfirm_prompt(enterMsg)
 		if ret == None :
 			return False
-		
+
 		if ret in genomeNames :
 			stop = True
 		else :
 			print "%s is not available, please enter a valid name." % ret
-	
+
 	update_REFERENCE_GENOME(specie, ret)
 	return True"""
 
