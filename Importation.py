@@ -26,7 +26,7 @@ def backUpDB() :
 	shutil.copy2(conf.pyGeno_RABA_DBFILE, fn)
 
 	return fn
-
+	
 def deleteBackUps(forceDelete = False) :
 	"if forceDelete = False a confirmation is asked for each file"
 	if forceDelete :
@@ -76,6 +76,8 @@ def importGenome(packageFile, verbose = False) :
 		s = s.replace('[', '').replace(']', '').replace("',", ': ').replace('), ', '\n').replace("'", '').replace('(', '').replace(')', '')
 		return s
 
+	rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).setAutoCommit(False)
+
 	print 'importing genome package %s...' % packageFile
 	pFile = tarfile.open(packageFile)
 	packageDir = os.path.normpath('./.tmp_genome_import')
@@ -121,12 +123,14 @@ def importGenome(packageFile, verbose = False) :
 		x1Chro = 0
 		for chro in genome.chromosomes :
 			print "Importing DNA sequence of chromosome %s..." % chro
-			length = __importSequence(chro, os.path.normpath(packageDir+'/'+chromosomesFiles[chro.number.lower()]), seqTargetDir)
+			length = _importSequence(chro, os.path.normpath(packageDir+'/'+chromosomesFiles[chro.number.lower()]), seqTargetDir)
 			chro.x1 = x1Chro
 			chro.x2 = x1Chro+length
 			x1Chro = chro.x2
 
 		genome.save()
+		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).commit()
+		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).setAutoCommit(True)
 		shutil.rmtree(packageDir)
 	except (KeyboardInterrupt, SystemExit, Exception) :
 		print "===>Exception caught! Rollback!<==="
@@ -172,7 +176,9 @@ def deleteGenome(name, specie) :
 		to pyGenoRaba.db in %s and manually erasing folder %s and reinstalling the package.
 		""" % (conf.pyGeno_SETTINGS['DATA_PATH'], conf.getGenomeSequencePath(specie, name))
 
-def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
+def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
+	"verbose is int [0, 3] for various levels of verbosity"
+
 	print 'Importing gene set infos from %s...' % gtfFilePath
 
 	gtf = GTFFile()
@@ -210,8 +216,8 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 				x1, x2 = x2, x1
 
 			if geneId not in genes :
-				#if verbose :
-				print '\tGene %s, %s...' % (geneId, geneName)
+				if verbose > 0 :
+					print '\tGene %s, %s...' % (geneId, geneName)
 				genes[geneId] = Gene()
 				genes[geneId].set(genome = genome, id = geneId, chromosome = chromosomes[chroNumber], name = geneName, strand = strand, biotype = gene_biotype)
 
@@ -219,23 +225,22 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 				transId = gtf.get(i, 'transcript_id')
 				transName = gtf.get(i, 'transcript_name')
 			except KeyError :
-				if verbose :
-					print '\tWarning: no transcript_id, name found in line %d' % i
+				if verbose > 1 :
+					print '\t\tWarning: no transcript_id, name found in line %d' % i
 
 			if transId not in transcripts :
-				if verbose :
-					print '\tTranscript %s, %s...' % (transId, transName)
+				if verbose > 1 :
+					print '\t\tTranscript %s, %s...' % (transId, transName)
 				transcripts[transId] = Transcript(importing = True)
 				transcripts[transId].set(genome = genome, id = transId, chromosome = chromosomes[chroNumber], gene = genes[geneId], name = transName)
 			try :
 				protId = gtf.get(i, 'protein_id')
 				if protId not in proteins :
-					if verbose :
-						print '\tProtein %s...' % (protId)
+					if verbose > 1 :
+						print '\t\tProtein %s...' % (protId)
 					proteins[protId] = Protein(importing = True)
 					proteins[protId].set(genome = genome, id = protId, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], name = transName)
 					transcripts[transId].protein = proteins[protId]
-					#proteins[protId].save()
 			except KeyError :
 				if verbose :
 					print 'Warning: no protein_id found in line %d' % i
@@ -250,10 +255,11 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 			if regionType == 'exon' :
 				try :
 					exonId = gtf.get(i, 'exon_id')
+					if verbose > 2 :
+						print '\t\t\texon %s...' % (exonId)
 					if exonId not in exons :
 						exons[exonKey] = Exon(importing = True)
 						exons[exonKey].set(genome = genome, id = exonId, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], strand = strand, number = exonNumber, x1 = x1, x2 = x2)
-						#exons[exonKey].save()
 				except KeyError :
 					print 'Warning: no exon_id found in line %d' % i
 
@@ -310,7 +316,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = False) :
 
 	print 'Current reference genome for specie %s is %s' %(genome.specie, genome.name)
 
-def __importSequence(chromosome, fastaFile, targetDir) :
+def _importSequence(chromosome, fastaFile, targetDir) :
 	print 'making data for chromsome %s, source file: %s...' %(chromosome.number, fastaFile)
 
 	f = gzip.open(fastaFile)
@@ -330,6 +336,8 @@ def importGenome_casava(specie, genomeName, snpsTxtFile) :
 	"""TODO: TEST"""
 
 	print 'importing %s genome %s...' % (specie, genomeName)
+
+	rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).setAutoCommit(False)
 
 	genome = Genome(name = genomeName, specie = specie)
 	genome.name = genomeName
@@ -372,127 +380,17 @@ def importGenome_casava(specie, genomeName, snpsTxtFile) :
 
 	print 'saving...'
 	genome.save()
+	rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).commit()
+	rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).setAutoCommit(True)
 	print 'importation %s of genome %s done.' %(specie, genomeName)
-
-
-def import_dbSNP(packageFolder, specie, versionName) :
-	"""To import dbSNP informations, download ASN1_flat files from the
-	dbSNP ftp : ftp://ftp.ncbi.nih.gov/snp/organisms/ and place them all in one single folder. This folder
-	will be considered as a package.
-	Launch this function and go make yourself a cup of coffee, this function has absolutly not been written to be fast
-
-	versionName is name with wich you want to call this specific version of dbSNP
-
-	pyGeno snp format is somewhat different from dbSNP's :
-		- all snps have an orientation of +. If a snp has an orientation of -, it's alleles are replaced by their complements
-		- positions are 0 based
-		- the only value extracted from the files are : 'posistion', 'rs', 'type', 'assembly', 'chromosome', 'validated', 'alleles', 'original_orientation', 'maf_allele', 'maf_count', 'maf', 'het', 'se(het)
-		-loc is a dictionary allele wise that simplifies the line loc'
-	"""
-	#TODO: make it a tar ball package with a manifest.ini
-
-	RabaConnection(conf.pyGeno_RABA_NAMESPACE).autoOnSaveCommit(False)
-
-	def parseSNP(snpLines, specie, chroNumber, version) :
-		lines = snpLines.split('\n')
-
-		snp = dbSNP_SNP()
-		snp.version = version
-		snp.specie = specie
-		snp.chromosomeNumber = chroNumber
-
-		#numericFields: maf_count', 'maf', 'het', 'se(het)'
-		for l in lines :
-			sl = l.split('|')
-			if sl[0][:2] == 'rs' :
-				snp.rsId = sl[0][2:].strip()
-				snp.type = sl[3].strip()
-
-			elif sl[0][:3] == 'SNP' :
-				snp.alleles = sl[1].strip().replace('alleles=', '').replace("'", "")
-				het = sl[2].strip().replace('het=', '')
-				try :
-					snp.het = float(het)
-				except :
-					pass
-
-				se_het = sl[3].strip().replace('se(het)=', '')
-				try :
-					snp.se_het = float(se_het)
-				except :
-					pass
-
-			elif sl[0][:3] == 'VAL' :
-				snp.validated = sl[1].strip().replace("validated=", '')
-
-			elif sl[0][:3] == 'CTG' and sl[1].find('GRCh') > -1 :
-				snp.original_orientation = sl[-1].replace('orient=', '').strip()
-				snp.assembly = sl[1].replace('assembly=', '').strip()
-				snp.chromosome = sl[2].replace('chr=', '').strip()
-				pos = sl[3].replace('chr-pos=', '').strip()
-
-				try:
-					snp.pos = int(pos) -1
-				except :
-					snp.pos = pos
-
-			elif sl[0][:4] == 'GMAF' :
-				snp.maf_allele = sl[1].strip().replace('allele=', '')
-				maf_count = sl[2].strip().replace('count=', '')
-				try :
-					snp.maf_count = float(maf_count)
-				except :
-					snp.maf_count = maf_count
-
-				maf = sl[3].strip().replace('MAF=', '')
-				try :
-					snp.maf = float(maf)
-				except :
-					snp.maf = maf
-
-			elif sl[0][:3] == 'LOC' :
-				loc = dbSNP_SNPLOC()
-				loc.allele = sl[4].strip().replace('allele=', '')
-				loc.gene = sl[1].strip()
-				loc.fxn_class = sl[3].strip().replace('fxn-class=', '')
-				try :
-					loc.residue = sl[6].strip().replace('residue=', '')
-				except IndexError :
-					pass
-
-		if snp.original_orientation == '-' :
-			snp.alleles = uf.complement(snp.alleles)
-
-		#snp.save()
-
-	files = glob.glob(os.path.normpath(packageFolder+'/*.flat.gz'))
-
-	for fil in files :
-		chrStrStartPos = fil.find('ch')
-		chrStrStopPos = fil.find('.flat')
-
-		chroNumber = fil[chrStrStartPos+2: chrStrStopPos]
-
-		print "extracting file :", fil, "..."
-		f = gzip.open(fil)
-		snps = f.read().split('\n\n')
-		f.close()
-
-		print "\timporting snps..."
-		for snp in snps[1:] :
-			parseSNP(snp, specie, chroNumber, versionName)
-
-	print 'saving...'
-	RabaConnection(conf.pyGeno_RABA_NAMESPACE).commit()
-	RabaConnection(conf.pyGeno_RABA_NAMESPACE).autoOnSaveCommit(True)
-	print 'done.'
 
 if __name__ == "__main__" :
 	#deleteBackUps(forceDelete = True)
-	deleteGenome(specie = 'human', name = 'GRCh37.74')
-	#importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse/mus_musculus_Y-only.tar.gz', verbose = False)
-	importGenome('/u/daoudat/py/pyGeno/importationPackages/GRCh37.74/GRCh37.74.tar.gz', verbose = False)
-
+	#deleteGenome(specie = 'human', name = 'GRCh37.74')
+	#importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse/mus_musculus_Y-only.tar.gz', verbose = 0)
+	#importGenome('/u/daoudat/py/pyGeno/importationPackages/GRCh37.74/GRCh37.74.tar.gz', verbose = 0)
+	importGenome_casava(specie, genomeName, snpsTxtFile)
+	
 	#g = Genome(specie = 'Mus_musculus', name = 'GRCm38_test')
 	#a = g.get(Gene)
 	#print a[0].transcripts#, a[0].help()
