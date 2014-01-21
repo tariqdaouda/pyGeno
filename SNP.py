@@ -1,14 +1,12 @@
 import configuration as conf
 
-from rabaDB.setup import *
-RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
-from rabaDB.Raba import *
+from pyGenoObject import *
 import rabaDB.fields as rf
 
 from tools import UsefulFunctions as uf
 from exceptions import *
 
-class Casava_SNP(Raba) :
+class CasavaSNP(pyGenoObject) :
 
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	pos = rf.Primitive()
@@ -17,6 +15,7 @@ class Casava_SNP(Raba) :
 	ref = rf.Primitive()
 	QSNP = rf.Primitive()
 	max_gt = rf.Primitive()
+	Qmax_gt = rf.Primitive()
 	max_gt_poly_site = rf.Primitive()
 	Qmax_gt_poly_site = rf.Primitive()
 	A_used = rf.Primitive()
@@ -28,4 +27,7 @@ class Casava_SNP(Raba) :
 	chromosome = rf.RabaObject('Chromosome')
 
 	def __init__(self) :
+		pass
+
+	def _curate(self) :
 		pass

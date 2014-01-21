@@ -72,7 +72,7 @@ class Chromosome(pyGenoObject) :
 	dataType = rf.Primitive() #'flat' => for dat files on drive, or name of the polymoprhism's rabaclass : ex 'CasavaSNP'
 
 	genome = rf.RabaObject('Genome')
-	genes = rf.Relation('Gene')
+	#genes = rf.Relation('Gene')
 
 	_raba_uniques = [('genome', 'number')]
 

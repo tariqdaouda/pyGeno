@@ -13,7 +13,8 @@ class Genome(pyGenoObject) :
 
 	name = rf.Primitive()
 	specie = rf.Primitive()
-	chromosomes = rf.Relation('Chromosome')
+	#chromosomes = rf.Relation('Chromosome')
+	snpsType = rf.Primitive()
 
 	source = rf.Primitive()
 	packageInfos = rf.Primitive()
