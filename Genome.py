@@ -19,7 +19,7 @@ class Genome(pyGenoObject) :
 	source = rf.Primitive()
 	packageInfos = rf.Primitive()
 
-	_raba_uniques = [('name', 'specie')]
+	#_raba_uniques = [('name', 'specie')]
 
 	def __init__(self) :
 		pass

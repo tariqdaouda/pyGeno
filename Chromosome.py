@@ -74,7 +74,7 @@ class Chromosome(pyGenoObject) :
 	genome = rf.RabaObject('Genome')
 	#genes = rf.Relation('Gene')
 
-	_raba_uniques = [('genome', 'number')]
+	#_raba_uniques = [('genome', 'number')]
 
 	def __init__(self, importing = False, SNPsFilter = defaultSNPsFilter) :
 		"""SNVsFilter is a fct that takes a SNP as input a returns true if it correpsond to the rule.

@@ -26,7 +26,7 @@ class Transcript(pyGenoObject) :
 	protein = rf.RabaObject('Protein')
 	exons = rf.Relation('Exon')
 
-	_raba_uniques = [('genome', 'id')]
+	#_raba_uniques = [('genome', 'id')]
 
 	def __init__(self, importing = False) :
 

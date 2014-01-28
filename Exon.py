@@ -28,7 +28,7 @@ class Exon(pyGenoObject):
 	transcript = rf.RabaObject('Transcript')
 	strand = rf.Primitive()
 
-	_raba_uniques = [('genome', 'id')]
+	#_raba_uniques = [('genome', 'id')]
 
 	def __init__(self, importing = False) :
 		r"""An exon, the sequence is set according to gene strand, if it's '-' the sequence is the complement.

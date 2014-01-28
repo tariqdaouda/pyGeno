@@ -27,7 +27,7 @@ class Gene(pyGenoObject) :
 	#transcripts = rf.Relation('Transcript')
 	#exons = rf.Relation('Exon')
 
-	_raba_uniques = [('genome', 'id')]
+	#_raba_uniques = [('genome', 'id')]
 
 	def _curate(self) :
 		self.name = self.name.upper()

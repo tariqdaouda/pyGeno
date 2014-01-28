@@ -18,7 +18,7 @@ class Protein(pyGenoObject) :
 	gene = rf.RabaObject('Gene')
 	transcript = rf.RabaObject('Transcript')
 
-	_raba_uniques = [('genome', 'id')]
+	#_raba_uniques = [('genome', 'id')]
 
 	def __init__(self, importing = False) :
 		if not importing :

@@ -1,4 +1,4 @@
-import os, glob, gzip, tarfile, shutil, time, sys
+import os, glob, gzip, tarfile, shutil, time, sys, gc
 from ConfigParser import SafeConfigParser
 
 import configuration as conf
@@ -102,7 +102,6 @@ def importGenome(packageFile, verbose = False) :
 	chromosomesFiles = dict(parser.items('chromosome_files'))
 	chromosomeSet = set(chromosomesFiles.keys())
 
-
 	try :
 		genome = Genome(name = genomeName, specie = specie)
 		raise ValueError("There seems to be already a genome (%s, %s), please call deleteGenome() first if you want to reinstall it" % (genomeName, specie))
@@ -116,7 +115,6 @@ def importGenome(packageFile, verbose = False) :
 
 	genome = Genome()
 	genome.set(name = genomeName, specie = specie, source = genomeSource, packageInfos = packageInfos)
-
 
 	try :
 		printf("Importing:\n\t%s\nGenome:\n\t%s\n..."  % (reformatItems(packageInfos).replace('\n', '\n\t'), reformatItems(parser.items('genome')).replace('\n', '\n\t')))
@@ -181,12 +179,24 @@ to pyGenoRaba.db in %s and manually erasing folder %s and reinstalling the packa
 
 def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	"verbose is int [0, 4] for various levels of verbosity"
-
+	
+	def save() :
+		printf('\tdone (%fmin), total time (%f).' %((time.time()-chroStartTime)/60, (time.time()-startTime)/60))
+		printf('\tsaving chromsome %s...' % chroNumber)
+		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).beginTransaction()
+		for c in transcripts.itervalues() :
+			c.save()
+		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).endTransaction()
+		printf('\tdone (%fmin), total time (%f).' %((time.time()-chroStartTime)/60, (time.time()-startTime)/60))
+	
 	printf('Importing gene set infos from %s...' % gtfFilePath)
-
+	startTime = time.time()
+	
 	gtf = GTFFile()
 	gtf.parseFile(gtfFilePath, gziped = True)
-
+	
+	gc.disable()
+	
 	chromosomes = {}
 	genes = {}
 	transcripts = {}
@@ -195,26 +205,21 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	chroNumber = None
 	for i in range(len(gtf)) :
 		chroN = str(gtf.get(i, 'seqname'))
-		if chroN != chroNumber and chroNumber != None:
-			printf('\tsaving chromsome %s...' % chroNumber)
-			rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).beginTransaction()
-			for c in transcripts.itervalues() :
-				c.save()
-			rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).endTransaction()
 
-			chromosomes = {}
-			genes = {}
-			transcripts = {}
-			proteins = {}
-			exons = {}
-
-		chroNumber = chroN
-
-		if chroNumber.upper() in chroSet or chroNumber.lower() in chroSet:
-
-			chroNumber = chroNumber.upper()
+		if chroN.upper() in chroSet or chroN.lower() in chroSet:
+			if chroN != chroNumber and chroNumber != None:
+				save()
+				chromosomes = {}
+				genes = {}
+				transcripts = {}
+				proteins = {}
+				exons = {}
+				#gc.collect()
+				
+			chroNumber = chroN.upper()
 			if chroNumber not in chromosomes :
-				printf('Chromosome %s...' % chroNumber)
+				chroStartTime = time.time()
+				printf('Importing objects for chromosome %s...' % chroNumber)
 				chromosomes[chroNumber] = Chromosome()
 				chromosomes[chroNumber].set(genome = genome, number = chroNumber)
 				chromosomes[chroNumber].dataType = 'heavy'
@@ -330,8 +335,8 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	printf('\tgenome.chromosomes...')
 	genome.chromosomes = RabaList(chromosomes.values())
 	"""
-	printf('saving...'
-	"""printf('\tgenome...')
+	"""printf('saving...'
+	printf('\tgenome...')
 	genome.save()
 	printf('\tchromosomes...')
 	for c in chromosomes.itervalues() :
@@ -339,9 +344,12 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	printf('\tgenes...')
 	for c in genes.itervalues() :
 		c.save()
-	printf('\ttranscripts + proteins + exons...'""")
+	printf('\ttranscripts + proteins + exons...')
 	for c in transcripts.itervalues() :
-		c.save()
+		c.save()"""
+	save()
+	gc.collect()
+	gc.enable()
 	#printf('\tproteins...')
 	#for c in proteins.itervalues :
 	#	c.save()
@@ -443,7 +451,7 @@ if __name__ == "__main__" :
 	#deleteBackUps(forceDelete = True)(, )
 	#deleteGenome(specie = 'Mus_musculus', name = 'GRCm38_test')
 	#importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse/mus_musculus_Y-only.tar.gz', verbose = 1)
-	deleteGenome(specie = 'human', name = 'GRCh37.74')
+	#deleteGenome(specie = 'human', name = 'GRCh37.74')
 	importGenome('/u/daoudat/py/pyGeno/importationPackages/GRCh37.74/GRCh37.74.tar.gz', verbose = 0)
 	#g = Genome(specie = 'Mus_musculus', name = 'GRCm38_test')
 	#printf(g.get(Transcript)[0].exons)
