@@ -5,8 +5,8 @@ from exceptions import *
 class PythonVersionError(Exception) :
 	pass
 
-pyGeno_SETTINGS_PATH = os.path.expanduser('/dev/shm/pyGeno6/')
-#pyGeno_SETTINGS_PATH = os.path.expanduser('~/.pyGeno6/')
+#pyGeno_SETTINGS_PATH = os.path.expanduser('/dev/shm/pyGeno6/')
+pyGeno_SETTINGS_PATH = os.path.expanduser('~/.pyGeno7/')
 pyGeno_SETTINGS_FILENAME = '%s/pyGeno_settings.pkl' % pyGeno_SETTINGS_PATH
 
 pyGeno_FACE = "~-~-:>"

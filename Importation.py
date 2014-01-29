@@ -4,7 +4,6 @@ from ConfigParser import SafeConfigParser
 import configuration as conf
 
 import rabaDB.setup
-#rabaDB.setup._DEBUG_MODE = True
 from rabaDB.Raba import *
 import rabaDB.fields as rf
 from rabaDB.filters import RabaQuery
@@ -20,7 +19,10 @@ from SNP import *
 from pyGeno.tools.GTFTools import GTFFile
 
 def printf(*s) :
-	print s
+	for e in s[:-1] :
+		print e,
+	print s[-1]
+	
 	sys.stdout.flush()
 
 def backUpDB() :
@@ -183,10 +185,14 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	def save() :
 		printf('\tdone (%fmin), total time (%f).' %((time.time()-chroStartTime)/60, (time.time()-startTime)/60))
 		printf('\tsaving chromsome %s...' % chroNumber)
+		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).enableStats(True)
 		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).beginTransaction()
 		for c in transcripts.itervalues() :
 			c.save()
+		printf('\tcommiting changes...')
 		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).endTransaction()
+		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).enableStats(False)
+		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).printStats()
 		printf('\tdone (%fmin), total time (%f).' %((time.time()-chroStartTime)/60, (time.time()-startTime)/60))
 	
 	printf('Importing gene set infos from %s...' % gtfFilePath)
