@@ -29,7 +29,6 @@ class Transcript(pyGenoObject) :
 	#_raba_uniques = [('genome', 'id')]
 
 	def __init__(self, importing = False) :
-
 		if not importing :
 			self.sequence = []
 			self.CDNA = []

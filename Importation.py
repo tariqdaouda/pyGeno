@@ -1,4 +1,4 @@
-import os, glob, gzip, tarfile, shutil, time, sys, gc
+import os, glob, gzip, tarfile, shutil, time, sys, gc, cPickle, tempfile
 from ConfigParser import SafeConfigParser
 
 import configuration as conf
@@ -18,11 +18,13 @@ from SNP import *
 
 from pyGeno.tools.GTFTools import GTFFile
 
+import cProfile
+
 def printf(*s) :
 	for e in s[:-1] :
 		print e,
 	print s[-1]
-	
+
 	sys.stdout.flush()
 
 def backUpDB() :
@@ -51,6 +53,27 @@ def deleteBackUps(forceDelete = False) :
 				os.remove(f)
 				printf('\tdeleted.')
 
+def _decompressPackage(packageFile) :
+	pFile = tarfile.open(packageFile)
+	packageDir = os.path.normpath('%s/tmp_pygeno_import' % tempfile.gettempdir())
+
+ 	if os.path.isdir(packageDir) :
+		shutil.rmtree(packageDir)
+	os.makedirs(packageDir)
+
+	for mem in pFile :
+		pFile.extract(mem, packageDir)
+
+	return packageDir
+
+def _checkGenomeNotInDb(genomeName, specie) :
+	"raise an excpetion is the genome is already present in the db"
+	try :
+		genome = Genome(name = genomeName, specie = specie)
+		raise ValueError("There seems to be already a genome (%s, %s), please call deleteGenome() first if you want to reinstall it" % (genomeName, specie))
+	except KeyError:
+		pass
+
 def importGenome(packageFile, verbose = False) :
 	r"""Import a pyGeno genome package. A genome packages is a tar.gz ball that contains at it's root:
 	-gziped fasta files for all chromosomes
@@ -76,22 +99,14 @@ def importGenome(packageFile, verbose = False) :
 		All files except the manifest can be downloaded at: http://useast.ensembl.org/info/data/ftp/index.html
 		A rollback is performed, if an exception is caught during importation
 	"""
-
 	def reformatItems(items) :
 		s = str(items)
 		s = s.replace('[', '').replace(']', '').replace("',", ': ').replace('), ', '\n').replace("'", '').replace('(', '').replace(')', '')
 		return s
 
 	printf('importing genome package %s...' % packageFile)
-	pFile = tarfile.open(packageFile)
-	packageDir = os.path.normpath('./.tmp_genome_import')
 
- 	if os.path.isdir(packageDir) :
-		shutil.rmtree(packageDir)
-	os.makedirs(packageDir)
-
-	for mem in pFile :
-		pFile.extract(mem, packageDir)
+	packageDir = _decompressPackage(packageFile)
 
 	parser = SafeConfigParser()
 	parser.read(os.path.normpath(packageDir+'/manifest.ini'))
@@ -104,11 +119,7 @@ def importGenome(packageFile, verbose = False) :
 	chromosomesFiles = dict(parser.items('chromosome_files'))
 	chromosomeSet = set(chromosomesFiles.keys())
 
-	try :
-		genome = Genome(name = genomeName, specie = specie)
-		raise ValueError("There seems to be already a genome (%s, %s), please call deleteGenome() first if you want to reinstall it" % (genomeName, specie))
-	except KeyError:
-		pass
+	_checkGenomeNotInDb(specie, genomeName)
 
 	seqTargetDir = conf.getGenomeSequencePath(specie, genomeName)
 	if os.path.isdir(seqTargetDir) :
@@ -123,9 +134,9 @@ def importGenome(packageFile, verbose = False) :
 		bckFn = backUpDB()
 		printf("=====\nIf anything goes wrong, the db has been backuped here: %s\nSimply rename it to: %s\n=====" %(bckFn, conf.pyGeno_RABA_DBFILE))
 
-		_importGenomeObjects(os.path.normpath(packageDir+'/'+gtfFile), chromosomeSet, genome, verbose)
+		chros = _importGenomeObjects(os.path.normpath(packageDir+'/'+gtfFile), chromosomeSet, genome, verbose)
 		x1Chro = 0
-		for chro in genome.get(Chromosome) :
+		for chro in chros :
 			printf("Importing DNA sequence of chromosome %s..." % chro)
 			length = _importSequence(chro, os.path.normpath(packageDir+'/'+chromosomesFiles[chro.number.lower()]), seqTargetDir)
 			chro.x1 = x1Chro
@@ -135,6 +146,7 @@ def importGenome(packageFile, verbose = False) :
 		genome.save()
 		shutil.rmtree(packageDir)
 	except (KeyboardInterrupt, SystemExit, Exception) :
+		raise
 		printf("===>Exception caught! Rollback!<===")
 		os.remove(conf.pyGeno_RABA_DBFILE)
 		os.rename(bckFn, conf.pyGeno_RABA_DBFILE)
@@ -179,52 +191,33 @@ def deleteGenome(specie, name) :
 		printf("""If the deletion was not fully performed and the problem persist, you can try to revert to a previous database version by renaming a pyGenoRaba_[date]_auto-bck.db)
 to pyGenoRaba.db in %s and manually erasing folder %s and reinstalling the package.""" % (conf.pyGeno_SETTINGS['DATA_PATH'], conf.getGenomeSequencePath(specie, name)))
 
+#@profile
 def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	"verbose is int [0, 4] for various levels of verbosity"
-	
-	def save() :
-		printf('\tdone (%fmin), total time (%f).' %((time.time()-chroStartTime)/60, (time.time()-startTime)/60))
-		printf('\tsaving chromsome %s...' % chroNumber)
-		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).enableStats(True)
-		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).beginTransaction()
-		for c in transcripts.itervalues() :
-			c.save()
-		printf('\tcommiting changes...')
-		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).endTransaction()
-		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).enableStats(False)
-		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).printStats()
-		printf('\tdone (%fmin), total time (%f).' %((time.time()-chroStartTime)/60, (time.time()-startTime)/60))
-	
+
 	printf('Importing gene set infos from %s...' % gtfFilePath)
 	startTime = time.time()
-	
+
 	gtf = GTFFile()
 	gtf.parseFile(gtfFilePath, gziped = True)
-	
-	gc.disable()
-	
+
 	chromosomes = {}
 	genes = {}
 	transcripts = {}
 	proteins = {}
 	exons = {}
 	chroNumber = None
+	chroStartTime = time.time()
 	for i in range(len(gtf)) :
 		chroN = str(gtf.get(i, 'seqname'))
 
-		if chroN.upper() in chroSet or chroN.lower() in chroSet:
-			if chroN != chroNumber and chroNumber != None:
-				save()
-				chromosomes = {}
-				genes = {}
-				transcripts = {}
-				proteins = {}
-				exons = {}
-				#gc.collect()
-				
+		if (chroN.upper() in chroSet or chroN.lower() in chroSet):
+			if chroN != chroNumber and chroNumber != None :
+				printf('\tdone (%fmin), total time (%f).' %((time.time()-chroStartTime)/60, (time.time()-startTime)/60))
+				chroStartTime = time.time()
+
 			chroNumber = chroN.upper()
 			if chroNumber not in chromosomes :
-				chroStartTime = time.time()
 				printf('Importing objects for chromosome %s...' % chroNumber)
 				chromosomes[chroNumber] = Chromosome()
 				chromosomes[chroNumber].set(genome = genome, number = chroNumber)
@@ -250,8 +243,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 					printf('\tGene %s, %s...' % (geneId, geneName))
 				genes[geneId] = Gene()
 				genes[geneId].set(genome = genome, id = geneId, chromosome = chromosomes[chroNumber], name = geneName, strand = strand, biotype = gene_biotype)
-				#chromosomes[chroNumber].genes.append(genes[geneId])
-				#genes[geneId].save()
+
 			try :
 				transId = gtf.get(i, 'transcript_id')
 				transName = gtf.get(i, 'transcript_name')
@@ -264,8 +256,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 					printf('\t\tTranscript %s, %s...' % (transId, transName))
 				transcripts[transId] = Transcript(importing = True)
 				transcripts[transId].set(genome = genome, id = transId, chromosome = chromosomes[chroNumber], gene = genes[geneId], name = transName)
-				#genes[geneId].transcripts.append(transcripts[transId])
-				#transcripts[transId].save()
+
 			try :
 				protId = gtf.get(i, 'protein_id')
 				if protId not in proteins :
@@ -274,7 +265,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 					proteins[protId] = Protein(importing = True)
 					proteins[protId].set(genome = genome, id = protId, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], name = transName)
 					transcripts[transId].protein = proteins[protId]
-					#proteins[protId].save()
+
 			except KeyError :
 				if verbose > 2 :
 					printf('Warning: no protein_id found in line %d' % i)
@@ -295,15 +286,13 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 						exons[exonKey] = Exon(importing = True)
 						exons[exonKey].set(genome = genome, id = exonId, chromosome = chromosomes[chroNumber], gene = genes[geneId], transcript = transcripts[transId], strand = strand, number = exonNumber, x1 = x1, x2 = x2)
 						transcripts[transId].exons.append(exons[exonKey])
-						#exons[exonKey].save()
+
 				except KeyError :
 					printf('Warning: no exon_id found in line %d' % i)
 
 			elif regionType == 'CDS' :
 				exons[exonKey].CDS_x1 = x1
 				exons[exonKey].CDS_x2 = x2
-			#elif regionType == 'start_codon' :
-			#	exons[exonKey].startCodon = x1
 			elif regionType == 'stop_codon' :
 				if strand == '+' :
 					exons[exonKey].x2 += 3
@@ -313,64 +302,42 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 					exons[exonKey].x1 -= 3
 					if exons[exonKey].CDS_x1 != None :
 						exons[exonKey].CDS_x1 -= 3
-	"""
-	printf('creating relations...')
-	printf('\ttranscript.exons...')
-	for transcript in transcripts.itervalues() :
-		f = RabaQuery(Exon)
-		f.addFilter(**{'transcript' : transcript})
-		p = f.run()
-		transcript.exons = f.run()
 
-	printf('\tgene.transcripts/.exons...')
-	for gene in genes.itervalues() :
-		f = RabaQuery(Transcript)
-		f.addFilter(**{'gene' : gene})
-		gene.transcripts = f.run()
+	printf('\tdone (%fmin), total time (%f).' %((time.time()-chroStartTime)/60, (time.time()-startTime)/60))
 
-		f = RabaQuery(Exon)
-		f.addFilter(**{'gene' : gene})
-		gene.exons = f.run()
-
-	printf('\tchromosome.genes...')
-	for chro in chromosomes.itervalues() :
-		f = RabaQuery(Gene)
-		f.addFilter(**{'chromosome' : chro})
-		chro.genes = f.run()
-
-	printf('\tgenome.chromosomes...')
-	genome.chromosomes = RabaList(chromosomes.values())
-	"""
-	"""printf('saving...'
-	printf('\tgenome...')
-	genome.save()
-	printf('\tchromosomes...')
+	rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).beginTransaction()
+	if verbose > 0 :
+		printf('saving %d chromsomes...' % len(chromosomes))
 	for c in chromosomes.itervalues() :
 		c.save()
-	printf('\tgenes...')
+
+	if verbose > 0 :
+		printf('saving %d genes...' % len(genes))
 	for c in genes.itervalues() :
 		c.save()
-	printf('\ttranscripts + proteins + exons...')
-	for c in transcripts.itervalues() :
-		c.save()"""
-	save()
-	gc.collect()
-	gc.enable()
-	#printf('\tproteins...')
-	#for c in proteins.itervalues :
-	#	c.save()
-	#printf('\texons...')
-	#for c in exons.itervalues :
-	#	c.save()
-	#printf('Done.')
 
-	#printf("=========", transcript.exons)
+	if verbose > 0 :
+		printf('saving %d transcripts and exons %d...' % (len(transcripts), len(exons)))
+	for c in transcripts.itervalues() :
+		c.save()
+
+	if verbose > 0 :
+		printf('saving %d proteins...' % len(proteins))
+	for c in proteins.itervalues() :
+		c.save()
+	genome.save()
+	printf('\tcommiting changes...')
+	rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).endTransaction()
+	printf('\tdone total time (%f).' %((time.time()-startTime)/60))
+
 	try :
 		refGenomeName = conf.getReferenceGenome(genome.specie)
 	except KeyError:
 		refGenomeName = genome.name
 		conf.setReferenceGenome(genome.specie, genome.name)
-	printf('Current reference genome for specie %s is %s' %(genome.specie, genome.name))
+		printf('Auto setting: Current reference genome for specie %s is now %s' %(genome.specie, genome.name))
+
+	return chromosomes.values()
 
 def _importSequence(chromosome, fastaFile, targetDir) :
 	printf('making data for chromsome %s, source file: %s...' %(chromosome.number, fastaFile))
@@ -388,29 +355,37 @@ def _importSequence(chromosome, fastaFile, targetDir) :
 	chromosome.header = header
 	return len(strRes)
 
-def importGenome_casava(specie, genomeName, snpsTxtFile) :
+def importGenome_casava(specie, genomeName, packageFile) :
 	"""TODO: TEST"""
 
 	printf('importing %s genome %s...' % (specie, genomeName))
 	bckFn = backUpDB()
 	printf("=====\nIf anything goes wrong, the db has been backuped here: %s\nSimply rename it to: %s\n=====" %(bckFn, conf.pyGeno_RABA_DBFILE))
 
+	packageDir = _decompressPackage(packageFile)
+
+	parser = SafeConfigParser()
+	parser.read(os.path.normpath(packageDir+'/manifest.ini'))
+	packageInfos = parser.items('package_infos')
+
+	genomeName = parser.get('genome', 'name')
+	specie = parser.get('genome', 'specie')
+	genomeSource = parser.get('genome', 'source')
+	snpsTxtFile = parser.get('snps', 'casava_snps_file')
+
 	try :
 		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).beginTransaction()
 
-		try :
-			genome = Genome(name = genomeName, specie = specie)
-			raise ValueError("There seems to be already a genome (%s, %s), please call deleteGenome() first if you want to reinstall it" % (genomeName, specie))
-		except KeyError:
-			pass
+		_checkGenomeNotInDb(specie, genomeName)
 
 		genome = Genome()
-		genome.set(name = genomeName, specie = specie, source = snpsTxtFile, snpType = 'CasavaSNP')
+		genome.set(name = genomeName, specie = specie, source = genomeSource, packageInfos = packageInfos, snpType = 'CasavaSNP')
 
 		f = open(snpsTxtFile)
 		lines = f.readlines()
 		f.close()
 
+		chromosomes = {}
 		currChrNumber = '-1'
 		for l in lines :
 			if l[0] != '#' : #ignore comments
@@ -420,6 +395,7 @@ def importGenome_casava(specie, genomeName, snpsTxtFile) :
 					currChrNumber = sl[0]
 					chromosome = Chromosome()
 					chromosome.set(number = currChrNumber, genome = genome, dataType = 'CasavaSNP')
+					chromosomes[currChrNumber] = chromosome
 
 				snp = CasavaSNP()
 				snp.chromosome = chromosome
@@ -439,12 +415,13 @@ def importGenome_casava(specie, genomeName, snpsTxtFile) :
 				snp.G_used = int(sl[13])
 				snp.T_used = int(sl[14])
 				snp.save()
-				#genome.snps.append(snp)
 
 		printf('saving...')
+		for c in chromosomes.itervalues() :
+			c.save()
+
 		genome.save()
 		rabaDB.setup.RabaConnection(conf.pyGeno_RABA_NAMESPACE).endTransaction()
-		printf(genome.snps)
 		printf('importation %s of genome %s done.' %(specie, genomeName))
 
 	except (KeyboardInterrupt, SystemExit, Exception) :
