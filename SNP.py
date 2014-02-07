@@ -6,10 +6,25 @@ import rabaDB.fields as rf
 from tools import UsefulFunctions as uf
 from exceptions import *
 
-class CasavaSNP(pyGenoObject) :
-
+class SNPMaster(Raba) :
+	'This object keeps trac'
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
-	pos = rf.Primitive()
+	specie = rf.Primitive()
+	SNPType = rf.Primitive()
+	setName = rf.Primitive()
+
+class SNP_INDEL(pyGenoObject) :
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	specie = rf.Primitive()
+	setName = rf.Primitive()
+	chromosomeNumber = rf.Primitive()
+
+	start = rf.Primitive()
+	end = rf.Primitive()
+	alleles = rf.Primitive()
+
+class CasavaSNP(SNP_INDEL) :
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	bcalls_used = rf.Primitive()
 	bcalls_filt = rf.Primitive()
 	ref = rf.Primitive()
@@ -23,11 +38,10 @@ class CasavaSNP(pyGenoObject) :
 	G_used = rf.Primitive()
 	T_used = rf.Primitive()
 
-	genome = rf.RabaObject('Genome')
-	chromosome = rf.RabaObject('Chromosome')
-
 	def __init__(self) :
-		pass
+		self.max_gt = self.alleles
+		self.pos = self.start
 
 	def _curate(self) :
-		pass
+		self.alleles = self.max_gt
+		self.start = self.pos

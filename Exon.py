@@ -38,9 +38,8 @@ class Exon(pyGenoObject):
 
 		if  not importing :
 			self._curate()
-
 			if self.x1 != None and self.x2 != None :
-				seq = self.transcript.gene.chromosome.sequence[self.x1:self.x2]
+				seq = self.chromosome.sequence[self.x1:self.x2]
 				if self.transcript.gene.strand == '+' :
 					self.sequence = seq
 				else :

@@ -1,3 +1,4 @@
+import copy
 from types import *
 import configuration as conf
 from pyGenoObject import *
@@ -5,7 +6,7 @@ from pyGenoObject import *
 #from rabaDB.setup import *
 #RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
 #from rabaDB.Raba import *
-#from rabaDB.filters import RabaQuery
+from rabaDB.filters import RabaQuery
 import rabaDB.fields as rf
 
 #from Gene import Gene
@@ -17,46 +18,74 @@ from tools import UsefulFunctions as uf
 from tools import SingletonManager
 import types
 
-def defaultSNPsFilter(casavaSnp) :
-	"""The default rule to decide wether to take the most probable genotype or the
-	reference, always returns true"""
-	return True
 
 class ChrosomeSequence(object) :
 
 	def __init__(self, data, chromosome) :
 		self.data = data
 		self.chromosome = chromosome
-		self.SNPsFilter = defaultSNPsFilter
+		self.SNPsFilter = self.chromosome.genome.SNPsFilter
 
 	def setSNPFilter(self, SNPsFilter) :
 		self.SNPsFilter = SNPsFilter
 
 	def _getSequence(self, slic) :
+		"returns a sequence including SNPs as filtered by the genome SNPFilter function"
 		assert type(slic) is SliceType
 
-		if self.chromosome.dataType == 'heavy' :
-			return self.data[slic]
-		else :
-			snps = self.chromosome.get(self.chromosome.dataType, {'pos >=' : slic[0], 'pos <' : slic[1]})
-			data = self.data[slic]
-			if len(snps) < 1 :
-				return data
-			for snp in snps:
-				if self.SNPsFilter(snp) :
-					if type(data) is not ListType :
-						data = list(data)
-					posSeq = snp['pos'] - start#-1
-					snp['max_gt'] = uf.getPolymorphicNucleotide(snp['max_gt'])
-					data[posSeq] = snp['max_gt']
+		data = self.data[slic]
+		SNPTypes = self.chromosome.genome.SNPTypes
+		if SNPTypes != None :
+			resSNPs = []
+			for SNPType in SNPTypes.itervalues() :
+				f = RabaQuery(snpType, namespace = self.chromosome._raba_namespace)
+				f.addFilter({'start >=' : slic[0], 'start < ' : slic[1], 'setName' : se, 'chromosomeNumber' : self.chromosome.number})
+				resSNPs.append(f.run(sqlTail = 'ORDER BY position'))
+
+			if len(resSNPs) == 1 :
+				for SNP in resSNPs[0] :
+					filtSNP = self.SNPsFilter(SNP)
+					if filtSNP != None :
+						if type(data) is not ListType :
+							data = list(data)
+						posSeq = filtSNP.start - slic[0]#-1
+						filtSNP.alleles = uf.getPolymorphicNucleotide(filtSNP.alleles)
+						data[posSeq] = filtSNP.alleles
+			elif len(resSNPs) > 1 :
+				for SNP in self._mixSNPs(*resSNPs) :
+					filtSNP = self.SNPsFilter(**SNP)
+					if filtSNP != None :
+						if type(data) is not ListType :
+							data = list(data)
+						posSeq = filtSNP.start - slic[0]#-1
+						filtSNP.alleles = uf.getPolymorphicNucleotide(filtSNP.alleles)
+						data[posSeq] = filtSNP.alleles
 
 			if type(data) is ListType :
 				return ''.join(data)
-			else :
-				return data
 
-	def __getitem__(self, tralala) :
-		return self._getSequence(tralala)
+		return data
+
+	def _mixSNPs(*snpsSets) :
+		"""takes several snp sets and return an iterator of values {setName1 : snp, setName2 : snp, setName3 : None, ...}.
+		the dict a intended for the SNPFilter function, each one correponds to a single position in the chromosome"""
+
+		positions = {}
+		empty = {}
+		for snpsSet in snpsSets :
+			empty[snpsSet[0].setName] = None
+
+		for snpsSet in snpsSets :
+			for snp in snpsSet :
+				if snp.start not in position :
+					positions[snp.start] = copy.copy(empty)
+				positions[snp.start][empty[snp.setName]] = snp
+
+		for v in positions.itervalues() :
+			yield v
+
+	def __getitem__(self, i) :
+		return self._getSequence(i)
 
 class Chromosome(pyGenoObject) :
 	"""A class that represents a Chromosome
@@ -69,14 +98,14 @@ class Chromosome(pyGenoObject) :
 	x1 = rf.Primitive()
 	x2 = rf.Primitive()
 	length = rf.Primitive()
-	dataType = rf.Primitive() #'flat' => for dat files on drive, or name of the polymoprhism's rabaclass : ex 'CasavaSNP'
+	#dataType = rf.Primitive() #'flat' => for dat files on drive, or name of the polymoprhism's rabaclass : ex 'CasavaSNP'
 
 	genome = rf.RabaObject('Genome')
 	#genes = rf.Relation('Gene')
 
 	#_raba_uniques = [('genome', 'number')]
 
-	def __init__(self, importing = False, SNPsFilter = defaultSNPsFilter) :
+	def __init__(self, importing = False) :
 		"""SNVsFilter is a fct that takes a SNP as input a returns true if it correpsond to the rule.
 		If left to none Chromosome.defaulSNVsFilter is used. This parameter has no effect if the genome is not light
 		(contains the sequences for all chros)"""
@@ -84,11 +113,10 @@ class Chromosome(pyGenoObject) :
 			self.number = str(self.number)
 
 		if not importing :
-			if self.dataType == 'heavy' :
-				path = '%s/chromosome%s.dat'%(self.genome.getSequencePath(), self.number)
-				self.sequence = ChrosomeSequence(SingletonManager.add(SecureMmap(path), path), self)
+			path = '%s/chromosome%s.dat'%(self.genome.getSequencePath(), self.number)
+			self.sequence = ChrosomeSequence(SingletonManager.add(SecureMmap(path), path), self)
 
-			self.SNPsFilter = SNPsFilter
+		#	self.SNPsFilter = SNPsFilter
 
 	def _curate(self) :
 		if  self.x2 != None and self.x1 != None :
@@ -111,9 +139,6 @@ class Chromosome(pyGenoObject) :
 		e = copy.copy(self)
 		e.genome = str(self.genome)
 		return e
-
-	def __getitem__(self, i) :
-		return self.sequence[i]
 
 	def __len__(self) :
 		return self.length
