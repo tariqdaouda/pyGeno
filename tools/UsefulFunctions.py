@@ -1,4 +1,4 @@
-import string, os, copy
+import string, os, copy, types
 import numpy as N
 
 class UnknownNucleotide(Exception) :
@@ -10,10 +10,10 @@ class UnknownNucleotide(Exception) :
 
 #This will probably be moved somewhere else in the futur
 def saveResults(directoryName, fileName, strResults, log = '', args = ''):
-	
+
 	if not os.path.exists(directoryName):
 		os.makedirs(directoryName)
-	
+
 	resPath = "%s/%s"%(directoryName, fileName)
 	resFile = open(resPath, 'w')
 	print "Saving results :\n\t%s..."%resPath
@@ -27,7 +27,7 @@ def saveResults(directoryName, fileName, strResults, log = '', args = ''):
 		print "Saving log :\n\t%s..." %errPath
 		errFile.write(log)
 		errFile.close()
-	
+
 	if args != '' :
 		paramPath = "%s.args.txt"%(resPath)
 		paramFile = open(paramPath, 'w')
@@ -35,9 +35,9 @@ def saveResults(directoryName, fileName, strResults, log = '', args = ''):
 		print "Saving arguments :\n\t%s..." %paramPath
 		paramFile.write(args)
 		paramFile.close()
-		
+
 	return "%s/"%(directoryName)
-	
+
 nucleotides = ['A', 'T', 'C', 'G']
 polymorphicNucleotides = {
 			'R' : ['A','G'], 'Y' : ['C','T'], 'M': ['A','C'],
@@ -52,24 +52,24 @@ codonAffinity = {'CTT': 'low', 'ACC': 'high', 'ACA': 'low', 'ACG': 'high', 'ATC'
 #</7iyed>
 
 codonTable = {
-'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 
+'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C',
 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C',
 'TTA' : 'L', 'TCA' : 'S', 'TAA' : '*', 'TGA' : '*',
 'TTG' : 'L', 'TCG' : 'S', 'TAG' : '*', 'TGG' : 'W',
 
-'CTT' : 'L', 'CTC' : 'L', 'CTA' : 'L', 'CTG' : 'L', 
-'CCT' : 'P', 'CCC' : 'P', 'CCA' : 'P', 'CCG' : 'P', 
-'CAT' : 'H', 'CAC' : 'H', 'CAA' : 'Q', 'CAG' : 'Q', 
-'CGT' : 'R', 'CGC' : 'R', 'CGA' : 'R', 'CGG' : 'R', 
+'CTT' : 'L', 'CTC' : 'L', 'CTA' : 'L', 'CTG' : 'L',
+'CCT' : 'P', 'CCC' : 'P', 'CCA' : 'P', 'CCG' : 'P',
+'CAT' : 'H', 'CAC' : 'H', 'CAA' : 'Q', 'CAG' : 'Q',
+'CGT' : 'R', 'CGC' : 'R', 'CGA' : 'R', 'CGG' : 'R',
 
-'ATT' : 'I', 'ATC' : 'I', 'ATA' : 'I', 'ATG' : 'M', 
-'ACT' : 'T', 'ACC' : 'T', 'ACA' : 'T', 'ACG' : 'T', 
-'AAT' : 'N', 'AAC' : 'N', 'AAA' : 'K', 'AAG' : 'K', 
-'AGT' : 'S', 'AGC' : 'S', 'AGA' : 'R', 'AGG' : 'R', 
+'ATT' : 'I', 'ATC' : 'I', 'ATA' : 'I', 'ATG' : 'M',
+'ACT' : 'T', 'ACC' : 'T', 'ACA' : 'T', 'ACG' : 'T',
+'AAT' : 'N', 'AAC' : 'N', 'AAA' : 'K', 'AAG' : 'K',
+'AGT' : 'S', 'AGC' : 'S', 'AGA' : 'R', 'AGG' : 'R',
 
-'GTT' : 'V', 'GTC' : 'V', 'GTA' : 'V', 'GTG' : 'V', 
-'GCT' : 'A', 'GCC' : 'A', 'GCA' : 'A', 'GCG' : 'A', 
-'GAT' : 'D', 'GAC' : 'D', 'GAA' : 'E', 'GAG' : 'E', 
+'GTT' : 'V', 'GTC' : 'V', 'GTA' : 'V', 'GTG' : 'V',
+'GCT' : 'A', 'GCC' : 'A', 'GCA' : 'A', 'GCG' : 'A',
+'GAT' : 'D', 'GAC' : 'D', 'GAA' : 'E', 'GAG' : 'E',
 'GGT' : 'G', 'GGC' : 'G', 'GGA' : 'G', 'GGG' : 'G'
 }
 
@@ -86,7 +86,7 @@ stripSplitStr = lambda x: x.strip().split(';')
 
 """returns a list of all the ocurances"""
 def findAll(haystack, needle) :
-	
+
 	h = haystack
 	res = []
 	f = haystack.find(needle)
@@ -97,9 +97,9 @@ def findAll(haystack, needle) :
 		offset += f+len(needle)
 		h = h[f+len(needle):]
 		f = h.find(needle)
-		
+
 	return res
-	
+
 def reverseComplement(seq):
 	'''
 	Complements a DNA sequence, returning the reverse complement.
@@ -111,13 +111,13 @@ def complement(seq) :
 	tb = string.maketrans("ACGTRYMKWSBDHVNacgtrymkwsbdhvn",
 						  "TGCAYRKMWSVHDBNtgcayrkmwsvhdbn")
 	return seq.translate(tb)
-  
+
 def translateDNA_6Frames(sequence) :
 	trans = [
 				translateDNA(sequence, 'f1'),
 				translateDNA(sequence, 'f2'),
 				translateDNA(sequence, 'f3'),
-				
+
 				translateDNA(sequence, 'r1'),
 				translateDNA(sequence, 'r2'),
 				translateDNA(sequence, 'r3'),
@@ -129,7 +129,7 @@ def translateDNA_6Frames(sequence) :
 def translateDNA(sequence, frame = 'fwd1') :
 
 	protein = ""
-	
+
 	if frame == 'fwd1' :
 		dna = sequence
 	elif frame == 'fwd2':
@@ -146,7 +146,7 @@ def translateDNA(sequence, frame = 'fwd1') :
 		dna = dna[2:]
 	else :
 		raise ValueError('unknown reading frame: %s, should be one of the following: fwd1, fwd2, fwd3, rev1, rev2, rev3' % frame)
-		
+
 	for i in range(0, len(dna),  3) :
 		if (len(dna[i:i+3]) == 3) :
 			try :
@@ -157,17 +157,17 @@ def translateDNA(sequence, frame = 'fwd1') :
 				for ci in range(len(combinaisons)):
 					translations.add(codonTable[combinaisons[ci]])
 				protein += '/'.join(translations)
-				
+
 	return protein
 
 def getSequenceCombinaisons(polymorphipolymorphicDnaSeqSeq, pos = 0) :
 	"""Takes a dna sequence with polymorphismes and returns all the possible sequences that it can yield"""
-	
+
 	if type(polymorphipolymorphicDnaSeqSeq).__name__ != 'list' :
 		seq = list(polymorphipolymorphicDnaSeqSeq)
 	else :
 		seq = polymorphipolymorphicDnaSeqSeq
-		
+
 	if pos >= len(seq) :
 		return [''.join(seq)]
 
@@ -181,21 +181,21 @@ def getSequenceCombinaisons(polymorphipolymorphicDnaSeqSeq, pos = 0) :
 		rseq = copy.copy(seq)
 		rseq[pos] = c
 		variants.extend(getSequenceCombinaisons(rseq, pos + 1))
-	
+
 	return variants
-	
+
 def polymorphicCodonCombinaisons(codon) :
 	return getSequenceCombinaisons(codon, 0)
-	
+
 def polymorphicCodonCombinaisons_bck(dnaSeq, startId = 0) :
 	if type(dnaSeq).__name__ != 'list' :
 		dna = list(dnaSeq)
 	else :
 		dna = dnaSeq
-	
+
 	if startId >= len(dna) :
 		return [''.join(dna)]
-		
+
 	rDna = copy.copy(dna)
 	res = []
 	try :
@@ -203,24 +203,27 @@ def polymorphicCodonCombinaisons_bck(dnaSeq, startId = 0) :
 		for c in chars :
 			rDna[startId] = c
 			res.extend(polymorphicCodonCombinaisons(rDna, startId +1))
-		
+
 	except KeyError:
 		res.extend(polymorphicCodonCombinaisons(rDna, startId +1))
 
 	return res
 
-def getPolymorphicNucleotide(strSeq) :
-	"""Seq is a string like : ATG or A/T/G"""
+def encodePolymorphicNucleotide(polySeq) :
+	"""from ['A', 'G'] or AG or A/G to R"""
 
-	seq = []
-	for c in strSeq :
-		if c in polymorphicNucleotides :
-			seq.extend(polymorphicNucleotides[c])
-		elif c in nucleotides :
-			seq.append(c)
-	
+	if type(polySeq) is types.ListeType :
+		seq = polySeq
+	else :
+		seq = []
+		for c in polySeq :
+			if c in polymorphicNucleotides :
+				seq.extend(polymorphicNucleotides[c])
+			elif c in nucleotides :
+				seq.append(c)
+
 	seq = set(seq)
-	#print "===>", seq 
+	#print "===>", seq
 	if len(seq) == 4:
 		return 'N'
 	elif len(seq) == 3 :
@@ -245,26 +248,31 @@ def getPolymorphicNucleotide(strSeq) :
 			return 'W'
 		elif 'C' in seq and 'G' in seq :
 			return 'S'
-	elif strSeq[0] in nucleotides :
-		return strSeq[0]
+	elif polySeq[0] in nucleotides :
+		return polySeq[0]
 	else :
-		raise UnknownNucleotide(strSeq)
+		raise UnknownNucleotide(polySeq)
 
 def decodePolymorphicNucleotide(nuc) :
+	"from 'R' to ['A', 'G']"
 	if nuc in polymorphicNucleotides :
-		return '/'.join(polymorphicNucleotides[nuc])
-	
+		return polymorphicNucleotides[nuc]
+
 	if nuc in nucleotides :
 		return nuc
-	
+
 	raise ValueError('nuc: %s, is not a valid nucleotide' % nuc)
-	
+
+def decodePolymorphicNucleotide_str(nuc) :
+	"from 'R' to 'A/G'"
+	return '/'.join(decodePolymorphicNucleotide(nuc))
+
 def getNucleotideCodon(sequence, x1) :
 	"Returns the entire codon of the nucleotide at pos x1 in the cdna, and the position of that nocleotide in the codon"
-	
+
 	if x1 < 0 or x1 >= len(sequence) :
 		return None
-	
+
 	p = x1%3
 	if p == 0 :
 		return (sequence[x1: x1+3], 0)
@@ -272,12 +280,12 @@ def getNucleotideCodon(sequence, x1) :
 		return (sequence[x1-1: x1+2], 1)
 	elif p == 2 :
 		return (sequence[x1-2: x1+1], 2)
-		
+
 def showDifferences(seq1, seq2) :
 	"returns a string representig matching chars (-) and differences (A|T) between the two strings or length exceeded (#)"
 	ret = []
 	for i in range(max(len(seq1), len(seq2))) :
-		
+
 		if i >= len(seq1) :
 			c1 = '#'
 		else :
@@ -286,18 +294,18 @@ def showDifferences(seq1, seq2) :
 			c2 = '#'
 		else :
 			c2 = seq2[i]
-		
+
 		if c1 != c2 :
 			ret.append('%s|%s' % (c1, c2))
 		else :
 			ret.append('-')
-		
+
 	return ''.join(ret)
 
 def showDifferences_test(seq1, seq2) :
 	"returns a string representig matching chars (-) and differences (A|T) between the two strings or length exceeded (#)"
 	ret = []
-	
+
 	for i in range(max(len(seq1), len(seq2))) :
 		if i >= len(seq1) :
 			c1 = '#'
@@ -309,7 +317,7 @@ def showDifferences_test(seq1, seq2) :
 					c1 = seq1[i]
 			else :
 				c1 = seq1[i]
-				
+
 		if i >= len(seq2) :
 			c2 = '#'
 		else :
@@ -320,17 +328,17 @@ def showDifferences_test(seq1, seq2) :
 					c2 = seq2[i]
 			else :
 				c2 = seq2[i]
-		
+
 		if c1 != c2 :
 			ret.append('%s|%s' % (c1, c2))
 		else :
 			ret.append('-')
-		
+
 	return ''.join(ret)
-	
+
 def highLightSubsequence(sequence, x1, x2, start=' [', stop = '] ') :
 	"returns a sequence where the subsequence in [x1, x2[ is placed bewteen start and stop,"
-	
+
 	seq = list(sequence)
 	ii = 0
 	acc = True
@@ -339,14 +347,14 @@ def highLightSubsequence(sequence, x1, x2, start=' [', stop = '] ') :
 			seq[i] = '['+seq[i]
 		if ii == x2-1 :
 			seq[i] = seq[i] + ']'
-		
+
 		if i < len(seq-1) :
 			if seq[i+1] == '/':
 				acc = False
 			else :
 				acc = True
-				
+
 		if acc :
 			ii += 1
-			
+
 	print ''.join(seq)

@@ -1,69 +1,90 @@
-import numpy as N
-import re, copy, sys, random
-
 import configuration as conf
 
-from pyGenoObject import *
+from pyGenoObjectBases import *
 import rabaDB.fields as rf
 
 from tools import UsefulFunctions as uf
-from Protein import Protein
-from Exon import Exon
+#from Protein import Protein
+from Exon import *
 
 from tools.BinarySequence import NucBinarySequence
 
 
-class Transcript(pyGenoObject) :
+class Transcript_Raba(pyGenoRabaObject) :
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 
 	id = rf.Primitive()
 	name = rf.Primitive()
-	length = rf.Primitive()
+	#length = rf.Primitive()
 
-	genome = rf.RabaObject('Genome')
-	chromosome = rf.RabaObject('Chromosome')
-	gene = rf.RabaObject('Gene')
-	protein = rf.RabaObject('Protein')
-	exons = rf.Relation('Exon')
-
-	#_raba_uniques = [('genome', 'id')]
-
-	def __init__(self, importing = False) :
-		if not importing :
-			self.sequence = []
-			self.CDNA = []
-			self.UTR5 = []
-			self.UTR3 = []
-			prime5 = True
-			for e in self.exons :
-				self.sequence.append(e.sequence)
-				if e.hasCDS() :
-					self.CDNA.append(e.CDSSequence)
-				else :
-					if prime5 :
-						self.UTR5.append(e.sequence)
-					else :
-						self.UTR3.append(e.sequence)
-
-			self.sequence = ''.join(self.sequence)
-			self.CDNA = ''.join(self.CDNA)
-			self.UTR5 = ''.join(self.UTR5)
-			self.UTR3 = ''.join(self.UTR3)
-
-			self.bin_CDNA = NucBinarySequence(self.CDNA)
-			self.bin_sequence = NucBinarySequence(self.sequence)
-			self.bin_UTR5 = NucBinarySequence(self.UTR5)
-			self.bin_UTR3 = NucBinarySequence(self.UTR3)
-
-			if len(self.CDNA) % 3 != 0 :
-				self.flags = {'DUBIOUS' : True, 'CDNA_LEN_NOT_MULT_3': True}
-			else :
-				self.flags = {'DUBIOUS' : False, 'CDNA_LEN_NOT_MULT_3': False}
+	genome = rf.RabaObject('Genome_Raba')
+	chromosome = rf.RabaObject('Chromosome_Raba')
+	gene = rf.RabaObject('Gene_Raba')
+	protein = rf.RabaObject('Protein_Raba')
+	exons = rf.Relation('Exon_Raba')
 
 	def _curate(self) :
 		if self.name != None :
 			self.name = self.name.upper()
 
+class Transcript(pyGenoRabaObjectWrapper) :
+
+	_wrapped_class = Transcript_Raba
+
+	def __init__(self, *args, **kwargs) :
+		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
+		self.loadedSequences = False
+		self.loadBinarySequence = True
+		
+	def _loadSequences(self) :
+		if not pyGenoRabaObjectWrapper.__getattribute__(self, 'loadedSequences') :
+			def getV(k) :
+				return pyGenoRabaObjectWrapper.__getattribute__(self, k)
+			
+			def setV(k, v) :
+				return pyGenoRabaObjectWrapper.__setattr__(self, k, v)
+				
+			sequence = []
+			CDNA = []
+			UTR5 = []
+			UTR3 = []
+			exons = []
+			prime5 = True
+			for ee in self.wrapped_object.exons :
+				e = pyGenoRabaObjectWrapper_metaclass._wrappers[Exon_Raba](wrapped_object_and_bag = (ee, getV('bagKey')))
+				exons.append(e)
+				sequence.append(e.sequence)
+
+				if e.hasCDS() :
+					UTR5.append(e.UTR5)
+					CDNA.append(e.CDS)
+					UTR3.append(e.UTR3)
+					prime5 = False
+				else :
+					if prime5 :
+						UTR5.append(e.sequence)
+					else :
+						UTR3.append(e.sequence)
+				
+			setV('exons', exons)
+			setV('sequence', ''.join(sequence))
+			setV('CDNA', ''.join(CDNA))
+			setV('UTR5', ''.join(UTR5))
+			setV('UTR3', ''.join(UTR3))
+			
+			if len(getV('CDNA')) % 3 != 0 :
+				setV('flags', {'DUBIOUS' : True, 'CDNA_LEN_NOT_MULT_3': True})
+			else :
+				setV('flags', {'DUBIOUS' : False, 'CDNA_LEN_NOT_MULT_3': False})
+		
+			setV('loadedSequences', True)
+ 
+	def _load_bin_sequence(self) :
+		self.bin_sequence = NucBinarySequence(self.sequence)
+		self.bin_UTR5 =  NucBinarySequence(self.UTR5)
+		self.bin_CDS =  NucBinarySequence(self.CDS)
+		self.bin_UTR3 =  NucBinarySequence(self.UTR3)
+	
 	def getNucleotideCodon(self, cdnaX1) :
 		"Returns the entire codon of the nucleotide at pos cdnaX1 in the cdna, and the position of that nocleotide in the codon"
 		return uf.getNucleotideCodon(self.CDNA, cdnaX1)
@@ -140,7 +161,6 @@ class Transcript(pyGenoObject) :
 		return chunks
 
 	def getCodonUsage(self) :
-
 		codonUsage = {}
 		for k in uf.codonTable.keys() :
 			codonUsage[k] = 0
@@ -164,6 +184,14 @@ class Transcript(pyGenoObject) :
 
 	def getNbCodons(self) :
 		return len(self.CDNA)/3
+
+	def __getattribute__(self, name) :
+		try : 
+			return pyGenoRabaObjectWrapper.__getattribute__(self, name)
+		except AttributeError :
+			pyGenoRabaObjectWrapper.__getattribute__(self, '_loadSequences')()
+		
+		return pyGenoRabaObjectWrapper.__getattribute__(self, name)
 
 	def __getitem__(self, i) :
 		return self.sequence[i]
