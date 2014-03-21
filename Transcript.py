@@ -35,15 +35,15 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 		self.loadedSequences = False
 		self.loadBinarySequence = True
-		
+
 	def _loadSequences(self) :
 		if not pyGenoRabaObjectWrapper.__getattribute__(self, 'loadedSequences') :
 			def getV(k) :
 				return pyGenoRabaObjectWrapper.__getattribute__(self, k)
-			
+
 			def setV(k, v) :
 				return pyGenoRabaObjectWrapper.__setattr__(self, k, v)
-				
+
 			sequence = []
 			CDNA = []
 			UTR5 = []
@@ -65,33 +65,38 @@ class Transcript(pyGenoRabaObjectWrapper) :
 						UTR5.append(e.sequence)
 					else :
 						UTR3.append(e.sequence)
-				
+
 			setV('exons', exons)
 			setV('sequence', ''.join(sequence))
 			setV('CDNA', ''.join(CDNA))
 			setV('UTR5', ''.join(UTR5))
 			setV('UTR3', ''.join(UTR3))
-			
+
 			if len(getV('CDNA')) % 3 != 0 :
 				setV('flags', {'DUBIOUS' : True, 'CDNA_LEN_NOT_MULT_3': True})
 			else :
 				setV('flags', {'DUBIOUS' : False, 'CDNA_LEN_NOT_MULT_3': False})
-		
+
 			setV('loadedSequences', True)
- 
+
 	def _load_bin_sequence(self) :
 		self.bin_sequence = NucBinarySequence(self.sequence)
 		self.bin_UTR5 =  NucBinarySequence(self.UTR5)
 		self.bin_CDS =  NucBinarySequence(self.CDS)
 		self.bin_UTR3 =  NucBinarySequence(self.UTR3)
-	
+
 	def getNucleotideCodon(self, cdnaX1) :
 		"Returns the entire codon of the nucleotide at pos cdnaX1 in the cdna, and the position of that nocleotide in the codon"
 		return uf.getNucleotideCodon(self.CDNA, cdnaX1)
 
 	def getCodon(self, i) :
 		"returns the ith codon"
-		return self.getNucleotideCodon(i*3)
+		return self.getNucleotideCodon(i*3)[0]
+
+	def iterCodons(self) :
+		"iterates through the codons"
+		for i in range(len(self.CDNA)/3) :
+			yield self.getCodon(i)
 
 	def find(self, sequence) :
 		"""return the position of the first occurance of sequence"""
@@ -186,11 +191,11 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		return len(self.CDNA)/3
 
 	def __getattribute__(self, name) :
-		try : 
+		try :
 			return pyGenoRabaObjectWrapper.__getattribute__(self, name)
 		except AttributeError :
 			pyGenoRabaObjectWrapper.__getattribute__(self, '_loadSequences')()
-		
+
 		return pyGenoRabaObjectWrapper.__getattribute__(self, name)
 
 	def __getitem__(self, i) :

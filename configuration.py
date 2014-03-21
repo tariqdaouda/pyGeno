@@ -1,4 +1,5 @@
 import sys, os, time, cPickle
+import rabaDB.setup
 #from tools import io
 #from exceptions import *
 
@@ -20,6 +21,9 @@ pyGeno_RABA_NAMESPACE = 'pyGenoRaba'
 pyGeno_RABA_DBFILE = '%s/pyGenoRaba.db' % pyGeno_SETTINGS_PATH
 
 pyGeno_SETTINGS = {'DATA_PATH' : '%s/data' % pyGeno_SETTINGS_PATH}
+
+rabaDB.setup.RabaConfiguration(pyGeno_RABA_NAMESPACE, pyGeno_RABA_DBFILE)
+db = rabaDB.setup.RabaConnection(pyGeno_RABA_NAMESPACE)
 
 def version() :
 	"""returns a tuple describing pyGeno's current version"""

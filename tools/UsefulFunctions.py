@@ -49,7 +49,17 @@ polymorphicNucleotides = {
 #from Molecular Systems Biology 8; Article number 572; doi:10.1038/msb.2012.3
 codonAffinity = {'CTT': 'low', 'ACC': 'high', 'ACA': 'low', 'ACG': 'high', 'ATC': 'high', 'AAC': 'high', 'ATA': 'low', 'AGG': 'high', 'CCT': 'low', 'ACT': 'low', 'AGC': 'high', 'AAG': 'high', 'AGA': 'low', 'CAT': 'low', 'AAT': 'low', 'ATT': 'low', 'CTG': 'high', 'CTA': 'low', 'CTC': 'high', 'CAC': 'high', 'AAA': 'low', 'CCG': 'high', 'AGT': 'low', 'CCA': 'low', 'CAA': 'low', 'CCC': 'high', 'TAT': 'low', 'GGT': 'low', 'TGT': 'low', 'CGA': 'low', 'CAG': 'high', 'TCT': 'low', 'GAT': 'low', 'CGG': 'high', 'TTT': 'low', 'TGC': 'high', 'GGG': 'high', 'TAG': 'high', 'GGA': 'low', 'TGG': 'high', 'GGC': 'high', 'TAC': 'high', 'TTC': 'high', 'TCG': 'high', 'TTA': 'low', 'TTG': 'high', 'TCC': 'high', 'GAA': 'low', 'TAA': 'high', 'GCA': 'low', 'GTA': 'low', 'GCC': 'high', 'GTC': 'high', 'GCG': 'high', 'GTG': 'high', 'GAG': 'high', 'GTT': 'low', 'GCT': 'low', 'TGA': 'high', 'GAC': 'high', 'CGT': 'low', 'TCA': 'low', 'ATG': 'high', 'CGC': 'high'}
 
+lowAffinityCodons = set(['CTT', 'ACA', 'AAA', 'ATA', 'CCT', 'AGA', 'CAT', 'AAT', 'ATT', 'CTA', 'ACT', 'CAA', 'AGT', 'CCA', 'TAT', 'GGT', 'TGT', 'CGA', 'TCT', 'GAT', 'TTT', 'GGA', 'TTA', 'CGT', 'GAA', 'TCA', 'GCA', 'GTA', 'GTT', 'GCT'])
+highAffinityCodons = set(['ACC', 'ATG', 'AAG', 'ACG', 'ATC', 'AAC', 'AGG', 'AGC', 'CTG', 'CTC', 'CAC', 'CCG', 'CAG', 'CCC', 'CGC', 'CGG', 'TGC', 'GGG', 'TAG', 'TGG', 'GGC', 'TAC', 'TTC', 'TCG', 'TTG', 'TCC', 'TAA', 'GCC', 'GTC', 'GCG', 'GTG', 'GAG', 'TGA', 'GAC'])
+
 #</7iyed>
+
+#Empiraclly calculated using genome GRCh37.74 and Ensembl annotations
+humanCodonCounts = {'CTT': 588990, 'ACC': 760250, 'ACA': 671093, 'ACG': 248588, 'ATC': 819539, 'AAC': 777291, 'ATA': 326568, 'AGG': 520514, 'CCT': 784233, 'ACT': 581281, 'AGC': 826157, 'AAG': 1373474, 'AGA': 560614, 'CAT': 487348, 'AAT': 745200, 'ATT': 685951, 'CTG': 1579105, 'CTA': 311963, 'CTC': 772503, 'CAC': 618558, 'AAA': 1111269, 'CCG': 285345, 'AGT': 558788, 'CCA': 771391, 'CAA': 572531, 'CCC': 809928, 'TAT': 507376, 'GGT': 459267, 'TGT': 443487, 'CGA': 276584, 'CAG': 1483627, 'TCT': 675336, 'GAT': 982540, 'CGG': 477748, 'TTT': 721642, 'TGC': 495033, 'GGG': 661842, 'TAG': 28685, 'GGA': 731598, 'TGG': 535340, 'GGC': 877641, 'TAC': 588108, 'TTC': 774303, 'TCG': 185384, 'TTA': 348372, 'TTG': 563764, 'TCC': 729893, 'GAA': 1355256, 'TAA': 37503, 'GCA': 718158, 'GTA': 316640, 'GCC': 1120424, 'GTC': 576027, 'GCG': 289438, 'GTG': 1119171, 'GAG': 1685297, 'GTT': 486471, 'GCT': 806491, 'TGA': 82954, 'GAC': 1033108, 'CGT': 200762, 'TCA': 569093, 'ATG': 935789, 'CGC': 404889}
+
+humanCodonCount = 42433513
+
+humanCodonRatios = {'CTT': 0.013880302580651288, 'ACC': 0.017916263496731935, 'ACA': 0.01581516477318293, 'ACG': 0.005858294127097137, 'ATC': 0.019313484603549088, 'AAC': 0.018317856454637634, 'ATA': 0.007695992551924702, 'AGG': 0.012266578070026868, 'CCT': 0.018481453562423644, 'ACT': 0.0136986301369863, 'AGC': 0.01946944623698726, 'AAG': 0.03236767127906662, 'AGA': 0.013211585851965638, 'CAT': 0.011484978865643295, 'AAT': 0.017561591000019253, 'ATT': 0.016165312544356155, 'CTG': 0.0372136287655467, 'CTA': 0.007351807049300867, 'CTC': 0.018205021111497414, 'CAC': 0.014577110313727737, 'AAA': 0.02618847513285077, 'CCG': 0.006724519838835875, 'AGT': 0.01316855382678309, 'CCA': 0.018178815409414725, 'CAA': 0.013492425197037068, 'CCC': 0.01908698909750885, 'TAT': 0.011956964298477951, 'GGT': 0.010823214189218791, 'TGT': 0.010451338308944631, 'CGA': 0.006518055669819277, 'CAG': 0.034963567593378375, 'TCT': 0.015915156494349172, 'GAT': 0.023154811622596506, 'CGG': 0.011258742588670422, 'TTT': 0.017006416602839365, 'TGC': 0.01166608571861585, 'GGG': 0.015597153127529177, 'TAG': 0.0006759987088507143, 'GGA': 0.017241042475083315, 'TGG': 0.012615971720276849, 'GGC': 0.020682732537369696, 'TAC': 0.013859517122704406, 'TTC': 0.01824744041342983, 'TCG': 0.004368811038576985, 'TTA': 0.008209831695999339, 'TTG': 0.013285819630347362, 'TCC': 0.017200861969641778, 'GAA': 0.03193834081095289, 'TAA': 0.0008838061557618385, 'GCA': 0.01692431168732129, 'GTA': 0.007462026535488589, 'GCC': 0.026404224415734798, 'GTC': 0.013574812907901357, 'GCG': 0.006820976618174413, 'GTG': 0.026374695868334068, 'GAG': 0.039716179049328296, 'GTT': 0.011464311239090669, 'GCT': 0.01900599179709679, 'TGA': 0.0019549170958341345, 'GAC': 0.024346511211551115, 'CGT': 0.004731213274752906, 'TCA': 0.013411404330346158, 'ATG': 0.022053064520017467, 'CGC': 0.009541727077840574}
 
 codonTable = {
 'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C',
@@ -268,7 +278,7 @@ def decodePolymorphicNucleotide_str(nuc) :
 	return '/'.join(decodePolymorphicNucleotide(nuc))
 
 def getNucleotideCodon(sequence, x1) :
-	"Returns the entire codon of the nucleotide at pos x1 in the cdna, and the position of that nocleotide in the codon"
+	"Returns the entire codon of the nucleotide at pos x1 in the cdna, and the position of that nocleotide in the codon in a tuple"
 
 	if x1 < 0 or x1 >= len(sequence) :
 		return None

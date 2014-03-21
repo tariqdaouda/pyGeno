@@ -2,7 +2,9 @@ import sys, time
 
 class ProgressBar :
 	"A very simple unthreaded progress bar, see ProgressBar  __name__ == '__main__' for an ex of utilisation"
-	def __init__(self, nbEpochs, width = 25, label = "progress", minRefeshTime = 0.1) :
+	def __init__(self, nbEpochs = -1, width = 25, label = "progress", minRefeshTime = 0.1) :
+		"if you don't know the maximum number of epochs you can enter nbEpochs < 1"
+		
 		self.width = width
 		self.currEpoch = 0
 		self.nbEpochs = float(nbEpochs)
@@ -13,7 +15,10 @@ class ProgressBar :
 		self.startTime = time.time()
 		self.lastPrintTime = 0
 		self.minRefeshTime = minRefeshTime
-
+		
+		self.bars = []
+		self.miniSnake = '~-~-~-?:>' 
+	
 	def formatTime(self, val) :
 		if val < 60 :
 			return '%.1fsc' % val
@@ -25,36 +30,46 @@ class ProgressBar :
 	def update(self, label = '') :
 		self.currEpoch += 1
 		if time.time() - self.lastPrintTime > self.minRefeshTime :
-			ratio = self.currEpoch/self.nbEpochs
-			snakeLen = int(self.width*ratio)
-			voidLen = int(self.width - (self.width*ratio))
-
 			wheelState = self.wheel[self.currEpoch%len(self.wheel)]
-
-			if snakeLen + voidLen < self.width :
-				snakeLen = self.width - voidLen
-
+			elTime = time.time() - self.startTime
+			runtime = self.formatTime(elTime)
 			if label == '' :
 				slabel = self.label
 			else :
 				slabel = label
+			
+			if self.nbEpochs > 1 :
+				ratio = self.currEpoch/self.nbEpochs
+				snakeLen = int(self.width*ratio)
+				voidLen = int(self.width - (self.width*ratio))
 
-			elTime = time.time() - self.startTime
-			runtime = self.formatTime(elTime)
-			remtime = self.formatTime(elTime/self.currEpoch * (self.nbEpochs-self.currEpoch))
+				if snakeLen + voidLen < self.width :
+					snakeLen = self.width - voidLen
 
-			self.bar = "%s %s[%s:>%s] %.1f%% (%d/%d) runtime: %s, remaing: %s" %(wheelState, slabel, "~-" * snakeLen, "  " * voidLen, ratio*100, self.currEpoch, self.nbEpochs, runtime, remtime)
+				remtime = self.formatTime(elTime/self.currEpoch * (self.nbEpochs-self.currEpoch))
+
+				self.bar = "%s %s[%s:>%s] %.1f%% (%d/%d) runtime: %s, remaing: %s" %(wheelState, slabel, "~-" * snakeLen, "  " * voidLen, ratio*100, self.currEpoch, self.nbEpochs, runtime, remtime)
+				if self.currEpoch == self.nbEpochs :
+					self.close()
+			else :
+				w = self.width - len(self.miniSnake)
+				v = self.currEpoch%(w+1)
+				snake = "%s%s%s" %("  " * (v), self.miniSnake, "  " * (w-v))
+				self.bar = "%s %s[%s] %s%% (%d/%s) runtime: %s, remaing:%s" %(wheelState, slabel, snake, '?', self.currEpoch, '?', runtime, '?')
+			
 			sys.stdout.write("\b" * (len(self.bar)+1))
 			sys.stdout.write(" " * (len(self.bar)+1))
 			sys.stdout.write("\b" * (len(self.bar)+1))
 			sys.stdout.write(self.bar)
 			sys.stdout.flush()
 			self.lastPrintTime = time.time()
-
-		if self.currEpoch == self.nbEpochs :
-			print
-
+	
+	def close(self) :
+		print
+	
 if __name__ == '__main__' :
-	p = ProgressBar(nbEpochs = 200)
-	for i in range(200) :
+	p = ProgressBar(nbEpochs = -1)
+	for i in range(200000) :
 		p.update(label = 'value of i %d' % i)
+		time.sleep(0.5)
+		

@@ -63,7 +63,10 @@ def joinCSVs(csvFilePaths, column, output, separator = ';') :
 	return res
 
 class CSVFile :
-	
+	#class CSVLine(self, lineNumber, CSVFile) :
+	#	self.lineNumber = lineNumber
+	#	self.CSVFile = CSVFile
+		
 	def __init__(self, legend = [], separator = ';') :
 		
 		self.legend = {}
