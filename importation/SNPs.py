@@ -103,6 +103,12 @@ def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsTxtFile) :
 	CasavaSNP.requireIndex('start')
 	printf('importation of SNP set %s for specie %s done.' %(setName, specie))
 
+def _importSNPs_dbSNPSNP(setName, specie, genomeSource, snpsTxtFile) :
+	raise FutureWarning('Not implemented yet')
+
+def _importSNPs_TopHatSNP(setName, specie, genomeSource, snpsTxtFile) :
+	raise FutureWarning('Not implemented yet')
+	
 if __name__ == "__main__" :
 	print "ex : importSNPs_casava('/u/daoudat/py/pyGeno/importationPackages/genomes/ARN_R/ARN_R.tar.gz')"
 
