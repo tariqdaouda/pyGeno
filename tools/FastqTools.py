@@ -1,7 +1,5 @@
 import os
 
-toStr = lambda x:str(x)
-
 class FastqEntry :
 	def __init__(self, ident, seq, plus, qual) :
 		self.values = {}

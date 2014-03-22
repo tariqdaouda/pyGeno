@@ -4,7 +4,6 @@ from pyGenoObjectBases import *
 import rabaDB.fields as rf
 
 from tools import UsefulFunctions as uf
-from exceptions import *
 
 class SNPMaster(Raba) :
 	'This object keeps track of set types'

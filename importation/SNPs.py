@@ -9,6 +9,7 @@ from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
 from Genomes import _decompressPackage
 
+from pyGeno.tools.CasavaSNPsTxtTools import CasavaSNPsTxtTools
 
 def importSNPs(packageFile) :
 	"""The big wrapper, this function should detect the SNP type by the package manifest and then launch the corresponding function"""
@@ -51,46 +52,42 @@ def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsTxtFile) :
 	printf('importing SNP set %s for specie %s...' % (setName, specie))
 
 	conf.db.beginTransaction()
-
-	f = open(snpsTxtFile)
-	lines = f.readlines()
-	f.close()
-
+	
+	snpData = CasavaSNPsTxtTools(snpsTxtFile)
+	
 	CasavaSNP.dropIndex('setName')
 	CasavaSNP.dropIndex('start')
 
 	pBar = ProgressBar(len(lines))
 	pLabel = ''
 	currChrNumber = None
-	for l in lines :
-		if l[0] != '#' : #ignore comments
-			sl = l.replace('\t\t', '\t').split('\t')
-			tmpChr = sl[0].upper().replace('CHR', '')
-			if tmpChr != currChrNumber :
-				currChrNumber = tmpChr
-				pLabel = 'Chr %s...' % currChrNumber
+	for snpEntry in snpData :
+		tmpChr = snpEntry['chromosomeNumber']
+		if tmpChr != currChrNumber :
+			currChrNumber = tmpChr
+			pLabel = 'Chr %s...' % currChrNumber
 
-			snp = CasavaSNP()
-			snp.chromosomeNumber = currChrNumber
-			snp.specie = specie
-			snp.setName = setName
-			#first column: chro, second first of range (identical to second column)
-			snp.start = int(sl[2])
-			snp.end = int(sl[2])+1
-			snp.bcalls_used = sl[3]
-			snp.bcalls_filt = sl[4]
-			snp.ref = sl[5]
-			snp.QSNP = int(sl[6])
-			snp.alleles = uf.getPolymorphicNucleotide(sl[7]) #max_gt
-			snp.Qmax_gt = int(sl[8])
-			snp.max_gt_poly_site = sl[9]
-			snp.Qmax_gt_poly_site = int(sl[10])
-			snp.A_used = int(sl[11])
-			snp.C_used = int(sl[12])
-			snp.G_used = int(sl[13])
-			snp.T_used = int(sl[14])
-			snp.save()
-			pBar.update(label = pLabel)
+		snp = CasavaSNP()
+		snp.chromosomeNumber = currChrNumber
+		snp.specie = specie
+		snp.setName = setName
+		#first column: chro, second first of range (identical to second column)
+		snp.start = snpEntry['start']
+		snp.end = snpEntry['end']
+		snp.bcalls_used = snpEntry['bcalls_used']
+		snp.bcalls_filt = snpEntry['bcalls_filt']
+		snp.ref = snpEntry['ref']
+		snp.QSNP = snpEntry['QSNP']
+		snp.alleles = snpEntry['alleles']
+		snp.Qmax_gt = snpEntry['Qmax_gt']
+		snp.max_gt_poly_site = snpEntry['max_gt_poly_site']
+		snp.Qmax_gt_poly_site = snpEntry['Qmax_gt_poly_site']
+		snp.A_used = snpEntry['A_used']
+		snp.C_used = snpEntry['C_used']
+		snp.G_used = snpEntry['G_used']
+		snp.T_used = snpEntry['T_used']
+		snp.save()
+		pBar.update(label = pLabel)
 
 	snpMaster = SNPMaster()
 	snpMaster.set(setName = setName, SNPType = 'CasavaSNP', specie = specie)
