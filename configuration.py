@@ -1,7 +1,5 @@
 import sys, os, time, cPickle
 import rabaDB.setup
-#from tools import io
-#from exceptions import *
 
 class PythonVersionError(Exception) :
 	pass
@@ -10,7 +8,7 @@ pyGeno_SETTINGS_PATH = os.path.expanduser('~/.pyGeno/')
 pyGeno_SETTINGS_FILENAME = '%s/pyGeno_settings.pkl' % pyGeno_SETTINGS_PATH
 
 pyGeno_FACE = "~-~-:>"
-pyGeno_BRANCH = "Medusa"
+pyGeno_BRANCH = "stableV2"
 
 pyGeno_VERSION_NAME = 'Lean Viper!'
 pyGeno_VERSION_RELEASE_LEVEL = 'Beta'
@@ -47,23 +45,6 @@ def checkDataPath() :
 	if not os.path.exists(pyGeno_SETTINGS['DATA_PATH']) :
 		return False
 	return True
-
-#def checkReferenceGenome(self, specie) :
-#	if specie not in pyGeno_SETTINGS['REFERENCE_GENOMES'] :
-#		return False
-#	return True
-
-#def setReferenceGenome(specie, newRef) :
-#	pyGeno_SETTINGS['REFERENCE_GENOMES'][specie] = newRef
-#	cPickle.dump(pyGeno_SETTINGS, open(pyGeno_SETTINGS_FILENAME, 'w'))
-#	return True
-
-#def getReferenceGenome(specie) :
-#	"returns the reference genome of the specie if one is set. If not prompt"
-#	try :
-#		return pyGeno_SETTINGS['REFERENCE_GENOMES'][specie]
-#	except KeyError:
-#		KeyError('specie %s has no defined reference genome, use setReference to manualy set one' % specie)
 
 def getGenomeSequencePath(specie, name) :
 	return os.path.normpath(pyGeno_SETTINGS['DATA_PATH']+'/%s/%s' % (specie.lower(), name))

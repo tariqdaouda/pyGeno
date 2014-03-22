@@ -7,7 +7,7 @@ from tools import UsefulFunctions as uf
 from exceptions import *
 
 class SNPMaster(Raba) :
-	'This object keeps trac'
+	'This object keeps track of set types'
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	specie = rf.Primitive()
 	SNPType = rf.Primitive()
@@ -19,6 +19,7 @@ class SNPMaster(Raba) :
 		self.setName = self.setName.lower()
 
 class SNP_INDEL(pyGenoRabaObject) :
+	"All SNPs should inherit from me"
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	_raba_abstract = True # not saved in db
 
@@ -35,6 +36,7 @@ class SNP_INDEL(pyGenoRabaObject) :
 		self.setName = self.setName.lower()
 
 class CasavaSNP(SNP_INDEL) :
+	"A SNP of Casava"
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 
 	bcalls_used = rf.Primitive()
@@ -51,3 +53,9 @@ class CasavaSNP(SNP_INDEL) :
 
 	def _curate(self) :
 		SNP_INDEL._curate(self)
+
+class dbSNPSNP(SNP_INDEL) :
+	pass
+
+class TopHatSNP(SNP_INDEL) :
+	pass

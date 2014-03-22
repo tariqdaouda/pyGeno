@@ -1,3 +1,10 @@
+def printf(*s) :
+	for e in s[:-1] :
+		print e,
+	print s[-1]
+
+	sys.stdout.flush()
+
 def enterConfirm_prompt(enterMsg) :
 	stopi = False
 	while not stopi :
