@@ -64,9 +64,8 @@ class CSVEntry :
 	def __init__(self, csvFile, lineNumber = None) :
 		self.lineNumber = lineNumber
 		self.csvFile = csvFile
-		tmpData = csvFile.lines[i].split(csvFile.separator)
-		self.data = []
 		
+		self.data = []
 		if lineNumber :
 			tmpDatum = []
 			for d in tmpData :
@@ -84,10 +83,10 @@ class CSVEntry :
 				self.data.append('')
 	
 	def __getitem__(self, key) :
-		return self.data[self.csvFile.legend[key]]
+		return self.data[self.csvFile.legend[key.lower()]]
 
 	def __setitem__(self, key, value) :
-		self.data[self.csvFile.legend[key]] = value
+		self.data[self.csvFile.legend[key.lower()]] = str(value)
 	
 	def __str__(self) :
 		return self.csvFile.separator.join(self.data)
@@ -112,7 +111,8 @@ class CSVFile :
 				self.legend[k.lower()] = legend[k]
 				self.strLegend.insert(legend[k], k.lower())
 			self.strLegend = separator.join(self.strLegend)
-			
+		
+		self.lines = []	
 		self.separator = separator
 		self.currentPos = -1
 	
@@ -154,7 +154,7 @@ class CSVFile :
 	def newLine(self) :
 		"Appends an empty line to the end of the CSV and returns it"
 		self.lines.append(CSVEntry(self))
-		return self.data[-1]
+		return self.lines[-1]
 	
 	def insertLine(self, i) :
 		"Inserts an empty line at position i and returns it"
@@ -164,12 +164,15 @@ class CSVFile :
 	def save(self, filePath) :
 		"save the csv to a file"
 		f = open(filePath, 'w')
-		s = [self.strLegend]
-		for l in self.lines :
-			s.append(str(s))
-		f.write('\n'.join(s))
+		f.write(self.toStr())
 		f.close()
 
+	def toStr(self) :
+		s = [self.strLegend]
+		for l in self.lines :
+			s.append(str(l))
+		return '\n'.join(s)
+	
 	def __iter__(self) :
 		self.currentPos = -1
 		return self

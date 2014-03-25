@@ -54,7 +54,9 @@ class CasavaSNP(SNP_INDEL) :
 		SNP_INDEL._curate(self)
 
 class dbSNPSNP(SNP_INDEL) :
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	pass
 
 class TopHatSNP(SNP_INDEL) :
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	pass
