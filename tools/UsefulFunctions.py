@@ -83,6 +83,9 @@ codonTable = {
 'GGT' : 'G', 'GGC' : 'G', 'GGA' : 'G', 'GGG' : 'G'
 }
 
+
+AATable = {'A': ['GCA', 'GCC', 'GCG', 'GCT'], 'C': ['TGT', 'TGC'], 'E': ['GAG', 'GAA'], 'D': ['GAT', 'GAC'], 'G': ['GGT', 'GGG', 'GGA', 'GGC'], 'F': ['TTT', 'TTC'], 'I': ['ATC', 'ATA', 'ATT'], 'H': ['CAT', 'CAC'], 'K': ['AAG', 'AAA'], '*': ['TAG', 'TGA', 'TAA'], 'M': ['ATG'], 'L': ['CTT', 'CTG', 'CTA', 'CTC', 'TTA', 'TTG'], 'N': ['AAC', 'AAT'], 'Q': ['CAA', 'CAG'], 'P': ['CCT', 'CCG', 'CCA', 'CCC'], 'S': ['AGC', 'AGT', 'TCT', 'TCG', 'TCC', 'TCA'], 'R': ['AGG', 'AGA', 'CGA', 'CGG', 'CGT', 'CGC'], 'T': ['ACA', 'ACG', 'ACT', 'ACC'], 'W': ['TGG'], 'V': ['GTA', 'GTC', 'GTG', 'GTT'], 'Y': ['TAT', 'TAC']}
+
 AAs = ['A', 'C', 'E', 'D', 'G', 'F', 'I', 'H', 'K', '*', 'M', 'L', 'N', 'Q', 'P', 'S', 'R', 'T', 'W', 'V', 'Y']
 
 toFloat = lambda x: float(x)
