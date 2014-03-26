@@ -9,7 +9,7 @@ from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
 from Genomes import _decompressPackage
 
-from pyGeno.tools.CasavaSNPsTxtTools import CasavaSNPsTxtTools
+from pyGeno.tools.CasavaTools import CasavaTools
 
 def importSNPs(packageFile) :
 	"""The big wrapper, this function should detect the SNP type by the package manifest and then launch the corresponding function"""
@@ -53,7 +53,7 @@ def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsTxtFile) :
 
 	conf.db.beginTransaction()
 	
-	snpData = CasavaSNPsTxtTools(snpsTxtFile)
+	snpData = SNPsTxtFile(snpsTxtFile)
 	
 	CasavaSNP.dropIndex('setName')
 	CasavaSNP.dropIndex('start')
