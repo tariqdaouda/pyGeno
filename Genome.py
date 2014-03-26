@@ -2,7 +2,6 @@ import os
 import configuration as conf
 from pyGenoObjectBases import *
 
-from pyGeno.Genome import Genome
 from pyGeno.Chromosome import Chromosome
 from pyGeno.Gene import Gene
 from pyGeno.Transcript import Transcript

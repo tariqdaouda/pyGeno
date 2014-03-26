@@ -5,7 +5,7 @@ class PythonVersionError(Exception) :
 	pass
 
 pyGeno_SETTINGS_PATH = os.path.expanduser('~/.pyGeno/')
-pyGeno_SETTINGS_FILENAME = '%s/pyGeno_settings.pkl' % pyGeno_SETTINGS_PATH
+#pyGeno_SETTINGS_FILENAME = '%s/pyGeno_settings.pkl' % pyGeno_SETTINGS_PATH
 
 pyGeno_FACE = "~-~-:>"
 pyGeno_BRANCH = "stableV2"
@@ -65,10 +65,9 @@ def pyGeno_init() :
 	if not checkDataPath() :
 		os.makedirs(pyGeno_SETTINGS['DATA_PATH'])
 
-	try :
-		pyGeno_SETTINGS = cPickle.load(open(pyGeno_SETTINGS_FILENAME))
-
-	except :
-		cPickle.dump(pyGeno_SETTINGS, open(pyGeno_SETTINGS_FILENAME, 'w'))
+	#try :
+	#	pyGeno_SETTINGS = cPickle.load(open(pyGeno_SETTINGS_FILENAME))
+	#	cPickle.dump(pyGeno_SETTINGS, open(pyGeno_SETTINGS_FILENAME, 'w'))
+	#except :
 
 pyGeno_init()
