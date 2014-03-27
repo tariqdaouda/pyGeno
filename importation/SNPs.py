@@ -96,8 +96,8 @@ def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsTxtFile) :
 	printf('saving...')
 	conf.db.endTransaction()
 	printf('creating indexes...')
-	CasavaSNP.requireIndex('setName')
-	CasavaSNP.requireIndex('start')
+	CasavaSNP.enureIndex('setName')
+	CasavaSNP.enureIndex('start')
 	printf('importation of SNP set %s for specie %s done.' %(setName, specie))
 
 def _importSNPs_dbSNPSNP(setName, specie, genomeSource, snpsTxtFile) :

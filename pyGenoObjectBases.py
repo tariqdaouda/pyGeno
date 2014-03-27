@@ -57,21 +57,21 @@ class pyGenoRabaObjectWrapper(object) :
 			pyGenoRabaObjectWrapper._bags[self.bagKey][self._getObjBagKey(self.wrapped_object)] = self
 
 		self.loadBinarySequences = True
-	
+
 	def _getObjBagKey(self, obj) :
 		return (obj._rabaClass.__name__, obj.raba_id)
 
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
 		f = RabaQuery(objectType._wrapped_class, namespace = self._wrapped_class._raba_namespace)
 		coolArgs[self._wrapped_class.__name__[:-5]] = self.wrapped_object #[:-5] removes _Raba from class name
-		
+
 		if len(args) > 0 and type(args[0]) is types.ListType :
 			for a in args[0] :
 				if type(a) is types.DictType :
 					f.addFilter(**a)
 		else :
 			f.addFilter(*args, **coolArgs)
-		
+
 		return f
 
 	def get(self, objectType, *args, **coolArgs) :
@@ -93,6 +93,10 @@ class pyGenoRabaObjectWrapper(object) :
 		for e in self._makeLoadQuery(objectType, *args, **coolArgs).iterRun() :
 			yield objectType(wrapped_object_and_bag = (e, self.bagKey))
 
+	def ensureIndex(self, objectType, *fields) :
+		where, whereValues = '%s=?' %(self._wrapped_class.__name__[:-5]), self.wrapped_object
+		objectType._wrapped_class.ensureIndex(fields, where, (whereValues,))
+
 	def __getattr__(self, name) :
 		if name == 'save' or name == 'delete' :
 			raise AttributeError("You can't delete or save an object from wrapper, try .wrapped_object.delete()/save()")
@@ -113,35 +117,22 @@ class pyGenoRabaObjectWrapper(object) :
 		return cls._wrapped_class.help()
 
 	@classmethod
-	def _parseIndex(cls, fields) :
-		if type(fields) is types.StringType :
-			ff = [fields, 'genome']
-		else :
-			ff = map(string.lower, fields)
-			try :
-				ff.index('genome')
-			except ValueError :
-				ff.insert(-1, 'genome')
-		
-		return ff
-	
-	@classmethod
-	def requireIndex(cls, fields) :
-		"""Add an index to the db to speedup lookouts. Fields can be a list of fields for Multi-Column Indices or simply the name of a single field
-		By default all indices in pyGeno are at least double indices that with the genome as the first column"""
-		cls._wrapped_class.requireIndex(cls._parseIndex(fields))
+	def enureGlobalIndex(cls, fields) :
+		"""Add a GLOBAL index to the db to speedup lookouts. Fields can be a list of fields for Multi-Column Indices or simply the name of a single field
+		A global index is an index on the entire type. Ex global index on transcript field name, will index the names for all the transcripts in the database"""
+		cls._wrapped_class.enureIndex(fields)
 
 	@classmethod
-	def dropIndex(cls, fields) :
-		cls._wrapped_class.dropIndex(cls._parseIndex(fields))
-	
+	def dropGlobalIndex(cls, fields) :
+		cls._wrapped_class.dropIndex(fields)
+
 	def _load_bin_sequence(self) :
 		raise NotImplementedError("This fct loads binary sequences and should be implemented in child")
-	
+
 	def __getattribute__(self, name) :
 		if name[:4] == 'bin_' and self.loadBinarySequences :
 			self._load_bin_sequence()
 			self.updateBinarySequence = False
-			
+
 		return object.__getattribute__(self, name)
 

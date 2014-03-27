@@ -62,23 +62,32 @@ def joinCSVs(csvFilePaths, column, output, separator = ';') :
 
 class CSVEntry :
 	def __init__(self, csvFile, lineNumber = None) :
-		self.lineNumber = lineNumber
-		self.csvFile = csvFile
 		
+		self.csvFile = csvFile
 		self.data = []
-		if lineNumber :
+		if lineNumber != None :
+			self.lineNumber = lineNumber
+			tmpL = csvFile.lines[lineNumber].replace('\r', '\n').replace('\n', '')
+			tmpData = tmpL.split(csvFile.separator)
+
 			tmpDatum = []
+			#print tmpData
 			for d in tmpData :
 				sd = d.strip()
-				if len(tmpDatum) > 0 or td[0] == csvFile.stringSeparator :
-					tmpDatum.append(sd)
-				
-				if td[-1] == csvFile.stringSeparator :
-					self.data.append(''.join(tmpDatum))
-					tmpDatum = []
-				else :
-					self.data.append(sd)
+				#print '\t', sd, d, tmpDatum, len(tmpDatum)
+				try :
+					if len(tmpDatum) > 0 or sd[0] == csvFile.stringSeparator :
+						tmpDatum.append(sd)
+					
+					if sd[-1] == csvFile.stringSeparator :
+						self.data.append(''.join(tmpDatum))
+						tmpDatum = []
+					else :
+						self.data.append(sd)
+				except IndexError :
+					pass
 		else :
+			self.lineNumber = len(csvFile)
 			for i in range(len(self.csvFile.legend)) :
 				self.data.append('')
 	
@@ -88,8 +97,11 @@ class CSVEntry :
 	def __setitem__(self, key, value) :
 		self.data[self.csvFile.legend[key.lower()]] = str(value)
 	
+	def __repr__(self) :
+		return "<line %d: %s>" %(self.lineNumber, str(self.data))
+		
 	def __str__(self) :
-		return self.csvFile.separator.join(self.data)
+		return csvFile.stringSeparator.join(str(self.data))
 	
 	def __repr__(self) :
 		return str(self.data)
@@ -112,6 +124,7 @@ class CSVFile :
 				self.strLegend.insert(legend[k], k.lower())
 			self.strLegend = separator.join(self.strLegend)
 		
+		self.filename = 0
 		self.lines = []	
 		self.separator = separator
 		self.currentPos = -1
@@ -119,6 +132,7 @@ class CSVFile :
 	def parse(self, fil, separator = ';', stringSeparator = '"') :
 		"Parses a CSV on disc"
 		
+		self.filename = fil
 		f = open(fil)
 		self.lines = f.readlines()
 		f.close()
@@ -134,9 +148,9 @@ class CSVFile :
 				self.legend[legendElement] = i
 			i+=1
 	
-		self.strLegend = self.lines[0]
+		self.strLegend = self.lines[0].replace('\r', '\n').replace('\n', '')
 		self.lines = self.lines[1:]
-	
+		
 	def _developLine(self, line) :
 		self.lines[line] = CSVEntry(self, line)
 	
@@ -181,8 +195,10 @@ class CSVFile :
 		self.currentPos += 0
 		return self[self.currentPos]
 	
-	def __getitem__(self, i) :
-		return self.lines[i]
+	def __getitem__(self, line) :
+		if self.lines[line].__class__ is not CSVEntry :
+			self._developLine(line)
+		return self.lines[line]
 
 	def __len__(self) :
 		return len(self.lines)
