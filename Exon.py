@@ -113,6 +113,13 @@ class Exon(pyGenoRabaObjectWrapper) :
 		e.transcript = str(self.transcript)
 		return e
 
+	def next(self) :
+		"""Returns the next exon of the transcript, or None if there is none"""
+		try :
+			return self.transcript.exons[self.number+1]
+		except IndexError :
+			return None
+		
 	def __str__(self) :
 		return """EXON, id %s, number: %s, (start, end): (%s, %s), cds: (%s, %s) > %s""" %( self.id, self.number, self.start, self.end, self.CDS_start, self.CDS_end, str(self.transcript))
 

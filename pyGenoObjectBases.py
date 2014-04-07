@@ -74,6 +74,9 @@ class pyGenoRabaObjectWrapper(object) :
 
 		return f
 
+	def count(self, objectType, *args, **coolArgs) :
+		return self._makeLoadQuery(objectType, *args, **coolArgs).count()
+
 	def get(self, objectType, *args, **coolArgs) :
 		"""Raba Magic inside. Loads anything with any parameters. Don't worry about memory Raba takes care of it
 		usage:
@@ -93,7 +96,7 @@ class pyGenoRabaObjectWrapper(object) :
 		for e in self._makeLoadQuery(objectType, *args, **coolArgs).iterRun() :
 			yield objectType(wrapped_object_and_bag = (e, self.bagKey))
 
-	def ensureIndex(self, objectType, *fields) :
+	def ensureIndex(self, objectType, fields) :
 		where, whereValues = '%s=?' %(self._wrapped_class.__name__[:-5]), self.wrapped_object
 		objectType._wrapped_class.ensureIndex(fields, where, (whereValues,))
 
@@ -117,10 +120,10 @@ class pyGenoRabaObjectWrapper(object) :
 		return cls._wrapped_class.help()
 
 	@classmethod
-	def enureGlobalIndex(cls, fields) :
+	def ensureGlobalIndex(cls, fields) :
 		"""Add a GLOBAL index to the db to speedup lookouts. Fields can be a list of fields for Multi-Column Indices or simply the name of a single field
 		A global index is an index on the entire type. Ex global index on transcript field name, will index the names for all the transcripts in the database"""
-		cls._wrapped_class.enureIndex(fields)
+		cls._wrapped_class.ensureIndex(fields)
 
 	@classmethod
 	def dropGlobalIndex(cls, fields) :

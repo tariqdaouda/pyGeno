@@ -21,9 +21,9 @@ class ProgressBar :
 	
 	def formatTime(self, val) :
 		if val < 60 :
-			return '%.1fsc' % val
+			return '%.3fsc' % val
 		elif val < 3600 :
-			return '%.1fmin' % (val/60)
+			return '%.3fmin' % (val/60)
 		else :
 			return '%dh %dmin' % (int(val)/3600, int(val/60)%60)
 
@@ -33,6 +33,7 @@ class ProgressBar :
 			wheelState = self.wheel[self.currEpoch%len(self.wheel)]
 			elTime = time.time() - self.startTime
 			runtime = self.formatTime(elTime)
+			avg = elTime/self.currEpoch
 			if label == '' :
 				slabel = self.label
 			else :
@@ -45,17 +46,17 @@ class ProgressBar :
 
 				if snakeLen + voidLen < self.width :
 					snakeLen = self.width - voidLen
+				
+				remtime = self.formatTime(avg * (self.nbEpochs-self.currEpoch))
 
-				remtime = self.formatTime(elTime/self.currEpoch * (self.nbEpochs-self.currEpoch))
-
-				self.bar = "%s %s[%s:>%s] %.1f%% (%d/%d) runtime: %s, remaing: %s" %(wheelState, slabel, "~-" * snakeLen, "  " * voidLen, ratio*100, self.currEpoch, self.nbEpochs, runtime, remtime)
+				self.bar = "%s %s[%s:>%s] %.3f%% (%d/%d) runtime: %s, remaing: %s, avg: %s" %(wheelState, slabel, "~-" * snakeLen, "  " * voidLen, ratio*100, self.currEpoch, self.nbEpochs, runtime, remtime, self.formatTime(avg))
 				if self.currEpoch == self.nbEpochs :
 					self.close()
 			else :
 				w = self.width - len(self.miniSnake)
 				v = self.currEpoch%(w+1)
 				snake = "%s%s%s" %("  " * (v), self.miniSnake, "  " * (w-v))
-				self.bar = "%s %s[%s] %s%% (%d/%s) runtime: %s, remaing:%s" %(wheelState, slabel, snake, '?', self.currEpoch, '?', runtime, '?')
+				self.bar = "%s %s[%s] %s%% (%d/%s) runtime: %s, remaing: %s, avg: %s" %(wheelState, slabel, snake, '?', self.currEpoch, '?', runtime, '?', self.formatTime(avg))
 			
 			sys.stdout.write("\b" * (len(self.bar)+1))
 			sys.stdout.write(" " * (len(self.bar)+1))

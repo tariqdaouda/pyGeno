@@ -1,9 +1,6 @@
 import os
 
-toStr = lambda x:str(x)
-
 class FastaFile :
-	
 	def __init__(self, fil = None) :
 		self.reset()
 		if fil != None :
@@ -19,20 +16,17 @@ class FastaFile :
 	def parseFile(self, file) :
 		f = open(file)
 		self.parseStr(f.read())
-		f.close()		
-		
+		f.close()
+
 	def __splitLine(self, li) :
 		if len(self.data[li]) != 2 :
-			#print self.data[li]
 			self.data[li] = self.data[li].replace('\r', '\n')
 			self.data[li] = self.data[li].replace('\n\n', '\n')
 			l = self.data[li].split('\n')
-			#print "==>", l[1]
 			header = '>'+l[0]
 			data = ''.join(l[1:])
 			self.data[li] = (header, data)
-			#print "==>", data
-	
+
 	def get(self, l) :
 		self.__splitLine(l)
 		return self.data[l]

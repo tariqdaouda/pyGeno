@@ -101,14 +101,11 @@ class CSVEntry :
 		return "<line %d: %s>" %(self.lineNumber, str(self.data))
 		
 	def __str__(self) :
-		return csvFile.stringSeparator.join(str(self.data))
-	
-	def __repr__(self) :
-		return str(self.data)
+		return self.csvFile.separator.join(self.data)
 	
 class CSVFile :
 
-	def __init__(self, legend = [], separator = ';') :
+	def __init__(self, legend = [], separator = '\t') :
 		"Legend can either be a list of a dict {field : column number}"
 		
 		self.legend = {}
