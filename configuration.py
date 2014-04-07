@@ -5,7 +5,6 @@ class PythonVersionError(Exception) :
 	pass
 
 pyGeno_SETTINGS_PATH = os.path.expanduser('~/.pyGeno/')
-#pyGeno_SETTINGS_FILENAME = '%s/pyGeno_settings.pkl' % pyGeno_SETTINGS_PATH
 
 pyGeno_FACE = "~-~-:>"
 pyGeno_BRANCH = "stableV2"
@@ -49,9 +48,6 @@ def checkDataPath() :
 def getGenomeSequencePath(specie, name) :
 	return os.path.normpath(pyGeno_SETTINGS['DATA_PATH']+'/%s/%s' % (specie.lower(), name))
 
-def getReferenceGenomeSequencePath(specie) :
-	return os.path.normpath(conf.pyGeno_SETTINGS['DATA_PATH']+'/%s/%s' % (specie.lower(), pyGeno_SETTINGS['REFERENCE_GENOMES'][specie.lower()]))
-
 def pyGeno_init() :
 	"This function is automaticly called at launch"
 	global pyGeno_SETTINGS
@@ -64,10 +60,5 @@ def pyGeno_init() :
 
 	if not checkDataPath() :
 		os.makedirs(pyGeno_SETTINGS['DATA_PATH'])
-
-	#try :
-	#	pyGeno_SETTINGS = cPickle.load(open(pyGeno_SETTINGS_FILENAME))
-	#	cPickle.dump(pyGeno_SETTINGS, open(pyGeno_SETTINGS_FILENAME, 'w'))
-	#except :
 
 pyGeno_init()

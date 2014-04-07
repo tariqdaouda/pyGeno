@@ -12,6 +12,7 @@ class Exon_Raba(pyGenoRabaObject) :
 	start = rf.Primitive()
 	end = rf.Primitive()
 	length = rf.Primitive()
+	CDS_length = rf.Primitive()
 	CDS_start = rf.Primitive()
 	CDS_end = rf.Primitive()
 	frame = rf.Primitive()
@@ -24,20 +25,22 @@ class Exon_Raba(pyGenoRabaObject) :
 	protein = rf.RabaObject('Protein_Raba')
 
 	def _curate(self) :
-		if self.start != None and self.end != None and self.start > self.end :
-			self.start, self.end = self.end, self.start
+		if self.start != None and self.end != None :
+			if self.start > self.end :
+				self.start, self.end = self.end, self.start
 			self.length = self.end-self.start
 
-		if self.CDS_start != None and self.CDS_end != None and self.CDS_start > self.CDS_end :
-			self.CDS_start, self.CDS_end = self.CDS_end, self.CDS_start
-
+		if self.CDS_start != None and self.CDS_end != None
+			if self.CDS_start > self.CDS_end :
+				self.CDS_start, self.CDS_end = self.CDS_end, self.CDS_start
+			self.CDS_length = self.CDS_end - self.CDS_start
+		
 		if self.number != None :
 			self.number = int(self.number)
 
 		if self.frame == '.' :
 			self.frame = None
-
-		if self.frame != None :
+		else :
 			self.frame = int(self.frame)
 
 class Exon(pyGenoRabaObjectWrapper) :

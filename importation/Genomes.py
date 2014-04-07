@@ -148,10 +148,15 @@ def deleteGenome(specie, name) :
 
 def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	"verbose is int [0, 4] for various levels of verbosity"
-
+	
 	printf('Importing gene set infos from %s...' % gtfFilePath)
 	startTime = time.time()
-
+	
+	printf('Backuping indexes...')
+	indexes = conf.db.getIndexes()
+	printf('Removing all indexes...')
+	conf.db.flushIndexes()
+	
 	gtf = GTFFile()
 	gtf.parseFile(gtfFilePath, gziped = True)
 
@@ -257,7 +262,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 					exons[exonKey].start -= 3
 					if exons[exonKey].CDS_start != None :
 						exons[exonKey].CDS_start -= 3
-
+	
 	printf('\tdone (%fmin), total time (%f).' %((time.time()-chroStartTime)/60, (time.time()-startTime)/60))
 
 	conf.db.beginTransaction()
@@ -294,16 +299,22 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 
 	printf('saving genome...')
 	genome.save()
+	
+	printf('restoring core indexes...')
+	Transcript.ensureGlobalIndex('exons')
+	Chromosome.ensureGlobalIndex('genome')
+	Gene.ensureGlobalIndex('genome')
+	Transcript.ensureGlobalIndex('genome')
+	Protein.ensureGlobalIndex('genome')
+	Exon.ensureGlobalIndex('genome')
+	
+	printf('restoring prior indexes')
+	for idx in indexes :
+		conf.db.execute(idx[-1])
+
 	printf('\tcommiting changes...')
 	conf.db.endTransaction()
 	printf('\tdone total time (%f).' %((time.time()-startTime)/60))
-
-	try :
-		refGenomeName = conf.getReferenceGenome(genome.specie)
-	except KeyError:
-		refGenomeName = genome.name
-		conf.setReferenceGenome(genome.specie, genome.name)
-		printf('Auto setting: Current reference genome for specie %s is now %s' %(genome.specie, genome.name))
 
 	return chromosomes.values()
 

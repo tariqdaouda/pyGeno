@@ -16,17 +16,33 @@ class Transcript_Raba(pyGenoRabaObject) :
 
 	id = rf.Primitive()
 	name = rf.Primitive()
-	#length = rf.Primitive()
-
+	length = rf.Primitive()
+	start = rf.Primitive()
+	end = rf.Primitive()
+	coding = rf.Primitive()
+	
 	genome = rf.RabaObject('Genome_Raba')
 	chromosome = rf.RabaObject('Chromosome_Raba')
 	gene = rf.RabaObject('Gene_Raba')
 	protein = rf.RabaObject('Protein_Raba')
 	exons = rf.Relation('Exon_Raba')
-
+	
 	def _curate(self) :
 		if self.name != None :
 			self.name = self.name.upper()
+		
+		self.start = self.exons[0].start
+		self.end = self.exons[-1].end
+		self.length = abs(self.end - self.start)
+		try :
+			self.CDS_start = self.exons[0].CDS_start
+			self.CDS_end = self.exons[-1].CDS_end
+			self.CDS_length = abs(self.CDS_end - self.CDS_start)
+			self.coding = True
+		except :
+			self.CDS_start, self.CDS_end = None, None
+			self.CDS_length = None
+			self.coding = False
 
 class Transcript(pyGenoRabaObjectWrapper) :
 
