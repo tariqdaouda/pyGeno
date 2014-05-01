@@ -31,17 +31,10 @@ class Transcript_Raba(pyGenoRabaObject) :
 		if self.name != None :
 			self.name = self.name.upper()
 		
-		self.start = self.exons[0].start
-		self.end = self.exons[-1].end
 		self.length = abs(self.end - self.start)
-		try :
-			self.CDS_start = self.exons[0].CDS_start
-			self.CDS_end = self.exons[-1].CDS_end
-			self.CDS_length = abs(self.CDS_end - self.CDS_start)
+		if self.exons[0].CDS_start is not None and self.exons[-1].CDS_end is not None :
 			self.coding = True
-		except :
-			self.CDS_start, self.CDS_end = None, None
-			self.CDS_length = None
+		else :
 			self.coding = False
 
 class Transcript(pyGenoRabaObjectWrapper) :

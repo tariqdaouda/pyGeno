@@ -11,7 +11,10 @@ class Gene_Raba(pyGenoRabaObject) :
 	name = rf.Primitive()
 	strand = rf.Primitive()
 	biotype = rf.Primitive()
-
+	
+	start = rf.Primitive()
+	end = rf.Primitive()
+	
 	genome = rf.RabaObject('Genome_Raba')
 	chromosome = rf.RabaObject('Chromosome_Raba')
 

@@ -60,7 +60,7 @@ def joinCSVs(csvFilePaths, column, output, separator = ';') :
 	
 	return res
 
-class CSVEntry :
+class CSVEntry(object) :
 	def __init__(self, csvFile, lineNumber = None) :
 		
 		self.csvFile = csvFile
@@ -103,7 +103,7 @@ class CSVEntry :
 	def __str__(self) :
 		return self.csvFile.separator.join(self.data)
 	
-class CSVFile :
+class CSVFile(object) :
 
 	def __init__(self, legend = [], separator = '\t') :
 		"Legend can either be a list of a dict {field : column number}"
@@ -126,7 +126,7 @@ class CSVFile :
 		self.separator = separator
 		self.currentPos = -1
 	
-	def parse(self, fil, separator = ';', stringSeparator = '"') :
+	def parse(self, fil, separator = ',', stringSeparator = '"') :
 		"Parses a CSV on disc"
 		
 		self.filename = fil

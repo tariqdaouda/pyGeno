@@ -1,4 +1,7 @@
+import sys
+
 def printf(*s) :
+	'print + sys.stdout.flush()'
 	for e in s[:-1] :
 		print e,
 	print s[-1]

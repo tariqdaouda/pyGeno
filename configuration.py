@@ -1,4 +1,4 @@
-import sys, os, time, cPickle
+import sys, os, time
 import rabaDB.setup
 
 class PythonVersionError(Exception) :

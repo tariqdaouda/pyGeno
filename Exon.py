@@ -30,7 +30,7 @@ class Exon_Raba(pyGenoRabaObject) :
 				self.start, self.end = self.end, self.start
 			self.length = self.end-self.start
 
-		if self.CDS_start != None and self.CDS_end != None
+		if self.CDS_start != None and self.CDS_end != None :
 			if self.CDS_start > self.CDS_end :
 				self.CDS_start, self.CDS_end = self.CDS_end, self.CDS_start
 			self.CDS_length = self.CDS_end - self.CDS_start
@@ -38,7 +38,7 @@ class Exon_Raba(pyGenoRabaObject) :
 		if self.number != None :
 			self.number = int(self.number)
 
-		if self.frame == '.' :
+		if not self.frame or self.frame == '.' :
 			self.frame = None
 		else :
 			self.frame = int(self.frame)

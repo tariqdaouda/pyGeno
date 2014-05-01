@@ -1,74 +1,78 @@
 import gzip
 
-class GTFFile :
-	"""This is a simple GTF2.2 (Revised Ensembl GTF) parser, see http://mblab.wustl.edu/GTF22.html for more infos"""
-	def __init__(self) :
+class GTFEntry(object) :
+	def __init__(self, gtfFile, lineNumber) :
 		
-		self.data = []
-		self.splittedFlag = [] # < 0 means line has already been processed
-		self.currentPos = 0
-		self.legend = {'seqname' : 0, 'source' : 1, 'feature' : 2, 'start' : 3, 'end' : 4, 'score' : 5, 'strand' : 6, 'frame' : 7, 'attributes' : 8}
+		self.lineNumber = lineNumber
+		self.gtfFile = gtfFile
+		self.data = gtfFile.lines[lineNumber][:-2].split('\t') #-2 remove ';\n'
+		proto_atts = self.data[gtfFile.legend['attributes']].strip().split('; ')
+		atts = {}
+		for a in proto_atts :
+			sa = a.split(' ')
+			atts[sa[0]] = sa[1].replace('"', '')
+		self.data[gtfFile.legend['attributes']] = atts
 	
-	def parseStr(self, string) :
-		self.data = string.split('\n')
-		if self.data[-1] == '':
-			del self.data[-1]
-		
-		self.splittedFlag = range(len(self.data))
-
-	def parseFile(self, fil, gziped = False) :
-		if gziped : 
-			f = gzip.open(fil)
-		else :
-			f = open(fil)
-		
-		self.data = f.readlines()
-		f.close()
-		if self.data[-1] == '':
-			del self.data[-1]
-		
-		self.splittedFlag = range(len(self.data))
-		
-	def __splitLine(self, l) :
-		#print '---<', l, self.data[l]
-		if self.data[l][0] == '#' :
-			return False
-		
-		if self.splittedFlag[l] >= 0 :
-			self.data[l] = self.data[l][:-2].split('\t') #-2 remove ';\n'
-			proto_atts = self.data[l][self.legend['attributes']].strip().split('; ')
-			atts = {}
-			for a in proto_atts :
-				sa = a.split(' ')
-				atts[sa[0]] = sa[1].replace('"', '')	
-			self.data[l][self.legend['attributes']] = atts
-			
-			self.splittedFlag[l] = -l-1
-		return True
-	
-	def get(self, line, elmt) :
-		i = line
-		while self.__splitLine(i) == None :
-			i += 1
-		
+	def __getitem__(self, k) :
 		try :
-			elmtId = self.legend[elmt]
-			#print 'iyoiuy', line, elmt, self.data[i]
-			return self.data[i][elmtId]
+			return self.data[self.gtfFile.legend[k]]
 		except KeyError :
 			try :
-				return self.data[i][self.legend['attributes']][elmt]
+				return self.data[self.gtfFile.legend['attributes']][k]
 			except KeyError :
-				raise KeyError("Line %d does not have an element %s. Line : %s" %(i, elmt, self.data[i]))
-		
-	def __getitem__(self, i) :
-		if i in self.notSplitted :
-			self.__splitLine(i)
-		ret = {}
-		for k in self.legend:
-			ret[k] = self.data[i][self.legend[k]]
-		
-		return ret
+				raise KeyError("Line %d does not have an element %s" %(self.lineNumber, k))
+	
+	def __repr__(self) :
+		return "<GTFEntry line: %d>" % self.lineNumber
+	
+	def __str__(self) :
+		return  "<GTFEntry line: %d, %s>" % (self.lineNumber, str(self.data))
 
+class GTFFile(object) :
+	"""This is a simple GTF2.2 (Revised Ensembl GTF) parser, see http://mblab.wustl.edu/GTF22.html for more infos"""
+	def __init__(self, filename, gziped = False) :
+		
+		self.filename = filename
+		self.legend = {'seqname' : 0, 'source' : 1, 'feature' : 2, 'start' : 3, 'end' : 4, 'score' : 5, 'strand' : 6, 'frame' : 7, 'attributes' : 8}
+
+		if gziped : 
+			f = gzip.open(filename)
+		else :
+			f = open(filename)
+		
+		self.lines = []
+		for l in f :
+			if l[0] != '#' and l != '' :
+				self.lines.append(l)
+		f.close()
+		
+		self.currentIt = -1
+
+	def get(self, line, elmt) :
+		return self[line][elmt]
+
+	def __iter__(self) :
+		self.currentPos = -1
+		return self
+
+	def next(self) :
+		self.currentPos += 1
+		if not self.stream :
+			try :
+				return self[self.currentPos-1]
+			except IndexError:
+				raise StopIteration
+
+	def __getitem__(self, i) :
+		if self.lines[i].__class__ is not GTFEntry :
+			self.lines[i] = GTFEntry(self, i)
+		return self.lines[i]
+
+	def __repr__(self) :
+		return "<GTFFile: %s>" % (os.path.basename(self.filename))
+
+	def __str__(self) :
+		return "<GTFFile: %s, gziped: %s, len: %d>" % (os.path.basename(self.filename), self.gziped, len(self))
+	
 	def __len__(self) :
-		return len(self.data)
+		return len(self.lines)

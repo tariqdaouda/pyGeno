@@ -1,6 +1,6 @@
 import os
 
-class FastaFile :
+class FastaFile(object) :
 	def __init__(self, fil = None) :
 		self.reset()
 		if fil != None :

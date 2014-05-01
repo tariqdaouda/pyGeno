@@ -225,7 +225,7 @@ def polymorphicCodonCombinaisons_bck(dnaSeq, startId = 0) :
 def encodePolymorphicNucleotide(polySeq) :
 	"""from ['A', 'G'] or AG or A/G to R"""
 
-	if type(polySeq) is types.ListeType :
+	if type(polySeq) is types.ListType :
 		seq = polySeq
 	else :
 		seq = []
@@ -236,7 +236,6 @@ def encodePolymorphicNucleotide(polySeq) :
 				seq.append(c)
 
 	seq = set(seq)
-	#print "===>", seq
 	if len(seq) == 4:
 		return 'N'
 	elif len(seq) == 3 :

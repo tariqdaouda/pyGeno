@@ -1,15 +1,14 @@
-import os, glob, gzip, tarfile, shutil, time, sys, gc, cPickle, tempfile
+import urllib, shutil
+
 from ConfigParser import SafeConfigParser
-
-import configuration as conf
-
-from SNP import *
-
+import pyGeno.configuration as conf
+from pyGeno.SNP import *
 from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
-from Genomes import _decompressPackage
+from Genomes import _decompressPackage, _getFile
 
-from pyGeno.tools.CasavaTools import CasavaTools
+from pyGeno.tools.parsers.CasavaTools import SNPsTxtFile
+from pyGeno.tools.parsers.VCFTools import VCFFile
 
 def importSNPs(packageFile) :
 	"""The big wrapper, this function should detect the SNP type by the package manifest and then launch the corresponding function"""
@@ -19,20 +18,27 @@ def importSNPs(packageFile) :
 	parser.read(os.path.normpath(packageDir+'/manifest.ini'))
 	packageInfos = parser.items('package_infos')
 
-	setName = parser.get('set', 'name')
-	typ = setName = parser.get('set', 'type')
-	specie = parser.get('set', 'specie').lower()
-	genomeSource = parser.get('set', 'source')
-	snpsTxtFile = os.path.normpath('%s/%s' %(packageDir, parser.get('snps', 'casava_snps_txt')))
+	setName = parser.get('set_infos', 'name')
+	typ = parser.get('set_infos', 'type')+'SNP'
+	specie = parser.get('set_infos', 'specie').lower()
+	genomeSource = parser.get('set_infos', 'source')
+	snpsFileTmp = parser.get('snps', 'filename').strip()
+	snpsFile = _getFile(parser.get('snps', 'filename'), packageDir)
 	
-	if typ == 'CasavaSNP' :
-		_importSNPs_CasavaSNP(setName, specie, genomeSource, snpsTxtFile)
-	elif typ == 'dbSNPSNP' :
-		raise FutureWarning('Not implemented yet')
-	elif typ == 'TopHatSNP' :
-		raise FutureWarning('Not implemented yet')
-	else :
-		raise FutureWarning('Unknown SNP type in manifest %s' % typ)
+	try :
+		SMaster = SNPMaster(setName = setName)
+		raise ValueError("There's already a SNP set by the name %s. Use deleteSNPs() to remove it first" %setName)
+	except KeyError :
+		if typ == 'CasavaSNP' :
+			return _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsFile)
+		elif typ == 'dbSNPSNP' :
+			return _importSNPs_dbSNPSNP(setName, specie, genomeSource, snpsFile)
+		elif typ == 'TopHatSNP' :
+			return _importSNPs_TopHatSNP(setName, specie, genomeSource, snpsFile)
+		else :
+			raise FutureWarning('Unknown SNP type in manifest %s' % typ)
+	
+	shutil.rmtree(packageDir)
 
 def deleteSNPs(setName) :
 	con = conf.db
@@ -44,21 +50,21 @@ def deleteSNPs(setName) :
 		SMaster.delete()
 		con.endTransaction()
 	except KeyError :
-		printf("can't delete the setName %s because i can't find it in SNPMaster, maybe there's not set by that name" % setName)
-		return
+		#raise KeyError("can't delete the setName %s because i can't find it in SNPMaster, maybe there's not set by that name" % setName)
+		printf("can't delete the setName %s because i can't find it in SNPMaster, maybe there's no set by that name" % setName)
+		return False
+	return True
 
-def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsTxtFile) :
-
+def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsFile) :
+	"This function will also create an index on start->chromosomeNumber->setName. Warning : pyGeno positions are 0 based"
 	printf('importing SNP set %s for specie %s...' % (setName, specie))
 
+	snpData = SNPsTxtFile(snpsFile)
+	
+	CasavaSNP.dropIndex(('start', 'chromosomeNumber', 'setName'))
 	conf.db.beginTransaction()
 	
-	snpData = SNPsTxtFile(snpsTxtFile)
-	
-	CasavaSNP.dropIndex('setName')
-	CasavaSNP.dropIndex('start')
-
-	pBar = ProgressBar(len(lines))
+	pBar = ProgressBar(len(snpData))
 	pLabel = ''
 	currChrNumber = None
 	for snpEntry in snpData :
@@ -72,20 +78,13 @@ def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsTxtFile) :
 		snp.specie = specie
 		snp.setName = setName
 		#first column: chro, second first of range (identical to second column)
-		snp.start = snpEntry['start']
-		snp.end = snpEntry['end']
-		snp.bcalls_used = snpEntry['bcalls_used']
-		snp.bcalls_filt = snpEntry['bcalls_filt']
-		snp.ref = snpEntry['ref']
-		snp.QSNP = snpEntry['QSNP']
-		snp.alleles = snpEntry['alleles']
-		snp.Qmax_gt = snpEntry['Qmax_gt']
-		snp.max_gt_poly_site = snpEntry['max_gt_poly_site']
-		snp.Qmax_gt_poly_site = snpEntry['Qmax_gt_poly_site']
-		snp.A_used = snpEntry['A_used']
-		snp.C_used = snpEntry['C_used']
-		snp.G_used = snpEntry['G_used']
-		snp.T_used = snpEntry['T_used']
+		for f in snp.getFields() :
+			try :
+				setattr(snp, f, snpEntry[f])
+			except KeyError :
+				printf("Warning filetype as no key %s", f)
+		snp.start -= 1
+		snp.end -= 1
 		snp.save()
 		pBar.update(label = pLabel)
 
@@ -96,16 +95,50 @@ def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsTxtFile) :
 	printf('saving...')
 	conf.db.endTransaction()
 	printf('creating indexes...')
-	CasavaSNP.enureIndex('setName')
-	CasavaSNP.enureIndex('start')
+	CasavaSNP.ensureGlobalIndex(('start', 'chromosomeNumber', 'setName'))
+	printf('importation of SNP set %s for specie %s done.' %(setName, specie))
+	
+	return True
+
+def _importSNPs_dbSNPSNP(setName, specie, genomeSource, snpsFile) :
+	"This function will also create an index on start->chromosomeNumber->setName. Warning : pyGeno positions are 0 based"
+	snpData = VCFFile(snpsFile, gziped = True, stream = True)
+	dbSNPSNP.dropIndex(('start', 'chromosomeNumber', 'setName'))
+	conf.db.beginTransaction()
+	pBar = ProgressBar()
+	pLabel = ''
+	for snpEntry in snpData :
+		pBar.update(label = 'Chr %s, %s...' %  (snpEntry['#CHROM'], snpEntry['ID']))
+		
+		snp = dbSNPSNP()
+		for f in snp.getFields() :
+			try :
+				setattr(snp, f, snpEntry[f])
+			except KeyError :
+				pass
+		snp.chromosomeNumber = snpEntry['#CHROM']
+		snp.specie = specie
+		snp.setName = setName
+		snp.start = snpEntry['POS']-1
+		snp.alt = snpEntry['ALT']
+		snp.end = snp.start+len(snp.alt)
+		snp.save()
+	
+	snpMaster = SNPMaster()
+	snpMaster.set(setName = setName, SNPType = 'dbSNPSNP', specie = specie)
+	snpMaster.save()
+	
+	printf('saving...')
+	conf.db.endTransaction()
+	printf('creating indexes...')
+	dbSNPSNP.ensureGlobalIndex(('start', 'chromosomeNumber', 'setName'))
 	printf('importation of SNP set %s for specie %s done.' %(setName, specie))
 
-def _importSNPs_dbSNPSNP(setName, specie, genomeSource, snpsTxtFile) :
-	raise FutureWarning('Not implemented yet')
-
-def _importSNPs_TopHatSNP(setName, specie, genomeSource, snpsTxtFile) :
+	return True
+	
+def _importSNPs_TopHatSNP(setName, specie, genomeSource, snpsFile) :
 	raise FutureWarning('Not implemented yet')
 	
 if __name__ == "__main__" :
-	print "ex : importSNPs_casava('/u/daoudat/py/pyGeno/importationPackages/genomes/ARN_R/ARN_R.tar.gz')"
-
+	print "ex : importSNPs('ARN_Subj10012.tar.gz')"
+	print "ex : importSNPs('dbSNP138.tar.gz')"

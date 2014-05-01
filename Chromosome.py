@@ -4,24 +4,16 @@ import configuration as conf
 from pyGenoObjectBases import *
 
 from SNP import *
-
-import rabaDB.setup
-
-#from rabaDB.setup import *
-#RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
-#from rabaDB.Raba import *
 from rabaDB.filters import RabaQuery
 import rabaDB.fields as rf
 
-#from Gene import Gene
-#from SNP import *
-
-#from tools.SegmentTree import SegmentTree as SegmentTree
 from tools.SecureMmap import SecureMmap as SecureMmap
 from tools import UsefulFunctions as uf
 from tools import SingletonManager
 import types
 
+import pyGeno.configuration as conf
+#exemple de fonctions filtre
 
 class ChrosomeSequence(object) :
 
@@ -34,6 +26,77 @@ class ChrosomeSequence(object) :
 		self.SNPsFilter = SNPsFilter
 
 	def _getSequence(self, slic) :
+		assert type(slic) is SliceType
+		
+		data = self.data[slic]
+		SNPTypes = self.chromosome.genome.SNPTypes
+		
+		if SNPTypes is not None :
+			iterators = {}
+			
+			for setName, SNPType in SNPTypes.iteritems() :
+				f = RabaQuery(str(SNPType), namespace = self.chromosome._raba_namespace)
+				f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : self.chromosome.number})
+				#conf.db.enableDebug(True)
+				iterators[setName] = f.iterRun(sqlTail = 'ORDER BY start')
+			
+			if len(iterators) < 1 :
+				return data
+			
+			data = list(data)
+			
+			lowStack = {}
+			lowStackSortedStarts = []
+			setsInLowStack = set()
+			deletions = [] #tuples (seqPos, len)
+			
+			while len(iterators) > 0 :
+				
+				itsWithoutSNPs = []
+				for setName, iterator in iterators.iteritems() :
+					try :
+						if setName not in setsInLowStack :
+							snp = iterator.next()
+							if snp.start not in lowStack :
+								lowStack[snp.start] = {}
+								lowStackSortedStarts.append(snp.start)
+							lowStack[snp.start][setName] = snp
+							setsInLowStack.add(setName)
+					except StopIteration :
+						itsWithoutSNPs.append(setName)
+				
+				if len(lowStackSortedStarts) < 1 :
+					break # no snps in that range
+				
+				lowStackSortedStarts.sort()
+				pos = lowStackSortedStarts.pop()
+				posSeq = snp.start - slic.start#-1
+				
+				#print snp.alt
+				refAllele = data[posSeq:posSeq +len(snp.alt)]
+				alleles = self.SNPsFilter(refAllele = refAllele, **lowStack[pos])
+				for setName in lowStack[pos] :
+					setsInLowStack.remove(setName)
+				del(lowStack[pos])
+				if len(refAllele) > len(alleles) :
+					deletions.append(posSeq, len(refAllele) - 1) #-1 to keep the inserted allele
+				#print posSeq, posSeq, data[posSeq], alleles
+				data[posSeq] = str(alleles)
+				
+				for setName in itsWithoutSNPs :
+					del(iterators[setName])
+				
+		for posSeq, length in deletions :
+			for i in range(posSeq + 1, length) :
+				del(data[i])
+		
+		if type(data) is ListType :
+			data = ''.join(data)
+			#print data
+		
+		return data
+
+	def _getSequence_bck(self, slic) :
 		"returns a sequence including SNPs as filtered by the genome SNPFilter function"
 		assert type(slic) is SliceType
 
@@ -54,8 +117,8 @@ class ChrosomeSequence(object) :
 						if type(data) is not ListType :
 							data = list(data)
 						posSeq = filtSNP.start - slic.start#-1
-						filtSNP.alleles = uf.getPolymorphicNucleotide(filtSNP.alleles)
-						data[posSeq] = str(filtSNP.alleles)
+						filtSNP.alleles = uf.getPolymorphicNucleotide(filtSNP.alt)
+						data[posSeq] = str(filtSNP.alt)
 						#print 'iop', filtSNP.alleles, type(filtSNP.alleles)
 			elif len(resSNPs) > 1 :
 				for SNP in self._mixSNPs(*resSNPs) :

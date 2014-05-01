@@ -1,6 +1,6 @@
 import os
 
-class FastqEntry :
+class FastqEntry(object) :
 	def __init__(self, ident, seq, plus, qual) :
 		self.values = {}
 		self.values['identifier'] = ident
@@ -17,7 +17,7 @@ class FastqEntry :
 	def __str__(self):
 		return "%s\n%s\n%s\n%s" %(self.values['identifier'], self.values['sequence'], self.values['+'], self.values['qualities'])
 	
-class FastqFile :
+class FastqFile(object) :
 	
 	def __init__(self, fil = None) :
 		self.reset()

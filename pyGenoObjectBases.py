@@ -15,7 +15,7 @@ class pyGenoRabaObject(Raba) :
 	def __init__(self) :
 		if self is pyGenoRabaObject :
 			raise TypeError("This class is abstract")
-
+		
 	def _curate(self) :
 		"last operations performed before saving, must be implemented in child"
 		raise TypeError("This method is abstract and should be implemented in child")
@@ -100,10 +100,15 @@ class pyGenoRabaObjectWrapper(object) :
 		where, whereValues = '%s=?' %(self._wrapped_class.__name__[:-5]), self.wrapped_object
 		objectType._wrapped_class.ensureIndex(fields, where, (whereValues,))
 
+	def dropIndex(self, objectType, fields) :
+		"not tested yet"
+		where, whereValues = '%s=?' %(self._wrapped_class.__name__[:-5]), self.wrapped_object
+		objectType._wrapped_class.dropIndex(fields, where, (whereValues,))
+		
 	def __getattr__(self, name) :
 		if name == 'save' or name == 'delete' :
 			raise AttributeError("You can't delete or save an object from wrapper, try .wrapped_object.delete()/save()")
-
+		
 		attr = getattr(self.wrapped_object, name)
 		if isRabaObject(attr) :
 			attrKey = self._getObjBagKey(attr)
@@ -115,6 +120,14 @@ class pyGenoRabaObjectWrapper(object) :
 			return retObj
 		return attr
 
+	@classmethod
+	def getIndexes(cls) :
+		return cls._wrapped_class.getIndexes()
+
+	@classmethod
+	def flushIndexes(cls) :
+		return cls._wrapped_class.flushIndexes()
+	
 	@classmethod
 	def help(cls) :
 		return cls._wrapped_class.help()

@@ -1,10 +1,13 @@
-import UsefulFunctions as uf
+import gzip
+import pyGeno.tools.UsefulFunctions as uf
 
-class SNPsTxtEntry :
+class SNPsTxtEntry(object) :
 
-	def __init__(self, line) :
+	def __init__(self, lineNumber, snpsTxtFile) :
+		self.snpsTxtFile = snpsTxtFile
+		self.lineNumber = lineNumber
 		self.values = {}
-		sl = line.replace('\t\t', '\t').split('\t')
+		sl = snpsTxtFile.data[lineNumber].replace('\t\t', '\t').split('\t')
 		
 		self.values['chromosomeNumber'] = sl[0].upper().replace('CHR', '')
 		#first column: chro, second first of range (identical to second column)
@@ -14,7 +17,7 @@ class SNPsTxtEntry :
 		self.values['bcalls_filt'] = sl[4]
 		self.values['ref'] = sl[5]
 		self.values['QSNP'] = int(sl[6])
-		self.values['alleles'] = uf.getPolymorphicNucleotide(sl[7]) #max_gt
+		self.values['alleles'] = uf.encodePolymorphicNucleotide(sl[7]) #max_gt
 		self.values['Qmax_gt'] = int(sl[8])
 		self.values['max_gt_poly_site'] = sl[9]
 		self.values['Qmax_gt_poly_site'] = int(sl[10])
@@ -32,52 +35,25 @@ class SNPsTxtEntry :
 	def __str__(self):
 		return str(self.values)
 	
-class SNPsTxtFile :
+class SNPsTxtFile(object) :
 	
-	def __init__(self, fil = None) :
+	def __init__(self, fil, gziped = False) :
 		self.reset()
-		if fil != None :
-			self.parseFile(fil)
-	
+		if not gziped :
+			f = open(fil)
+		else :
+			f = gzip.open(fil)
+		
+		for l in f :
+			if l[0] != '#' :
+				self.data.append(l)
+
+		f.close()
+
 	def reset(self) :
 		self.data = []
 		self.currentPos = 0
 	
-	def parseStr(self, st) :
-		lines = st.replace('\r', '\n')
-		lines = self.data.replace('\n\n', '\n')
-		lines = self.data.split('\n')
-		
-		for l in lines :
-			if l[0] != '#'
-			self.data.append(SNPsTxtEntry(l))
-	
-	def parseFile(self, fil) :
-		f = open(fil)
-		self.parseStr(f.read())
-		f.close()		
-		
-	def get(self, li) :
-		return self.data[i]
-		
-	def save(self, filePath) :
-		f = open(filePath, 'w')
-		f.write(self.make())
-		f.close()
-	
-	def toStr(self) :
-		return self.make()
-	
-	def build(self) :
-		return self.make()
-		
-	def make(self) :
-		st = ""
-		for d in self.data :
-			st += "%s\n%s" % (d[0], d[1]) 
-	
-		return st
-		
 	def __iter__(self) :
 		self.currentPos = 0
 		return self
@@ -90,13 +66,9 @@ class SNPsTxtFile :
 		return v
 
 	def __getitem__(self, i) :
-		return self.get(i)
+		if self.data[i].__class__ is not SNPsTxtEntry :
+			self.data[i] = SNPsTxtEntry(i, self)
+		return self.data[i]
 	
-	def __setitem__(self, i, v) :
-		if len(v) != 2: 
-			raise TypeError("v must have a len of 2 : (header, data)")
-			
-		self.data[i] = v
-		
 	def __len__(self) :
 		return len(self.data)
