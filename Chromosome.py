@@ -21,7 +21,7 @@ class ChrosomeSequence(object) :
 		self.data = data
 		self.chromosome = chromosome
 		self.SNPsFilter = self.chromosome.genome.SNPsFilter
-
+	
 	def setSNPFilter(self, SNPsFilter) :
 		self.SNPsFilter = SNPsFilter
 
@@ -183,7 +183,8 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 
 		path = '%s/chromosome%s.dat'%(self.genome.getSequencePath(), self.number)
 		self.sequence = ChrosomeSequence(SingletonManager.add(SecureMmap(path), path), self)
-
+		self.loadSequences = False
+	
 	def stringFind(self, sequence) :
 		return self.sequence.find(sequence)
 

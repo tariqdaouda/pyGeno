@@ -56,6 +56,7 @@ class pyGenoRabaObjectWrapper(object) :
 			pyGenoRabaObjectWrapper._bags[self.bagKey] = {}
 			pyGenoRabaObjectWrapper._bags[self.bagKey][self._getObjBagKey(self.wrapped_object)] = self
 
+		self.loadSequences = True
 		self.loadBinarySequences = True
 
 	def _getObjBagKey(self, obj) :
@@ -142,13 +143,20 @@ class pyGenoRabaObjectWrapper(object) :
 	def dropGlobalIndex(cls, fields) :
 		cls._wrapped_class.dropIndex(fields)
 
+	def _loadSequences(self) :
+		raise NotImplementedError("This fct loads non binary sequences and should be implemented in child if needed")
+	
 	def _load_bin_sequence(self) :
-		raise NotImplementedError("This fct loads binary sequences and should be implemented in child")
+		raise NotImplementedError("This fct loads binary sequences and should be implemented in child if needed")
 
 	def __getattribute__(self, name) :
+		if name == "sequence" and self.loadSequences :
+			self.loadSequences = False
+			self._loadSequences()
+		
 		if name[:4] == 'bin_' and self.loadBinarySequences :
-			self._load_bin_sequence()
 			self.updateBinarySequence = False
+			self._load_bin_sequence()
 
 		return object.__getattribute__(self, name)
 

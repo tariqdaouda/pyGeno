@@ -1,7 +1,7 @@
 import sys, time
 
 class ProgressBar :
-	"A very simple unthreaded progress bar, see ProgressBar  __name__ == '__main__' for an ex of utilisation"
+	"A very simple unthreaded progress bar, see ProgressBar  __name__ == '__main__' for an ex of utilisation. This progress bar also logs stats in .logs"
 	def __init__(self, nbEpochs = -1, width = 25, label = "progress", minRefeshTime = 0.1) :
 		"if you don't know the maximum number of epochs you can enter nbEpochs < 1"
 		
@@ -13,16 +13,20 @@ class ProgressBar :
 		self.label = label
 		self.wheel = ["-", "\\", "|", "/"]
 		self.startTime = time.time()
-		self.lastPrintTime = 0
+		self.lastPrintTime = -1
 		self.minRefeshTime = minRefeshTime
 		
-		self.elTime = 0
-		self.runtime = 0
-		self.avg = 0
+		self.runtime = -1
+		self.runtime_hr = -1
+		self.avg = -1
 		self.remtime = -1
+		self.remtime_hr = -1
+		self.currTime = time.time()
+		self.lastEpochDuration = -1 
 		
 		self.bars = []
 		self.miniSnake = '~-~-~-?:>' 
+		self.logs = {'epochDuration' : [], 'avg' : [], 'runtime' : [], 'remtime' : []}
 		
 	def formatTime(self, val) :
 		if val < 60 :
@@ -32,13 +36,34 @@ class ProgressBar :
 		else :
 			return '%dh %dmin' % (int(val)/3600, int(val/60)%60)
 
-	def update(self, label = '', forceRefrech = False) :
+	def _update(self) :
 		self.currEpoch += 1
-		if (time.time() - self.lastPrintTime > self.minRefeshTime) or forceRefrech :
+		tim = time.time()
+		if self.nbEpochs > 1 :
+			if self.currTime > 0 :
+				self.lastEpochDuration = tim - self.currTime
+			self.currTime = tim
+			self.runtime = tim - self.startTime
+			self.runtime_hr = self.formatTime(self.runtime)
+			self.avg = self.runtime/self.currEpoch
+			
+			self.remtime = self.avg * (self.nbEpochs-self.currEpoch)
+			self.remtime_hr = self.formatTime(self.remtime)
+	
+	def log(self) :
+		"logs stats about the progression, without printing anything on screen"
+		self._update()
+		self.logs['epochDuration'].append(self.lastEpochDuration)
+		self.logs['avg'].append(self.avg)
+		self.logs['runtime'].append(self.runtime)
+		self.logs['remtime'].append(self.remtime)
+	
+	def update(self, label = '', forceRefresh = False) :
+		self.log()
+		tim = time.time()
+		if (tim - self.lastPrintTime > self.minRefeshTime) or forceRefresh :
 			wheelState = self.wheel[self.currEpoch%len(self.wheel)]
-			self.elTime = time.time() - self.startTime
-			self.runtime = self.formatTime(self.elTime)
-			self.avg = self.elTime/self.currEpoch
+			
 			if label == '' :
 				slabel = self.label
 			else :
@@ -52,16 +77,15 @@ class ProgressBar :
 				if snakeLen + voidLen < self.width :
 					snakeLen = self.width - voidLen
 				
-				self.remtime = self.formatTime(self.avg * (self.nbEpochs-self.currEpoch))
-
-				self.bar = "%s %s[%s:>%s] %.3f%% (%d/%d) runtime: %s, remaing: %s, avg: %s" %(wheelState, slabel, "~-" * snakeLen, "  " * voidLen, ratio*100, self.currEpoch, self.nbEpochs, self.runtime, self.remtime, self.formatTime(self.avg))
+				self.bar = "%s %s[%s:>%s] %.3f%% (%d/%d) runtime: %s, remaing: %s, avg: %s" %(wheelState, slabel, "~-" * snakeLen, "  " * voidLen, ratio*100, self.currEpoch, self.nbEpochs, self.runtime_hr, self.remtime_hr, self.formatTime(self.avg))
 				if self.currEpoch == self.nbEpochs :
 					self.close()
+				
 			else :
 				w = self.width - len(self.miniSnake)
 				v = self.currEpoch%(w+1)
 				snake = "%s%s%s" %("  " * (v), self.miniSnake, "  " * (w-v))
-				self.bar = "%s %s[%s] %s%% (%d/%s) runtime: %s, remaing: %s, avg: %s" %(wheelState, slabel, snake, '?', self.currEpoch, '?', self.runtime, '?', self.formatTime(self.avg))
+				self.bar = "%s %s[%s] %s%% (%d/%s) runtime: %s, remaing: %s, avg: %s" %(wheelState, slabel, snake, '?', self.currEpoch, '?', self.runtime_hr, '?', self.formatTime(self.avg))
 			
 			sys.stdout.write("\b" * (len(self.bar)+1))
 			sys.stdout.write(" " * (len(self.bar)+1))
@@ -71,8 +95,8 @@ class ProgressBar :
 			self.lastPrintTime = time.time()
 	
 	def close(self) :
-		self.update(forceRefrech = True)
-		print
+		self.update(forceRefresh = True)
+		print '\n'
 	
 if __name__ == '__main__' :
 	p = ProgressBar(nbEpochs = -1)

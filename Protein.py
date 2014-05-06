@@ -30,6 +30,7 @@ class Protein(pyGenoRabaObjectWrapper) :
 	def __init__(self, *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 		self.sequence = uf.translateDNA(self.transcript.CDNA[:-3])
+		self.loadSequences = False
 	
 	def getSequence(self):
 		return self.sequence

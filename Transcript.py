@@ -43,51 +43,51 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 	def __init__(self, *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
-		self.loadedSequences = False
+		self.loadSequences = False
 		self.loadBinarySequence = True
 
 	def _loadSequences(self) :
-		if not pyGenoRabaObjectWrapper.__getattribute__(self, 'loadedSequences') :
-			def getV(k) :
-				return pyGenoRabaObjectWrapper.__getattribute__(self, k)
+		#if not pyGenoRabaObjectWrapper.__getattribute__(self, 'loadSequences') :
+		def getV(k) :
+			return pyGenoRabaObjectWrapper.__getattribute__(self, k)
 
-			def setV(k, v) :
-				return pyGenoRabaObjectWrapper.__setattr__(self, k, v)
+		def setV(k, v) :
+			return pyGenoRabaObjectWrapper.__setattr__(self, k, v)
 
-			sequence = []
-			CDNA = []
-			UTR5 = []
-			UTR3 = []
-			exons = []
-			prime5 = True
-			for ee in self.wrapped_object.exons :
-				e = pyGenoRabaObjectWrapper_metaclass._wrappers[Exon_Raba](wrapped_object_and_bag = (ee, getV('bagKey')))
-				exons.append(e)
-				sequence.append(e.sequence)
+		sequence = []
+		CDNA = []
+		UTR5 = []
+		UTR3 = []
+		exons = []
+		prime5 = True
+		for ee in self.wrapped_object.exons :
+			e = pyGenoRabaObjectWrapper_metaclass._wrappers[Exon_Raba](wrapped_object_and_bag = (ee, getV('bagKey')))
+			exons.append(e)
+			sequence.append(e.sequence)
 
-				if e.hasCDS() :
-					UTR5.append(e.UTR5)
-					CDNA.append(e.CDS)
-					UTR3.append(e.UTR3)
-					prime5 = False
-				else :
-					if prime5 :
-						UTR5.append(e.sequence)
-					else :
-						UTR3.append(e.sequence)
-
-			setV('exons', exons)
-			setV('sequence', ''.join(sequence))
-			setV('CDNA', ''.join(CDNA))
-			setV('UTR5', ''.join(UTR5))
-			setV('UTR3', ''.join(UTR3))
-
-			if len(getV('CDNA')) % 3 != 0 :
-				setV('flags', {'DUBIOUS' : True, 'CDNA_LEN_NOT_MULT_3': True})
+			if e.hasCDS() :
+				UTR5.append(e.UTR5)
+				CDNA.append(e.CDS)
+				UTR3.append(e.UTR3)
+				prime5 = False
 			else :
-				setV('flags', {'DUBIOUS' : False, 'CDNA_LEN_NOT_MULT_3': False})
+				if prime5 :
+					UTR5.append(e.sequence)
+				else :
+					UTR3.append(e.sequence)
 
-			setV('loadedSequences', True)
+		setV('exons', exons)
+		setV('sequence', ''.join(sequence))
+		setV('CDNA', ''.join(CDNA))
+		setV('UTR5', ''.join(UTR5))
+		setV('UTR3', ''.join(UTR3))
+
+		if len(getV('CDNA')) % 3 != 0 :
+			setV('flags', {'DUBIOUS' : True, 'CDNA_LEN_NOT_MULT_3': True})
+		else :
+			setV('flags', {'DUBIOUS' : False, 'CDNA_LEN_NOT_MULT_3': False})
+
+			#setV('loadSequences', True)
 
 	def _load_bin_sequence(self) :
 		self.bin_sequence = NucBinarySequence(self.sequence)
@@ -148,47 +148,6 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 	def getUTR3Length(self):
 		return len(self.bin_UTR3)
-
-	#<7iyed>
-	def getCodonAffinityMap(self, chunkRatio = 0.05) :
-		chunks = []
-		if len(self.CDNA) < 3 :
-			return None
-
-		for i in range(int(1/chunkRatio)) :
-			chunks.append({'low_aff':0, 'high_aff':0})
-
-		for i in range(self.getNbCodons()) :
-			c = int(N.floor(i/(self.getNbCodons()*chunkRatio)))
-			codon = self.getCodon(i)[0]
-			if codon in uf.codonTable.keys():
-				if uf.codonAffinity[codon] == 'low' :
-					chunks[c]['low_aff'] += 1
-				elif uf.codonAffinity[codon] == 'high' :
-					chunks[c]['high_aff'] += 1
-			else :
-				for polyCodon in uf.polymorphicCodonCombinaisons(codon) :
-					if uf.codonAffinity[polyCodon] == 'low' :
-						chunks[c]['low_aff'] += 1
-					elif uf.codonAffinity[polyCodon] == 'high' :
-						chunks[c]['high_aff'] += 1
-
-		return chunks
-
-	def getCodonUsage(self) :
-		codonUsage = {}
-		for k in uf.codonTable.keys() :
-			codonUsage[k] = 0
-
-		for i in range(self.getNbCodons()) :
-			codon = self.getCodon(i)[0]
-			if codon in uf.codonTable.keys():
-				codonUsage[codon] += 1
-			else :
-				for polyCodon in uf.polymorphicCodonCombinaisons(codon) :
-					codonUsage[polyCodon] += 1
-		return codonUsage
-	#</7iyed>
 
 	def pluck(self):
 		"""Returns a plucked object. Plucks the transcript off the tree, set the value of self.gene into str(self.gene). This effectively disconnects the object and

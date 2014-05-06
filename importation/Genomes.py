@@ -253,57 +253,60 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 				if end > transcripts[transId].end or transcripts[transId].end is None:
 					transcripts[transId].end = end
 			
-			try :
-				protId = gtf.get(i, 'protein_id')
-			except KeyError :
-				protId = None
-				if verbose > 2 :
-					printf('Warning: no protein_id found in line %s' % gtf[i])
-			
-			if protId is not None and protId not in proteins :
-				if verbose > 1 :
-					printf('\t\tProtein %s...' % (protId))
-				proteins[protId] = Protein_Raba()
-				proteins[protId].set(genome = genome, id = protId, chromosome = chromosomes[chroNumber], gene = genes.get(geneId, None), transcript = transcripts.get(transId, None), name = transName)
-				transcripts[transId].protein = proteins[protId]
+				try :
+					protId = gtf.get(i, 'protein_id')
+				except KeyError :
+					protId = None
+					if verbose > 2 :
+						printf('Warning: no protein_id found in line %s' % gtf[i])
+				
+				if protId is not None and protId not in proteins :
+					if verbose > 1 :
+						printf('\t\tProtein %s...' % (protId))
+					proteins[protId] = Protein_Raba()
+					proteins[protId].set(genome = genome, id = protId, chromosome = chromosomes[chroNumber], gene = genes.get(geneId, None), transcript = transcripts.get(transId, None), name = transName)
+					transcripts[transId].protein = proteins[protId]
 
-			try :
-				exonNumber = gtf.get(i, 'exon_number')
-				exonKey = (transId, exonNumber)
-			except KeyError :
-				exonNumber = None
-				exonKey = None
-				if verbose > 2 :
-					printf('Warning: no exon number or id found in line %s' % gtf[i])
-			
-			exonKey = (transId, exonNumber)
-			if exonKey is not None :
-				if verbose > 3 :
-					printf('\t\t\texon %s...' % (exonId))
+				try :
+					exonNumber = gtf.get(i, 'exon_number')
+					exonKey = (transId, exonNumber)
+				except KeyError :
+					exonNumber = None
+					exonKey = None
+					if verbose > 2 :
+						printf('Warning: no exon number or id found in line %s' % gtf[i])
 				
-				if exonKey not in exons :
-					exonId = gtf.get(i, 'exon_id')
-					exons[exonKey] = Exon_Raba()
-					exons[exonKey].set(genome = genome, id = exonId, chromosome = chromosomes[chroNumber], gene = genes.get(geneId, None), transcript = transcripts.get(transId, None), protein = proteins.get(protId, None), strand = strand, number = exonNumber, start = start, end = end)
-					transcripts[transId].exons.append(exons[exonKey])
-				
-				if regionType == 'exon' :
-					if start < exons[exonKey].start or exons[exonKey].start is None:
-						exons[exonKey].start = start
-					if end > transcripts[transId].end or exons[exonKey].end is None:
-						exons[exonKey].end = end
-				elif regionType == 'CDS' :
-					exons[exonKey].CDS_start = start
-					exons[exonKey].CDS_end = end
-					exons[exonKey].frame = frame
-				elif regionType == 'stop_codon' :
-					if strand == '+' :
-						exons[exonKey].end += 3
-						if exons[exonKey].CDS_end != None :
-							exons[exonKey].CDS_end += 3
-					if strand == '-' :
-						if exons[exonKey].CDS_start != None :
-							exons[exonKey].CDS_start -= 3
+				if exonKey is not None :
+					if verbose > 3 :
+						printf('\t\t\texon %s...' % (exonId))
+					
+					if exonKey not in exons :
+						exons[exonKey] = Exon_Raba()
+						exons[exonKey].set(genome = genome, chromosome = chromosomes[chroNumber], gene = genes.get(geneId, None), transcript = transcripts.get(transId, None), protein = proteins.get(protId, None), strand = strand, number = exonNumber, start = start, end = end)
+						transcripts[transId].exons.append(exons[exonKey])
+					
+					try :
+						exons[exonKey].id = gtf.get(i, 'exon_id')
+					except KeyError :
+						pass
+					
+					if regionType == 'exon' :
+						if start < exons[exonKey].start or exons[exonKey].start is None:
+							exons[exonKey].start = start
+						if end > transcripts[transId].end or exons[exonKey].end is None:
+							exons[exonKey].end = end
+					elif regionType == 'CDS' :
+						exons[exonKey].CDS_start = start
+						exons[exonKey].CDS_end = end
+						exons[exonKey].frame = frame
+					elif regionType == 'stop_codon' :
+						if strand == '+' :
+							exons[exonKey].end += 3
+							if exons[exonKey].CDS_end != None :
+								exons[exonKey].CDS_end += 3
+						if strand == '-' :
+							if exons[exonKey].CDS_start != None :
+								exons[exonKey].CDS_start -= 3
 	
 	pBar.close()
 	conf.db.beginTransaction()

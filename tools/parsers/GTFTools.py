@@ -20,7 +20,8 @@ class GTFEntry(object) :
 			try :
 				return self.data[self.gtfFile.legend['attributes']][k]
 			except KeyError :
-				raise KeyError("Line %d does not have an element %s" %(self.lineNumber, k))
+				#return None
+				raise KeyError("Line %d does not have an element %s.\nline:%s" %(self.lineNumber, k, self.gtfFile.lines[self.lineNumber]))
 	
 	def __repr__(self) :
 		return "<GTFEntry line: %d>" % self.lineNumber
