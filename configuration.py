@@ -17,7 +17,7 @@ pyGeno_VERSION_BUILD_TIME = time.ctime(os.path.getmtime(__file__))
 pyGeno_RABA_NAMESPACE = 'pyGenoRaba'
 pyGeno_RABA_DBFILE = '%s/pyGenoRaba.db' % pyGeno_SETTINGS_PATH
 
-#pyGeno_SETTINGS = {'DATA_PATH' : '%s/data' % pyGeno_SETTINGS_PATH}
+pyGeno_SETTINGS = {'DATA_PATH' : '%s/data' % pyGeno_SETTINGS_PATH}
 
 rabaDB.setup.RabaConfiguration(pyGeno_RABA_NAMESPACE, pyGeno_RABA_DBFILE)
 db = rabaDB.setup.RabaConnection(pyGeno_RABA_NAMESPACE)
