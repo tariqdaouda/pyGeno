@@ -153,7 +153,6 @@ class dbSNPSNP(SNP_INDEL) :
 	#FILTER_NC = rf.Primitive() #Inconsistent Genotype Submission For At Least One Sample
 	
 	altAlias = 'ALT'
-	altAlias = 'REF'
 
 class TopHatSNP(SNP_INDEL) :
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE

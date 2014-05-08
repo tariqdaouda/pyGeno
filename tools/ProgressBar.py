@@ -1,4 +1,4 @@
-import sys, time
+import sys, time, cPickle
 
 class ProgressBar :
 	"A very simple unthreaded progress bar, see ProgressBar  __name__ == '__main__' for an ex of utilisation. This progress bar also logs stats in .logs"
@@ -58,6 +58,11 @@ class ProgressBar :
 		self.logs['runtime'].append(self.runtime)
 		self.logs['remtime'].append(self.remtime)
 	
+	def saveLogs(self, filename) :
+		f = open(filename, 'wb')
+		cPickle.dump(self.logs, f)
+		f.close()
+
 	def update(self, label = '', forceRefresh = False) :
 		self.log()
 		tim = time.time()
