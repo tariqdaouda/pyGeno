@@ -15,9 +15,10 @@ pyGeno_VERSION_NUMBER = 14.02
 pyGeno_VERSION_BUILD_TIME = time.ctime(os.path.getmtime(__file__))
 
 pyGeno_RABA_NAMESPACE = 'pyGenoRaba'
-pyGeno_RABA_DBFILE = '%s/pyGenoRaba.db' % pyGeno_SETTINGS_PATH
+pyGeno_RABA_DBFILE = os.path.normpath('%s/pyGenoRaba.db' % pyGeno_SETTINGS_PATH)
+pyGeno_DATA_PATH = os.path.normpath('%s/data' % pyGeno_SETTINGS_PATH)
 
-pyGeno_SETTINGS = {'DATA_PATH' : '%s/data' % pyGeno_SETTINGS_PATH}
+#pyGeno_SETTINGS = {'DATA_PATH' : '%s/data' % pyGeno_SETTINGS_PATH}
 
 rabaDB.setup.RabaConfiguration(pyGeno_RABA_NAMESPACE, pyGeno_RABA_DBFILE)
 db = rabaDB.setup.RabaConnection(pyGeno_RABA_NAMESPACE)
@@ -41,24 +42,21 @@ def checkSettingsPath() :
 	return True
 
 def checkDataPath() :
-	if not os.path.exists(pyGeno_SETTINGS['DATA_PATH']) :
+	if not os.path.exists(pyGeno_DATA_PATH) :
 		return False
 	return True
 
 def getGenomeSequencePath(specie, name) :
-	return os.path.normpath(pyGeno_SETTINGS['DATA_PATH']+'/%s/%s' % (specie.lower(), name))
+	return os.path.normpath(pyGeno_DATA_PATH+'/%s/%s' % (specie.lower(), name))
 
 def pyGeno_init() :
 	"This function is automaticly called at launch"
-	global pyGeno_SETTINGS
-
+	
 	if not checkPythonVersion() :
 		raise PythonVersionError("==> FATAL: pyGeno only works with python 2.7 and above, please upgrade your python version")
 
 	if not checkSettingsPath() :
 		os.makedirs(pyGeno_SETTINGS_PATH)
 
-	#if not checkDataPath() :
-	#	os.makedirs(pyGeno_SETTINGS['DATA_PATH'])
-
-pyGeno_init()
+	if not checkDataPath() :
+		os.makedirs(pyGeno_DATA_PATH)

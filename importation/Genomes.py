@@ -268,7 +268,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 					transcripts[transId].protein = proteins[protId]
 
 				try :
-					exonNumber = gtf.get(i, 'exon_number')
+					exonNumber = int(gtf.get(i, 'exon_number')) - 1
 					exonKey = (transId, exonNumber)
 				except KeyError :
 					exonNumber = None
