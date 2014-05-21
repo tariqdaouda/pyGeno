@@ -74,7 +74,7 @@ def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsFile) :
 			pLabel = 'Chr %s...' % currChrNumber
 
 		snp = CasavaSNP()
-		snp.chromosomeNumber = currChrNumber
+		#snp.chromosomeNumber = currChrNumber
 		snp.specie = specie
 		snp.setName = setName
 		#first column: chro, second first of range (identical to second column)
@@ -82,12 +82,15 @@ def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsFile) :
 			try :
 				setattr(snp, f, snpEntry[f])
 			except KeyError :
-				printf("Warning filetype as no key %s", f)
+				if f != 'specie' and f != 'setName' :
+					printf("Warning filetype as no key %s", f)
 		snp.start -= 1
 		snp.end -= 1
 		snp.save()
 		pBar.update(label = pLabel)
 
+	pBar.close()
+	
 	snpMaster = SNPMaster()
 	snpMaster.set(setName = setName, SNPType = 'CasavaSNP', specie = specie)
 	snpMaster.save()
@@ -123,6 +126,8 @@ def _importSNPs_dbSNPSNP(setName, specie, genomeSource, snpsFile) :
 		snp.alt = snpEntry['ALT']
 		snp.end = snp.start+len(snp.alt)
 		snp.save()
+	
+	pBar.close()
 	
 	snpMaster = SNPMaster()
 	snpMaster.set(setName = setName, SNPType = 'dbSNPSNP', specie = specie)

@@ -120,7 +120,7 @@ class Exon(pyGenoRabaObjectWrapper) :
 	def next(self) :
 		"""Returns the next exon of the transcript, or None if there is none"""
 		try :
-			return self.transcript.exons[self.number]
+			return self.transcript.exons[self.number+1]
 		except IndexError :
 			return None
 		

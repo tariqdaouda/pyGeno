@@ -200,28 +200,6 @@ def getSequenceCombinaisons(polymorphipolymorphicDnaSeqSeq, pos = 0) :
 def polymorphicCodonCombinaisons(codon) :
 	return getSequenceCombinaisons(codon, 0)
 
-def polymorphicCodonCombinaisons_bck(dnaSeq, startId = 0) :
-	if type(dnaSeq).__name__ != 'list' :
-		dna = list(dnaSeq)
-	else :
-		dna = dnaSeq
-
-	if startId >= len(dna) :
-		return [''.join(dna)]
-
-	rDna = copy.copy(dna)
-	res = []
-	try :
-		chars = polymorphicNucleotides[dna[startId]]
-		for c in chars :
-			rDna[startId] = c
-			res.extend(polymorphicCodonCombinaisons(rDna, startId +1))
-
-	except KeyError:
-		res.extend(polymorphicCodonCombinaisons(rDna, startId +1))
-
-	return res
-
 def encodePolymorphicNucleotide(polySeq) :
 	"""from ['A', 'G'] or AG or A/G to R"""
 
@@ -306,40 +284,6 @@ def showDifferences(seq1, seq2) :
 			c2 = '#'
 		else :
 			c2 = seq2[i]
-
-		if c1 != c2 :
-			ret.append('%s|%s' % (c1, c2))
-		else :
-			ret.append('-')
-
-	return ''.join(ret)
-
-def showDifferences_test(seq1, seq2) :
-	"returns a string representig matching chars (-) and differences (A|T) between the two strings or length exceeded (#)"
-	ret = []
-
-	for i in range(max(len(seq1), len(seq2))) :
-		if i >= len(seq1) :
-			c1 = '#'
-		else :
-			if (i+1) < len(seq1) and seq1[i+1] == '/' :
-				try :
-					c1 = seq1[i:i+2]
-				except :
-					c1 = seq1[i]
-			else :
-				c1 = seq1[i]
-
-		if i >= len(seq2) :
-			c2 = '#'
-		else :
-			if (i+1) < len(seq2) and seq2[i+1] == '/' :
-				try :
-					c2 = seq2[i:i+2]
-				except :
-					c2 = seq2[i]
-			else :
-				c2 = seq2[i]
 
 		if c1 != c2 :
 			ret.append('%s|%s' % (c1, c2))
