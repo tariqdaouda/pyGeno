@@ -13,7 +13,6 @@ from tools import SingletonManager
 import types
 
 import pyGeno.configuration as conf
-#exemple de fonctions filtre
 
 class ChrosomeSequence(object) :
 
@@ -119,7 +118,7 @@ class ChrosomeSequence(object) :
 						posSeq = filtSNP.start - slic.start#-1
 						filtSNP.alleles = uf.getPolymorphicNucleotide(filtSNP.alt)
 						data[posSeq] = str(filtSNP.alt)
-						#print 'iop', filtSNP.alleles, type(filtSNP.alleles)
+						
 			elif len(resSNPs) > 1 :
 				for SNP in self._mixSNPs(*resSNPs) :
 					filtSNP = self.SNPsFilter(**SNP)
@@ -135,7 +134,7 @@ class ChrosomeSequence(object) :
 
 		return data
 
-	def _mixSNPs(*snpsSets) :
+	def _mixSNPs_bck(*snpsSets) :
 		"""takes several snp sets and return an iterator of values {setName1 : snp, setName2 : snp, setName3 : None, ...}.
 		the dict a intended for the SNPFilter function, each one correponds to a single position in the chromosome"""
 

@@ -31,7 +31,7 @@ class SequenceSNP_INDEL(object) :
 """
 
 def defaultSNPsFilter(refAllele, *args, **kwargs) :
-	"Default function for filtering snp, simply does not filter anything. Doesn't work with indels"
+	"Default function for filtering snp, does not filter anything. Doesn't work with indels"
 	alleles = []
 	for snp in args :
 		alleles.append(snp.alt)

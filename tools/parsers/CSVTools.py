@@ -126,7 +126,7 @@ class CSVFile(object) :
 		self.separator = separator
 		self.currentPos = -1
 	
-	def parse(self, fil, separator = ',', stringSeparator = '"') :
+	def parse(self, fil, separator = '\t', stringSeparator = '"') :
 		"Parses a CSV on disc"
 		
 		self.filename = fil
@@ -189,7 +189,9 @@ class CSVFile(object) :
 		return self
 	
 	def next(self) :
-		self.currentPos += 0
+		self.currentPos += 1
+		if self.currentPos >= len(self) :
+			raise StopIteration
 		return self[self.currentPos]
 	
 	def __getitem__(self, line) :

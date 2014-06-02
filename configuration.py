@@ -1,9 +1,6 @@
 import sys, os, time
 from ConfigParser import SafeConfigParser
-
 import rabaDB.setup
-
-import user_config as uc
 
 class PythonVersionError(Exception) :
 	pass
@@ -23,7 +20,8 @@ pyGeno_SETTINGS_PATH = None
 pyGeno_RABA_DBFILE = None
 pyGeno_DATA_PATH = None
 
-db = None
+db = None #proxy for the raba database
+dbConf = None #proxy for the raba databse configuration
 
 def version() :
 	"""returns a tuple describing pyGeno's current version"""
@@ -86,3 +84,4 @@ def pyGeno_init() :
 	#launching the db
 	rabaDB.setup.RabaConfiguration(pyGeno_RABA_NAMESPACE, pyGeno_RABA_DBFILE)
 	db = rabaDB.setup.RabaConnection(pyGeno_RABA_NAMESPACE)
+	dbConf = rabaDB.setup.RabaConfiguration(pyGeno_RABA_NAMESPACE)

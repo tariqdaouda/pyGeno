@@ -117,7 +117,7 @@ class Exon(pyGenoRabaObjectWrapper) :
 		e.transcript = str(self.transcript)
 		return e
 
-	def next(self) :
+	def nextExon(self) :
 		"""Returns the next exon of the transcript, or None if there is none"""
 		try :
 			return self.transcript.exons[self.number+1]
