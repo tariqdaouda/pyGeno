@@ -34,6 +34,20 @@ class pyGenoRabaObjectWrapper_metaclass(type) :
 		cls._wrappers[dct['_wrapped_class']] = clsObj
 		return clsObj
 
+class RLWrapper(object) :
+	"A wrapper for returning the pyGeno Object instead of the raw raba objects contained in raba lists"
+	def __init__(self, rabaObj, listObjectType, rl) :
+		self.rabaObj = rabaObj
+		self.rl = rl
+		self.listObjectType = listObjectType
+
+	def __getitem__(self, i) :
+		return self.listObjectType(wrapped_object_and_bag = (self.rl[i], self.rabaObj.bagKey))
+	
+	def __getattr__(self, name) :
+		rl =  object.__getattribute__(self, 'rl')
+		return getattr(rl, name)
+
 class pyGenoRabaObjectWrapper(object) :
 
 	__metaclass__ = pyGenoRabaObjectWrapper_metaclass

@@ -9,7 +9,6 @@ import pyGeno.configuration as conf
 #conf.db.enableDebug(True)
 print Transcript.help()
 
-refGenome = Genome(name = "GRCh37.74", specie = 'human')
-gene = refGenome.get(Gene, name = 'TPST2')[0]
-for t in gene.get(Transcript) :
-	print t.sequence
+refGenome = Genome(name = "GRCh37.75")
+trans = refGenome.get(Transcript, name = 'TPST2-001')[0]
+print trans.exons[0].sequence

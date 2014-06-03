@@ -43,8 +43,9 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 	def __init__(self, *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
-		self.loadSequences = False
-		self.loadBinarySequence = True
+		self.exons = RLWrapper(self, Exon, self.wrapped_object.exons)
+		#self.loadSequences = False
+		#self.loadBinarySequence = True
 
 	def _loadSequences(self) :
 		#if not pyGenoRabaObjectWrapper.__getattribute__(self, 'loadSequences') :
@@ -158,14 +159,14 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 	def getNbCodons(self) :
 		return len(self.CDNA)/3
-
+	
 	def __getattribute__(self, name) :
-		try :
-			return pyGenoRabaObjectWrapper.__getattribute__(self, name)
-		except AttributeError :
-			pyGenoRabaObjectWrapper.__getattribute__(self, '_loadSequences')()
-
+		#try :
 		return pyGenoRabaObjectWrapper.__getattribute__(self, name)
+		#except AttributeError :
+		#	pyGenoRabaObjectWrapper.__getattribute__(self, '_loadSequences')()
+
+		#return pyGenoRabaObjectWrapper.__getattribute__(self, name)
 
 	def __getitem__(self, i) :
 		return self.sequence[i]
