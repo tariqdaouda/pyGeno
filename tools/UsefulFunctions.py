@@ -139,22 +139,22 @@ def translateDNA_6Frames(sequence) :
 	return trans
 
 """Translates DNA code, frame : fwd1, fwd2, fwd3, rev1, rev2, rev3"""
-def translateDNA(sequence, frame = 'fwd1') :
+def translateDNA(sequence, frame = 'f1') :
 
 	protein = ""
 
-	if frame == 'fwd1' :
+	if frame == 'f1' :
 		dna = sequence
-	elif frame == 'fwd2':
+	elif frame == 'f2':
 		dna = sequence[1:]
-	elif frame == 'fwd3' :
+	elif frame == 'f3' :
 		dna = sequence[2:]
-	elif frame == 'rev1' :
+	elif frame == 'r1' :
 		dna = reverseComplement(sequence)
-	elif frame == 'rev2' :
+	elif frame == 'r2' :
 		dna = reverseComplement(sequence)
 		dna = dna[1:]
-	elif frame == 'rev3' :
+	elif frame == 'r3' :
 		dna = reverseComplement(sequence)
 		dna = dna[2:]
 	else :

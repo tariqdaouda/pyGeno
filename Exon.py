@@ -126,6 +126,10 @@ class Exon(pyGenoRabaObjectWrapper) :
 	
 	def previousExon(self) :
 		"""Returns the previous exon of the transcript, or None if there is none"""
+		
+		if self.number == 0 :
+			return None
+		
 		try :
 			return self.transcript.exons[self.number-1]
 		except IndexError :
