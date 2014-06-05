@@ -44,10 +44,11 @@ class Transcript(pyGenoRabaObjectWrapper) :
 	def __init__(self, *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 		self.exons = RLWrapper(self, Exon, self.wrapped_object.exons)
+		self._load_sequencesTriggers = set(["UTR5", "UTR3", "cDNA", "sequence"])
 		#self.loadSequences = False
 		#self.loadBinarySequence = True
 
-	def _loadSequences(self) :
+	def _load_sequences(self) :
 		#if not pyGenoRabaObjectWrapper.__getattribute__(self, 'loadSequences') :
 		def getV(k) :
 			return pyGenoRabaObjectWrapper.__getattribute__(self, k)
@@ -56,7 +57,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			return pyGenoRabaObjectWrapper.__setattr__(self, k, v)
 
 		sequence = []
-		CDNA = []
+		cDNA = []
 		UTR5 = []
 		UTR3 = []
 		exons = []
@@ -68,7 +69,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 			if e.hasCDS() :
 				UTR5.append(e.UTR5)
-				CDNA.append(e.CDS)
+				cDNA.append(e.CDS)
 				UTR3.append(e.UTR3)
 				prime5 = False
 			else :
@@ -76,17 +77,21 @@ class Transcript(pyGenoRabaObjectWrapper) :
 					UTR5.append(e.sequence)
 				else :
 					UTR3.append(e.sequence)
-
+		
+		sequence = ''.join(sequence)
+		cDNA = ''.join(cDNA)
+		UTR5 = ''.join(UTR5)
+		UTR3 = ''.join(UTR3)
 		setV('exons', exons)
-		setV('sequence', ''.join(sequence))
-		setV('CDNA', ''.join(CDNA))
-		setV('UTR5', ''.join(UTR5))
-		setV('UTR3', ''.join(UTR3))
-
-		if len(getV('CDNA')) % 3 != 0 :
-			setV('flags', {'DUBIOUS' : True, 'CDNA_LEN_NOT_MULT_3': True})
+		setV('sequence', sequence)
+		setV('cDNA', cDNA)
+		setV('UTR5', UTR5)
+		setV('UTR3', UTR3)
+		
+		if len(cDNA) > 0 and len(cDNA) % 3 != 0 :
+			setV('flags', {'DUBIOUS' : True, 'cDNA_LEN_NOT_MULT_3': True})
 		else :
-			setV('flags', {'DUBIOUS' : False, 'CDNA_LEN_NOT_MULT_3': False})
+			setV('flags', {'DUBIOUS' : False, 'cDNA_LEN_NOT_MULT_3': False})
 
 			#setV('loadSequences', True)
 
@@ -98,7 +103,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 	def getNucleotideCodon(self, cdnaX1) :
 		"Returns the entire codon of the nucleotide at pos cdnaX1 in the cdna, and the position of that nocleotide in the codon"
-		return uf.getNucleotideCodon(self.CDNA, cdnaX1)
+		return uf.getNucleotideCodon(self.cDNA, cdnaX1)
 
 	def getCodon(self, i) :
 		"returns the ith codon"
@@ -106,7 +111,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 	def iterCodons(self) :
 		"iterates through the codons"
-		for i in range(len(self.CDNA)/3) :
+		for i in range(len(self.cDNA)/3) :
 			yield self.getCodon(i)
 
 	def find(self, sequence) :
@@ -117,16 +122,16 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		"""Returns a lits of all positions where sequence was found"""
 		return self.bin_Sequence.findAll(sequence)
 
-	def findInCDNA(self, sequence) :
+	def findIncDNA(self, sequence) :
 		"""return the position of the first occurance of sequence"""
-		return self.bin_CDNA.find(sequence)
+		return self.bin_cDNA.find(sequence)
 
-	def findAllInCDNA(self, seqence):
+	def findAllIncDNA(self, seqence):
 		"""Returns a lits of all positions where sequence was found"""
-		return self.bin_CDNA.findAll(sequence)
+		return self.bin_cDNA.findAll(sequence)
 
-	def getCDNALength(self):
-		return len(self.CDNA)
+	def getcDNALength(self):
+		return len(self.cDNA)
 
 	def findInUTR5(self, sequence) :
 		"""return the position of the first occurance of sequence"""
@@ -158,13 +163,13 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		return e
 
 	def getNbCodons(self) :
-		return len(self.CDNA)/3
+		return len(self.cDNA)/3
 	
 	def __getattribute__(self, name) :
 		#try :
 		return pyGenoRabaObjectWrapper.__getattribute__(self, name)
 		#except AttributeError :
-		#	pyGenoRabaObjectWrapper.__getattribute__(self, '_loadSequences')()
+		#	pyGenoRabaObjectWrapper.__getattribute__(self, '_load_sequences')()
 
 		#return pyGenoRabaObjectWrapper.__getattribute__(self, name)
 

@@ -70,6 +70,7 @@ class pyGenoRabaObjectWrapper(object) :
 			pyGenoRabaObjectWrapper._bags[self.bagKey] = {}
 			pyGenoRabaObjectWrapper._bags[self.bagKey][self._getObjBagKey(self.wrapped_object)] = self
 
+		self._load_sequencesTriggers = set()
 		self.loadSequences = True
 		self.loadBinarySequences = True
 
@@ -124,6 +125,16 @@ class pyGenoRabaObjectWrapper(object) :
 		if name == 'save' or name == 'delete' :
 			raise AttributeError("You can't delete or save an object from wrapper, try .wrapped_object.delete()/save()")
 		
+		if name in self._load_sequencesTriggers and self.loadSequences :
+			self.loadSequences = False
+			self._load_sequences()
+			return getattr(self, name)
+			
+		if name[:4] == 'bin_' and self.loadBinarySequences :
+			self.updateBinarySequence = False
+			self._load_bin_sequence()
+			return getattr(self, name)
+			
 		attr = getattr(self.wrapped_object, name)
 		if isRabaObject(attr) :
 			attrKey = self._getObjBagKey(attr)
@@ -157,20 +168,8 @@ class pyGenoRabaObjectWrapper(object) :
 	def dropGlobalIndex(cls, fields) :
 		cls._wrapped_class.dropIndex(fields)
 
-	def _loadSequences(self) :
+	def _load_sequences(self) :
 		raise NotImplementedError("This fct loads non binary sequences and should be implemented in child if needed")
 	
 	def _load_bin_sequence(self) :
 		raise NotImplementedError("This fct loads binary sequences and should be implemented in child if needed")
-
-	def __getattribute__(self, name) :
-		if name == "sequence" and self.loadSequences :
-			self.loadSequences = False
-			self._loadSequences()
-		
-		if name[:4] == 'bin_' and self.loadBinarySequences :
-			self.updateBinarySequence = False
-			self._load_bin_sequence()
-
-		return object.__getattribute__(self, name)
-

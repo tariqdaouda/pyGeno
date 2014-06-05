@@ -53,10 +53,11 @@ class Exon(pyGenoRabaObjectWrapper) :
 		SNVsFilter is a fct that defines wich SNVs are included in the sequence.
 		I expect [start, end[ (python) not something like [start, end](ensembl format)"""
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
-		self.loadSequences = True
-		#self._loadSequences()
+		self._load_sequencesTriggers = set(["UTR5", "UTR3", "CDS", "sequence"])
+		#self.loadSequences = True
+		#self._load_sequences()
 	
-	def _loadSequences(self) :
+	def _load_sequences(self) :
 		seq = self.chromosome.sequence[self.start : self.end]
 		if self.strand == '+' :
 			self.sequence = seq
