@@ -79,7 +79,7 @@ class ChrosomeSequence(object) :
 				del(lowStack[pos])
 				if len(refAllele) > len(alleles) :
 					deletions.append(posSeq, len(refAllele) - 1) #-1 to keep the inserted allele
-				#print posSeq, posSeq, data[posSeq], alleles
+
 				data[posSeq] = str(alleles)
 				
 				for setName in itsWithoutSNPs :
@@ -91,69 +91,68 @@ class ChrosomeSequence(object) :
 		
 		if type(data) is ListType :
 			data = ''.join(data)
-			#print data
 		
 		return data
 
-	def _getSequence_bck(self, slic) :
-		"returns a sequence including SNPs as filtered by the genome SNPFilter function"
-		assert type(slic) is SliceType
-
-		data = self.data[slic]
-		SNPTypes = self.chromosome.genome.SNPTypes
-
-		if SNPTypes != None :
-			resSNPs = []
-			for setName, SNPType in SNPTypes.iteritems() :
-				f = RabaQuery(str(SNPType), namespace = self.chromosome._raba_namespace)
-				f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : self.chromosome.number})
-				resSNPs.append(f.run(sqlTail = 'ORDER BY start'))
-
-			if len(resSNPs) == 1 :
-				for SNP in resSNPs[0] :
-					filtSNP = self.SNPsFilter(SNP)
-					if filtSNP != None :
-						if type(data) is not ListType :
-							data = list(data)
-						posSeq = filtSNP.start - slic.start#-1
-						filtSNP.alleles = uf.getPolymorphicNucleotide(filtSNP.alt)
-						data[posSeq] = str(filtSNP.alt)
-						
-			elif len(resSNPs) > 1 :
-				for SNP in self._mixSNPs(*resSNPs) :
-					filtSNP = self.SNPsFilter(**SNP)
-					if filtSNP != None :
-						if type(data) is not ListType :
-							data = list(data)
-						posSeq = filtSNP.start - slic[0]#-1
-						filtSNP.alleles = uf.getPolymorphicNucleotide(filtSNP.alleles)
-						data[posSeq] = filtSNP.alleles
-
-			if type(data) is ListType :
-				return ''.join(data)
-
-		return data
-
-	def _mixSNPs_bck(*snpsSets) :
-		"""takes several snp sets and return an iterator of values {setName1 : snp, setName2 : snp, setName3 : None, ...}.
-		the dict a intended for the SNPFilter function, each one correponds to a single position in the chromosome"""
-
-		positions = {}
-		empty = {}
-		for snpsSet in snpsSets :
-			empty[snpsSet[0].setName] = None
-
-		for snpsSet in snpsSets :
-			for snp in snpsSet :
-				if snp.start not in position :
-					positions[snp.start] = copy.copy(empty)
-				positions[snp.start][empty[snp.setName]] = snp
-
-		for v in positions.itervalues() :
-			yield v
-
-	def __getitem__(self, i) :
-		return self._getSequence(i)
+	#~ def _getSequence_bck(self, slic) :
+		#~ "returns a sequence including SNPs as filtered by the genome SNPFilter function"
+		#~ assert type(slic) is SliceType
+#~ 
+		#~ data = self.data[slic]
+		#~ SNPTypes = self.chromosome.genome.SNPTypes
+#~ 
+		#~ if SNPTypes != None :
+			#~ resSNPs = []
+			#~ for setName, SNPType in SNPTypes.iteritems() :
+				#~ f = RabaQuery(str(SNPType), namespace = self.chromosome._raba_namespace)
+				#~ f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : self.chromosome.number})
+				#~ resSNPs.append(f.run(sqlTail = 'ORDER BY start'))
+#~ 
+			#~ if len(resSNPs) == 1 :
+				#~ for SNP in resSNPs[0] :
+					#~ filtSNP = self.SNPsFilter(SNP)
+					#~ if filtSNP != None :
+						#~ if type(data) is not ListType :
+							#~ data = list(data)
+						#~ posSeq = filtSNP.start - slic.start#-1
+						#~ filtSNP.alleles = uf.getPolymorphicNucleotide(filtSNP.alt)
+						#~ data[posSeq] = str(filtSNP.alt)
+						#~ 
+			#~ elif len(resSNPs) > 1 :
+				#~ for SNP in self._mixSNPs(*resSNPs) :
+					#~ filtSNP = self.SNPsFilter(**SNP)
+					#~ if filtSNP != None :
+						#~ if type(data) is not ListType :
+							#~ data = list(data)
+						#~ posSeq = filtSNP.start - slic[0]#-1
+						#~ filtSNP.alleles = uf.getPolymorphicNucleotide(filtSNP.alleles)
+						#~ data[posSeq] = filtSNP.alleles
+#~ 
+			#~ if type(data) is ListType :
+				#~ return ''.join(data)
+#~ 
+		#~ return data
+#~ 
+	#~ def _mixSNPs_bck(*snpsSets) :
+		#~ """takes several snp sets and return an iterator of values {setName1 : snp, setName2 : snp, setName3 : None, ...}.
+		#~ the dict a intended for the SNPFilter function, each one correponds to a single position in the chromosome"""
+#~ 
+		#~ positions = {}
+		#~ empty = {}
+		#~ for snpsSet in snpsSets :
+			#~ empty[snpsSet[0].setName] = None
+#~ 
+		#~ for snpsSet in snpsSets :
+			#~ for snp in snpsSet :
+				#~ if snp.start not in position :
+					#~ positions[snp.start] = copy.copy(empty)
+				#~ positions[snp.start][empty[snp.setName]] = snp
+#~ 
+		#~ for v in positions.itervalues() :
+			#~ yield v
+#~ 
+	#~ def __getitem__(self, i) :
+		#~ return self._getSequence(i)
 
 class Chromosome_Raba(pyGenoRabaObject) :
 	"""A class that represents a persistent Chromosome"""

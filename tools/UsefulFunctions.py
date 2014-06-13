@@ -176,7 +176,7 @@ def translateDNA(sequence, frame = 'f1') :
 def getSequenceCombinaisons(polymorphipolymorphicDnaSeqSeq, pos = 0) :
 	"""Takes a dna sequence with polymorphismes and returns all the possible sequences that it can yield"""
 
-	if type(polymorphipolymorphicDnaSeqSeq).__name__ != 'list' :
+	if type(polymorphipolymorphicDnaSeqSeq) is not types.ListType :
 		seq = list(polymorphipolymorphicDnaSeqSeq)
 	else :
 		seq = polymorphipolymorphicDnaSeqSeq

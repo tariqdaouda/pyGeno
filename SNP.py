@@ -1,3 +1,5 @@
+import types
+
 import configuration as conf
 import configuration as conf
 
@@ -13,6 +15,51 @@ from tools import UsefulFunctions as uf
 -A SNP_INDELs must have at least chromosomeNumber, setName, specie, start and ref filled in order to be inserted into sequences
 -User can define an alias for the alt field (snp_indel alleles) to indicate the default field from wich to extract alleles
 """
+
+#~ class SequenceSNP_INDEL(object) :
+	#~ "This type that a of objects that a SNP filter should return"
+	#~ 
+	#~ SNPType = 'SNP'
+	#~ deletionType = 'DELETION'
+	#~ insertionType = 'INSERTION'
+	#~ 
+	#~ def __init__(self, alleles, polymorphismType) :
+		#~ assert type(alleles) is StringType
+		#~ assert type(polymorphismType) is StringType
+		#~ 
+		#~ allowedTypes = ['SNP', 'DELETION', 'INSERTION']
+		#~ 
+		#~ self.alleles = alleles
+		#~ self.polymorphismType = polymorphismType
+		#~ 
+		#~ if polymorphismType.upper() not in allowedTypes :
+			#~ raise TypeError('polymorphismType must be one of the following: %s' % (allowedTypes))
+#~ 
+		#~ self.SNPSources = {}
+#~ 
+	#~ def addSourceSNP(self, SNPSetName, sources) :
+		#~ "Optional, you can keep a dict that records the polynorphims that were mixed together to make self. They are stored into self.SNPSources"
+		#~ self.SNPSources = sources
+#~ 
+#~ def defaultSNPsFilter(refAllele, **kwargs) :
+	#~ """Default function for filtering snp, does not filter anything. Doesn't work with indels.
+	#~ This is also a template that you can use for own filters.
+	#~ 
+	#~ The arguments that will be passed to the function are all polymorphisms that appear at the same position and have the following format:
+	#~ SNP_setName1 = snp1, SNP_setName2 = snp2, ...
+	#~ 
+	#~ This allowes you to make custom filters that take into account the snp set.
+	#~ 
+	#~ returns a SequenceSNP_INDEL"""
+	#~ 
+	#~ alleles = []
+	#~ for k, snp in kwargs.iteritems() :
+		#~ alleles.append(snp.alt)
+	#~ 
+	#~ ret = SequenceSNP_INDEL(alleles, SequenceSNP_INDEL.SNPType)
+	#~ ret.addSources(kwargs)
+	#~ 
+	#~ return ret
 
 class SNPMaster(Raba) :
 	'This object keeps track of set types'
