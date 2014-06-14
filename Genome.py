@@ -1,4 +1,4 @@
-import os
+import types
 import configuration as conf
 import pyGeno.tools.UsefulFunctions as uf
 from pyGenoObjectBases import *
@@ -10,36 +10,7 @@ from pyGeno.Protein import Protein
 from pyGeno.Exon import Exon
 from SNP import *
 
-#from rabaDB.setup import *
-#RabaConfiguration(conf.pyGeno_RABA_NAMESPACE, conf.pyGeno_RABA_DBFILE)
-#from rabaDB.Raba import *
-#from rabaDB.filters import RabaQuery
 import rabaDB.fields as rf
-
-"""
-class SequenceSNP_INDEL(object) :
-	"This SNP is intended to be embeded in a sequence and has no persistency. It's alleles can be a mix of alleles from SNPs of different sets"
-	def __init__(self, alleles, start, end) :
-		self.alleles = alleles
-		self.start = start
-		self.end = end
-		self.sourceSNPs = []
-
-	def addSourceSNP(self, sourceSNP) :
-		"persistent SNPs whose alleles have been mixed to make self.alleles"
-		self.sourceSNPs.append(sourceSNP)
-"""
-
-def defaultSNPsFilter(refAllele, *args, **kwargs) :
-	"Default function for filtering snp, does not filter anything. Doesn't work with indels"
-	alleles = []
-	for snp in args :
-		alleles.append(snp.alt)
-	
-	for k, snp in kwargs.iteritems() :
-		alleles.append(snp.alt)
-	
-	return uf.encodePolymorphicNucleotide(''.join(alleles))
 
 class Genome_Raba(pyGenoRabaObject) :
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
@@ -74,7 +45,11 @@ class Genome(pyGenoRabaObjectWrapper) :
 	def __init__(self, SNPs = None, SNPsFilter = defaultSNPsFilter,  *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 
-		self.SNPsSets = SNPs
+		if type(SNPs) is types.StringType :
+			self.SNPsSets = [SNPs]
+		else :
+			self.SNPsSets = SNPs
+		
 		self.SNPsFilter = SNPsFilter
 		self.SNPTypes = {}
 		
@@ -90,5 +65,21 @@ class Genome(pyGenoRabaObjectWrapper) :
 			for s in res :
 				self.SNPTypes[s.setName] = s.SNPType
 
+	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
+		if issubclass(objectType, SNP_INDEL) :
+			f = RabaQuery(objectType, namespace = self._wrapped_class._raba_namespace)
+			coolArgs['specie'] = self.specie
+
+			if len(args) > 0 and type(args[0]) is types.ListType :
+				for a in args[0] :
+					if type(a) is types.DictType :
+						f.addFilter(**a)
+			else :
+				f.addFilter(*args, **coolArgs)
+
+			return f
+		
+		return pyGenoRabaObjectWrapper_makeLoadQuery(self, objectType, *args, **coolArgs)
+	
 	def __str__(self) :
 		return "Genome: %s/%s SNPs: %s" %(self.specie, self.name, self.SNPTypes)

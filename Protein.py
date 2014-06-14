@@ -30,7 +30,24 @@ class Protein(pyGenoRabaObjectWrapper) :
 	def __init__(self, *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 		self._load_sequencesTriggers = set(["sequence"])
+
+	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
+		if issubclass(objectType, SNP_INDEL) :
+			f = RabaQuery(objectType, namespace = self._wrapped_class._raba_namespace)
+			coolArgs['chromosomeNumber'] = self.chromosome.number
+			coolArgs['start'] = self.transcript.start
+			coolArgs['end'] = self.transcript.end
 		
+			if len(args) > 0 and type(args[0]) is types.ListType :
+				for a in args[0] :
+					if type(a) is types.DictType :
+						f.addFilter(**a)
+			else :
+				f.addFilter(*args, **coolArgs)
+
+			return f
+		
+		return pyGenoRabaObjectWrapper_makeLoadQuery(self, objectType, *args, **coolArgs)
 	
 	def _load_sequences(self) :
 		self.sequence = uf.translateDNA(self.transcript.cDNA[:-3])

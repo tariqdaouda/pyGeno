@@ -27,5 +27,23 @@ class Gene(pyGenoRabaObjectWrapper) :
 	def __init__(self, *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 
+	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
+		if issubclass(objectType, SNP_INDEL) :
+			f = RabaQuery(objectType, namespace = self._wrapped_class._raba_namespace)
+			coolArgs['chromosomeNumber'] = self.chromosome.number
+			coolArgs['start'] = self.start
+			coolArgs['end'] = self.end
+		
+			if len(args) > 0 and type(args[0]) is types.ListType :
+				for a in args[0] :
+					if type(a) is types.DictType :
+						f.addFilter(**a)
+			else :
+				f.addFilter(*args, **coolArgs)
+
+			return f
+		
+		return pyGenoRabaObjectWrapper_makeLoadQuery(self, objectType, *args, **coolArgs)
+	
 	def __str__(self) :
 		return "Gene, name: %s, id: %s, strand: '%s' > %s" %(self.name, self.id, self.strand, str(self.chromosome))

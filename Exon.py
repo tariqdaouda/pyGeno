@@ -54,8 +54,24 @@ class Exon(pyGenoRabaObjectWrapper) :
 		I expect [start, end[ (python) not something like [start, end](ensembl format)"""
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 		self._load_sequencesTriggers = set(["UTR5", "UTR3", "CDS", "sequence"])
-		#self.loadSequences = True
-		#self._load_sequences()
+
+	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
+		if issubclass(objectType, SNP_INDEL) :
+			f = RabaQuery(objectType, namespace = self._wrapped_class._raba_namespace)
+			coolArgs['chromosomeNumber'] = self.chromosome.number
+			coolArgs['start'] = self.start
+			coolArgs['end'] = self.end
+		
+			if len(args) > 0 and type(args[0]) is types.ListType :
+				for a in args[0] :
+					if type(a) is types.DictType :
+						f.addFilter(**a)
+			else :
+				f.addFilter(*args, **coolArgs)
+
+			return f
+		
+		return pyGenoRabaObjectWrapper_makeLoadQuery(self, objectType, *args, **coolArgs)
 	
 	def _load_sequences(self) :
 		seq = self.chromosome.sequence[self.start : self.end]
