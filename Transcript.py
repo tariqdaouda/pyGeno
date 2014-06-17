@@ -45,7 +45,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 		self.exons = RLWrapper(self, Exon, self.wrapped_object.exons)
 		self._load_sequencesTriggers = set(["UTR5", "UTR3", "cDNA", "sequence"])
-		self.CDS_exons = {}
+		self.exonsDict = {}
 	
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
 		if issubclass(objectType, SNP_INDEL) :
@@ -79,12 +79,12 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		exons = []
 		prime5 = True
 		for ee in self.wrapped_object.exons :
+			self.exonsDict[(e.start, e.end)] = e
 			e = pyGenoRabaObjectWrapper_metaclass._wrappers[Exon_Raba](wrapped_object_and_bag = (ee, getV('bagKey')))
 			exons.append(e)
 			sequence.append(e.sequence)
 
 			if e.hasCDS() :
-				self.CDS_exons[(e.CDS_start, e.CDS_end)] = e
 				UTR5.append(e.UTR5)
 				cDNA.append(e.CDS)
 				UTR3.append(e.UTR3)
@@ -170,13 +170,14 @@ class Transcript(pyGenoRabaObjectWrapper) :
 	def getUTR3Length(self):
 		return len(self.bin_UTR3)
 
-	def cDNAToDNA(self, x1) :
-		for CDS, e in self.CDS_exons.iteritems() :
-			if  CDS[0] <= x1 and x1 < CDS[1] :
+	def toDNA(self, x1) :
+		"Convertes a position in the transcript to a one in DNA (with respect to the chromosome)"
+		for startEnd, e in self.exonsDict.iteritems() :
+			if  startEnd[0] <= x1 and x1 < startEnd[1] :
 				if self.strand == '+' :
-					return x1 + CDS[0]
+					return x1 + startEnd[0]
 				else :
-					return CDS[1] - x1
+					return startEnd[1] - x1
 		return None
 
 	def getNbCodons(self) :
