@@ -45,7 +45,8 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 		self.exons = RLWrapper(self, Exon, self.wrapped_object.exons)
 		self._load_sequencesTriggers = set(["UTR5", "UTR3", "cDNA", "sequence"])
-
+		self.CDS_exons = {}
+	
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
 		if issubclass(objectType, SNP_INDEL) :
 			f = RabaQuery(objectType, namespace = self._wrapped_class._raba_namespace)
@@ -83,6 +84,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			sequence.append(e.sequence)
 
 			if e.hasCDS() :
+				self.CDS_exons[(e.CDS_start, e.CDS_end)] = e
 				UTR5.append(e.UTR5)
 				cDNA.append(e.CDS)
 				UTR3.append(e.UTR3)
@@ -107,8 +109,6 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			setV('flags', {'DUBIOUS' : True, 'cDNA_LEN_NOT_MULT_3': True})
 		else :
 			setV('flags', {'DUBIOUS' : False, 'cDNA_LEN_NOT_MULT_3': False})
-
-			#setV('loadSequences', True)
 
 	def _load_bin_sequence(self) :
 		self.bin_sequence = NucBinarySequence(self.sequence)
@@ -170,23 +170,20 @@ class Transcript(pyGenoRabaObjectWrapper) :
 	def getUTR3Length(self):
 		return len(self.bin_UTR3)
 
-	def pluck(self):
-		"""Returns a plucked object. Plucks the transcript off the tree, set the value of self.gene into str(self.gene). This effectively disconnects the object and
-		makes it much more lighter in case you'd like to pickle it"""
-		e = copy.copy(self)
-		e.gene = str(self.gene)
-		return e
+	def cDNAToDNA(self, x1) :
+		for CDS, e in self.CDS_exons.iteritems() :
+			if  CDS[0] <= x1 and x1 < CDS[1] :
+				if self.strand == '+' :
+					return x1 + CDS[0]
+				else :
+					return CDS[1] - x1
+		return None
 
 	def getNbCodons(self) :
 		return len(self.cDNA)/3
 	
 	def __getattribute__(self, name) :
-		#try :
 		return pyGenoRabaObjectWrapper.__getattribute__(self, name)
-		#except AttributeError :
-		#	pyGenoRabaObjectWrapper.__getattribute__(self, '_load_sequences')()
-
-		#return pyGenoRabaObjectWrapper.__getattribute__(self, name)
 
 	def __getitem__(self, i) :
 		return self.sequence[i]
