@@ -1,5 +1,4 @@
 import string, os, copy, types
-import numpy as N
 
 class UnknownNucleotide(Exception) :
 	def __init__(self, nuc) :
@@ -201,18 +200,19 @@ def polymorphicCodonCombinaisons(codon) :
 	return getSequenceCombinaisons(codon, 0)
 
 def encodePolymorphicNucleotide(polySeq) :
-	"""from ['A', 'G'] or AG or A/G to R"""
-
-	if type(polySeq) is types.ListType :
-		seq = polySeq
+	if type(polySeq) is types.StringType :
+		sseq = polySeq.split('/')
 	else :
-		seq = []
-		for c in polySeq :
-			if c in polymorphicNucleotides :
-				seq.extend(polymorphicNucleotides[c])
-			elif c in nucleotides :
-				seq.append(c)
-
+		sseq = polySeq
+	
+	seq = []
+	for n in sseq :
+		try :
+			for n2 in polymorphicNucleotides[n] :
+				seq.append(n2)
+		except KeyError :
+			seq.append(n)
+	
 	seq = set(seq)
 	if len(seq) == 4:
 		return 'N'

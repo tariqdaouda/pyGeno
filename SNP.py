@@ -26,7 +26,7 @@ class SequenceSNP_INDEL(object) :
 	class InsertionType :
 		pass
 
-	strTypes = {'SNP' : SequenceSNP_INDEL.SNPType, 'DELETION' : SequenceSNP_INDEL.DeletionType, 'INSERTION' : SequenceSNP_INDEL.InsertionType}
+	strTypes = {'SNP' : SNPType, 'DELETION' : DeletionType, 'INSERTION' : InsertionType}
 	
 	def __init__(self, alleles, polyType, length) :
 		"""
@@ -36,9 +36,9 @@ class SequenceSNP_INDEL(object) :
 		* length is the number of nucleatides affected by the ppolymorphism. It must be an int.
 		== 1 if it's a SNP, > 1 if its an indel. In that last case it's the number of nucleotides inserted or deleted
 		"""
-		
 		assert type(alleles) is types.StringType
 		assert type(length) is types.IntType
+		
 		assert length > 0
 		
 		if type(polyType) is types.StringType :
@@ -52,9 +52,11 @@ class SequenceSNP_INDEL(object) :
 			raise TypeError("type, if it's a class, must one of those: SequenceSNP_INDEL.SNPType, SequenceSNP_INDEL.DeletionType, SequenceSNP_INDEL.InsertionType. You've provided: %s" % polyType)
 
 		self.alleles = alleles
+		self.polyType = polyType
+		self.length = length
 		self.SNPSources = {}
-
-	def addSourceSNP(self, SNPSetName, sources) :
+		
+	def addSources(self, sources) :
 		"Optional, you can keep a dict that records the polynorphims that were mixed together to make self. They are stored into self.SNPSources"
 		self.SNPSources = sources
 
@@ -90,7 +92,7 @@ def defaultSNPsFilter(chromosome, **kwargs) :
 	alleles = uf.encodePolymorphicNucleotide(alleles) #encodes all the polymorphism in a single character
 	
 	#creates the SequenceSNP_INDEL, length means that it's a snp and not instertion (> 1) or a deletion (< 0)
-	ret = SequenceSNP_INDEL(alleles = alleles, length = 1)
+	ret = SequenceSNP_INDEL(alleles = alleles, polyType = SequenceSNP_INDEL.SNPType, length = 1)
 	#optional we keep a record of the polymorphisms that were used during the process
 	ret.addSources(sources)
 	

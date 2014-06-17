@@ -62,7 +62,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 			return f
 		
-		return pyGenoRabaObjectWrapper_makeLoadQuery(self, objectType, *args, **coolArgs)
+		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 		
 	def _load_sequences(self) :
 		def getV(k) :

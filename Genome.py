@@ -79,7 +79,7 @@ class Genome(pyGenoRabaObjectWrapper) :
 
 			return f
 		
-		return pyGenoRabaObjectWrapper_makeLoadQuery(self, objectType, *args, **coolArgs)
+		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 	
 	def __str__(self) :
 		return "Genome: %s/%s SNPs: %s" %(self.specie, self.name, self.SNPTypes)

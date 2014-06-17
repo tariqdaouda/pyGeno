@@ -43,7 +43,7 @@ class Gene(pyGenoRabaObjectWrapper) :
 
 			return f
 		
-		return pyGenoRabaObjectWrapper_makeLoadQuery(self, objectType, *args, **coolArgs)
+		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 	
 	def __str__(self) :
 		return "Gene, name: %s, id: %s, strand: '%s' > %s" %(self.name, self.id, self.strand, str(self.chromosome))

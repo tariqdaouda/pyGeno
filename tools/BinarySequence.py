@@ -1,6 +1,5 @@
 import array, copy
 import UsefulFunctions as uf
-import numpy as N
 
 class BinarySequence :
 	
@@ -309,19 +308,6 @@ class NucBinarySequence(BinarySequence) :
 		return res
 		
 if __name__=="__main__":
-	
-	#nbT = 100000
-	#maxSeqLen = 100
-	#minSeqLen = 8
-	#pPoly = 0.05
-	#for i in range(nbT) :
-	#	seq = ''
-	#	seqLen = N.random.randint(minSeqLen, maxSeqLen)
-	#	nbVar = 1
-	#	for i in range(seqLen) :
-	#		seq += uf.AAs(N.random.randint(0, len(uf.AAs)))
-	#		if N.rand() <= pPoly :
-	#			seq += '/'+uf.AAs(N.random.randint(0, len(uf.AAs)))
 		
 	#seq = 'ACED/E/GFIHK/MLMQPS/RTWVY'
 	seq = 'ACED/E/GFIHK/MLMQPS/RTWVY/A/R'

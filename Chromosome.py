@@ -28,8 +28,9 @@ class ChrosomeSequence(object) :
 		self.SNPsFilter = SNPsFilter
 	
 	def _getSequence(self, slic) :
-		assert type(slic) is SliceType
-		
+		#~ print slic
+		#~ assert type(slic) is SliceType
+		#~ 
 		data = self.data[slic]
 		SNPTypes = self.chromosome.genome.SNPTypes
 		
@@ -49,23 +50,24 @@ class ChrosomeSequence(object) :
 		polys = {}
 		for iterator in iterators :
 			for poly in iterator : 
-				if poly.pos not in polys :
-					polys[poly.pos] = {poly.setName : poly}
+				if poly.start not in polys :
+					polys[poly.start] = {poly.setName : poly}
 				else :
-					polys[poly.pos][poly.setName] = poly
+					polys[poly.start][poly.setName] = poly
 		
 		data = list(data)
-		for pos, setPolys in polys.iteritems() :
-			if sequenceSNP.length < 1 :
-				raise TypeError("SequenceSNP of chromosome: %s starting at: %s has a .length < 1 (%s)" % (self.chromosome.number, snp.start, snp.length))
+		for start, setPolys in polys.iteritems() :
 			
-			seqPos = snp.start - slic.start
+			seqPos = start - slic.start
 			sequenceSNP = self.SNPsFilter(chromosome = self.chromosome, **setPolys)
 			
-			if sequenceSNP.alleles not in uf.polymorphicNucleotides and sequenceSNP.alleles not in uf.nucleotides :
-				raise TypeError("SequenceSNP of chromosome: %s starting at: %s has invalid alleles" % (self.chromosome.number, snp.start, sequenceSNP.alleles))
+			if sequenceSNP.length < 1 :
+				raise TypeError("SequenceSNP of chromosome: %s starting at: %s has a .length < 1 (%s)" % (self.chromosome.number, start, sequenceSNP.length))
 			
-			if sequenceSNP.type is SequenceSNP_INDEL.deletetionType :
+			if sequenceSNP.alleles not in uf.polymorphicNucleotides and sequenceSNP.alleles not in uf.nucleotides :
+				raise TypeError("SequenceSNP of chromosome: %s starting at: %s has invalid alleles" % (self.chromosome.number, start, sequenceSNP.alleles))
+			
+			if sequenceSNP.type is SequenceSNP_INDEL.DeletionType :
 				data = data[:seqPos-1] + data[seqPos-1 + sequenceSNP.length] 
 			elif sequenceSNP.type is SequenceSNP_INDEL.InsertionType or sequenceSNP.type is SequenceSNP_INDEL.SNPType :
 				data[seqPos] = sequenceSNP.alleles
@@ -73,6 +75,13 @@ class ChrosomeSequence(object) :
 				raise TypeError("SequenceSNP of chromosome: %s starting at: %s is of unknown type: %s" % (self.chromosome.number, snp.start, sequenceSNP.type))
 		
 		return ''.join(data)
+
+	def __getitem__(self, i) :
+		return self._getSequence(i)
+		#return self.data[i]
+
+	def __len__(self) :
+		return self.chromosome.length
 
 class Chromosome_Raba(pyGenoRabaObject) :
 	"""A class that represents a persistent Chromosome"""
@@ -121,7 +130,7 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 
 			return f
 		
-		return pyGenoRabaObjectWrapper_makeLoadQuery(self, objectType, *args, **coolArgs)
+		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 
 	def __str__(self) :
 		return "Chromosome: number %s > %s" %(self.wrapped_object.number, str(self.wrapped_object.genome))

@@ -71,7 +71,7 @@ class Exon(pyGenoRabaObjectWrapper) :
 
 			return f
 		
-		return pyGenoRabaObjectWrapper_makeLoadQuery(self, objectType, *args, **coolArgs)
+		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 	
 	def _load_sequences(self) :
 		seq = self.chromosome.sequence[self.start : self.end]
