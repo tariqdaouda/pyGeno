@@ -5,7 +5,6 @@ from pyGenoObjectBases import *
 import rabaDB.fields as rf
 
 from tools import UsefulFunctions as uf
-#from Protein import Protein
 from Exon import *
 
 from tools.BinarySequence import NucBinarySequence
@@ -79,8 +78,8 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		exons = []
 		prime5 = True
 		for ee in self.wrapped_object.exons :
-			self.exonsDict[(e.start, e.end)] = e
 			e = pyGenoRabaObjectWrapper_metaclass._wrappers[Exon_Raba](wrapped_object_and_bag = (ee, getV('bagKey')))
+			self.exonsDict[(e.start, e.end)] = e
 			exons.append(e)
 			sequence.append(e.sequence)
 

@@ -185,9 +185,9 @@ def getSequenceCombinaisons(polymorphipolymorphicDnaSeqSeq, pos = 0) :
 
 	variants = []
 	if seq[pos] in polymorphicNucleotides :
-		chars = decodePolymorphicNucleotide(seq[pos]).split('/')
+		chars = decodePolymorphicNucleotide(seq[pos])
 	else :
-		chars = seq[pos].split('/')
+		chars = seq[pos]#.split('/')
 
 	for c in chars :
 		rseq = copy.copy(seq)
