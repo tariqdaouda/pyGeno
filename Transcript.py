@@ -112,7 +112,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 	def _load_bin_sequence(self) :
 		self.bin_sequence = NucBinarySequence(self.sequence)
 		self.bin_UTR5 =  NucBinarySequence(self.UTR5)
-		self.bin_CDS =  NucBinarySequence(self.CDS)
+		self.bin_cDNA =  NucBinarySequence(self.cDNA)
 		self.bin_UTR3 =  NucBinarySequence(self.UTR3)
 
 	def getNucleotideCodon(self, cdnaX1) :
