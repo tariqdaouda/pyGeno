@@ -4,54 +4,58 @@ import UsefulFunctions as uf
 class BinarySequence :
 	
 	def __init__(self, sequence, arrayForma, charToBinDict) :
-		
-		self.polymorphisms = []
-		self.defaultSequence = ''
-		
+	
 		self.forma = arrayForma
 		self.charToBin = charToBinDict
 		self.sequence = sequence
 		
-		self.binSequence = self.encode(sequence)
+		self.binSequence, self.defaultSequence, self.polymorphisms = self.encode(sequence)
 		self.itemsize = self.binSequence.itemsize
 		self.typecode = self.binSequence.typecode
 		#print 'bin', len(self.sequence), len(self.binSequence)
-		
+
 	def encode(self, sequence):
-		res = array.array(self.forma.typecode)
+		"""returns a tuple (binary reprensentation, default sequence, polymorphisms list)"""
+		
+		polymorphisms = []
+		defaultSequence = '' 
+		binSequence = array.array(self.forma.typecode)
 		b = 0
 		i = 0
 		trueI = 0 #not inc in case if poly
-		poly = []
+		poly = set()
 		while i < len(sequence)-1:
 			b = b | self.forma[self.charToBin[sequence[i]]]
 			if sequence[i+1] == '/' :
-				if sequence[i] not in poly :
-					poly.append(sequence[i])
+				poly.add(sequence[i])
 				i += 2
 			else :
-				res.append(b)
-				b = 0
+				binSequence.append(b)
 				if len(poly) > 0 :
-					if sequence[i] not in poly :
-						poly.append(sequence[i])
-					self.polymorphisms.append((trueI, poly))
-					poly = []
-				self.defaultSequence += sequence[i]
+					poly.add(sequence[i])
+					polymorphisms.append((trueI, poly))
+					poly = set()
+				
+				bb = 0
+				while b % 2 != 0 :
+					b = b/2
+					
+				defaultSequence += sequence[i]
+				b = 0
 				i += 1
 				trueI += 1
-				
+		
 		if i < len(sequence) :
 			b = b | self.forma[self.charToBin[sequence[i]]]
-			res.append(b)
+			binSequence.append(b)
 			if len(poly) > 0 :
 				if sequence[i] not in poly :
-					poly.append(sequence[i])
-				self.polymorphisms.append((trueI, poly))
-				#poly = []
-			self.defaultSequence += sequence[i]
-		return res
+					poly.add(sequence[i])
+				polymorphisms.append((trueI, poly))
+			defaultSequence += sequence[i]
 		
+		return (binSequence, defaultSequence, polymorphisms)
+
 	def __testFind(self, arr) :
 		if len(arr)  == 0:
 			raise TypeError ('binary find, needle is empty')
@@ -65,9 +69,12 @@ class BinarySequence :
 			raise TypeError ('bin operator, both arrays must have same item size, arr: %d, self: %d' % (arr.itemsize, self.itemsize))
 	
 	def findPolymorphisms(self, strSeq, strict = False):
-		"""If strict = False, it ignores the cases of matching heterozygocity (ex: for a given position i, strSeq[i] = A and self.sequence = 'A/G')
-		, if strict = True returns all positions where strSeq differs self's sequence"""
-		arr = self.encode(strSeq)
+		"""
+		Compares strSeq with self.sequence.
+		If not strict, it ignores the cases of matching heterozygocity (ex: for a given position i, strSeq[i] = A and self.sequence[i] = 'A/G')
+		, if strict it returns all positions where strSeq differs self,sequence
+		"""
+		arr = self.encode(strSeq)[0]
 		res = []
 		if not strict :
 			for i in range(len(arr)+len(self)) :
@@ -108,7 +115,6 @@ class BinarySequence :
 		else :
 			return [''.join(listSequence)]
 
-	
 	def getSequenceVariants(self, x1 = 0, x2 = -1, maxVariantNumber = 128) :
 		"""returns the sequences resulting from all combinaisons of all polymorphismes between x1 and x2
 		@return a couple (bool, variants of sequence between x1 and x2), bool == true if there's more combinaisons than maxVariantNumber"""
@@ -121,7 +127,7 @@ class BinarySequence :
 		nbP = 1
 		stopped = False
 		j = 0
-		for p in self.polymorphisms:
+		for p in self.polymorphisms :
 			if p[0] >= xx2 :
 				break
 			
@@ -140,8 +146,7 @@ class BinarySequence :
 			return (stopped, [self.defaultSequence[x1:xx2]])
 		
 		return (stopped, self.__getSequenceVariants(x1, polyStart, j, list(self.defaultSequence[x1:xx2])))
-	
-	
+
 	def getNbVariants(self, x1, x2 = -1) :
 		"""@returns the nb of variants of sequences between x1 and x2"""
 		if x2 == -1 :
@@ -162,8 +167,7 @@ class BinarySequence :
 		arr = self.encode(strSeq)
 		
 		if len(arr) == 0 :
-			print "strSeq encodeion is empty", strSeq, arr
-			return []
+			raise TypeError("strSeq encoding is empty")
 
 		for i in range(len(arr)) :
 			l = []
@@ -285,45 +289,43 @@ class NucBinarySequence(BinarySequence) :
 	def __init__(self, sequence):
 		f = array.array('B', [1, 2, 4, 8])
 		c = {'A': 0, 'T': 1, 'C': 2, 'G': 3}
-		self.nucleotides = {
-			'A' : ['A'], 'T' : ['T'], 'C' : ['C'], 'G' : ['G'],
-			'R' : ['A','G'], 'Y' : ['C','T'], 'M': ['A','C'],
-			'K' : ['T','G'], 'W' : ['A','T'], 'S' : ['C','G'], 'B': ['C','G','T'],
-			'D' : ['A','G','T'], 'H' : ['A','C','T'], 'V' : ['A','C','G'], 'N': ['A','C','G','T']
+		ce = {
+			'R' : 'A/G', 'Y' : 'C/T', 'M': 'A/C',
+			'K' : 'T/G', 'W' : 'A/T', 'S' : 'C/G', 'B': 'C/G/T',
+			'D' : 'A/G/T', 'H' : 'A/C/T', 'V' : 'A/C/G', 'N': 'A/C/G/T'
 			}
-		BinarySequence.__init__(self, sequence, f, c)
-		
-	def encode(self, sequence):
-		res = array.array(self.forma.typecode)
-		i = 0
-		for c in sequence :
-			b = 0
-			for nuc in self.nucleotides[c] :
-				b = b | self.forma[self.charToBin[nuc]]
-			if c in uf.polymorphicNucleotides :
-				self.polymorphisms.append((i, self.nucleotides[c]))
-			
-			res.append(b)
-			i += 1
-		return res
-		
+		lstSeq = list(sequence)
+		for i in xrange(len(lstSeq)) :
+			if lstSeq[i] in ce :
+				lstSeq[i] = ce[lstSeq[i]]
+		lstSeq = ''.join(lstSeq)
+		BinarySequence.__init__(self, lstSeq, f, c)
+
 if __name__=="__main__":
+	
+	def test0() :
+		#seq = 'ACED/E/GFIHK/MLMQPS/RTWVY'
+		seq = 'ACED/E/GFIHK/MLMQPS/RTWVY/A/R'
+		bSeq = AABinarySequence(seq)
+		start = 0
+		stop = 4
+		rB = bSeq.getSequenceVariants_bck(start, stop)
+		r = bSeq.getSequenceVariants(start, stop)
 		
-	#seq = 'ACED/E/GFIHK/MLMQPS/RTWVY'
-	seq = 'ACED/E/GFIHK/MLMQPS/RTWVY/A/R'
-	bSeq = AABinarySequence(seq)
-	start = 0
-	stop = 4
-	rB = bSeq.getSequenceVariants_bck(start, stop)
-	r = bSeq.getSequenceVariants(start, stop)
+		#print start, stop, 'nb_comb_r', len(r[1]), set(rB[1])==set(r[1]) 
+		print start, stop#, 'nb_comb_r', len(r[1]), set(rB[1])==set(r[1]) 
+		
+		#if set(rB[1])!=set(r[1]) :
+		print '-AV-'
+		print start, stop, 'nb_comb_r', len(rB[1])
+		print '\n'.join(rB[1])
+		print '=AP========'
+		print start, stop, 'nb_comb_r', len(r[1]) 
+		print '\n'.join(r[1])
 	
-	#print start, stop, 'nb_comb_r', len(r[1]), set(rB[1])==set(r[1]) 
-	print start, stop#, 'nb_comb_r', len(r[1]), set(rB[1])==set(r[1]) 
-	
-	#if set(rB[1])!=set(r[1]) :
-	print '-AV-'
-	print start, stop, 'nb_comb_r', len(rB[1])
-	print '\n'.join(rB[1])
-	print '=AP========'
-	print start, stop, 'nb_comb_r', len(r[1]) 
-	print '\n'.join(r[1])
+	def testVariants() :
+		seq = 'ATGAGTTTGCCGCGCN'
+		bSeq = NucBinarySequence(seq)
+		print bSeq.getSequenceVariants() 
+
+	testVariants()
