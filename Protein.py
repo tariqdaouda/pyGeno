@@ -1,6 +1,7 @@
 import configuration as conf
 
 from pyGenoObjectBases import *
+from SNP import SNP_INDEL
 
 import rabaDB.fields as rf
 

@@ -1,4 +1,5 @@
 from pyGenoObjectBases import *
+from SNP import SNP_INDEL
 
 import rabaDB.fields as rf
 from tools import UsefulFunctions as uf

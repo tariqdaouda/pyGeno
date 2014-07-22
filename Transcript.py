@@ -6,6 +6,7 @@ import rabaDB.fields as rf
 
 from tools import UsefulFunctions as uf
 from Exon import *
+from SNP import SNP_INDEL
 
 from tools.BinarySequence import NucBinarySequence
 
