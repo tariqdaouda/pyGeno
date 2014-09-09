@@ -117,10 +117,10 @@ class pyGenoRabaObjectWrapper(object) :
 		objectType._wrapped_class.ensureIndex(fields, where, (whereValues,))
 
 	def dropIndex(self, objectType, fields) :
-		"not tested yet"
+		"not tested yet but should work"
 		where, whereValues = '%s=?' %(self._wrapped_class.__name__[:-5]), self.wrapped_object
 		objectType._wrapped_class.dropIndex(fields, where, (whereValues,))
-		
+	
 	def __getattr__(self, name) :
 		if name == 'save' or name == 'delete' :
 			raise AttributeError("You can't delete or save an object from wrapper, try .wrapped_object.delete()/save()")

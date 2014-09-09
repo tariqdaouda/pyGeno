@@ -60,7 +60,7 @@ class SequenceSNP_INDEL(object) :
 		"Optional, you can keep a dict that records the polynorphims that were mixed together to make self. They are stored into self.SNPSources"
 		self.SNPSources = sources
 
-def defaultSNPsFilter(chromosome, **kwargs) :
+def defaultSNPFilter(chromosome, **kwargs) :
 	"""Default function for filtering snp, does not filter anything. Doesn't apply indels.
 	This is also a template that you can use for own filters.
 	

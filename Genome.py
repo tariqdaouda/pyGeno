@@ -42,7 +42,7 @@ class Genome_Raba(pyGenoRabaObject) :
 class Genome(pyGenoRabaObjectWrapper) :
 	_wrapped_class = Genome_Raba
 
-	def __init__(self, SNPs = None, SNPsFilter = defaultSNPsFilter,  *args, **kwargs) :
+	def __init__(self, SNPs = None, SNPFilter = defaultSNPFilter,  *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 
 		if type(SNPs) is types.StringType :

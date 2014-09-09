@@ -71,26 +71,21 @@ class CSVEntry(object) :
 			tmpData = tmpL.split(csvFile.separator)
 
 			tmpDatum = []
-			#print tmpData
 			for d in tmpData :
 				sd = d.strip()
-				#print '\t', sd, d, tmpDatum, len(tmpDatum)
-				try :
-					if len(tmpDatum) > 0 or sd[0] == csvFile.stringSeparator :
-						tmpDatum.append(sd)
-					
-					if sd[-1] == csvFile.stringSeparator :
-						self.data.append(''.join(tmpDatum))
+				if len(tmpDatum) > 0 or (len(sd) > 0 and sd[0] == csvFile.stringSeparator) :
+					tmpDatum.append(sd)
+				
+					if len(sd) > 0 and sd[-1] == csvFile.stringSeparator :
+						self.data.append(csvFile.separator.join(tmpDatum))
 						tmpDatum = []
-					else :
-						self.data.append(sd)
-				except IndexError :
-					pass
+				else :
+					self.data.append(sd) 
 		else :
 			self.lineNumber = len(csvFile)
 			for i in range(len(self.csvFile.legend)) :
 				self.data.append('')
-	
+
 	def __getitem__(self, key) :
 		return self.data[self.csvFile.legend[key.lower()]]
 
@@ -105,7 +100,7 @@ class CSVEntry(object) :
 	
 class CSVFile(object) :
 
-	def __init__(self, legend = [], separator = '\t') :
+	def __init__(self, legend = [], separator = ',') :
 		"Legend can either be a list of a dict {field : column number}"
 		
 		self.legend = {}
@@ -121,16 +116,16 @@ class CSVFile(object) :
 				self.strLegend.insert(legend[k], k.lower())
 			self.strLegend = separator.join(self.strLegend)
 		
-		self.filename = 0
+		self.filename = ""
 		self.lines = []	
 		self.separator = separator
 		self.currentPos = -1
 	
-	def parse(self, fil, separator = '\t', stringSeparator = '"') :
+	def parse(self, filePath, separator = ',', stringSeparator = '"') :
 		"Parses a CSV on disc"
 		
-		self.filename = fil
-		f = open(fil)
+		self.filename = filePath
+		f = open(filePath)
 		self.lines = f.readlines()
 		f.close()
 		
@@ -169,11 +164,12 @@ class CSVFile(object) :
 	
 	def insertLine(self, i) :
 		"Inserts an empty line at position i and returns it"
-		self.data.insert(CSVEntry(self))
+		self.data.insert(i, CSVEntry(self))
 		return self.lines[i]
 	
 	def save(self, filePath) :
 		"save the csv to a file"
+		self.filename = filePath
 		f = open(filePath, 'w')
 		f.write(self.toStr())
 		f.close()
