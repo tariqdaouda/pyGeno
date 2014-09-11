@@ -50,7 +50,7 @@ class Genome(pyGenoRabaObjectWrapper) :
 		else :
 			self.SNPsSets = SNPs
 		
-		self.SNPsFilter = SNPsFilter
+		self.SNPFilter = SNPFilter
 		self.SNPTypes = {}
 		
 		if SNPs is not None :

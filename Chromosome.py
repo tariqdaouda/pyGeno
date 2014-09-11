@@ -22,10 +22,10 @@ class ChrosomeSequence(object) :
 		self.data = data
 		self.refOnly = refOnly
 		self.chromosome = chromosome
-		self.SNPsFilter = self.chromosome.genome.SNPsFilter
+		self.SNPFilter = self.chromosome.genome.SNPFilter
 	
-	def setSNPFilter(self, SNPsFilter) :
-		self.SNPsFilter = SNPsFilter
+	def setSNPFilter(self, SNPFilter) :
+		self.SNPFilter = SNPFilter
 	
 	def _getSequence(self, slic) :
 		#~ print slic
@@ -59,7 +59,7 @@ class ChrosomeSequence(object) :
 		for start, setPolys in polys.iteritems() :
 			
 			seqPos = start - slic.start
-			sequenceSNP = self.SNPsFilter(chromosome = self.chromosome, **setPolys)
+			sequenceSNP = self.SNPFilter(chromosome = self.chromosome, **setPolys)
 			
 			if sequenceSNP.length < 1 :
 				raise TypeError("SequenceSNP of chromosome: %s starting at: %s has a .length < 1 (%s)" % (self.chromosome.number, start, sequenceSNP.length))
