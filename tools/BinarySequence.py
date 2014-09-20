@@ -160,61 +160,48 @@ class BinarySequence :
 				nbP *= len(p[1])
 		
 		return nbP
-		
-	def find(self, strSeq) :
-		"finds all instances of strSeq"
-		lpos = range(len(self))
-		arr = self.encode(strSeq)
-		
-		if len(arr) == 0 :
-			raise TypeError("strSeq encoding is empty")
 
-		for i in range(len(arr)) :
-			l = []
-			for j in range(len(lpos)) :
-				#print i, arr[i], self[lpos[j]+i], arr[i] & self[lpos[j]+i]
-				if (lpos[j]+i < len(self)) and (arr[i] & self[lpos[j]+i] > 0):
-					l.append(lpos[j])
-			lpos = l
-		
-		return l
-		
-	def find_naive(self, strSeq) :
-		
-		res = -1
-		arr = self.encode(strSeq)
-		
-		#naive search, faire qlq de plus fancy quand j'aurais le temps	
-		for i in range(len(self)) :
-			found = True
-			if (i+len(arr) <= len(self)) :
-				for j in range(len(arr)) :
-					if (self[i+j] & arr[j]) == 0 :
+	def _dichFind(self, needle, currHaystack, offset, lst = None) :
+		"dichotomic search, if lst is None, will return the first position found. If it's a list, will return a list of all positions in lst. returns -1 or [] if no match found"
+		if len(currHaystack) == 1 :
+			if (offset < (len(self) - len(needle))) and (currHaystack[0] & needle[0]) > 0 and (self[offset+len(needle)-1] & needle[-1]) > 0 :
+				found = True
+				for i in xrange(1, len(needle)-1) :
+					if self[offset + i] & needle[i] == 0 :
 						found = False
 						break
 				if found :
-					return i
-				
-		return -1
-		
-	def findAll_naive(self, strSeq) :
-	
+					if lst is not None :
+						lst.append(offset)
+					else :
+						return offset
+				else :
+					if lst is None :
+						return -1
+		else :
+			if (offset < (len(self) - len(needle))) :
+				if lst is not None :
+					self._dichFind(needle, currHaystack[:len(currHaystack)/2], offset, lst)
+					self._dichFind(needle, currHaystack[len(currHaystack)/2:], offset + len(currHaystack)/2, lst)
+				else :
+					v1 = self._dichFind(needle, currHaystack[:len(currHaystack)/2], offset, lst)
+					if v1 > -1 :
+						return v1
+
+					return self._dichFind(needle, currHaystack[len(currHaystack)/2:], offset + len(currHaystack)/2, lst)
+					
+			return -1
+
+	def find(self, strSeq) :
 		arr = self.encode(strSeq)
-		self.__testFind(arr)
-		#naive search, faire qlq de plus fancy quand j'aurais le temps
-		ret = []
-		for i in range(len(self)) :
-			found = True
-			if (i+len(arr) <= len(self)) :
-				for j in range(len(arr)) :
-					if (self[i+j] & arr[j]) == 0 :
-						found = False
-						break
-				if found :
-					ret.append(i)
+		return self._dichFind(arr[0], self, 0, lst = None)
+
+	def findAll(self, strSeq) :
+		arr = self.encode(strSeq)
+		lst = []
+		self._dichFind(arr[0], self, self, 0, lst)
+		return lst
 		
-		return ret
-	
 	def __and__(self, arr) :
 		self.__testBinary(arr)
 		

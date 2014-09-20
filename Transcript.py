@@ -194,4 +194,3 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 	def __str__(self) :
 		return """Transcript, id: %s, name: %s > %s""" %(self.id, self.name, str(self.gene))
-

@@ -10,7 +10,7 @@ def nosave() :
 
 class pyGenoRabaObject(Raba) :
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
-	_raba_abstract = True # not saved in db
+	_raba_abstract = True # not saved in db by default
 
 	def __init__(self) :
 		if self is pyGenoRabaObject :
