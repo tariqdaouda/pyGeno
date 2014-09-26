@@ -1,6 +1,6 @@
 import sys, os, time
 from ConfigParser import SafeConfigParser
-import rabaDB.setup
+import rabaDB.rabaSetup
 
 class PythonVersionError(Exception) :
 	pass
@@ -10,7 +10,7 @@ pyGeno_BRANCH = "V2"
 
 pyGeno_VERSION_NAME = 'Lean Viper!'
 pyGeno_VERSION_RELEASE_LEVEL = 'Beta'
-pyGeno_VERSION_NUMBER = 14.02
+pyGeno_VERSION_NUMBER = 14.09
 pyGeno_VERSION_BUILD_TIME = time.ctime(os.path.getmtime(__file__))
 
 pyGeno_RABA_NAMESPACE = 'pyGenoRaba'
@@ -82,6 +82,6 @@ def pyGeno_init() :
 		os.makedirs(pyGeno_DATA_PATH)
 
 	#launching the db
-	rabaDB.setup.RabaConfiguration(pyGeno_RABA_NAMESPACE, pyGeno_RABA_DBFILE)
-	db = rabaDB.setup.RabaConnection(pyGeno_RABA_NAMESPACE)
-	dbConf = rabaDB.setup.RabaConfiguration(pyGeno_RABA_NAMESPACE)
+	rabaDB.rabaSetup.RabaConfiguration(pyGeno_RABA_NAMESPACE, pyGeno_RABA_DBFILE)
+	db = rabaDB.rabaSetup.RabaConnection(pyGeno_RABA_NAMESPACE)
+	dbConf = rabaDB.rabaSetup.RabaConfiguration(pyGeno_RABA_NAMESPACE)
