@@ -64,7 +64,7 @@ Loading a genome with SNPs:
 
 Filtering SNPs:
 ---------------
-For an example of how to definie your own filters you can have a look at the function defaultSNPFilter in SNP.py
+For an example of how to define your own filters you can have a look at the function defaultSNPFilter in SNP.py
 
 Progress Bar:
 -------------
