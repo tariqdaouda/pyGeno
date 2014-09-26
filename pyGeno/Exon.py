@@ -79,7 +79,7 @@ class Exon(pyGenoRabaObjectWrapper) :
 		if self.strand == '+' :
 			self.sequence = seq
 		else :
-			self.sequence =  uf.reverseComplement(seq)
+			self.sequence =  uf.reverseComplement(str(seq))
 		
 		if self.hasCDS() :
 			start = self.CDS_start-self.start

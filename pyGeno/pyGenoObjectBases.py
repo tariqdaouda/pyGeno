@@ -1,7 +1,7 @@
 import time, types, string
 import configuration as conf
 
-from rabaDB.setup import *
+from rabaDB.rabaSetup import *
 from rabaDB.Raba import *
 from rabaDB.filters import RabaQuery
 

@@ -9,7 +9,7 @@ pyGeno_FACE = "~-~-:>"
 pyGeno_BRANCH = "V2"
 
 pyGeno_VERSION_NAME = 'Lean Viper!'
-pyGeno_VERSION_RELEASE_LEVEL = 'Beta'
+pyGeno_VERSION_RELEASE_LEVEL = 'Release'
 pyGeno_VERSION_NUMBER = 14.09
 pyGeno_VERSION_BUILD_TIME = time.ctime(os.path.getmtime(__file__))
 

@@ -36,10 +36,11 @@ class SequenceSNP_INDEL(object) :
 		* length is the number of nucleatides affected by the ppolymorphism. It must be an int.
 		== 1 if it's a SNP, > 1 if its an indel. In that last case it's the number of nucleotides inserted or deleted
 		"""
-		assert type(alleles) is types.StringType
 		assert type(length) is types.IntType
-		
 		assert length > 0
+
+		if type(alleles) is types.UnicodeType :
+			alleles = str(alleles)
 		
 		if type(polyType) is types.StringType :
 			try :
@@ -50,7 +51,7 @@ class SequenceSNP_INDEL(object) :
 			self.type = polyType
 		else :
 			raise TypeError("type, if it's a class, must one of those: SequenceSNP_INDEL.SNPType, SequenceSNP_INDEL.DeletionType, SequenceSNP_INDEL.InsertionType. You've provided: %s" % polyType)
-
+		
 		self.alleles = alleles
 		self.polyType = polyType
 		self.length = length
@@ -84,7 +85,8 @@ def defaultSNPFilter(chromosome, **kwargs) :
 		else :
 			sources[snpSet] = snp
 			alleles.append(snp.alt) #if not an indel append the polymorphism
-	
+		print snp.start, snp.alt, snp.ref
+		
 	#appends the refence allele to the lot
 	refAllele = chromosome.refSequence[pos]
 	alleles.append(refAllele)
@@ -95,7 +97,7 @@ def defaultSNPFilter(chromosome, **kwargs) :
 	ret = SequenceSNP_INDEL(alleles = alleles, polyType = SequenceSNP_INDEL.SNPType, length = 1)
 	#optional we keep a record of the polymorphisms that were used during the process
 	ret.addSources(sources)
-	
+	#print '----', ret.alleles, refAllele, kwargs
 	return ret
 
 class SNPMaster(Raba) :

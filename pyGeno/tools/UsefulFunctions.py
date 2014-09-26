@@ -122,6 +122,7 @@ def complement(seq) :
 	"returns the complementary sequence without inversing it"
 	tb = string.maketrans("ACGTRYMKWSBDHVNacgtrymkwsbdhvn",
 						  "TGCAYRKMWSVHDBNtgcayrkmwsvhdbn")
+	
 	return seq.translate(tb)
 
 def translateDNA_6Frames(sequence) :
@@ -200,8 +201,13 @@ def polymorphicCodonCombinaisons(codon) :
 	return getSequenceCombinaisons(codon, 0)
 
 def encodePolymorphicNucleotide(polySeq) :
+	"polySeq must have one of the following forms: ['A', 'T', 'G'], 'ATG', 'A/T/G'"
 	if type(polySeq) is types.StringType :
-		sseq = polySeq.split('/')
+		if polySeq.find("/") < 0 :
+			sseq = list(polySeq)
+		else :
+			sseq = polySeq.split('/')
+			
 	else :
 		sseq = polySeq
 	
@@ -214,6 +220,7 @@ def encodePolymorphicNucleotide(polySeq) :
 			seq.append(n)
 	
 	seq = set(seq)
+	
 	if len(seq) == 4:
 		return 'N'
 	elif len(seq) == 3 :
