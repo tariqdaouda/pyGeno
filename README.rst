@@ -1,6 +1,18 @@
 pyGeno: A python package for Personalized Proteogenomics
 ========================================================
 
+Bootstraping:
+-------------
+There are two packages shipped with pyGeno, the reference genome GRCh37.75 and a dummy packages that mimics a casava's snps.txt with one SNP at begining of the gene SRY. 
+You can bootstrap pyGeno with the following
+
+.. code:: python
+	
+	import pyGeno.bootstrap as B
+	
+	B.importHumanReference()
+	B.importDummySRY()
+
 Importing a data wrap:
 ----------------------
 
@@ -8,6 +20,15 @@ Importing a data wrap:
 
   from pyGeno.importation.Genomes import *
   importGenome('GRCh37.75.tar.gz')
+
+To import a patient's specific polymorphisms
+
+.. code:: python
+
+  from pyGeno.importation.SNPs import *
+  importSNPs('patient1.tar.gz')
+
+For more details about how packages are built you can have a look inside the folder bootstrap_data. There are two packages for you there.
 
 Instanciating a genome:
 -----------------------
@@ -27,6 +48,23 @@ Printing all the proteins of a gene:
   gene = ref.get(Gene, name = 'TPST2')[0]
   for prot in gene.get(Protein) :
   	print prot.sequence
+
+Loading a genome with SNPs:
+---------------------------
+.. code:: python
+  
+  from pyGeno.Genome import Genome
+  #the name of the snp set is defined inside the package
+  dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY')
+  #you can also define a filter
+  dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY', SNPFilter = myFilter)
+  #and mix several snp sets  
+  dummy = Genome(name = 'GRCh37.75', SNPs = ['dummySRY', 'anotherSet'], SNPFilter = myFilter)
+
+
+Filtering SNPs:
+---------------
+For an example of how to definie your own filters you can have a look at the function defaultSNPFilter in SNP.py
 
 Progress Bar:
 -------------
