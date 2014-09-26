@@ -49,6 +49,30 @@ Printing all the proteins of a gene:
   for prot in gene.get(Protein) :
   	print prot.sequence
 
+Making queries:
+--------------
+pyGeno's get function uses the expressivity of rabaDB
+
+These are all possible query formats
+
+.. code:: python
+  ref.get(Gene, name = "SRY")
+  ref.get(Gene, { "name like" : "HLA"})
+  chormosome.get(Exon, { "start >" : 12000, "end <" : 12300 })
+
+Making queries get vs iterGet:
+-----------------------------
+iterGet is a faster version of get that returns an iterator instead of a list.
+
+
+Creating indexes to speed up queries:
+------------------------------------
+.. code:: python
+
+  from pyGeno.Gene import Gene
+  #creating an index on gene names is necessary
+  Gene.ensureGobalIndex('name')
+  
 Loading a genome with SNPs:
 ---------------------------
 .. code:: python
