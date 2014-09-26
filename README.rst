@@ -52,13 +52,14 @@ Printing all the proteins of a gene:
 Making queries:
 --------------
 pyGeno's get function uses the expressivity of rabaDB
-
 These are all possible query formats
 
 .. code:: python
+
   ref.get(Gene, name = "SRY")
   ref.get(Gene, { "name like" : "HLA"})
-  chormosome.get(Exon, { "start >" : 12000, "end <" : 12300 })
+  chr12.get(Exon, { "start >" : 12000, "end <" : 12300 })
+  ref.get(Transcript, { "gene.name" : 'SRY' })
 
 Making queries get vs iterGet:
 -----------------------------
