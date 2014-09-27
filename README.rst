@@ -54,8 +54,12 @@ Printing all the proteins of a gene:
   for prot in gene.get(Protein) :
   	print prot.sequence
 
-Making queries:
---------------
+Making queries, get() Vs iterGet():
+-----------------------------------
+iterGet is a faster version of get that returns an iterator instead of a list.
+
+Making queries, syntax:
+----------------------
 pyGeno's get function uses the expressivity of rabaDB.
 
 These are all possible query formats:
@@ -66,10 +70,6 @@ These are all possible query formats:
   ref.get(Gene, { "name like" : "HLA"})
   chr12.get(Exon, { "start >=" : 12000, "end <" : 12300 })
   ref.get(Transcript, { "gene.name" : 'SRY' })
-
-Making queries get() Vs iterGet():
------------------------------
-iterGet is a faster version of get that returns an iterator instead of a list.
 
 
 Creating indexes to speed up queries:
@@ -84,14 +84,17 @@ Creating indexes to speed up queries:
   
 Creating a Personalized Genome:
 -------------------------------
+Personalized Genomes are a powerful feature that allow to work on the specific genomes and proteomes of your patients.
+You can even mix several SNPs together.
+
 .. code:: python
   
   from pyGeno.Genome import Genome
   #the name of the snp set is defined inside the package's manifest.ini file
   dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY')
-  #you can also define a filter
+  #you can also define a filter (ex: a quality filter) for the SNPs
   dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY', SNPFilter = myFilter)
-  #and mix several snp sets  
+  #and even mix several snp sets  
   dummy = Genome(name = 'GRCh37.75', SNPs = ['dummySRY', 'anotherSet'], SNPFilter = myFilter)
 
 
