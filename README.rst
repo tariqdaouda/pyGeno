@@ -48,6 +48,7 @@ Printing all the proteins of a gene:
   from pyGeno.Gene import Gene
   from pyGeno.Protein import Protein
   ref = Genome(name = 'GRCh37.75')
+  #get returns a list of elements
   gene = ref.get(Gene, name = 'TPST2')[0]
   for prot in gene.get(Protein) :
   	print prot.sequence
