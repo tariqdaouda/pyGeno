@@ -1,5 +1,7 @@
 pyGeno: A python package for Personalized Proteogenomics
 ========================================================
+(pip install pyGeno for the latest stable version)
+
 
 Bootstraping:
 -------------
