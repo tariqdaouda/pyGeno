@@ -67,7 +67,7 @@ These are all possible query formats:
   chr12.get(Exon, { "start >=" : 12000, "end <" : 12300 })
   ref.get(Transcript, { "gene.name" : 'SRY' })
 
-Making queries get vs iterGet:
+Making queries get() Vs iterGet():
 -----------------------------
 iterGet is a faster version of get that returns an iterator instead of a list.
 
