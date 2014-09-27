@@ -28,7 +28,8 @@ To import a patient's specific polymorphisms
   from pyGeno.importation.SNPs import *
   importSNPs('patient1.tar.gz')
 
-For more details about how packages are built you can have a look inside the folder bootstrap_data. There are two packages for you there.
+You can easily make your own data wraps with any tar.gz compressor.
+For more details on how data wraps are made you can have a look inside the folder bootstrap_data. There are two there for you.
 
 Instanciating a genome:
 -----------------------
