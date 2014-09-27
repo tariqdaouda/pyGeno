@@ -59,7 +59,7 @@ These are all possible query formats
 
   ref.get(Gene, name = "SRY")
   ref.get(Gene, { "name like" : "HLA"})
-  chr12.get(Exon, { "start >" : 12000, "end <" : 12300 })
+  chr12.get(Exon, { "start >=" : 12000, "end <" : 12300 })
   ref.get(Transcript, { "gene.name" : 'SRY' })
 
 Making queries get vs iterGet:
