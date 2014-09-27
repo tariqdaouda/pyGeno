@@ -6,7 +6,7 @@ pyGeno: A python package for Personalized Proteogenomics
 Bootstraping:
 -------------
 There are two data wraps shipped with pyGeno, the reference genome GRCh37.75 and a dummy data wrap that mimics a casava's snps.txt with one SNP at the begining of the gene SRY. 
-You can bootstrap pyGeno with the following
+You can bootstrap pyGeno with the following:
 
 .. code:: python
 	
