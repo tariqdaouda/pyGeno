@@ -38,6 +38,7 @@ Instanciating a genome:
 .. code:: python
 	
 	from pyGeno.Genome import Genome
+	#the name of the genome is defined inside the package's manifest.ini file
 	ref = Genome(name = 'GRCh37.75')
 
 Printing all the proteins of a gene:
@@ -86,7 +87,7 @@ Creating a Personalized Genome:
 .. code:: python
   
   from pyGeno.Genome import Genome
-  #the name of the snp set is defined inside the package
+  #the name of the snp set is defined inside the package's manifest.ini file
   dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY')
   #you can also define a filter
   dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY', SNPFilter = myFilter)
