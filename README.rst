@@ -72,8 +72,10 @@ Creating indexes to speed up queries:
 .. code:: python
 
   from pyGeno.Gene import Gene
-  #creating an index on gene names is necessary
+  #creating an index on gene names if it does not already exist
   Gene.ensureGobalIndex('name')
+  #removing the index
+  Gene.dropIndex('name')
   
 Loading a genome with SNPs:
 ---------------------------
