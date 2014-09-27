@@ -81,8 +81,8 @@ Creating indexes to speed up queries:
   #removing the index
   Gene.dropIndex('name')
   
-Loading a genome with SNPs:
----------------------------
+Creating a Personalized Genome:
+-------------------------------
 .. code:: python
   
   from pyGeno.Genome import Genome
