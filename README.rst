@@ -55,8 +55,9 @@ Printing all the proteins of a gene:
 
 Making queries:
 --------------
-pyGeno's get function uses the expressivity of rabaDB
-These are all possible query formats
+pyGeno's get function uses the expressivity of rabaDB.
+
+These are all possible query formats:
 
 .. code:: python
 
