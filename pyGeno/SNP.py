@@ -85,7 +85,6 @@ def defaultSNPFilter(chromosome, **kwargs) :
 		else :
 			sources[snpSet] = snp
 			alleles.append(snp.alt) #if not an indel append the polymorphism
-		print snp.start, snp.alt, snp.ref
 		
 	#appends the refence allele to the lot
 	refAllele = chromosome.refSequence[pos]
