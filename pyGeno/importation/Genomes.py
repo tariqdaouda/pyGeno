@@ -25,8 +25,8 @@ def backUpDB() :
 
 def _decompressPackage(packageFile) :
 	pFile = tarfile.open(packageFile)
-	packageDir = #os.path.normpath('%s/tmp_pygeno_import' % tempfile.gettempdir())
-
+	
+	packageDir = tempfile.mkdtemp(prefix = "pyGeno_import_")
  	if os.path.isdir(packageDir) :
 		shutil.rmtree(packageDir)
 	os.makedirs(packageDir)
