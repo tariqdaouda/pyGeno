@@ -17,7 +17,7 @@ from tools import UsefulFunctions as uf
 """
 
 class SequenceSNP_INDEL(object) :
-	"This type that a of objects that a SNP filter should return"
+	"The type objetc that a SNP filter should return"
 	
 	class SNPType :
 		pass
