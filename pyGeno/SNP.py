@@ -30,7 +30,7 @@ class SequenceSNP_INDEL(object) :
 	
 	def __init__(self, alleles, polyType, length) :
 		"""
-		* alleles is string of nucleotides
+		* alleles should be encoded as single chars using encodePolymorphicNucleotide() in UsefulFunctions
 		* polyType can either be a string among ['SNP', 'DELETION', 'INSERTION'] or one of the types
 		SequenceSNP_INDEL.SNPType, SequenceSNP_INDEL.DeletionType, SequenceSNP_INDEL.InsertionType
 		* length is the number of nucleatides affected by the ppolymorphism. It must be an int.
@@ -72,7 +72,7 @@ def defaultSNPFilter(chromosome, **kwargs) :
 	
 	returns a SequenceSNP_INDEL"""
 	
-	warn = 'Warning: the default snp filter ignores indels. IGNORED :s of SNP set: %s at pos: %s of chromosome: %s'
+	warn = 'Warning: the default snp filter ignores indels. IGNORED %s of SNP set: %s at pos: %s of chromosome: %s'
 	
 	alleles = []
 	sources = {}

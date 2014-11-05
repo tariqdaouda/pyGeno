@@ -116,7 +116,7 @@ def importGenome(packageFile, verbose = False) :
 		s = s.replace('[', '').replace(']', '').replace("',", ': ').replace('), ', '\n').replace("'", '').replace('(', '').replace(')', '')
 		return s
 
-	printf('importing genome package %s...' % packageFile)
+	printf('importing genome package %s... (this make take a while)' % packageFile)
 
 	packageDir = _decompressPackage(packageFile)
 

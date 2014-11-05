@@ -64,11 +64,13 @@ class ChrosomeSequence(object) :
 			if sequenceSNP.length < 1 :
 				raise TypeError("SequenceSNP of chromosome: %s starting at: %s has a .length < 1 (%s)" % (self.chromosome.number, start, sequenceSNP.length))
 			
-			if sequenceSNP.alleles not in uf.polymorphicNucleotides and sequenceSNP.alleles not in uf.nucleotides :
-				raise TypeError("SequenceSNP of chromosome: %s starting at: %s has invalid alleles" % (self.chromosome.number, start, sequenceSNP.alleles))
+			#~ if sequenceSNP.alleles not in uf.polymorphicNucleotides and sequenceSNP.alleles not in uf.nucleotides :
+				#~ raise TypeError("SequenceSNP of chromosome: %s starting at: %s has invalid alleles '%s'" % (self.chromosome.number, start, sequenceSNP.alleles))
 			
 			if sequenceSNP.type is SequenceSNP_INDEL.DeletionType :
-				data = data[:seqPos-1] + data[seqPos-1 + sequenceSNP.length] 
+				#~ print data[seqPos], seqPos, len(data)
+				#~ print data[seqPos:seqPos + sequenceSNP.length]
+				data = data[:seqPos] + data[seqPos + sequenceSNP.length:]
 			elif sequenceSNP.type is SequenceSNP_INDEL.InsertionType or sequenceSNP.type is SequenceSNP_INDEL.SNPType :
 				data[seqPos] = sequenceSNP.alleles
 			else :
@@ -78,7 +80,6 @@ class ChrosomeSequence(object) :
 
 	def __getitem__(self, i) :
 		return self._getSequence(i)
-		#return self.data[i]
 
 	def __len__(self) :
 		return self.chromosome.length
