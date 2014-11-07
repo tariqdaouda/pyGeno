@@ -129,6 +129,6 @@ Progress Bar:
   from pyGeno.tools.ProgressBar import ProgressBar
   pg = ProgressBar(nbEpochs = 155)
   for i in range(155) :
-  	p.update(label = '%d' %i) # or simply p.update() 
-  p.close()
+  	pg.update(label = '%d' %i) # or simply p.update() 
+  pg.close()
 
