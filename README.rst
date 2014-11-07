@@ -102,8 +102,26 @@ You can even mix several SNPs together.
 
 Filtering SNPs:
 ---------------
-For an example of how to define your own filters you can have a look at the function defaultSNPFilter in SNP.py
+pyGeno allows to filter the SNPs that end up into the final sequences. It supports SNPs, Inserts and Deletions.
 
+.. code:: python
+
+	from pyGeno.SNPFiltering import SNPFilter
+	from pyGeno.SNPFiltering import SequenceSNP
+
+	class QMax_gt_filter(SNPFilter) :
+		
+		def __init__(self, threshold) :
+			self.threshold = threshold
+			
+		def filter(self, chromosome, dummySRY) :
+			if dummySRY.Qmax_gt > self.threshold :
+				#other possibilities of return are SequenceInsert(<bases>), SequenceDelete(<length>)
+				return SequenceSNP(dummySRY.alt)
+			return None #None means keep the reference allele
+	
+	persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = QMax_gt_filter(10))
+	
 Progress Bar:
 -------------
 .. code:: python
