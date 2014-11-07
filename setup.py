@@ -11,7 +11,7 @@ with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
 setup(
     name='pyGeno',
 
-    version='1.0.0',
+    version='1.1.0',
 
     description='A python package for Personalized Proteogenomics',
     long_description=long_description,
