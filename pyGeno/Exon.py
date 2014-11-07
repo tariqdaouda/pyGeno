@@ -76,6 +76,11 @@ class Exon(pyGenoRabaObjectWrapper) :
 	
 	def _load_sequences(self) :
 		seq = self.chromosome.sequence[self.start : self.end]
+		diffLen = (self.end-self.start) - len(seq)
+		
+		# print "=---", len(seq), self.end-self.start
+		# print "=---", seq[-1], '...'
+		
 		if self.strand == '+' :
 			self.sequence = seq
 		else :
@@ -87,11 +92,11 @@ class Exon(pyGenoRabaObjectWrapper) :
 			
 			if self.strand == '+' :
 				self.UTR5 = self.sequence[:start]
-				self.CDS = self.sequence[start:end]
-				self.UTR3 = self.sequence[end:]
+				self.CDS = self.sequence[start:end+diffLen]
+				self.UTR3 = self.sequence[end+diffLen:]
 			else :
-				self.UTR5 = self.sequence[:len(self.sequence)-end]
-				self.CDS = self.sequence[len(self.sequence)-end:len(self.sequence)-start]
+				self.UTR5 = self.sequence[:len(self.sequence)-(end-diffLen)]
+				self.CDS = self.sequence[len(self.sequence)-(end-diffLen):len(self.sequence)-start]
 				self.UTR3 = self.sequence[len(self.sequence)-start:]
 		else :
 			self.UTR5 = ''

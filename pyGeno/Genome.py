@@ -3,16 +3,18 @@ import configuration as conf
 import pyGeno.tools.UsefulFunctions as uf
 from pyGenoObjectBases import *
 
-from pyGeno.Chromosome import Chromosome
-from pyGeno.Gene import Gene
-from pyGeno.Transcript import Transcript
-from pyGeno.Protein import Protein
-from pyGeno.Exon import Exon
+from Chromosome import Chromosome
+from Gene import Gene
+from Transcript import Transcript
+from Protein import Protein
+from Exon import Exon
+import SNPFiltering as SF
 from SNP import *
 
 import rabaDB.fields as rf
 
 class Genome_Raba(pyGenoRabaObject) :
+	"Instanciate a persistent Genome. You probably do not need to use this class"
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	#_raba_not_a_singleton = True #you can have several instances of the same genome but they all share the same location in the database
 
@@ -39,10 +41,19 @@ class Genome_Raba(pyGenoRabaObject) :
 
 		return l
 
-class Genome(pyGenoRabaObjectWrapper) :
+class Genome(pyGenoRabaObjectWrapper) :	
+	"""
+	This is the entry point to pyGeno::
+		
+		myGeno = Genome(name = 'GRCh37.75', SNPs = ['RNA_S1', 'DNA_S1'], SNPFilter = MyFilter)
+		for prot in myGeno.get(Protein) :
+			print prot.sequence
+	
+	"""
 	_wrapped_class = Genome_Raba
 
-	def __init__(self, SNPs = None, SNPFilter = defaultSNPFilter,  *args, **kwargs) :
+	def __init__(self, SNPs = None, SNPFilter = None,  *args, **kwargs) :
+
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 
 		if type(SNPs) is types.StringType :
@@ -50,7 +61,14 @@ class Genome(pyGenoRabaObjectWrapper) :
 		else :
 			self.SNPsSets = SNPs
 		
-		self.SNPFilter = SNPFilter
+		if SNPFilter is None :
+			self.SNPFilter = SF.DefaultSNPFilter()
+		else :
+			if issubclass(SNPFilter.__class__, SF.SNPFilter) :
+				self.SNPFilter = SNPFilter
+			else :
+				raise ValueError("The value of 'SNPFilter' is not an object deriving from a subclass of SNPFiltering.SNPFilter. Got: '%s'" % SNPFilter)
+
 		self.SNPTypes = {}
 		
 		if SNPs is not None :

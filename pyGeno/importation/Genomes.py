@@ -74,27 +74,33 @@ def deleteGenome(specie, name) :
 		pBar.close()
 		
 	except KeyError as e :
-		printf("\tWARNING, couldn't remove genome form db, maybe it's not there: ", e)
+		#~ printf("\tWARNING, couldn't remove genome form db, maybe it's not there: ", e)
+		raise KeyError("\tWARNING, couldn't remove genome form db, maybe it's not there: ", e)
 		allGood = False
 	printf('\tdeleting folder')
 	try :
 		shutil.rmtree(conf.getGenomeSequencePath(specie, name))
 	except OSError as e:
-		printf('\tWARNING, Unable to delete folder: ', e)
+		#~ printf('\tWARNING, Unable to delete folder: ', e)
+		OSError('\tWARNING, Unable to delete folder: ', e)
 		allGood = False
 		
 	conf.db.endTransaction()
 	return allGood
 
 def importGenome(packageFile, verbose = False) :
-	r"""Import a pyGeno genome package. A genome packages is a tar.gz ball that contains at it's root:
-	-gziped fasta files for all chromosomes
-	-gziped GTF gene_set file from ensembl
-	-a manifest.ini file such as:
+	"""Import a pyGeno genome package. A genome packages is a tar.gz ball that contains at it's root:
+
+	* gziped fasta files for all chromosomes
+	
+	* gziped GTF gene_set file from ensembl
+	
+	* a manifest.ini file such as::
+	
 		[package_infos]
 		description = Test package. This package installs only chromosome Y of mus musculus
 		maintainer = Tariq Daouda
-		maintainer_contact = tariq.daouda@umontreal.ca
+		maintainer_contact = tariq.daouda [at] umontreal
 		version = GRCm38.73
 
 		[genome]
@@ -108,15 +114,17 @@ def importGenome(packageFile, verbose = False) :
 		[gene_set]
 		gtf = Mus_musculus.GRCm38.73_Y-only.gtf.gz / or an url such as ftp://... or http://
 
-		All files except the manifest can be downloaded at: http://useast.ensembl.org/info/data/ftp/index.html
-		A rollback is performed, if an exception is caught during importation
+	All files except the manifest can be downloaded from: http://useast.ensembl.org/info/data/ftp/index.html
+	
+	A rollback is performed if an exception is caught during importation
 	"""
+
 	def reformatItems(items) :
 		s = str(items)
 		s = s.replace('[', '').replace(']', '').replace("',", ': ').replace('), ', '\n').replace("'", '').replace('(', '').replace(')', '')
 		return s
 
-	printf('importing genome package %s... (this make take a while)' % packageFile)
+	printf('Importing genome package: %s... (This make take a while)' % packageFile)
 
 	packageDir = _decompressPackage(packageFile)
 
@@ -367,7 +375,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	return chromosomes.values()
 
 def _importSequence(chromosome, fastaFile, targetDir) :
-	#printf('making data for chromsome %s, source file: %s...' %(chromosome.number, fastaFile))
+	"Serializes fastas into .dat files"
 
 	f = gzip.open(fastaFile)
 	header = f.readline()
@@ -381,11 +389,3 @@ def _importSequence(chromosome, fastaFile, targetDir) :
 	chromosome.dataFile = fn
 	chromosome.header = header
 	return len(strRes)
-
-
-
-if __name__ == "__main__" :
-	print """
-	Ex :
-	deleteGenome(specie = 'Mus_musculus', name = 'GRCm38_test')
-	importGenome('/u/daoudat/py/pyGeno/importationPackages/genomes/mouse/mus_musculus_Y-only.tar.gz', verbose = 0)"""

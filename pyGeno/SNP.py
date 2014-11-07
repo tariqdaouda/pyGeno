@@ -1,12 +1,11 @@
 import types
 
 import configuration as conf
-import configuration as conf
 
 from pyGenoObjectBases import *
 import rabaDB.fields as rf
 
-from tools import UsefulFunctions as uf
+# from tools import UsefulFunctions as uf
 
 """General guidelines for SNP classes:
 ----
@@ -16,91 +15,8 @@ from tools import UsefulFunctions as uf
 -User can define an alias for the alt field (snp_indel alleles) to indicate the default field from wich to extract alleles
 """
 
-class SequenceSNP_INDEL(object) :
-	"The type objetc that a SNP filter should return"
-	
-	class SNPType :
-		pass
-	class DeletionType :
-		pass
-	class InsertionType :
-		pass
-
-	strTypes = {'SNP' : SNPType, 'DELETION' : DeletionType, 'INSERTION' : InsertionType}
-	
-	def __init__(self, alleles, polyType, length) :
-		"""
-		* alleles should be encoded as single chars using encodePolymorphicNucleotide() in UsefulFunctions
-		* polyType can either be a string among ['SNP', 'DELETION', 'INSERTION'] or one of the types
-		SequenceSNP_INDEL.SNPType, SequenceSNP_INDEL.DeletionType, SequenceSNP_INDEL.InsertionType
-		* length is the number of nucleatides affected by the ppolymorphism. It must be an int.
-		== 1 if it's a SNP, > 1 if its an indel. In that last case it's the number of nucleotides inserted or deleted
-		"""
-		assert type(length) is types.IntType
-		assert length > 0
-
-		if type(alleles) is types.UnicodeType :
-			alleles = str(alleles)
-		
-		if type(polyType) is types.StringType :
-			try :
-				self.type = self.strTypes[polyType.upper()]
-			except KeyError :
-				raise TypeError("type, if it's a String, must one of those: ['SNP', 'DELETION', 'INSERTION'], i don't care about the case. You've provided: %s" % polyType)
-		elif polyType is SequenceSNP_INDEL.SNPType or polyType is SequenceSNP_INDEL.DeletionType or polyType is SequenceSNP_INDEL.InsertionType :
-			self.type = polyType
-		else :
-			raise TypeError("type, if it's a class, must one of those: SequenceSNP_INDEL.SNPType, SequenceSNP_INDEL.DeletionType, SequenceSNP_INDEL.InsertionType. You've provided: %s" % polyType)
-		
-		self.alleles = alleles
-		self.polyType = polyType
-		self.length = length
-		self.SNPSources = {}
-		
-	def addSources(self, sources) :
-		"Optional, you can keep a dict that records the polynorphims that were mixed together to make self. They are stored into self.SNPSources"
-		self.SNPSources = sources
-
-def defaultSNPFilter(chromosome, **kwargs) :
-	"""Default function for filtering snp, does not filter anything. Doesn't apply indels.
-	This is also a template that you can use for own filters.
-	
-	The arguments that will be passed to the function are all polymorphisms that appear at the same position and have the following format:
-	SNP_setName1 = snp1, SNP_setName2 = snp2, ...
-	
-	This allowes you to make custom filters that take into account the snp set.
-	
-	returns a SequenceSNP_INDEL"""
-	
-	warn = 'Warning: the default snp filter ignores indels. IGNORED %s of SNP set: %s at pos: %s of chromosome: %s'
-	
-	alleles = []
-	sources = {}
-	for snpSet, snp in kwargs.iteritems() :
-		pos = snp.start
-		if snp.alt[0] == '-' :
-			print warn % ('DELETION', snpSet, snp.pos, snp.chromosomeNumber)
-		if snp.ref[0] == '-' :
-			print warn % ('INSERTION', snpSet, snp.pos, snp.chromosomeNumber)
-		else :
-			sources[snpSet] = snp
-			alleles.append(snp.alt) #if not an indel append the polymorphism
-		
-	#appends the refence allele to the lot
-	refAllele = chromosome.refSequence[pos]
-	alleles.append(refAllele)
-	
-	alleles = uf.encodePolymorphicNucleotide(alleles) #encodes all the polymorphism in a single character
-	
-	#creates the SequenceSNP_INDEL, length means that it's a snp and not instertion (> 1) or a deletion (< 0)
-	ret = SequenceSNP_INDEL(alleles = alleles, polyType = SequenceSNP_INDEL.SNPType, length = 1)
-	#optional we keep a record of the polymorphisms that were used during the process
-	ret.addSources(sources)
-	#print '----', ret.alleles, refAllele, kwargs
-	return ret
-
 class SNPMaster(Raba) :
-	'This object keeps track of set types'
+	'This object keeps track of SNP sets and their types'
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	specie = rf.Primitive()
 	SNPType = rf.Primitive()
@@ -168,6 +84,7 @@ class CasavaSNP(SNP_INDEL) :
 	altAlias = 'alleles'
 
 class dbSNPSNP(SNP_INDEL) :
+	"This class is for SNPs from dbSNP. Most you can uncomment the fields that you need"
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	
 	# To add/remove a field comment/uncomentd it. Beware, adding or removing a field results in a significant overhead the first time you relaunch pyGeno. You may have to delete and reimport some snps sets.
@@ -240,5 +157,6 @@ class dbSNPSNP(SNP_INDEL) :
 	altAlias = 'ALT'
 
 class TopHatSNP(SNP_INDEL) :
+	"A SNP from Top Hat, not implemented"
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	pass

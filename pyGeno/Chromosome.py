@@ -4,33 +4,33 @@ import configuration as conf
 from pyGenoObjectBases import *
 
 from SNP import *
+import SNPFiltering as SF
+
 from rabaDB.filters import RabaQuery
 import rabaDB.fields as rf
 
 from tools.SecureMmap import SecureMmap as SecureMmap
 from tools import UsefulFunctions as uf
 from tools import SingletonManager
+
 import types
 
 import pyGeno.configuration as conf
 
 class ChrosomeSequence(object) :
+	"""Represents a chromosome sequence. If refOnly no ploymorphisms are applied and the ref sequence is always returned"""
 
 	def __init__(self, data, chromosome, refOnly = False) :
-		"""represents a chromosome sequence. if refOnly no ploymorphisms are applied and the ref sequence is always returned"""
-
+		
 		self.data = data
 		self.refOnly = refOnly
 		self.chromosome = chromosome
-		self.SNPFilter = self.chromosome.genome.SNPFilter
+		self.setSNPFilter(self.chromosome.genome.SNPFilter)
 	
 	def setSNPFilter(self, SNPFilter) :
 		self.SNPFilter = SNPFilter
 	
 	def _getSequence(self, slic) :
-		#~ print slic
-		#~ assert type(slic) is SliceType
-		#~ 
 		data = self.data[slic]
 		SNPTypes = self.chromosome.genome.SNPTypes
 		
@@ -59,22 +59,16 @@ class ChrosomeSequence(object) :
 		for start, setPolys in polys.iteritems() :
 			
 			seqPos = start - slic.start
-			sequenceSNP = self.SNPFilter(chromosome = self.chromosome, **setPolys)
-			
-			if sequenceSNP.length < 1 :
-				raise TypeError("SequenceSNP of chromosome: %s starting at: %s has a .length < 1 (%s)" % (self.chromosome.number, start, sequenceSNP.length))
-			
-			#~ if sequenceSNP.alleles not in uf.polymorphicNucleotides and sequenceSNP.alleles not in uf.nucleotides :
-				#~ raise TypeError("SequenceSNP of chromosome: %s starting at: %s has invalid alleles '%s'" % (self.chromosome.number, start, sequenceSNP.alleles))
-			
-			if sequenceSNP.type is SequenceSNP_INDEL.DeletionType :
-				#~ print data[seqPos], seqPos, len(data)
-				#~ print data[seqPos:seqPos + sequenceSNP.length]
-				data = data[:seqPos] + data[seqPos + sequenceSNP.length:]
-			elif sequenceSNP.type is SequenceSNP_INDEL.InsertionType or sequenceSNP.type is SequenceSNP_INDEL.SNPType :
-				data[seqPos] = sequenceSNP.alleles
-			else :
-				raise TypeError("SequenceSNP of chromosome: %s starting at: %s is of unknown type: %s" % (self.chromosome.number, snp.start, sequenceSNP.type))
+			sequenceModifier = self.SNPFilter.filter(self.chromosome, **setPolys)
+			if sequenceModifier is not None :
+				if sequenceModifier.__class__ is SF.SequenceDel :
+					data = data[:seqPos] + data[seqPos + sequenceModifier.length:]
+				elif sequenceModifier.__class__ is SF.SequenceSNP :
+					data[seqPos] = sequenceModifier.alleles
+				elif sequenceModifier.__class__ is SF.SequenceInsert :
+					data[seqPos] = "%s%s" % (sequenceModifier.bases, data[seqPos])
+				else :
+					raise TypeError("sequenceModifier on chromosome: %s starting at: %s is of unknown type: %s" % (self.chromosome.number, snp.start, sequenceModifier.__class__))
 		
 		return ''.join(data)
 
@@ -85,7 +79,7 @@ class ChrosomeSequence(object) :
 		return self.chromosome.length
 
 class Chromosome_Raba(pyGenoRabaObject) :
-	"""A class that represents a persistent Chromosome"""
+	
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 
 	header = rf.Primitive()
@@ -103,7 +97,7 @@ class Chromosome_Raba(pyGenoRabaObject) :
 			self.number =  str(self.number).upper()
 
 class Chromosome(pyGenoRabaObjectWrapper) :
-
+	"""A chromosome"""
 	_wrapped_class = Chromosome_Raba
 
 	def __init__(self, *args, **kwargs) :

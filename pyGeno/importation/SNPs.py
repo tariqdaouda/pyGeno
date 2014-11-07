@@ -11,7 +11,26 @@ from pyGeno.tools.parsers.CasavaTools import SNPsTxtFile
 from pyGeno.tools.parsers.VCFTools import VCFFile
 
 def importSNPs(packageFile) :
-	"""The big wrapper, this function should detect the SNP type by the package manifest and then launch the corresponding function"""
+	"""The big wrapper, this function should detect the SNP type by the package manifest and then launch the corresponding function.
+	Here's an example of a SNP manifest file for Casava SNPs::
+
+		[package_infos]
+		description = Casava SNPs for testing purposes
+		maintainer = Tariq Daouda
+		maintainer_contact = tariq.daouda [at] umontreal
+		version = 1
+
+		[set_infos]
+		specie = human
+		name = dummySRY
+		type = Casava
+		source = my place at IRIC
+
+		[snps]
+		filename = snps.txt # as with genomes you can either include de file at the root of the package or specify an URL from where it must be downloaded
+	"""
+	printf("Importing polymorphism set: %s... (This may take a while)" % packageFile)
+	
 	packageDir = _decompressPackage(packageFile)
 
 	parser = SafeConfigParser()
@@ -50,8 +69,8 @@ def deleteSNPs(setName) :
 		SMaster.delete()
 		con.endTransaction()
 	except KeyError :
-		#raise KeyError("can't delete the setName %s because i can't find it in SNPMaster, maybe there's not set by that name" % setName)
-		printf("can't delete the setName %s because i can't find it in SNPMaster, maybe there's no set by that name" % setName)
+		raise KeyError("Can't delete the setName %s because i can't find it in SNPMaster, maybe there's not set by that name" % setName)
+		#~ printf("can't delete the setName %s because i can't find it in SNPMaster, maybe there's no set by that name" % setName)
 		return False
 	return True
 
@@ -143,7 +162,3 @@ def _importSNPs_dbSNPSNP(setName, specie, genomeSource, snpsFile) :
 	
 def _importSNPs_TopHatSNP(setName, specie, genomeSource, snpsFile) :
 	raise FutureWarning('Not implemented yet')
-	
-if __name__ == "__main__" :
-	print "ex : importSNPs('ARN_Subj10012.tar.gz')"
-	print "ex : importSNPs('dbSNP138.tar.gz')"
