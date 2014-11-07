@@ -14,7 +14,8 @@ from SNP import *
 import rabaDB.fields as rf
 
 class Genome_Raba(pyGenoRabaObject) :
-	"Instanciate a persistent Genome. You probably do not need to use this class"
+	"""The wrapped Raba object that really holds the data"""
+	
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	#_raba_not_a_singleton = True #you can have several instances of the same genome but they all share the same location in the database
 
@@ -53,7 +54,7 @@ class Genome(pyGenoRabaObjectWrapper) :
 	_wrapped_class = Genome_Raba
 
 	def __init__(self, SNPs = None, SNPFilter = None,  *args, **kwargs) :
-
+		
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 
 		if type(SNPs) is types.StringType :

@@ -6,6 +6,8 @@ from SNP import SNP_INDEL
 import rabaDB.fields as rf
 
 class Gene_Raba(pyGenoRabaObject) :
+	"""The wrapped Raba object that really holds the data"""
+	
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 
 	id = rf.Primitive()
@@ -23,6 +25,8 @@ class Gene_Raba(pyGenoRabaObject) :
 		self.name = self.name.upper()
 
 class Gene(pyGenoRabaObjectWrapper) :
+	"""The wrapper for playing with genes"""
+	
 	_wrapped_class = Gene_Raba
 
 	def __init__(self, *args, **kwargs) :

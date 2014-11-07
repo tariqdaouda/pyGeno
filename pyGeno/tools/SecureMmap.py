@@ -2,6 +2,7 @@ import mmap
 
 class SecureMmap:
 	"""In a normal mmap, modifying the string modifies the file. This is a mmap with write protection"""
+	
 	def __init__(self, filename, enableWrite = False) :
 		
 		self.enableWrite = enableWrite

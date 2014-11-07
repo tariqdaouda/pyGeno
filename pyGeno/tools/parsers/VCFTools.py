@@ -1,7 +1,8 @@
 import os, types, gzip
-#This is a small parser for VCF files, it should work with any VCF file but has only been teste on dbSNP138 files
 
 class VCFEntry(object) :
+	"""A single entry in a VCF file"""
+	
 	def __init__(self, vcfFile, line, lineNumber) :
 		#CHROM POS     ID        REF    ALT     QUAL FILTER INFO                              FORMAT      NA00001        NA00002        NA00003
 		#20     14370   rs6054257 G      A       29   PASS   NS=3;DP=14;AF=0.5;DB;H2           GT:GQ:DP:HQ 0|0:48:1:51,51 1|0:48:8:51,51 1/1:43:5:.,.
@@ -68,7 +69,18 @@ class VCFEntry(object) :
 		return "<VCFEntry line: %d,  %s" % (self.lineNumber, str(self.data))
 
 class VCFFile(object) :
-
+	"""
+		This is a small parser for VCF files, it should work with any VCF file but has only been tested on dbSNP138 files.
+		Represents a whole VCF file::
+		
+		#reading
+		f = VCFFile()
+		f.parse('hop.vcf')
+		for line in f :
+			print line['pos']
+		
+	"""
+	
 	def __init__(self, filename = None, gziped = False, stream = False) :
 		self.legend = {}
 		self.dnegel = {}
@@ -130,6 +142,7 @@ class VCFFile(object) :
 			self.f.close()
 	
 	def close(self) :
+		"""closes the file"""
 		self.f.close()
 		
 	def _developLine(self, lineNumber) :

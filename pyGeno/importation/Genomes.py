@@ -16,7 +16,7 @@ from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
 
 def backUpDB() :
-	"backup the current database version. automatically called by importGenome(). Returns the filename of the backup"
+	"""backup the current database version. automatically called by importGenome(). Returns the filename of the backup"""
 	st = time.ctime().replace(' ', '_')
 	fn = conf.pyGeno_RABA_DBFILE.replace('.db', '_%s-bck.db' % st)
 	shutil.copy2(conf.pyGeno_RABA_DBFILE, fn)
@@ -48,7 +48,7 @@ def _getFile(fil, directory) :
 	return finalFile
 
 def deleteGenome(specie, name) :
-	"removes all infos about a genome"
+	"""Removes a genome from the database"""
 
 	printf('deleting genome (%s, %s)...' % (specie, name))
 

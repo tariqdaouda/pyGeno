@@ -10,6 +10,8 @@ from tools.BinarySequence import AABinarySequence
 import copy
 
 class Protein_Raba(pyGenoRabaObject) :
+	"""The wrapped Raba object that really holds the data"""
+	
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 
 	id = rf.Primitive()
@@ -25,7 +27,8 @@ class Protein_Raba(pyGenoRabaObject) :
 			self.name = self.name.upper()
 
 class Protein(pyGenoRabaObjectWrapper) :
-
+	"""The wrapper for playing with Proteins"""
+	
 	_wrapped_class = Protein_Raba
 
 	def __init__(self, *args, **kwargs) :
@@ -60,10 +63,11 @@ class Protein(pyGenoRabaObjectWrapper) :
 		self.bin_sequence = AABinarySequence(self.sequence)
 
 	def getDefaultSequence(self) :
-		"""returns a version str sequence where only the last allele of each polymorphisms is shown"""
+		"""Returns a version str sequence where only the last allele of each polymorphisms is shown"""
 		return self.bin_sequence.defaultSequence
 
 	def getPolymorphisms(self) :
+		"""Returns a list of all prolymorphisms contained in the protein"""
 		return self.bin_sequence.getPolymorphisms()
 
 	def find(self, sequence):

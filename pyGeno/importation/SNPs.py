@@ -60,6 +60,7 @@ def importSNPs(packageFile) :
 	shutil.rmtree(packageDir)
 
 def deleteSNPs(setName) :
+	"""deletes a set of polymorphisms"""
 	con = conf.db
 	try :
 		SMaster = SNPMaster(setName = setName)

@@ -28,11 +28,12 @@ def version() :
 	return (pyGeno_FACE, pyGeno_BRANCH, pyGeno_VERSION_NAME, pyGeno_VERSION_RELEASE_LEVEL, pyGeno_VERSION_NUMBER, pyGeno_VERSION_BUILD_TIME )
 
 def prettyVersion() :
-	"""returns pyGeno's current version in a pretty human redable way"""
+	"""returns pyGeno's current version in a pretty human readable way"""
 	return "pyGeno %s Branch: %s, Name: %s, Release Level: %s, Version: %s, Build time: %s" % version()
 
 def checkPythonVersion() :
-	#pyGeno needs python 2.7+
+	"""pyGeno needs python 2.7+"""
+	
 	if sys.version_info[0] < 2 or (sys.version_info[0] > 2  and sys.version_info[1] < 7) :
 		return False
 	return True
@@ -41,13 +42,14 @@ def getGenomeSequencePath(specie, name) :
 	return os.path.normpath(pyGeno_DATA_PATH+'/%s/%s' % (specie.lower(), name))
 
 def createDefaultConfigFile() :
+	"""Creates a default configuration file"""
 	s = "[pyGeno_config]\nsettings_dir = %s" % pyGeno_SETTINGS_DIR
 	f = open('%s/config.ini' % pyGeno_SETTINGS_DIR, 'w')
 	f.write(s)
 	f.close()
 
 def getSettingsPath() :
-	
+	"""Returns the path where the settings are stored"""
 	parser = SafeConfigParser()
 	try :
 		parser.read(os.path.normpath(pyGeno_SETTINGS_DIR+'/config.ini'))
@@ -57,7 +59,7 @@ def getSettingsPath() :
 		return getSettingsPath()
 
 def pyGeno_init() :
-	"This function is automaticly called at launch"
+	"""This function is automaticly called at launch"""
 	
 	global db
 	

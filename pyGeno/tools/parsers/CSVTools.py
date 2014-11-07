@@ -1,7 +1,8 @@
 import os, types
 
-def removeDuplicates(fIn, fOut) :
-	f = open(fIn)
+def removeDuplicates(inFileName, outFileName) :
+	"""removes duplicated lines from a 'inFileName' CSV file, the results are witten in 'outFileName'"""
+	f = open(inFileName)
 	legend = f.readline()
 	
 	data = ''
@@ -15,20 +16,20 @@ def removeDuplicates(fIn, fOut) :
 			data += l
 			
 	f.close()
-	f = open(fOut, 'w')
+	f = open(outFileName, 'w')
 	f.write(legend+data)
 	f.close()
 
-def catCSVs(folder, output, removeDups = False) :
-
-	strCmd = r"""cat %s/*.csv > %s""" %(folder, output)
+def catCSVs(folder, ouputFileName, removeDups = False) :
+	"""Concatenates all csv in 'folder' and wites the results in 'ouputFileName'. My not work on non Unix systems"""
+	strCmd = r"""cat %s/*.csv > %s""" %(folder, ouputFileName)
 	os.system(strCmd)
 
 	if removeDups :
-		removeDuplicates(output, output)
+		removeDuplicates(ouputFileName, ouputFileName)
 
-def joinCSVs(csvFilePaths, column, output, separator = ';') :
-	"csvFilePaths should be an iterable"
+def joinCSVs(csvFilePaths, column, ouputFileName, separator = ',') :
+	"""csvFilePaths should be an iterable. Joins all CSVs according to the values in the column 'column'. Write the results in a new file 'ouputFileName' """
 	
 	res = ''
 	legend = []
@@ -54,13 +55,15 @@ def joinCSVs(csvFilePaths, column, output, separator = ';') :
 	print len(lines)
 	res = legend + '\n' + '\n'.join(lines)
 	
-	f = open(output, 'w')
+	f = open(ouputFileName, 'w')
 	f.write(res)
 	f.close()
 	
 	return res
 
 class CSVEntry(object) :
+	"""A single entry in a CSV file"""
+	
 	def __init__(self, csvFile, lineNumber = None) :
 		
 		self.csvFile = csvFile
@@ -87,9 +90,11 @@ class CSVEntry(object) :
 				self.data.append('')
 
 	def __getitem__(self, key) :
+		"""Returns the value of field 'key'"""
 		return self.data[self.csvFile.legend[key.lower()]]
 
 	def __setitem__(self, key, value) :
+		"""Sets the value of field 'key' to 'value' """
 		self.data[self.csvFile.legend[key.lower()]] = str(value)
 	
 	def __repr__(self) :
@@ -99,9 +104,24 @@ class CSVEntry(object) :
 		return self.csvFile.separator.join(self.data)
 	
 class CSVFile(object) :
-
+	"""Represents a whole CSV file::
+		
+		#reading
+		f = CSVFile()
+		f.parse('hop.csv')
+		for line in f :
+			print line['ref']
+		
+		#writing, legend can either be a list of a dict {field : column number}
+		f = CSVFile(legend = ['name', 'email'])
+		l = f.newLine()
+		l['name'] = 'toto'
+		l['email'] = "hop@gmail.com"
+		f.save('myCSV.csv')
+		
+	"""
+	
 	def __init__(self, legend = [], separator = ',') :
-		"Legend can either be a list of a dict {field : column number}"
 		
 		self.legend = {}
 		if type(legend) is types.ListType :
@@ -122,7 +142,7 @@ class CSVFile(object) :
 		self.currentPos = -1
 	
 	def parse(self, filePath, separator = ',', stringSeparator = '"') :
-		"Parses a CSV on disc"
+		"""Open a CSV"""
 		
 		self.filename = filePath
 		f = open(filePath)
@@ -158,23 +178,24 @@ class CSVFile(object) :
 		self.lines[line][key] = val
 	
 	def newLine(self) :
-		"Appends an empty line to the end of the CSV and returns it"
+		"""Appends an empty line at the end of the CSV and returns it"""
 		self.lines.append(CSVEntry(self))
 		return self.lines[-1]
 	
 	def insertLine(self, i) :
-		"Inserts an empty line at position i and returns it"
+		"""Inserts an empty line at position i and returns it"""
 		self.data.insert(i, CSVEntry(self))
 		return self.lines[i]
 	
 	def save(self, filePath) :
-		"save the csv to a file"
+		"""save the CSV to a file"""
 		self.filename = filePath
 		f = open(filePath, 'w')
 		f.write(self.toStr())
 		f.close()
 
 	def toStr(self) :
+		"""returns a string version of the CSV"""
 		s = [self.strLegend]
 		for l in self.lines :
 			s.append(str(l))

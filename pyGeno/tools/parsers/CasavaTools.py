@@ -2,7 +2,8 @@ import gzip
 import pyGeno.tools.UsefulFunctions as uf
 
 class SNPsTxtEntry(object) :
-
+	"""A single entry in the casavas snps.txt file"""
+	
 	def __init__(self, lineNumber, snpsTxtFile) :
 		self.snpsTxtFile = snpsTxtFile
 		self.lineNumber = lineNumber
@@ -26,17 +27,25 @@ class SNPsTxtEntry(object) :
 		self.values['G_used'] = int(sl[13])
 		self.values['T_used'] = int(sl[14])
 	
-	def __getitem__(self, i):
-		return self.values[i]
+	def __getitem__(self, fieldName):
+		"""Returns the value of field 'fieldName'"""
+		return self.values[field]
 	
-	def __setitem__(self, i, v) :
-		self.values[i] = v
+	def __setitem__(self, fieldName, value) :
+		"""Sets the value of field 'fieldName' to 'value' """
+		self.values[fieldName] = value
 		
 	def __str__(self):
 		return str(self.values)
 	
 class SNPsTxtFile(object) :
+	"""Represents a whole casava's snps.txt file::
+		
+		f = SNPsTxtFile('snps.txt')
+		for line in f :
+			print line['ref']
 	
+	"""
 	def __init__(self, fil, gziped = False) :
 		self.reset()
 		if not gziped :
@@ -51,6 +60,7 @@ class SNPsTxtFile(object) :
 		f.close()
 
 	def reset(self) :
+		"""Frees the file"""
 		self.data = []
 		self.currentPos = 0
 	

@@ -2,6 +2,7 @@ import gzip
 
 class GTFEntry(object) :
 	def __init__(self, gtfFile, lineNumber) :
+		"""A single entry in a GTF file"""
 		
 		self.lineNumber = lineNumber
 		self.gtfFile = gtfFile
@@ -50,6 +51,7 @@ class GTFFile(object) :
 		self.currentIt = -1
 
 	def get(self, line, elmt) :
+		"""returns the value of the field 'elmt' of line 'line'"""
 		return self[line][elmt]
 
 	def __iter__(self) :
@@ -65,6 +67,7 @@ class GTFFile(object) :
 				raise StopIteration
 
 	def __getitem__(self, i) :
+		"""returns the ith entry"""
 		if self.lines[i].__class__ is not GTFEntry :
 			self.lines[i] = GTFEntry(self, i)
 		return self.lines[i]

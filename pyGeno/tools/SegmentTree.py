@@ -17,7 +17,8 @@ def aux_moveTree(offset, tree):
 		aux_moveTree(offset, c)
 		
 class SegmentTree :
-	"""A segment tree in arborescence of segments. First position in inclusive, second one exlusive, respectively refered to as x1 and x2.
+	""" Optimised genome annoations.
+	A segment tree is an arborescence of segments. First position is inclusive, second exlusive, respectively refered to as x1 and x2.
 	A segment tree has the following properties :
 	-The root has no x1 or x2 (both set to None).
 	-Segment are arrangend in an ascending order
@@ -35,9 +36,8 @@ class SegmentTree :
 	------->Segment : 12-14
 	---->Segment : 13-15
 	
-	Each segment tree can have a name to make it easily recognizable and a referedObject, an object who instance is stored for future usage.
-	referedObject are always stored in lists no matter what you pass as an argument. If referedObject is already a list it will be stored as is, if
-	not it will first be placed in a list and then stored.
+	Each segment can have a name to make it easily recognizable and a referedObject, and an object whose instance is stored for future usage.
+	ReferedObject are always stored in lists no matter what you pass as an argument. If referedObject is already a list it will be stored as is.
 	"""
 	
 	def __init__(self, x1 = None, x2 = None, name = '', referedObject = [], father = None, level = 0) :
@@ -63,8 +63,8 @@ class SegmentTree :
 	
 	def insert(self, x1, x2, name = '', referedObject = []) :
 		"""Insert the segment in it's right place and returns it
-		If there's already a segment S as S.x1 == x1 and S.x2 == x2. S.name will be changed to S.name U name and the
-		referedObject will be appended the current one"""
+		If there's already a segment S as S.x1 == x1 and S.x2 == x2. S.name will be changed to 'S.name U name' and the
+		referedObject will be appended to the already existing list"""
 		
 		if x1 > x2 :
 			xx1, xx2 = x2, x1
@@ -118,15 +118,16 @@ class SegmentTree :
 		return rt
 	
 	def insertTree(self, childTree):
-		"""inserts segTree in the right position (regions will rearanged to fit the organisation of self)"""
+		"""inserts childTree in the right position (regions will be rearanged to fit the organisation of self)"""
 		aux_insertTree(childTree, self)
 		
-	def included_todo(self, x1, x2=None) :
-		"Returns all the segments where [x1, x2] is included"""
-		pass
+	#~ def included_todo(self, x1, x2=None) :
+		#~ "Returns all the segments where [x1, x2] is included"""
+		#~ pass
 		
 	def intersect(self, x1, x2 = None) :
-		"Returns a list of all segments intersected by [x1, x2]"
+		"""Returns a list of all segments intersected by [x1, x2]"""
+		
 		def condition(x1, x2, tree) :
 			#print self.id, tree.x1, tree.x2, x1, x2
 			if (tree.x1 != None and tree.x2 != None) and (tree.x1 <= x1 and x1 < tree.x2 or tree.x1 <= x2 and x2 < tree.x2) :
@@ -146,7 +147,6 @@ class SegmentTree :
 		if c1 == -1 or c2 == -1 :
 			return []
 			
-		#print self.children[c1].id, self.children[c2].id
 		if xx1 < self.children[c1].x1 :
 			c1 -= 1
 			
@@ -205,6 +205,7 @@ class SegmentTree :
 		return ret
 	
 	def emptyChildren(self) :
+		"""Kills of children"""
 		self.children = []
 	
 	def removeGaps(self) :
@@ -215,11 +216,13 @@ class SegmentTree :
 				aux_moveTree(self.children[i-1].x2-self.children[i].x1, self.children[i])
 		
 	def getX1(self) :
+		"""Returns the starting position of the tree"""
 		if self.x1 != None :
 			return self.x1
 		return self.children[0].x1
 
 	def getX2(self) :
+		"""Returns the ending position of the tree"""
 		if self.x2 != None :
 			return self.x2
 		return self.children[-1].x2
@@ -238,7 +241,7 @@ class SegmentTree :
 				return l
 	
 	def getFirstLevel(self) :
-		'returns a list of couples (x1, x2) of all the first level indexed regions'
+		"""returns a list of couples (x1, x2) of all the first level indexed regions"""
 		res = []
 		if len(self.children) > 0 :
 			for c in self.children:
@@ -251,7 +254,7 @@ class SegmentTree :
 		return res
 		
 	def flatten(self) :
-		r"""Flattens the tree. The tree become a tree of depth 1 where overlapping regions have been merged together"""
+		"""Flattens the tree. The tree become a tree of depth 1 where overlapping regions have been merged together"""
 		if len(self.children) > 1 :
 			children = self.children
 			self.emptyChildren()
@@ -292,9 +295,6 @@ class SegmentTree :
 			offset = newX1-self.children[0].x1
 			aux_moveTree(offset, self)
 
-	def translate(self, offset) :
-		aux_moveTree(offset, self)
-
 	def __str__(self) :
 		strRes = self.__str()
 		
@@ -326,10 +326,7 @@ class SegmentTree :
 	
 	def __repr__(self):
 		return 'Segment Tree, id:%s, father id:%s, (x1, x2): (%s, %s)' %(self.id, self.father.id, self.x1, self.x2)
-		
-	def getMergedLeafs(self) :
-		#TODO
-		pass
+
 
 if __name__== "__main__" :
 	s = SegmentTree()

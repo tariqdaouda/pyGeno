@@ -5,6 +5,7 @@ import configuration as conf
 from tools import UsefulFunctions as uf
 
 class Sequence_modifiers(object) :
+	"""Abtract Class. All sequence must inherit from me"""
 	def __init__(self, sources = {}) :
 		self.SNPSources = sources
 
@@ -13,6 +14,7 @@ class Sequence_modifiers(object) :
 		self.SNPSources[name] = snp
 
 class SequenceSNP(Sequence_modifiers) :
+	"""Represents a SNP to be applied to the sequence"""
 	def __init__(self, alleles, sources = {}) :
 		Sequence_modifiers.__init__(self, sources)
 		if type(alleles) is types.ListType :
@@ -21,16 +23,20 @@ class SequenceSNP(Sequence_modifiers) :
 			self.alleles = uf.encodePolymorphicNucleotide(alleles)
 	
 class SequenceInsert(Sequence_modifiers) :
+	"""Represents an Insertion to be applied to the sequence"""
+	
 	def __init__(self, bases, sources = {}) :
 		Sequence_modifiers.__init__(self, sources)
 		self.bases = bases
 
 class SequenceDel(Sequence_modifiers) :
+	"""Represents a Deletion to be applied to the sequence"""
 	def __init__(self, length, sources = {}) :
 		Sequence_modifiers.__init__(self, sources)
 		self.length = length
 
 class SNPFilter(object) :
+	"""Abtract Class. All filters must inherit from me"""
 	
 	def __init__(self) :
 		pass
@@ -43,7 +49,7 @@ class DefaultSNPFilter(SNPFilter) :
 	This is also a template that you can use for own filters. A prototype for a custom filter might be::
 		class MyFilter(SNPFilter) :
 	
-			def filter(chromosome, SNP_Set1, SNP_Set2) :
+			def filter(chromosome, SNP_Set1 = None, SNP_Set2 = None ) :
 				if SNP_Set1.alt == SNP_Set2.alt :
 					return SequenceSNP(SNP_Set1.alt)
 
@@ -58,7 +64,7 @@ class DefaultSNPFilter(SNPFilter) :
 
 		* SequenceDel
 
-		* a None value
+		* None
 
 		"""
 
@@ -66,7 +72,8 @@ class DefaultSNPFilter(SNPFilter) :
 		SNPFilter.__init__(self)
 
 	def filter(self, chromosome, **kwargs) :
-	
+		"""The default filter mixes applied all SNPs and ignores Insertions and Deletions."""
+		
 		warn = 'Warning: the default snp filter ignores indels. IGNORED %s of SNP set: %s at pos: %s of chromosome: %s'
 		
 		alleles = []

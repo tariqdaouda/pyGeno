@@ -9,6 +9,15 @@ def nosave() :
 	raise ValueError('You can only save object that are linked to reference genomes')
 
 class pyGenoRabaObject(Raba) :
+	"""pyGeno uses rabaDB to persistenly store data. Most persistent 
+	objects have classes that inherit from this one (Genome_Raba, 
+	Chromosome_Raba, Gene_Raba, Protein_Raba, Exon_Raba). Theses classes 
+	are not mean to be accessed directly. Users manipulate wrappers 
+	such as : Genome, Chromosome etc... pyGenoRabaObject extends 
+	the Raba class by adding a function _curate that is called just 
+	before saving. This class is to be considered abstract, and is not 
+	meant to be instanciated"""
+
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	_raba_abstract = True # not saved in db by default
 
@@ -17,16 +26,20 @@ class pyGenoRabaObject(Raba) :
 			raise TypeError("This class is abstract")
 		
 	def _curate(self) :
-		"last operations performed before saving, must be implemented in child"
+		"Last operations performed before saving, must be implemented in child"
 		raise TypeError("This method is abstract and should be implemented in child")
 
 	def save(self) :
+		"""Calls _curate() before performing a normal rabaDB lazy save 
+		(saving only occurs if the object has been modified)"""
+		
 		if self.mutated() :
 			self._curate()
 		Raba.save(self)
 
 class pyGenoRabaObjectWrapper_metaclass(type) :
-
+	"""This metaclass keeps track of the relationship between wrapped 
+	classes and wrappers """
 	_wrappers = {}
 
 	def __new__(cls, name, bases, dct) :
@@ -35,7 +48,7 @@ class pyGenoRabaObjectWrapper_metaclass(type) :
 		return clsObj
 
 class RLWrapper(object) :
-	"A wrapper for returning the pyGeno Object instead of the raw raba objects contained in raba lists"
+	"""A wrapper for rabalists that replaces raba objects by pyGeno Object"""
 	def __init__(self, rabaObj, listObjectType, rl) :
 		self.rabaObj = rabaObj
 		self.rl = rl
@@ -49,7 +62,10 @@ class RLWrapper(object) :
 		return getattr(rl, name)
 
 class pyGenoRabaObjectWrapper(object) :
-
+	"""All the wrapper classes such as Genome and Chromosome inherit 
+	from this class. It has most that make pyGeno useful, such as 
+	get(), count(), ensureIndex(). This class is to be considered 
+	abstract, and is not meant to be instanciated"""
 	__metaclass__ = pyGenoRabaObjectWrapper_metaclass
 
 	_wrapped_class = None
@@ -75,6 +91,9 @@ class pyGenoRabaObjectWrapper(object) :
 		self.loadBinarySequences = True
 
 	def _getObjBagKey(self, obj) :
+		"""pyGeno objects are kept in bags to ensure that reference 
+		objects are loaded only once. This function returns the bag key 
+		of the current object"""
 		return (obj._rabaClass.__name__, obj.raba_id)
 
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
@@ -91,37 +110,56 @@ class pyGenoRabaObjectWrapper(object) :
 		return f
 
 	def count(self, objectType, *args, **coolArgs) :
+		"""Returns the number of elements satisfying the query"""
 		return self._makeLoadQuery(objectType, *args, **coolArgs).count()
 
 	def get(self, objectType, *args, **coolArgs) :
-		"""Raba Magic inside. Loads anything with any parameters. Don't worry about memory Raba takes care of it
-		usage:
-		load("Gene", name = 'TPST2')
-		load(Gene, name = 'TPST2')
-		load(Transcript, {'len >' : 60})
+		"""Raba Magic inside. This is th function that you use for 
+		querying pyGeno's DB.
+		
+		Usage examples:
+		
+			* myGenome.get("Gene", name = 'TPST2')
+		
+			* myGene.get(Protein, id = 'ENSID...')
+		
+			* myGenome.get(Transcript, {'start >' : x, 'end <' : y})
 
 		You can use string as the object type to avoid circular imports"""
+		
 		ret = []
 		for e in self._makeLoadQuery(objectType, *args, **coolArgs).iterRun() :
 			ret.append(objectType(wrapped_object_and_bag = (e, self.bagKey)))
 		return ret
 
 	def iterGet(self, objectType, *args, **coolArgs) :
-		"""Same as load. But retuns the elements one by one, much more efficient for large outputs"""
+		"""Same as get. But retuns the elements one by one, much more efficient for large outputs"""
 
 		for e in self._makeLoadQuery(objectType, *args, **coolArgs).iterRun() :
 			yield objectType(wrapped_object_and_bag = (e, self.bagKey))
 
-	def ensureIndex(self, objectType, fields) :
+	def ensureIndex(self, fields) :
+		"""
+		Warning: May not work on some systems, see ensureGlobalIndex
+		
+		Creates a partial index on self (if it does not exist). 
+		Ex: myTranscript.ensureIndex('name')"""
+		
 		where, whereValues = '%s=?' %(self._wrapped_class.__name__[:-5]), self.wrapped_object
-		objectType._wrapped_class.ensureIndex(fields, where, (whereValues,))
+		self._wrapped_class.ensureIndex(fields, where, (whereValues,))
 
-	def dropIndex(self, objectType, fields) :
-		"not tested yet but should work"
+	def dropIndex(self, fields) :
+		"""Warning: May not work on some systems, see dropGlobalIndex
+		
+		Drops a partial index on self. Ex: myTranscript.dropIndex('name')"""
+
 		where, whereValues = '%s=?' %(self._wrapped_class.__name__[:-5]), self.wrapped_object
-		objectType._wrapped_class.dropIndex(fields, where, (whereValues,))
+		self._wrapped_class.dropIndex(fields, where, (whereValues,))
 	
 	def __getattr__(self, name) :
+		"""If a wrapper does not have a specific field, pyGeno will 
+		look for it in the wrapped_object"""
+		
 		if name == 'save' or name == 'delete' :
 			raise AttributeError("You can't delete or save an object from wrapper, try .wrapped_object.delete()/save()")
 		
@@ -148,28 +186,40 @@ class pyGenoRabaObjectWrapper(object) :
 
 	@classmethod
 	def getIndexes(cls) :
+		"""Returns a list of indexes attached to the object's class. Ex 
+		Transcript.getIndexes()"""
 		return cls._wrapped_class.getIndexes()
 
 	@classmethod
 	def flushIndexes(cls) :
+		"""Drops all the indexes attached to the object's class. Ex 
+		Transcript.flushIndexes()"""
 		return cls._wrapped_class.flushIndexes()
 	
 	@classmethod
 	def help(cls) :
+		"""Returns a list of available field for queries. Ex 
+		Transcript.help()"""
 		return cls._wrapped_class.help()
 
 	@classmethod
 	def ensureGlobalIndex(cls, fields) :
-		"""Add a GLOBAL index to the db to speedup lookouts. Fields can be a list of fields for Multi-Column Indices or simply the name of a single field
-		A global index is an index on the entire type. Ex global index on transcript field name, will index the names for all the transcripts in the database"""
+		"""Add a GLOBAL index to the db to speedup lookouts. Fields can be a 
+		list of fields for Multi-Column Indices or simply the name of a 
+		single field. A global index is an index on the entire type.
+		A global index on 'Transcript' on field 'name', will index the names for all the transcripts in the database"""
 		cls._wrapped_class.ensureIndex(fields)
 
 	@classmethod
 	def dropGlobalIndex(cls, fields) :
+		"""Drops an index, the opposite of ensureGlobalIndex()"""
 		cls._wrapped_class.dropIndex(fields)
 
 	def _load_sequences(self) :
+		"""This lazy abstract function is only called if the object 
+		sequences need to be loaded"""
 		raise NotImplementedError("This fct loads non binary sequences and should be implemented in child if needed")
 	
 	def _load_bin_sequence(self) :
+		"""Same as _load_sequences(), but loads binary sequences"""
 		raise NotImplementedError("This fct loads binary sequences and should be implemented in child if needed")

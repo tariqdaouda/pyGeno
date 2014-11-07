@@ -1,10 +1,18 @@
 import sys, time, cPickle
 
 class ProgressBar :
-	"A very simple unthreaded progress bar, see ProgressBar  __name__ == '__main__' for an ex of utilisation. This progress bar also logs stats in .logs"
+	"""A very simple unthreaded progress bar. This progress bar also logs stats in .logs.
+	Usage example::
+
+		p = ProgressBar(nbEpochs = -1)
+			for i in range(200000) :
+				p.update(label = 'value of i %d' % i)
+		p.close()
+	
+	If you don't know the maximum number of epochs you can enter nbEpochs < 1
+	"""
+	
 	def __init__(self, nbEpochs = -1, width = 25, label = "progress", minRefeshTime = 0.1) :
-		"if you don't know the maximum number of epochs you can enter nbEpochs < 1"
-		
 		self.width = width
 		self.currEpoch = 0
 		self.nbEpochs = float(nbEpochs)
@@ -51,7 +59,8 @@ class ProgressBar :
 			self.remtime_hr = self.formatTime(self.remtime)
 	
 	def log(self) :
-		"logs stats about the progression, without printing anything on screen"
+		"""logs stats about the progression, without printing anything on screen"""
+		
 		self._update()
 		self.logs['epochDuration'].append(self.lastEpochDuration)
 		self.logs['avg'].append(self.avg)
@@ -59,11 +68,14 @@ class ProgressBar :
 		self.logs['remtime'].append(self.remtime)
 	
 	def saveLogs(self, filename) :
+		"""dumps logs into a nice pickle"""
 		f = open(filename, 'wb')
 		cPickle.dump(self.logs, f)
 		f.close()
 
 	def update(self, label = '', forceRefresh = False) :
+		"""the function to be called at each iteration"""
+		
 		self.log()
 		tim = time.time()
 		if (tim - self.lastPrintTime > self.minRefeshTime) or forceRefresh :
@@ -100,12 +112,7 @@ class ProgressBar :
 			self.lastPrintTime = time.time()
 	
 	def close(self) :
+		"""Closes the bar so your next print will be on another line"""
 		self.update(forceRefresh = True)
 		print '\n'
-	
-if __name__ == '__main__' :
-	p = ProgressBar(nbEpochs = -1)
-	for i in range(200000) :
-		p.update(label = 'value of i %d' % i)
-		time.sleep(0.5)
 		

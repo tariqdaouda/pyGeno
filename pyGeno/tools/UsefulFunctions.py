@@ -96,9 +96,9 @@ splitStr = lambda x: x.split(';')
 stripSplitStr = lambda x: x.strip().split(';')
 
 
-"""returns a list of all the ocurances"""
 def findAll(haystack, needle) :
-
+	"""returns a list of all occurances of needle in haystack"""
+	
 	h = haystack
 	res = []
 	f = haystack.find(needle)
@@ -119,14 +119,15 @@ def reverseComplement(seq):
 	return complement(seq)[::-1]
 
 def complement(seq) :
-	"returns the complementary sequence without inversing it"
+	"""returns the complementary sequence without inversing it"""
 	tb = string.maketrans("ACGTRYMKWSBDHVNacgtrymkwsbdhvn",
 						  "TGCAYRKMWSVHDBNtgcayrkmwsvhdbn")
 	
 	return seq.translate(tb)
 
 def translateDNA_6Frames(sequence) :
-	trans = [
+	"""returns 6 translation of sequence. One for each reading frame"""
+	trans = (
 				translateDNA(sequence, 'f1'),
 				translateDNA(sequence, 'f2'),
 				translateDNA(sequence, 'f3'),
@@ -134,12 +135,12 @@ def translateDNA_6Frames(sequence) :
 				translateDNA(sequence, 'r1'),
 				translateDNA(sequence, 'r2'),
 				translateDNA(sequence, 'r3'),
-			]
+			)
 
 	return trans
 
-"""Translates DNA code, frame : fwd1, fwd2, fwd3, rev1, rev2, rev3"""
 def translateDNA(sequence, frame = 'f1') :
+	"""Translates DNA code, frame : fwd1, fwd2, fwd3, rev1, rev2, rev3"""
 
 	protein = ""
 
@@ -198,10 +199,14 @@ def getSequenceCombinaisons(polymorphipolymorphicDnaSeqSeq, pos = 0) :
 	return variants
 
 def polymorphicCodonCombinaisons(codon) :
+	"""Returns all the possible amino acids encoded by codon"""
 	return getSequenceCombinaisons(codon, 0)
 
 def encodePolymorphicNucleotide(polySeq) :
-	"polySeq must have one of the following forms: ['A', 'T', 'G'], 'ATG', 'A/T/G'"
+	"""returns a single character encoding all nucletides of polySeq 
+	in a single character. PolySeq must have one of the following forms: 
+	['A', 'T', 'G'], 'ATG', 'A/T/G'"""
+	
 	if type(polySeq) is types.StringType :
 		if polySeq.find("/") < 0 :
 			sseq = list(polySeq)
@@ -251,7 +256,7 @@ def encodePolymorphicNucleotide(polySeq) :
 		raise UnknownNucleotide(polySeq)
 
 def decodePolymorphicNucleotide(nuc) :
-	"from 'R' to ['A', 'G']"
+	"""the opposite of encodePolymorphicNucleotide, from 'R' to ['A', 'G']"""
 	if nuc in polymorphicNucleotides :
 		return polymorphicNucleotides[nuc]
 
@@ -261,11 +266,13 @@ def decodePolymorphicNucleotide(nuc) :
 	raise ValueError('nuc: %s, is not a valid nucleotide' % nuc)
 
 def decodePolymorphicNucleotide_str(nuc) :
-	"from 'R' to 'A/G'"
+	"""same as decodePolymorphicNucleotide but returns a string instead 
+	of a list, from 'R' to 'A/G"""
 	return '/'.join(decodePolymorphicNucleotide(nuc))
 
 def getNucleotideCodon(sequence, x1) :
-	"Returns the entire codon of the nucleotide at pos x1 in the cdna, and the position of that nocleotide in the codon in a tuple"
+	"""Returns the entire codon of the nucleotide at pos x1 in sequence, 
+	and the position of that nocleotide in the codon in a tuple"""
 
 	if x1 < 0 or x1 >= len(sequence) :
 		return None
@@ -279,7 +286,15 @@ def getNucleotideCodon(sequence, x1) :
 		return (sequence[x1-2: x1+1], 2)
 
 def showDifferences(seq1, seq2) :
-	"returns a string representig matching chars (-) and differences (A|T) between the two strings or length exceeded (#)"
+	"""Returns a string highligthing differences between seq1 and seq2:
+	
+	* Matches by '-'
+	
+	* Differences : 'A|T'
+	
+	* Exceeded length : '#'
+	
+	"""
 	ret = []
 	for i in range(max(len(seq1), len(seq2))) :
 
@@ -300,7 +315,8 @@ def showDifferences(seq1, seq2) :
 	return ''.join(ret)
 
 def highLightSubsequence(sequence, x1, x2, start=' [', stop = '] ') :
-	"returns a sequence where the subsequence in [x1, x2[ is placed bewteen start and stop,"
+	"""returns a sequence where the subsequence in [x1, x2[ is placed 
+	in bewteen 'start' and 'stop'"""
 
 	seq = list(sequence)
 	ii = 0

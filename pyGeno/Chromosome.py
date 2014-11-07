@@ -18,7 +18,7 @@ import types
 import pyGeno.configuration as conf
 
 class ChrosomeSequence(object) :
-	"""Represents a chromosome sequence. If refOnly no ploymorphisms are applied and the ref sequence is always returned"""
+	"""Represents a chromosome sequence. If 'refOnly' no ploymorphisms are applied and the ref sequence is always returned"""
 
 	def __init__(self, data, chromosome, refOnly = False) :
 		
@@ -79,6 +79,7 @@ class ChrosomeSequence(object) :
 		return self.chromosome.length
 
 class Chromosome_Raba(pyGenoRabaObject) :
+	"""The wrapped Raba object that really holds the data"""
 	
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 
@@ -97,7 +98,8 @@ class Chromosome_Raba(pyGenoRabaObject) :
 			self.number =  str(self.number).upper()
 
 class Chromosome(pyGenoRabaObjectWrapper) :
-	"""A chromosome"""
+	"""The wrapper for playing with Chromosomes"""
+	
 	_wrapped_class = Chromosome_Raba
 
 	def __init__(self, *args, **kwargs) :
@@ -107,9 +109,6 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 		self.sequence = ChrosomeSequence(SingletonManager.add(SecureMmap(path), path), self)
 		self.refSequence = ChrosomeSequence(SingletonManager.add(SecureMmap(path), path), self, refOnly = True)
 		self.loadSequences = False
-	
-	def stringFind(self, sequence) :
-		return self.sequence.find(sequence)
 
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
 		if issubclass(objectType, SNP_INDEL) :

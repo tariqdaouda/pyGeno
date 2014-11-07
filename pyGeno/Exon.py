@@ -6,6 +6,8 @@ from tools import UsefulFunctions as uf
 from tools.BinarySequence import NucBinarySequence
 
 class Exon_Raba(pyGenoRabaObject) :
+	"""The wrapped Raba object that really holds the data"""
+	
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 
 	id = rf.Primitive()
@@ -45,14 +47,11 @@ class Exon_Raba(pyGenoRabaObject) :
 			self.frame = int(self.frame)
 
 class Exon(pyGenoRabaObjectWrapper) :
-
+	"""The wrapper for playing with Exons"""
+		
 	_wrapped_class = Exon_Raba
 
 	def __init__(self, *args, **kwargs) :
-		"""An exon, the sequence is set according to gene strand, if it's '-' the sequence is the complement.
-		A CDS is a couple of coordinates that lies inside of the exon.
-		SNVsFilter is a fct that defines wich SNVs are included in the sequence.
-		I expect [start, end[ (python) not something like [start, end](ensembl format)"""
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 		self._load_sequencesTriggers = set(["UTR5", "UTR3", "CDS", "sequence"])
 
