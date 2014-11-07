@@ -102,7 +102,7 @@ You can even mix several SNPs together.
 
 Filtering SNPs:
 ---------------
-pyGeno allows to filter the SNPs that end up into the final sequences. It supports SNPs, Inserts and Deletions.
+pyGeno allows you to select the Polymorphisms that end up into the final sequences. It supports SNPs, Inserts and Deletions.
 
 .. code:: python
 
