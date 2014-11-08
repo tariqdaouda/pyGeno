@@ -12,6 +12,8 @@ from tools.BinarySequence import NucBinarySequence
 
 
 class Transcript_Raba(pyGenoRabaObject) :
+	"""The wrapped Raba object that really holds the data"""
+	
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 
 	id = rf.Primitive()
@@ -38,7 +40,8 @@ class Transcript_Raba(pyGenoRabaObject) :
 			self.coding = False
 
 class Transcript(pyGenoRabaObjectWrapper) :
-
+	"""The wrapper for playing with Transcripts"""
+	
 	_wrapped_class = Transcript_Raba
 
 	def __init__(self, *args, **kwargs) :
@@ -117,15 +120,15 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		self.bin_UTR3 =  NucBinarySequence(self.UTR3)
 
 	def getNucleotideCodon(self, cdnaX1) :
-		"Returns the entire codon of the nucleotide at pos cdnaX1 in the cdna, and the position of that nocleotide in the codon"
+		"""Returns the entire codon of the nucleotide at pos cdnaX1 in the cdna, and the position of that nocleotide in the codon"""
 		return uf.getNucleotideCodon(self.cDNA, cdnaX1)
 
 	def getCodon(self, i) :
-		"returns the ith codon"
+		"""returns the ith codon"""
 		return self.getNucleotideCodon(i*3)[0]
 
 	def iterCodons(self) :
-		"iterates through the codons"
+		"""iterates through the codons"""
 		for i in range(len(self.cDNA)/3) :
 			yield self.getCodon(i)
 
@@ -134,53 +137,47 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		return self.bin_Sequence.find(sequence)
 
 	def findAll(self, seqence):
-		"""Returns a lits of all positions where sequence was found"""
+		"""Returns a list of all positions where sequence was found"""
 		return self.bin_Sequence.findAll(sequence)
 
 	def findIncDNA(self, sequence) :
 		"""return the position of the first occurance of sequence"""
 		return self.bin_cDNA.find(sequence)
 
-	def findAllIncDNA(self, seqence):
-		"""Returns a lits of all positions where sequence was found"""
+	def findAllIncDNA(self, seqence) :
+		"""Returns a list of all positions where sequence was found in the cDNA"""
 		return self.bin_cDNA.findAll(sequence)
 
-	def getcDNALength(self):
+	def getcDNALength(self) :
+		"""returns the length of the cDNA"""
 		return len(self.cDNA)
 
 	def findInUTR5(self, sequence) :
-		"""return the position of the first occurance of sequence"""
+		"""return the position of the first occurance of sequence in the 5'UTR"""
 		return self.bin_UTR5.find(sequence)
 
-	def findAllInUTR5(self, seqence):
-		"""Returns a lits of all positions where sequence was found"""
+	def findAllInUTR5(self, seqence) :
+		"""Returns a list of all positions where sequence was found in the 5'UTR"""
 		return self.bin_UTR5.findAll(sequence)
 
-	def getUTR5Length(self):
+	def getUTR5Length(self) :
+		"""returns the length of the 5'UTR"""
 		return len(self.bin_UTR5)
 
 	def findInUTR3(self, sequence) :
-		"""return the position of the first occurance of sequence"""
+		"""return the position of the first occurance of sequence in the 3'UTR"""
 		return self.bin_UTR3.find(sequence)
 
-	def findAllInUTR3(self, seqence):
-		"""Returns a lits of all positions where sequence was found"""
+	def findAllInUTR3(self, seqence) :
+		"""Returns a lits of all positions where sequence was found in the 3'UTR"""
 		return self.bin_UTR3.findAll(sequence)
 
-	def getUTR3Length(self):
+	def getUTR3Length(self) :
+		"""returns the length of the 3'UTR"""
 		return len(self.bin_UTR3)
 
-	def toDNA(self, x1) :
-		"Convertes a position in the transcript to a one in DNA (with respect to the chromosome)"
-		for startEnd, e in self.exonsDict.iteritems() :
-			if  startEnd[0] <= x1 and x1 < startEnd[1] :
-				if self.strand == '+' :
-					return x1 + startEnd[0]
-				else :
-					return startEnd[1] - x1
-		return None
-
 	def getNbCodons(self) :
+		"""returns the number of codons in the transcript"""
 		return len(self.cDNA)/3
 	
 	def __getattribute__(self, name) :

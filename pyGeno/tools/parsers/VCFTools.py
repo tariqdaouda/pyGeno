@@ -90,6 +90,7 @@ class VCFFile(object) :
 			self.parse(filename, gziped, stream)
 		
 	def parse(self, filename, gziped = False, stream = False) :
+		"""opens a file"""
 		self.stream = stream
 		
 		if gziped :
@@ -167,6 +168,7 @@ class VCFFile(object) :
 			return VCFEntry(self, line, self.currentPos)
 	
 	def __getitem__(self, line) :
+		"""returns the lineth element"""
 		if self.stream :
 			raise KeyError("When the file is opened as a stream it's impossible to ask for specific item")
 		
@@ -175,6 +177,7 @@ class VCFFile(object) :
 		return self.lines[line]
 
 	def __len__(self) :
+		"""returns the number of entries"""
 		return len(self.lines)
 	
 	def __repr__(self) :

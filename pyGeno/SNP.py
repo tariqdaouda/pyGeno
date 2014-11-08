@@ -84,7 +84,7 @@ class CasavaSNP(SNP_INDEL) :
 	altAlias = 'alleles'
 
 class dbSNPSNP(SNP_INDEL) :
-	"This class is for SNPs from dbSNP. Most you can uncomment the fields that you need"
+	"This class is for SNPs from dbSNP. Feel free to uncomment the fields that you need"
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	
 	# To add/remove a field comment/uncomentd it. Beware, adding or removing a field results in a significant overhead the first time you relaunch pyGeno. You may have to delete and reimport some snps sets.

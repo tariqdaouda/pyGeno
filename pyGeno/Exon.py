@@ -109,11 +109,13 @@ class Exon(pyGenoRabaObjectWrapper) :
 		self.bin_UTR3 =  NucBinarySequence(self.UTR3)
 		
 	def hasCDS(self) :
+		"""returns true or false depending on if the exon has a CDS"""
 		if self.CDS_start != None and self.CDS_end != None:
 			return True
 		return False
 
 	def getCDSLength(self) :
+		"""returns the length of the CDS sequence"""
 		return len(self.CDS)
 
 	def find(self, sequence) :

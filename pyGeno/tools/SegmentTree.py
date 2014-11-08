@@ -17,27 +17,40 @@ def aux_moveTree(offset, tree):
 		aux_moveTree(offset, c)
 		
 class SegmentTree :
-	""" Optimised genome annoations.
+	""" Optimised genome annotations.
 	A segment tree is an arborescence of segments. First position is inclusive, second exlusive, respectively refered to as x1 and x2.
 	A segment tree has the following properties :
-	-The root has no x1 or x2 (both set to None).
-	-Segment are arrangend in an ascending order
-	-For two segment S1 and S2 : [S2.x1, S2.x2[ C [S1.x1, S1.x2[ <=> S2 is a child of S1
 	
-	It looks like this :
-	Root : 0-15
-	---->Segment : 0-12
-	------->Segment : 1-6
-	---------->Segment : 2-3
-	---------->Segment : 4-5
-	------->Segment : 7-8
-	------->Segment : 9-10
-	---->Segment : 11-14
-	------->Segment : 12-14
-	---->Segment : 13-15
+	* The root has no x1 or x2 (both set to None).
 	
-	Each segment can have a name to make it easily recognizable and a referedObject, and an object whose instance is stored for future usage.
-	ReferedObject are always stored in lists no matter what you pass as an argument. If referedObject is already a list it will be stored as is.
+	* Segment are arrangend in an ascending order
+	
+	* For two segment S1 and S2 : [S2.x1, S2.x2[ C [S1.x1, S1.x2[ <=> S2 is a child of S1
+	
+	Here's an example of a tree :
+	
+	* Root : 0-15
+	
+	* ---->Segment : 0-12
+	
+	* ------->Segment : 1-6
+	
+	* ---------->Segment : 2-3
+	
+	* ---------->Segment : 4-5
+	
+	* ------->Segment : 7-8
+	
+	* ------->Segment : 9-10
+	
+	* ---->Segment : 11-14
+	
+	* ------->Segment : 12-14
+	
+	* ---->Segment : 13-15
+	
+	Each segment can have a 'name' and a 'referedObject'. ReferedObject are objects are stored within the graph for future usage.
+	These objects are always stored in lists. If referedObject is already a list it will be stored as is.
 	"""
 	
 	def __init__(self, x1 = None, x2 = None, name = '', referedObject = [], father = None, level = 0) :
@@ -62,7 +75,7 @@ class SegmentTree :
 			self.children.insert(index, segmentTree)
 	
 	def insert(self, x1, x2, name = '', referedObject = []) :
-		"""Insert the segment in it's right place and returns it
+		"""Insert the segment in it's right place and returns it. 
 		If there's already a segment S as S.x1 == x1 and S.x2 == x2. S.name will be changed to 'S.name U name' and the
 		referedObject will be appended to the already existing list"""
 		

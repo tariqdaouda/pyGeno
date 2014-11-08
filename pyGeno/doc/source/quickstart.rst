@@ -2,7 +2,7 @@ Quickstart
 ==========
 
 Quick importation
--------
+-----------------
 
 If your goal is simply to play with pyGeno to have a feel of its magic. PyGeno is shipped with a datawrap of the human reference Y chromosome::
 
@@ -59,8 +59,8 @@ To know the available fields for queries, there's a "help()" function::
 	Gene.help()
 
 
-To get more speed
------------
+Faster queries
+---------------
 
 To speed up loops use iterGet()::
 	

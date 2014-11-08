@@ -7,11 +7,11 @@ from tools import UsefulFunctions as uf
 class Sequence_modifiers(object) :
 	"""Abtract Class. All sequence must inherit from me"""
 	def __init__(self, sources = {}) :
-		self.SNPSources = sources
+		self.sources = sources
 
 	def addSource(self, name, snp) :
-		"Optional, you can keep a dict that records the polynorphims that were mixed together to make self. They are stored into self.SNPSources"
-		self.SNPSources[name] = snp
+		"Optional, you can keep a dict that records the polymorphims that were mixed together to make self. They are stored into self.sources"
+		self.sources[name] = snp
 
 class SequenceSNP(Sequence_modifiers) :
 	"""Represents a SNP to be applied to the sequence"""
@@ -48,11 +48,14 @@ class DefaultSNPFilter(SNPFilter) :
 	"""Default filtering object, does not filter anything. Doesn't apply indels.
 	This is also a template that you can use for own filters. A prototype for a custom filter might be::
 		class MyFilter(SNPFilter) :
-	
+			def __init__(self, thres) :
+				self.thres = thres
+			
 			def filter(chromosome, SNP_Set1 = None, SNP_Set2 = None ) :
-				if SNP_Set1.alt == SNP_Set2.alt :
+				if SNP_Set1.alt is not None and (SNP_Set1.alt == SNP_Set2.alt) and SNP_Set1.Qmax_gt > self.thres :
 					return SequenceSNP(SNP_Set1.alt)
-
+				return None
+			
 	Where SNP_Set1 and SNP_Set2 are the actual names of the snp sets supplied to the genome. In the context of the function
 	they represent single polymorphisms derived from thoses sets that occur at the same position.
 
