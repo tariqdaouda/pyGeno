@@ -114,7 +114,7 @@ pyGeno allows you to select the Polymorphisms that end up into the final sequenc
 		def __init__(self, threshold) :
 			self.threshold = threshold
 			
-		def filter(self, chromosome, dummySRY) :
+		def filter(self, chromosome, dummySRY = None) :
 			if dummySRY.Qmax_gt > self.threshold :
 				#other possibilities of return are SequenceInsert(<bases>), SequenceDelete(<length>)
 				return SequenceSNP(dummySRY.alt)
