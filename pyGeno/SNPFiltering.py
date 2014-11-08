@@ -45,8 +45,10 @@ class SNPFilter(object) :
 		raise NotImplemented("Must be implemented in child")
 
 class DefaultSNPFilter(SNPFilter) :
-	"""Default filtering object, does not filter anything. Doesn't apply indels.
+	"""
+	Default filtering object, does not filter anything. Doesn't apply indels.
 	This is also a template that you can use for own filters. A prototype for a custom filter might be::
+	
 		class MyFilter(SNPFilter) :
 			def __init__(self, thres) :
 				self.thres = thres

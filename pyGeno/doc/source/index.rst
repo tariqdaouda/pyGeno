@@ -9,7 +9,7 @@ pyGeno: A python package for Personalized Proteogenomics!
 Introduction
 --------------
 
-pyGeno is a python module mainly intended for **personal medicine** applications that revolve around **genomics** and **proteomics** (protegenomics).
+pyGeno is a python module mainly intended for **personal medicine** applications that revolve around **genomics** and **proteomics** (proteogenomics).
 
 It integrates:
 

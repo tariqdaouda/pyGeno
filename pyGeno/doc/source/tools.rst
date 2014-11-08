@@ -35,5 +35,5 @@ Secure memory map
 ------------------
 A write protected memory map.
 
-.. automodule:: tools.SegmentTree
+.. automodule:: tools.SecureMmap
    :members:

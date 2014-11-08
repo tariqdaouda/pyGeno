@@ -11,17 +11,17 @@ To read and write CSV files.
    :members:
 
 FASTA
----
+-----
 To read and write FASTA files.
 
-.. automodule:: tools.parsers.FASTATools
+.. automodule:: tools.parsers.FastaTools
    :members:
 
 FASTQ
----
+-----
 To read and write FASTQ files.
 
-.. automodule:: tools.parsers.FASTQTools
+.. automodule:: tools.parsers.FastqTools
    :members:
 
 GTF
@@ -42,5 +42,5 @@ Casava
 -------
 To read casava files.
 
-.. automodule:: tools.parsers.VCFTools
+.. automodule:: tools.parsers.CasavaTools
    :members:

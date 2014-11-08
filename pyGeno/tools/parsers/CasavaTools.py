@@ -39,7 +39,8 @@ class SNPsTxtEntry(object) :
 		return str(self.values)
 	
 class SNPsTxtFile(object) :
-	"""Represents a whole casava's snps.txt file::
+	"""
+	Represents a whole casava's snps.txt file::
 		
 		f = SNPsTxtFile('snps.txt')
 		for line in f :

@@ -20,7 +20,8 @@ class FastqEntry(object) :
 		return "%s\n%s\n%s\n%s" %(self.values['identifier'], self.values['sequence'], self.values['+'], self.values['qualities'])
 	
 class FastqFile(object) :
-	"""Represents a whole CSV file::
+	"""
+	Represents a whole CSV file::
 		
 		#reading
 		f = FastqFile()

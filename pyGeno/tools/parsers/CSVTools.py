@@ -104,21 +104,21 @@ class CSVEntry(object) :
 		return self.csvFile.separator.join(self.data)
 	
 class CSVFile(object) :
-	"""Represents a whole CSV file::
+	"""
+	Represents a whole CSV file::
 		
 		#reading
 		f = CSVFile()
 		f.parse('hop.csv')
 		for line in f :
 			print line['ref']
-		
+
 		#writing, legend can either be a list of a dict {field : column number}
 		f = CSVFile(legend = ['name', 'email'])
 		l = f.newLine()
 		l['name'] = 'toto'
 		l['email'] = "hop@gmail.com"
-		f.save('myCSV.csv')
-		
+		f.save('myCSV.csv')		
 	"""
 	
 	def __init__(self, legend = [], separator = ',') :

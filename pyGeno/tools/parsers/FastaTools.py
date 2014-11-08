@@ -1,7 +1,8 @@
 import os
 
 class FastaFile(object) :
-	"""Represents a whole Fasta file::
+	"""
+	Represents a whole Fasta file::
 		
 		#reading
 		f = FastaFile()

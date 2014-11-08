@@ -70,15 +70,14 @@ class VCFEntry(object) :
 
 class VCFFile(object) :
 	"""
-		This is a small parser for VCF files, it should work with any VCF file but has only been tested on dbSNP138 files.
-		Represents a whole VCF file::
+	This is a small parser for VCF files, it should work with any VCF file but has only been tested on dbSNP138 files.
+	Represents a whole VCF file::
 		
 		#reading
 		f = VCFFile()
 		f.parse('hop.vcf')
 		for line in f :
 			print line['pos']
-		
 	"""
 	
 	def __init__(self, filename = None, gziped = False, stream = False) :
