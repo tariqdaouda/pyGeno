@@ -92,14 +92,14 @@ pyGeno allows you to customize the Polymorphisms that end up into the final sequ
 
 	class QMax_gt_filter(SNPFilter) :
 
-        def __init__(self, threshold) :
-                self.threshold = threshold
+		def __init__(self, threshold) :
+			self.threshold = threshold
 
-        def filter(self, chromosome, dummySRY = None) :
-                if dummySRY.Qmax_gt > self.threshold :
-                        #other possibilities of return are SequenceInsert(<bases>), SequenceDelete(<length>)
-                        return SequenceSNP(dummySRY.alt)
-                return None #None means keep the reference allele
+		def filter(self, chromosome, dummySRY = None) :
+			if dummySRY.Qmax_gt > self.threshold :
+				#other possibilities of return are SequenceInsert(<bases>), SequenceDelete(<length>)
+				return SequenceSNP(dummySRY.alt)
+			return None #None means keep the reference allele
 
 	persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = QMax_gt_filter(10))
 
