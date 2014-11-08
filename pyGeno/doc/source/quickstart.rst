@@ -101,5 +101,5 @@ pyGeno allows you to customize the Polymorphisms that end up into the final sequ
                         return SequenceSNP(dummySRY.alt)
                 return None #None means keep the reference allele
 
-		persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = QMax_gt_filter(10))
+	persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = QMax_gt_filter(10))
 
