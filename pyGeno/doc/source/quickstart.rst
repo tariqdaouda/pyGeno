@@ -3,6 +3,8 @@ Quickstart
 
 Quick importation
 -----------------
+In order to use pyGeno you first need to populate its database by importing datawraps. An importation is a one time step
+and once the data has been imported, the datawrap can be discarded with no concequences to the database. 
 
 If your goal is simply to play with pyGeno to have a feel of its magic. PyGeno is shipped with a datawrap of the human reference Y chromosome::
 
