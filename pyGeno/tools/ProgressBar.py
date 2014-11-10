@@ -102,7 +102,7 @@ class ProgressBar :
 				w = self.width - len(self.miniSnake)
 				v = self.currEpoch%(w+1)
 				snake = "%s%s%s" %("  " * (v), self.miniSnake, "  " * (w-v))
-				self.bar = "%s %s[%s] %s%% (%d/%s) runtime: %s, remaing: %s, avg: %s" %(wheelState, slabel, snake, '?', self.currEpoch, '?', self.runtime_hr, '?', self.formatTime(self.avg))
+				self.bar = "%s %s[%s] %s%% (%d/%s) runtime: %s, remaining: %s, avg: %s" %(wheelState, slabel, snake, '?', self.currEpoch, '?', self.runtime_hr, '?', self.formatTime(self.avg))
 			
 			sys.stdout.write("\b" * (len(self.bar)+1))
 			sys.stdout.write(" " * (len(self.bar)+1))
