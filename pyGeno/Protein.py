@@ -75,15 +75,15 @@ class Protein(pyGenoRabaObjectWrapper) :
 		return self.bin_sequence.find(sequence)
 
 	def findAll(self, sequence):
-		"""Returns all occurences of sequence taking polymorphisms into account this slower than the simple string search findStringAll"""
+		"""Returns all occurences of sequence taking polymorphisms into account this is slower than the simple string search findStringAll"""
 		return self.bin_sequence.findAll(sequence)
 
 	def findString(self, sequence) :
-		"""return the first occurence of sequence using simple string search in sequence doesn't care about polymorphisms"""
+		"""Returns the first occurence of sequence using simple string search in sequence doesn't care about polymorphisms"""
 		return self.sequence.find(sequence)
 
 	def findStringAll(self, sequence):
-		"""return all first occurences of sequence using simple string search in sequence doesn't care about polymorphisms"""
+		"""Returns all first occurences of sequence using simple string search in sequence doesn't care about polymorphisms"""
 		return uf.findAll(self.sequence, sequence)
 
 	def pluck(self) :
