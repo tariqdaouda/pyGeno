@@ -69,7 +69,7 @@ To speed up loops use iterGet()::
 
 For more speed create indexes on the fields you need the most::
 	
-	Gene.ensureIndex('name')
+	Gene.ensureGlobalIndex('name')
 
 
 Personalized Genomes

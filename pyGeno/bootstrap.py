@@ -16,5 +16,5 @@ def importDummySRY() :
 
 def importHumanReference() :
 	"Importes the Human Reference Genome. This may take a while, but it's done only once."
-	path = os.path.join(this_dir, "bootstrap_data", "GRCh37.75.tar.gz")
+	path = os.path.join(this_dir, "bootstrap_data", "GRCh36.75.tar.gz")
 	importGenome(path)
