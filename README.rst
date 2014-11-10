@@ -13,8 +13,10 @@ You can bootstrap pyGeno with the following:
 .. code:: python
 	
 	import pyGeno.bootstrap as B
-	
+	#Downloads the whole genome (205MB), may take an hour, but done only once.
 	B.importHumanReference()
+	#Very fast, imports only the Y chromosome. Useful for playing around with pyGeno 
+	B.importHumanReferenceYOnly()
 	B.importDummySRY()
 
 Importing a data wrap:
