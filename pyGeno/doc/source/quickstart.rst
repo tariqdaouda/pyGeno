@@ -15,7 +15,7 @@ There's also a dummy SNP datawrap that you can import with the following::
 	B.importDummySRY()
 
 For more serious work pyGeno is also shipped with a datawrap for the complete human reference genome.
-PyGeno will automatically download the needed data from Ensembl (~166Mb), and the whole importation process
+PyGeno will automatically download the needed data from Ensembl (~205MB), and the whole importation process
 may exceed an hour::
 	
 	import pyGeno.bootstrap as B
