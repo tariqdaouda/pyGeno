@@ -15,6 +15,8 @@ from pyGeno.tools.parsers.GTFTools import GTFFile
 from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
 
+import gc
+
 def backUpDB() :
 	"""backup the current database version. automatically called by importGenome(). Returns the filename of the backup"""
 	st = time.ctime().replace(' ', '_')
@@ -210,7 +212,8 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 			self.proteins = {}
 			
 			self.conf.db.endTransaction()
-		
+			gc.collect()
+
 		def save_chros(self) :
 			pBar = ProgressBar(nbEpochs = len(self.chromosomes))
 			for c in self.chromosomes.itervalues() :
