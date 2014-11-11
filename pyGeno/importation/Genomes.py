@@ -88,7 +88,7 @@ def deleteGenome(specie, name) :
 	conf.db.endTransaction()
 	return allGood
 
-def importGenome(packageFile, verbose = False) :
+def importGenome(packageFile, batchSize = 25, verbose = 0) :
 	"""Import a pyGeno genome package. A genome packages is a tar.gz ball that contains at it's root:
 
 	* gziped fasta files for all chromosomes
@@ -117,6 +117,11 @@ def importGenome(packageFile, verbose = False) :
 	All files except the manifest can be downloaded from: http://useast.ensembl.org/info/data/ftp/index.html
 	
 	A rollback is performed if an exception is caught during importation
+	
+	Verbose must be an int [0, 4] for various levels of verbosity
+	
+	batchSize sets the number of genes to parse before performing a database save. PCs with little ram like
+	small values, while those with endowed with more memory may perform faster with higher values.
 	"""
 
 	def reformatItems(items) :
@@ -124,7 +129,7 @@ def importGenome(packageFile, verbose = False) :
 		s = s.replace('[', '').replace(']', '').replace("',", ': ').replace('), ', '\n').replace("'", '').replace('(', '').replace(')', '')
 		return s
 
-	printf('Importing genome package: %s... (This make take a while)' % packageFile)
+	printf('Importing genome package: %s... (This may take a while)' % packageFile)
 
 	packageDir = _decompressPackage(packageFile)
 
@@ -159,7 +164,7 @@ def importGenome(packageFile, verbose = False) :
 
 	printf("Importing:\n\t%s\nGenome:\n\t%s\n..."  % (reformatItems(packageInfos).replace('\n', '\n\t'), reformatItems(parser.items('genome')).replace('\n', '\n\t')))
 
-	chros = _importGenomeObjects(gtfFile, chromosomeSet, genome, verbose)
+	chros = _importGenomeObjects(gtfFile, chromosomeSet, genome, batchSize, verbose)
 	os.makedirs(seqTargetDir)
 	startChro = 0
 	pBar = ProgressBar(nbEpochs = len(chros))
@@ -174,9 +179,43 @@ def importGenome(packageFile, verbose = False) :
 	shutil.rmtree(packageDir)
 	return True
 	
-def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
-	"verbose is int [0, 4] for various levels of verbosity"
+def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
+	"""verbose must be an int [0, 4] for various levels of verbosity"""
 	
+	chromosomes = {}
+	genes = {}
+	transcripts = {}
+	proteins = {}
+	exons = {}
+	
+	class Store(object) :
+		
+		def __init__(self, conf) :
+			self.conf = conf
+			self.chromosomes = {}
+			self.genes = {}
+			self.transcripts = {}
+			self.proteins = {}
+			self.exons = {}
+
+		def batch_save(self) :
+			self.conf.db.beginTransaction()
+			
+			for c in self.genes.itervalues() :
+				c.save()
+			self.genes = {}
+			
+			for c in self.transcripts.itervalues() :
+				c.save()
+			self.transcripts = {}
+			self.exons = {}
+
+			for c in self.proteins.itervalues() :
+				c.save()
+			self.proteins = {}
+			
+			self.conf.db.endTransaction()
+		
 	printf('Importing gene set infos from %s...' % gtfFilePath)
 	
 	printf('Backuping indexes...')
@@ -193,11 +232,6 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	gtf = GTFFile(gtfFilePath, gziped = True)
 	printf('Done. Importation begins!')
 	
-	chromosomes = {}
-	genes = {}
-	transcripts = {}
-	proteins = {}
-	exons = {}
 	chroNumber = None
 	
 	pBar = ProgressBar(nbEpochs = len(gtf))
@@ -220,16 +254,18 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 			if chroNumber not in chromosomes :
 				chromosomes[chroNumber] = Chromosome_Raba()
 				chromosomes[chroNumber].set(genome = genome, number = chroNumber)
-				chromosomes[chroNumber].dataType = 'heavy'
-
+			
 			try :
 				geneId = gtf.get(i, 'gene_id')
-				geneName = gtf.get(i, 'gene_name')
+				geneName =  gtf.get(i, 'gene_name')
 			except KeyError :
 				geneId = None
 				geneName = None
 				if verbose :
 					printf('Warning: no gene_id/name found in line %s' % gtf[i])
+			
+			if len(genes) > batchSize and geneName not in genes :
+				batch_save()
 			
 			if geneId is not None :
 				if geneId not in genes :
@@ -315,40 +351,22 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 						if strand == '-' :
 							if exons[exonKey].CDS_start != None :
 								exons[exonKey].CDS_start -= 3
-	
 	pBar.close()
+	
+	batch_save()
 	conf.db.beginTransaction()
-	printf('saving %d chromsomes...' % len(chromosomes))
+	printf('almost done saving %d chromsomes...' % len(chromosomes))
 	pBar = ProgressBar(nbEpochs = len(chromosomes))
 	for c in chromosomes.itervalues() :
 		pBar.update(label = 'Chr %s' % c.number)
 		c.save()
 	pBar.close()
 	
-	printf('saving %d genes...' % len(genes))
-	pBar = ProgressBar(nbEpochs = len(genes))
-	for c in genes.itervalues() :
-		pBar.update(label = 'gene %s' % c.id)
-		c.save()
-	pBar.close()
-
-	printf('saving %d transcripts and exons %d...' % (len(transcripts), len(exons)))
-	pBar = ProgressBar(nbEpochs = len(transcripts))
-	for c in transcripts.itervalues() :
-		pBar.update(label = 'transcript %s' % c.id)
-		c.save()
-	pBar.close()
-	
-	printf('saving %d proteins...' % len(proteins))
-	pBar = ProgressBar(nbEpochs = len(proteins))
-	for c in proteins.itervalues() :
-		pBar.update(label = 'protein %s' % c.id)
-		c.save()
-	pBar.close()
-
-	printf('saving genome...')
+	printf('saving genome object...')
 	genome.save()
+	conf.db.endTransaction()
 	
+	conf.db.beginTransaction()
 	printf('restoring core indexes...')
 	Genome.ensureGlobalIndex(('name', 'specie'))
 	Chromosome.ensureGlobalIndex('genome')
