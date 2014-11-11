@@ -6,7 +6,11 @@ this_dir, this_filename = os.path.split(__file__)
 
 def listDataWraps() :
 	"""Lists all the datawraps pyGeno comes with"""
-	return os.listdir(this_dir)
+	l = []
+	for f in os.listdir(os.path.join(this_dir, "bootstrap_data")) :
+		if f.find(".tar.gz") > -1 :
+			l.append(f)
+	return l
 
 def importHumanReferenceYOnly() :
 	"Importing only the Y chromosome of the Human Reference Genome. Useful for playing a bit with pyGeno."
