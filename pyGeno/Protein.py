@@ -71,27 +71,20 @@ class Protein(pyGenoRabaObjectWrapper) :
 		return self.bin_sequence.getPolymorphisms()
 
 	def find(self, sequence):
-		"""Returns the first occurence of sequence taking polymorphisms into account this is slower than the simple string search findString"""
+		"""Returns the position of the first occurence of sequence taking polymorphisms into account"""
 		return self.bin_sequence.find(sequence)
 
 	def findAll(self, sequence):
-		"""Returns all occurences of sequence taking polymorphisms into account this is slower than the simple string search findStringAll"""
+		"""Returns all the position of the occurences of sequence taking polymorphisms into accoun"""
 		return self.bin_sequence.findAll(sequence)
 
 	def findString(self, sequence) :
-		"""Returns the first occurence of sequence using simple string search in sequence doesn't care about polymorphisms"""
+		"""Returns the first occurence of sequence using simple string search in sequence that doesn't care about polymorphisms"""
 		return self.sequence.find(sequence)
 
 	def findStringAll(self, sequence):
-		"""Returns all first occurences of sequence using simple string search in sequence doesn't care about polymorphisms"""
+		"""Returns all first occurences of sequence using simple string search in sequence that doesn't care about polymorphisms"""
 		return uf.findAll(self.sequence, sequence)
-
-	def pluck(self) :
-		"""Returns a plucked object. Plucks the protein off the tree, set the value of self.transcript into str(self.transcript). This effectively disconnects the object and
-		makes it much more lighter in case you'd like to pickle it"""
-		e = copy.copy(self)
-		e.transcript = str(self.transcript)
-		return e
 
 	def __getitem__(self, i) :
 		return self.bin_sequence.getChar(i)
