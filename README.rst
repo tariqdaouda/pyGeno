@@ -82,7 +82,7 @@ Creating indexes to speed up queries:
 
   from pyGeno.Gene import Gene
   #creating an index on gene names if it does not already exist
-  Gene.ensureGobalIndex('name')
+  Gene.ensureGlobalIndex('name')
   #removing the index
   Gene.dropIndex('name')
   
