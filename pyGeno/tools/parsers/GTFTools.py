@@ -60,11 +60,11 @@ class GTFFile(object) :
 
 	def next(self) :
 		self.currentPos += 1
-		if not self.stream :
-			try :
-				return self[self.currentPos-1]
-			except IndexError:
-				raise StopIteration
+		try :
+			yield GTFEntry(self, self.currentPos)
+			#return self[self.currentPos-1]
+		except IndexError:
+			raise StopIteration
 
 	def __getitem__(self, i) :
 		"""returns the ith entry"""

@@ -84,6 +84,10 @@ class pyGenoSNPTests(unittest.TestCase):
 		self.assertEqual('ATGCAATCATATGCTTCTGC', refProt.transcript.cDNA[:20])
 		self.assertEqual('TGCAATCATATGCTTCTGCT', persProt.transcript.cDNA[:20])
 
+	def test_bags(self) :
+		dummy = Genome(name = 'GRCh37.75_Y-Only')
+		self.assertEqual(dummy.wrapped_object, self.ref.wrapped_object)
+		 
 if __name__ == "__main__" :
 	from pyGeno.bootstrap import importHumanReferenceYOnly, importDummySRY
 	

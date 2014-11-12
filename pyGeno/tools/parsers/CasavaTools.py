@@ -29,7 +29,7 @@ class SNPsTxtEntry(object) :
 	
 	def __getitem__(self, fieldName):
 		"""Returns the value of field 'fieldName'"""
-		return self.values[field]
+		return self.values[fieldName]
 	
 	def __setitem__(self, fieldName, value) :
 		"""Sets the value of field 'fieldName' to 'value' """

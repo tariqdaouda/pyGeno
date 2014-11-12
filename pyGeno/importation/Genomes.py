@@ -16,6 +16,7 @@ from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
 
 import gc
+import objgraph
 
 def backUpDB() :
 	"""backup the current database version. automatically called by importGenome(). Returns the filename of the backup"""
@@ -90,7 +91,7 @@ def deleteGenome(specie, name) :
 	conf.db.endTransaction()
 	return allGood
 
-def importGenome(packageFile, batchSize = 50, verbose = 0) :
+def importGenome(packageFile, batchSize = 5, verbose = 0) :
 	"""Import a pyGeno genome package. A genome packages is a tar.gz ball that contains at it's root:
 
 	* gziped fasta files for all chromosomes
@@ -179,8 +180,22 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 	pBar.close()
 	
 	shutil.rmtree(packageDir)
+	def getrefs(clsName) :
+		import random
+		obj = random.choice(objgraph.by_type(clsName))
+		
+		bck_chain = objgraph.find_backref_chain(obj, objgraph.is_proper_module)
+		objgraph.show_chain(bck_chain, filename = "%s_ref.png" % clsName)
+		
+		chain = objgraph.find_ref_chain(obj, objgraph.is_proper_module)
+		objgraph.show_chain(chain, filename = "%s_bck_ref.png" % clsName)
+
+	#~ getrefs('Exon_Raba')
+	getrefs('GTFEntry')
+	print objgraph.show_most_common_types()
 	return True
-	
+
+@profile
 def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 	"""verbose must be an int [0, 4] for various levels of verbosity"""
 
@@ -200,19 +215,35 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 			
 			for c in self.genes.itervalues() :
 				c.save()
-			self.genes = {}
+				del(c)
+			
+			for c in self.exons.itervalues() :
+				c.save()
+				del(c)
 			
 			for c in self.transcripts.itervalues() :
 				c.save()
-			self.transcripts = {}
-			self.exons = {}
-
+				conf.removeFromDBRegistery(c.exons)
+				del(c)
+				
 			for c in self.proteins.itervalues() :
 				c.save()
-			self.proteins = {}
-			
+				del(c)
+				
 			self.conf.db.endTransaction()
+			
+			del(self.genes)
+			del(self.transcripts)
+			del(self.proteins)
+			del(self.exons)
 			gc.collect()
+			
+			self.genes = {}
+			self.transcripts = {}
+			self.proteins = {}
+			self.exons = {}
+			print "-----iop"
+			print objgraph.show_most_common_types()
 
 		def save_chros(self) :
 			pBar = ProgressBar(nbEpochs = len(self.chromosomes))
@@ -240,18 +271,18 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 	store = Store(conf)
 	chroNumber = None
 	pBar = ProgressBar(nbEpochs = len(gtf))
-	for i in xrange(len(gtf)) :
-		chroN = str(gtf.get(i, 'seqname'))
+	for line in gtf :
+		chroN = line['seqname'] #str(line['seqname'])
 		pBar.update(label = "Chr %s" % chroN)
 		
 		if (chroN.upper() in chroSet or chroN.lower() in chroSet):
-			strand = gtf.get(i, 'strand')
-			gene_biotype = gtf.get(i, 'gene_biotype')
-			regionType = gtf.get(i, 'feature')
-			frame = gtf.get(i, 'frame')
+			strand = line['strand']#line['strand']
+			gene_biotype = line['gene_biotype']#line['gene_biotype']
+			regionType = line['feature']# line['feature']
+			frame = line['frame']#line['frame']
 
-			start = int(gtf.get(i, 'start')) - 1
-			end = int(gtf.get(i, 'end'))
+			start = int(line['start']) - 1
+			end = int(line['end'])
 			if start > end :
 				start, end = end, start
 
@@ -261,8 +292,8 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 				store.chromosomes[chroNumber].set(genome = genome, number = chroNumber)
 			
 			try :
-				geneId = gtf.get(i, 'gene_id')
-				geneName =  gtf.get(i, 'gene_name')
+				geneId = line['gene_id']
+				geneName =  line['gene_name']
 			except KeyError :
 				geneId = None
 				geneName = None
@@ -283,8 +314,8 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 				if end > store.genes[geneId].end or store.genes[geneId].end is None :
 					store.genes[geneId].end = end
 			try :
-				transId = gtf.get(i, 'transcript_id')
-				transName = gtf.get(i, 'transcript_name')
+				transId = line['transcript_id']
+				transName = line['transcript_name']
 			except KeyError :
 				transId = None
 				transName = None
@@ -303,7 +334,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 					store.transcripts[transId].end = end
 			
 				try :
-					protId = gtf.get(i, 'protein_id')
+					protId = line['protein_id']
 				except KeyError :
 					protId = None
 					if verbose > 2 :
@@ -317,7 +348,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 					store.transcripts[transId].protein = store.proteins[protId]
 
 				try :
-					exonNumber = int(gtf.get(i, 'exon_number')) - 1
+					exonNumber = int(line['exon_number']) - 1
 					exonKey = (transId, exonNumber)
 				except KeyError :
 					exonNumber = None
@@ -335,7 +366,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 						store.transcripts[transId].exons.append(store.exons[exonKey])
 					
 					try :
-						store.exons[exonKey].id = gtf.get(i, 'exon_id')
+						store.exons[exonKey].id = line['exon_id']
 					except KeyError :
 						pass
 					
@@ -394,6 +425,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 	
 	return store.chromosomes.values()
 
+@profile
 def _importSequence(chromosome, fastaFile, targetDir) :
 	"Serializes fastas into .dat files"
 
