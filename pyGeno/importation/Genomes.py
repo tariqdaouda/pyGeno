@@ -16,7 +16,7 @@ from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
 
 import gc
-import objgraph
+#~ import objgraph
 
 def backUpDB() :
 	"""backup the current database version. automatically called by importGenome(). Returns the filename of the backup"""
@@ -91,7 +91,7 @@ def deleteGenome(specie, name) :
 	conf.db.endTransaction()
 	return allGood
 
-def importGenome(packageFile, batchSize = 5, verbose = 0) :
+def importGenome(packageFile, batchSize = 50, verbose = 0) :
 	"""Import a pyGeno genome package. A genome packages is a tar.gz ball that contains at it's root:
 
 	* gziped fasta files for all chromosomes
@@ -180,22 +180,22 @@ def importGenome(packageFile, batchSize = 5, verbose = 0) :
 	pBar.close()
 	
 	shutil.rmtree(packageDir)
-	def getrefs(clsName) :
-		import random
-		obj = random.choice(objgraph.by_type(clsName))
-		
-		bck_chain = objgraph.find_backref_chain(obj, objgraph.is_proper_module)
-		objgraph.show_chain(bck_chain, filename = "%s_ref.png" % clsName)
-		
-		chain = objgraph.find_ref_chain(obj, objgraph.is_proper_module)
-		objgraph.show_chain(chain, filename = "%s_bck_ref.png" % clsName)
+	#~ def getrefs(clsName) :
+		#~ import random
+		#~ obj = random.choice(objgraph.by_type(clsName))
+		#~ 
+		#~ bck_chain = objgraph.find_backref_chain(obj, objgraph.is_proper_module)
+		#~ objgraph.show_chain(bck_chain, filename = "%s_ref.png" % clsName)
+		#~ 
+		#~ chain = objgraph.find_ref_chain(obj, objgraph.is_proper_module)
+		#~ objgraph.show_chain(chain, filename = "%s_bck_ref.png" % clsName)
 
 	#~ getrefs('Exon_Raba')
-	getrefs('GTFEntry')
-	print objgraph.show_most_common_types()
+	#~ getrefs('GTFEntry')
+	#~ print objgraph.show_most_common_types()
 	return True
 
-@profile
+#~ @profile
 def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 	"""verbose must be an int [0, 4] for various levels of verbosity"""
 
@@ -215,20 +215,20 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 			
 			for c in self.genes.itervalues() :
 				c.save()
-				del(c)
+				#~ del(c)
 			
 			for c in self.exons.itervalues() :
 				c.save()
-				del(c)
+				#~ del(c)
 			
 			for c in self.transcripts.itervalues() :
 				c.save()
 				conf.removeFromDBRegistery(c.exons)
-				del(c)
+				#~ del(c)
 				
 			for c in self.proteins.itervalues() :
 				c.save()
-				del(c)
+				#~ del(c)
 				
 			self.conf.db.endTransaction()
 			
@@ -236,14 +236,15 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 			del(self.transcripts)
 			del(self.proteins)
 			del(self.exons)
-			gc.collect()
 			
 			self.genes = {}
 			self.transcripts = {}
 			self.proteins = {}
 			self.exons = {}
-			print "-----iop"
-			print objgraph.show_most_common_types()
+			#~ print "-----iop"
+			#~ print objgraph.show_most_common_types()
+
+			gc.collect()
 
 		def save_chros(self) :
 			pBar = ProgressBar(nbEpochs = len(self.chromosomes))
@@ -425,7 +426,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 	
 	return store.chromosomes.values()
 
-@profile
+#~ @profile
 def _importSequence(chromosome, fastaFile, targetDir) :
 	"Serializes fastas into .dat files"
 

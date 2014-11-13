@@ -61,8 +61,7 @@ class GTFFile(object) :
 	def next(self) :
 		self.currentPos += 1
 		try :
-			yield GTFEntry(self, self.currentPos)
-			#return self[self.currentPos-1]
+			return GTFEntry(self, self.currentPos)
 		except IndexError:
 			raise StopIteration
 
