@@ -164,7 +164,7 @@ class BinarySequence :
 		"""dichotomic search, if lst is None, will return the first position found. If it's a list, will return a list of all positions in lst. returns -1 or [] if no match found"""
 		
 		if len(currHaystack) == 1 :
-			if (offset < (len(self) - len(needle))) and (currHaystack[0] & needle[0]) > 0 and (self[offset+len(needle)-1] & needle[-1]) > 0 :
+			if (offset <= (len(self) - len(needle))) and (currHaystack[0] & needle[0]) > 0 and (self[offset+len(needle)-1] & needle[-1]) > 0 :
 				found = True
 				for i in xrange(1, len(needle)-1) :
 					if self[offset + i] & needle[i] == 0 :
@@ -187,9 +187,8 @@ class BinarySequence :
 					v1 = self._dichFind(needle, currHaystack[:len(currHaystack)/2], offset, lst)
 					if v1 > -1 :
 						return v1
-
-					return self._dichFind(needle, currHaystack[len(currHaystack)/2:], offset + len(currHaystack)/2, lst)
 					
+					return self._dichFind(needle, currHaystack[len(currHaystack)/2:], offset + len(currHaystack)/2, lst)
 			return -1
 
 	def find(self, strSeq) :

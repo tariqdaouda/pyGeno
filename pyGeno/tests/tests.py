@@ -87,7 +87,14 @@ class pyGenoSNPTests(unittest.TestCase):
 	def test_bags(self) :
 		dummy = Genome(name = 'GRCh37.75_Y-Only')
 		self.assertEqual(dummy.wrapped_object, self.ref.wrapped_object)
-		 
+	
+	def test_find(self) :
+		prot = self.ref.get(Protein, id = 'ENSP00000438917')[0]
+		needle = prot.sequence[:10]
+		self.assertEqual(0, prot.find(needle))
+		needle = prot.sequence[-10:]
+		self.assertEqual(len(prot)-10, prot.find(needle))
+
 if __name__ == "__main__" :
 	from pyGeno.bootstrap import importHumanReferenceYOnly, importDummySRY
 	
