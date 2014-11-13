@@ -16,7 +16,6 @@ from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
 
 import gc
-#~ import objgraph
 
 def backUpDB() :
 	"""backup the current database version. automatically called by importGenome(). Returns the filename of the backup"""
@@ -180,19 +179,7 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 	pBar.close()
 	
 	shutil.rmtree(packageDir)
-	#~ def getrefs(clsName) :
-		#~ import random
-		#~ obj = random.choice(objgraph.by_type(clsName))
-		#~ 
-		#~ bck_chain = objgraph.find_backref_chain(obj, objgraph.is_proper_module)
-		#~ objgraph.show_chain(bck_chain, filename = "%s_ref.png" % clsName)
-		#~ 
-		#~ chain = objgraph.find_ref_chain(obj, objgraph.is_proper_module)
-		#~ objgraph.show_chain(chain, filename = "%s_bck_ref.png" % clsName)
 
-	#~ getrefs('Exon_Raba')
-	#~ getrefs('GTFEntry')
-	#~ print objgraph.show_most_common_types()
 	return True
 
 #~ @profile
@@ -215,20 +202,16 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 			
 			for c in self.genes.itervalues() :
 				c.save()
-				#~ del(c)
 			
 			for c in self.exons.itervalues() :
 				c.save()
-				#~ del(c)
 			
 			for c in self.transcripts.itervalues() :
 				c.save()
 				conf.removeFromDBRegistery(c.exons)
-				#~ del(c)
 				
 			for c in self.proteins.itervalues() :
 				c.save()
-				#~ del(c)
 				
 			self.conf.db.endTransaction()
 			
@@ -241,8 +224,6 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 			self.transcripts = {}
 			self.proteins = {}
 			self.exons = {}
-			#~ print "-----iop"
-			#~ print objgraph.show_most_common_types()
 
 			gc.collect()
 
