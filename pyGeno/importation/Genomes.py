@@ -16,6 +16,7 @@ from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
 
 import gc
+import objgraph
 
 def backUpDB() :
 	"""backup the current database version. automatically called by importGenome(). Returns the filename of the backup"""
@@ -49,16 +50,16 @@ def _getFile(fil, directory) :
 	
 	return finalFile
 
-def deleteGenome(specie, name) :
+def deleteGenome(species, name) :
 	"""Removes a genome from the database"""
 
-	printf('deleting genome (%s, %s)...' % (specie, name))
+	printf('deleting genome (%s, %s)...' % (species, name))
 
 	conf.db.beginTransaction()
 	objs = []
 	allGood = True
 	try :
-		genome = Genome_Raba(name = name, specie = specie.lower())
+		genome = Genome_Raba(name = name, species = species.lower())
 		objs.append(genome)
 		pBar = ProgressBar(label = 'preparing')
 		for typ in (Chromosome_Raba, Gene_Raba, Transcript_Raba, Exon_Raba, Protein_Raba) :
@@ -81,7 +82,7 @@ def deleteGenome(specie, name) :
 		allGood = False
 	printf('\tdeleting folder')
 	try :
-		shutil.rmtree(conf.getGenomeSequencePath(specie, name))
+		shutil.rmtree(conf.getGenomeSequencePath(species, name))
 	except OSError as e:
 		#~ printf('\tWARNING, Unable to delete folder: ', e)
 		OSError('\tWARNING, Unable to delete folder: ', e)
@@ -106,7 +107,7 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 		version = GRCm38.73
 
 		[genome]
-		specie = Mus_musculus
+		species = Mus_musculus
 		name = GRCm38_test
 		source = http://useast.ensembl.org/info/data/ftp/index.html
 
@@ -140,10 +141,10 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 	packageInfos = parser.items('package_infos')
 
 	genomeName = parser.get('genome', 'name')
-	specie = parser.get('genome', 'specie')
+	species = parser.get('genome', 'species')
 	genomeSource = parser.get('genome', 'source')
 	
-	seqTargetDir = conf.getGenomeSequencePath(specie.lower(), genomeName)
+	seqTargetDir = conf.getGenomeSequencePath(species.lower(), genomeName)
 	if os.path.isdir(seqTargetDir) :
 		raise ValueError("The directory %s already exists, Please call deleteGenome() first if you want to reinstall" % seqTargetDir)
 		
@@ -156,13 +157,13 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 		chromosomeSet.add(key)
 
 	try :
-		genome = Genome(name = genomeName, specie = specie)
-		raise ValueError("There seems to be already a genome (%s, %s), please call deleteGenome() first if you want to reinstall it" % (genomeName, specie))
+		genome = Genome(name = genomeName, species = species)
+		raise ValueError("There seems to be already a genome (%s, %s), please call deleteGenome() first if you want to reinstall it" % (genomeName, species))
 	except KeyError:
 		pass
 
 	genome = Genome_Raba()
-	genome.set(name = genomeName, specie = specie, source = genomeSource, packageInfos = packageInfos)
+	genome.set(name = genomeName, species = species, source = genomeSource, packageInfos = packageInfos)
 
 	printf("Importing:\n\t%s\nGenome:\n\t%s\n..."  % (reformatItems(packageInfos).replace('\n', '\n\t'), reformatItems(parser.items('genome')).replace('\n', '\n\t')))
 
@@ -179,10 +180,11 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 	pBar.close()
 	
 	shutil.rmtree(packageDir)
-
+	
+	objgraph.show_most_common_types(limit=20)
 	return True
 
-#~ @profile
+@profile
 def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 	"""verbose must be an int [0, 4] for various levels of verbosity"""
 
@@ -202,17 +204,17 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 			
 			for c in self.genes.itervalues() :
 				c.save()
-			
-			for c in self.exons.itervalues() :
-				c.save()
-			
+				conf.removeFromDBRegistery(c)
+				
 			for c in self.transcripts.itervalues() :
 				c.save()
 				conf.removeFromDBRegistery(c.exons)
-				
+				conf.removeFromDBRegistery(c)
+			
 			for c in self.proteins.itervalues() :
 				c.save()
-				
+				conf.removeFromDBRegistery(c)
+			
 			self.conf.db.endTransaction()
 			
 			del(self.genes)
@@ -254,14 +256,14 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 	chroNumber = None
 	pBar = ProgressBar(nbEpochs = len(gtf))
 	for line in gtf :
-		chroN = line['seqname'] #str(line['seqname'])
+		chroN = line['seqname']
 		pBar.update(label = "Chr %s" % chroN)
 		
 		if (chroN.upper() in chroSet or chroN.lower() in chroSet):
-			strand = line['strand']#line['strand']
-			gene_biotype = line['gene_biotype']#line['gene_biotype']
-			regionType = line['feature']# line['feature']
-			frame = line['frame']#line['frame']
+			strand = line['strand']
+			gene_biotype = line['gene_biotype']
+			regionType = line['feature']
+			frame = line['frame']
 
 			start = int(line['start']) - 1
 			end = int(line['end'])
@@ -383,7 +385,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 	
 	conf.db.beginTransaction()
 	printf('restoring core indexes...')
-	Genome.ensureGlobalIndex(('name', 'specie'))
+	Genome.ensureGlobalIndex(('name', 'species'))
 	Chromosome.ensureGlobalIndex('genome')
 	Gene.ensureGlobalIndex('genome')
 	Transcript.ensureGlobalIndex('genome')
@@ -407,7 +409,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 	
 	return store.chromosomes.values()
 
-#~ @profile
+@profile
 def _importSequence(chromosome, fastaFile, targetDir) :
 	"Serializes fastas into .dat files"
 

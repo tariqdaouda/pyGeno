@@ -21,7 +21,7 @@ def importSNPs(packageFile) :
 		version = 1
 
 		[set_infos]
-		specie = human
+		species = human
 		name = dummySRY
 		type = Casava
 		source = my place at IRIC
@@ -39,7 +39,7 @@ def importSNPs(packageFile) :
 
 	setName = parser.get('set_infos', 'name')
 	typ = parser.get('set_infos', 'type')+'SNP'
-	specie = parser.get('set_infos', 'specie').lower()
+	species = parser.get('set_infos', 'species').lower()
 	genomeSource = parser.get('set_infos', 'source')
 	snpsFileTmp = parser.get('snps', 'filename').strip()
 	snpsFile = _getFile(parser.get('snps', 'filename'), packageDir)
@@ -49,11 +49,11 @@ def importSNPs(packageFile) :
 		raise ValueError("There's already a SNP set by the name %s. Use deleteSNPs() to remove it first" %setName)
 	except KeyError :
 		if typ == 'CasavaSNP' :
-			return _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsFile)
+			return _importSNPs_CasavaSNP(setName, species, genomeSource, snpsFile)
 		elif typ == 'dbSNPSNP' :
-			return _importSNPs_dbSNPSNP(setName, specie, genomeSource, snpsFile)
+			return _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile)
 		elif typ == 'TopHatSNP' :
-			return _importSNPs_TopHatSNP(setName, specie, genomeSource, snpsFile)
+			return _importSNPs_TopHatSNP(setName, species, genomeSource, snpsFile)
 		else :
 			raise FutureWarning('Unknown SNP type in manifest %s' % typ)
 	
@@ -75,9 +75,9 @@ def deleteSNPs(setName) :
 		return False
 	return True
 
-def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsFile) :
+def _importSNPs_CasavaSNP(setName, species, genomeSource, snpsFile) :
 	"This function will also create an index on start->chromosomeNumber->setName. Warning : pyGeno positions are 0 based"
-	printf('importing SNP set %s for specie %s...' % (setName, specie))
+	printf('importing SNP set %s for species %s...' % (setName, species))
 
 	snpData = SNPsTxtFile(snpsFile)
 	
@@ -95,14 +95,14 @@ def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsFile) :
 
 		snp = CasavaSNP()
 		#snp.chromosomeNumber = currChrNumber
-		snp.specie = specie
+		snp.species = species
 		snp.setName = setName
 		#first column: chro, second first of range (identical to second column)
 		for f in snp.getFields() :
 			try :
 				setattr(snp, f, snpEntry[f])
 			except KeyError :
-				if f != 'specie' and f != 'setName' :
+				if f != 'species' and f != 'setName' :
 					printf("Warning filetype as no key %s", f)
 		snp.start -= 1
 		snp.end -= 1
@@ -112,18 +112,18 @@ def _importSNPs_CasavaSNP(setName, specie, genomeSource, snpsFile) :
 	pBar.close()
 	
 	snpMaster = SNPMaster()
-	snpMaster.set(setName = setName, SNPType = 'CasavaSNP', specie = specie)
+	snpMaster.set(setName = setName, SNPType = 'CasavaSNP', species = species)
 	snpMaster.save()
 
 	printf('saving...')
 	conf.db.endTransaction()
 	printf('creating indexes...')
 	CasavaSNP.ensureGlobalIndex(('start', 'chromosomeNumber', 'setName'))
-	printf('importation of SNP set %s for specie %s done.' %(setName, specie))
+	printf('importation of SNP set %s for species %s done.' %(setName, species))
 	
 	return True
 
-def _importSNPs_dbSNPSNP(setName, specie, genomeSource, snpsFile) :
+def _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile) :
 	"This function will also create an index on start->chromosomeNumber->setName. Warning : pyGeno positions are 0 based"
 	snpData = VCFFile(snpsFile, gziped = True, stream = True)
 	dbSNPSNP.dropIndex(('start', 'chromosomeNumber', 'setName'))
@@ -140,7 +140,7 @@ def _importSNPs_dbSNPSNP(setName, specie, genomeSource, snpsFile) :
 			except KeyError :
 				pass
 		snp.chromosomeNumber = snpEntry['#CHROM']
-		snp.specie = specie
+		snp.species = species
 		snp.setName = setName
 		snp.start = snpEntry['POS']-1
 		snp.alt = snpEntry['ALT']
@@ -150,16 +150,16 @@ def _importSNPs_dbSNPSNP(setName, specie, genomeSource, snpsFile) :
 	pBar.close()
 	
 	snpMaster = SNPMaster()
-	snpMaster.set(setName = setName, SNPType = 'dbSNPSNP', specie = specie)
+	snpMaster.set(setName = setName, SNPType = 'dbSNPSNP', species = species)
 	snpMaster.save()
 	
 	printf('saving...')
 	conf.db.endTransaction()
 	printf('creating indexes...')
 	dbSNPSNP.ensureGlobalIndex(('start', 'chromosomeNumber', 'setName'))
-	printf('importation of SNP set %s for specie %s done.' %(setName, specie))
+	printf('importation of SNP set %s for species %s done.' %(setName, species))
 
 	return True
 	
-def _importSNPs_TopHatSNP(setName, specie, genomeSource, snpsFile) :
+def _importSNPs_TopHatSNP(setName, species, genomeSource, snpsFile) :
 	raise FutureWarning('Not implemented yet')

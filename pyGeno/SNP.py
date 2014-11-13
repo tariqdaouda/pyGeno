@@ -11,20 +11,20 @@ import rabaDB.fields as rf
 ----
 -All classes must inherit from SNP_INDEL
 -All classes name must end with SNP
--A SNP_INDELs must have at least chromosomeNumber, setName, specie, start and ref filled in order to be inserted into sequences
+-A SNP_INDELs must have at least chromosomeNumber, setName, species, start and ref filled in order to be inserted into sequences
 -User can define an alias for the alt field (snp_indel alleles) to indicate the default field from wich to extract alleles
 """
 
 class SNPMaster(Raba) :
 	'This object keeps track of SNP sets and their types'
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
-	specie = rf.Primitive()
+	species = rf.Primitive()
 	SNPType = rf.Primitive()
 	setName = rf.Primitive()
 	_raba_uniques = [('setName',)]
 
 	def _curate(self) :
-		self.specie = self.specie.lower()
+		self.species = self.species.lower()
 		self.setName = self.setName.lower()
 
 class SNP_INDEL(pyGenoRabaObject) :
@@ -32,7 +32,7 @@ class SNP_INDEL(pyGenoRabaObject) :
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	_raba_abstract = True # not saved in db
 
-	specie = rf.Primitive()
+	species = rf.Primitive()
 	setName = rf.Primitive()
 	chromosomeNumber = rf.Primitive()
 
@@ -59,7 +59,7 @@ class SNP_INDEL(pyGenoRabaObject) :
 		pyGenoRabaObject.__setattr__(self, k, v)
 	
 	def _curate(self) :
-		self.specie = self.specie.lower()
+		self.species = self.species.lower()
 
 	@classmethod
 	def ensureGlobalIndex(cls, fields) :

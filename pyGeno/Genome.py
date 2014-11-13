@@ -20,19 +20,19 @@ class Genome_Raba(pyGenoRabaObject) :
 	#_raba_not_a_singleton = True #you can have several instances of the same genome but they all share the same location in the database
 
 	name = rf.Primitive()
-	specie = rf.Primitive()
+	species = rf.Primitive()
 
 	source = rf.Primitive()
 	packageInfos = rf.Primitive()
 
 	def _curate(self) :
-		self.specie = self.specie.lower()
+		self.species = self.species.lower()
 
 	def getSequencePath(self) :
-		return conf.getGenomeSequencePath(self.specie, self.name)
+		return conf.getGenomeSequencePath(self.species, self.name)
 
 	def getReferenceSequencePath(self) :
-		return conf.getReferenceGenomeSequencePath(self.specie)
+		return conf.getReferenceGenomeSequencePath(self.species)
 
 	def __len__(self) :
 		"""Size of the genome in pb"""
@@ -75,11 +75,11 @@ class Genome(pyGenoRabaObjectWrapper) :
 		if SNPs is not None :
 			f = RabaQuery(SNPMaster, namespace = self._raba_namespace)
 			for se in self.SNPsSets :
-				f.addFilter(setName = se, specie = self.specie)
+				f.addFilter(setName = se, species = self.species)
 
 			res = f.run()
 			if res is None or len(res) < 1 :
-				raise ValueError("There's no set of SNPs that goes by the name of %s for specie %s" % (SNPs, self.specie))
+				raise ValueError("There's no set of SNPs that goes by the name of %s for species %s" % (SNPs, self.species))
 
 			for s in res :
 				self.SNPTypes[s.setName] = s.SNPType
@@ -87,7 +87,7 @@ class Genome(pyGenoRabaObjectWrapper) :
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
 		if issubclass(objectType, SNP_INDEL) :
 			f = RabaQuery(objectType, namespace = self._wrapped_class._raba_namespace)
-			coolArgs['specie'] = self.specie
+			coolArgs['species'] = self.species
 
 			if len(args) > 0 and type(args[0]) is types.ListType :
 				for a in args[0] :
@@ -101,4 +101,4 @@ class Genome(pyGenoRabaObjectWrapper) :
 		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 	
 	def __str__(self) :
-		return "Genome: %s/%s SNPs: %s" %(self.specie, self.name, self.SNPTypes)
+		return "Genome: %s/%s SNPs: %s" %(self.species, self.name, self.SNPTypes)

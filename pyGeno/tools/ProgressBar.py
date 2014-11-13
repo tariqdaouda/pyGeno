@@ -12,7 +12,7 @@ class ProgressBar :
 	If you don't know the maximum number of epochs you can enter nbEpochs < 1
 	"""
 	
-	def __init__(self, nbEpochs = -1, width = 25, label = "progress", minRefeshTime = 0.1) :
+	def __init__(self, nbEpochs = -1, width = 25, label = "progress", minRefeshTime = 1) :
 		self.width = width
 		self.currEpoch = 0
 		self.nbEpochs = float(nbEpochs)
@@ -61,7 +61,6 @@ class ProgressBar :
 	def log(self) :
 		"""logs stats about the progression, without printing anything on screen"""
 		
-		self._update()
 		self.logs['epochDuration'].append(self.lastEpochDuration)
 		self.logs['avg'].append(self.avg)
 		self.logs['runtime'].append(self.runtime)
@@ -73,12 +72,13 @@ class ProgressBar :
 		cPickle.dump(self.logs, f)
 		f.close()
 
-	def update(self, label = '', forceRefresh = False) :
-		"""the function to be called at each iteration"""
+	def update(self, label = '', forceRefresh = False, log = False) :
+		"""the function to be called at each iteration. Setting log = True is the same as calling log() just after update()"""
 		
-		self.log()
 		tim = time.time()
 		if (tim - self.lastPrintTime > self.minRefeshTime) or forceRefresh :
+			self._update()
+			
 			wheelState = self.wheel[self.currEpoch%len(self.wheel)]
 			
 			if label == '' :
@@ -110,7 +110,10 @@ class ProgressBar :
 			sys.stdout.write(self.bar)
 			sys.stdout.flush()
 			self.lastPrintTime = time.time()
-	
+			
+			if log :
+				self.log()
+
 	def close(self) :
 		"""Closes the bar so your next print will be on another line"""
 		self.update(forceRefresh = True)

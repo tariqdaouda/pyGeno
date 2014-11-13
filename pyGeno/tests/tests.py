@@ -99,7 +99,7 @@ if __name__ == "__main__" :
 	from pyGeno.bootstrap import importHumanReferenceYOnly, importDummySRY
 	
 	try :
-		importHumanReferenceYOnly()
+		importHumanReference_YOnly()
 	except ValueError :
 		print "--> Seems to already exist in db"
 		
