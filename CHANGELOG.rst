@@ -1,4 +1,11 @@
-1.1.0
+1.1.2
+=====
+
+* Genome import is now much more memory efficient
+
+* BUG FIX: find in BinarySequence could not find subsequences at the tail of sequence
+ 
+1.1.1
 =====
 
 Much better SNP filtering interface
