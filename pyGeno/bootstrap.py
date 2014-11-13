@@ -12,9 +12,10 @@ def listDataWraps() :
 			l.append(f)
 	return l
 
-def importHumanReferenceYOnly() :
-	"Importing only the Y chromosome of the Human Reference Genome. Useful for playing a bit with pyGeno."
-	path = os.path.join(this_dir, "bootstrap_data", "GRCh37.75_Y-Only.tar.gz")
+def importHumanReferenceYOnly(batchSize = 100) :
+	"""Importing only the Y chromosome of the Human Reference Genome. Useful for playing a bit with pyGeno.
+	batchSize is the number of genes saved with each batch. Higher values mean less time wasted in io operations, but more ram needed"""
+	path = os.path.join(this_dir, "bootstrap_data", "GRCh37.75_Y-Only.tar.gz", batchSize = 100)
 	importGenome(path)
 
 def importDummySRY() :
@@ -22,8 +23,9 @@ def importDummySRY() :
 	path = os.path.join(this_dir, "bootstrap_data", "dummySRY.tar.gz")
 	importSNPs(path)
 
-def importHumanReference() :
+def importHumanReference(batchSize = 100) :
 	""""Importes the Human Reference Genome. This may take a while, depending on the computers and 
-	indexes in the database. But it's done only once."""
-	path = os.path.join(this_dir, "bootstrap_data", "GRCh37.75.tar.gz")
+	indexes in the database. But it's done only once.
+	batchSize is the number of genes saved with each batch. Higher values mean less time wasted in io operations, but more ram needed"""
+	path = os.path.join(this_dir, "bootstrap_data", "GRCh37.75.tar.gz", batchSize = 100)
 	importGenome(path)
