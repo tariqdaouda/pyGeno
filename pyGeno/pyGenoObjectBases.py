@@ -138,23 +138,23 @@ class pyGenoRabaObjectWrapper(object) :
 		for e in self._makeLoadQuery(objectType, *args, **coolArgs).iterRun() :
 			yield objectType(wrapped_object_and_bag = (e, self.bagKey))
 
-	def ensureIndex(self, fields) :
-		"""
-		Warning: May not work on some systems, see ensureGlobalIndex
-		
-		Creates a partial index on self (if it does not exist). 
-		Ex: myTranscript.ensureIndex('name')"""
-		
-		where, whereValues = '%s=?' %(self._wrapped_class.__name__[:-5]), self.wrapped_object
-		self._wrapped_class.ensureIndex(fields, where, (whereValues,))
+	#~ def ensureIndex(self, fields) :
+		#~ """
+		#~ Warning: May not work on some systems, see ensureGlobalIndex
+		#~ 
+		#~ Creates a partial index on self (if it does not exist). 
+		#~ Ex: myTranscript.ensureIndex('name')"""
+		#~ 
+		#~ where, whereValues = '%s=?' %(self._wrapped_class.__name__[:-5]), self.wrapped_object
+		#~ self._wrapped_class.ensureIndex(fields, where, (whereValues,))
 
-	def dropIndex(self, fields) :
-		"""Warning: May not work on some systems, see dropGlobalIndex
-		
-		Drops a partial index on self. Ex: myTranscript.dropIndex('name')"""
+	#~ def dropIndex(self, fields) :
+		#~ """Warning: May not work on some systems, see dropGlobalIndex
+		#~ 
+		#~ Drops a partial index on self. Ex: myTranscript.dropIndex('name')"""
 
-		where, whereValues = '%s=?' %(self._wrapped_class.__name__[:-5]), self.wrapped_object
-		self._wrapped_class.dropIndex(fields, where, (whereValues,))
+		#~ where, whereValues = '%s=?' %(self._wrapped_class.__name__[:-5]), self.wrapped_object
+		#~ self._wrapped_class.dropIndex(fields, where, (whereValues,))
 	
 	def __getattr__(self, name) :
 		"""If a wrapper does not have a specific field, pyGeno will 

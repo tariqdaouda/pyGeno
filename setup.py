@@ -11,7 +11,7 @@ with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
 setup(
     name='pyGeno',
 
-    version='1.1.0',
+    version='1.1.1',
 
     description='A python package for Personalized Proteogenomics',
     long_description=long_description,
@@ -44,7 +44,7 @@ setup(
 
     keywords='proteogenomics genomics proteomics annotations medicine research personalized',
 
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages(exclude=[]),
 
     # List run-time dependencies here.  These will be installed by pip when your
     # project is installed. For an analysis of "install_requires" vs pip's

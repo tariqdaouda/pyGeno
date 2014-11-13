@@ -15,6 +15,9 @@ from pyGeno.tools.parsers.GTFTools import GTFFile
 from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
 
+import gc
+#~ import objgraph
+
 def backUpDB() :
 	"""backup the current database version. automatically called by importGenome(). Returns the filename of the backup"""
 	st = time.ctime().replace(' ', '_')
@@ -88,7 +91,7 @@ def deleteGenome(specie, name) :
 	conf.db.endTransaction()
 	return allGood
 
-def importGenome(packageFile, verbose = False) :
+def importGenome(packageFile, batchSize = 50, verbose = 0) :
 	"""Import a pyGeno genome package. A genome packages is a tar.gz ball that contains at it's root:
 
 	* gziped fasta files for all chromosomes
@@ -117,6 +120,11 @@ def importGenome(packageFile, verbose = False) :
 	All files except the manifest can be downloaded from: http://useast.ensembl.org/info/data/ftp/index.html
 	
 	A rollback is performed if an exception is caught during importation
+	
+	Verbose must be an int [0, 4] for various levels of verbosity
+	
+	batchSize sets the number of genes to parse before performing a database save. PCs with little ram like
+	small values, while those with endowed with more memory may perform faster with higher values.
 	"""
 
 	def reformatItems(items) :
@@ -124,7 +132,7 @@ def importGenome(packageFile, verbose = False) :
 		s = s.replace('[', '').replace(']', '').replace("',", ': ').replace('), ', '\n').replace("'", '').replace('(', '').replace(')', '')
 		return s
 
-	printf('Importing genome package: %s... (This make take a while)' % packageFile)
+	printf('Importing genome package: %s... (This may take a while)' % packageFile)
 
 	packageDir = _decompressPackage(packageFile)
 
@@ -159,7 +167,7 @@ def importGenome(packageFile, verbose = False) :
 
 	printf("Importing:\n\t%s\nGenome:\n\t%s\n..."  % (reformatItems(packageInfos).replace('\n', '\n\t'), reformatItems(parser.items('genome')).replace('\n', '\n\t')))
 
-	chros = _importGenomeObjects(gtfFile, chromosomeSet, genome, verbose)
+	chros = _importGenomeObjects(gtfFile, chromosomeSet, genome, batchSize, verbose)
 	os.makedirs(seqTargetDir)
 	startChro = 0
 	pBar = ProgressBar(nbEpochs = len(chros))
@@ -172,11 +180,79 @@ def importGenome(packageFile, verbose = False) :
 	pBar.close()
 	
 	shutil.rmtree(packageDir)
+	#~ def getrefs(clsName) :
+		#~ import random
+		#~ obj = random.choice(objgraph.by_type(clsName))
+		#~ 
+		#~ bck_chain = objgraph.find_backref_chain(obj, objgraph.is_proper_module)
+		#~ objgraph.show_chain(bck_chain, filename = "%s_ref.png" % clsName)
+		#~ 
+		#~ chain = objgraph.find_ref_chain(obj, objgraph.is_proper_module)
+		#~ objgraph.show_chain(chain, filename = "%s_bck_ref.png" % clsName)
+
+	#~ getrefs('Exon_Raba')
+	#~ getrefs('GTFEntry')
+	#~ print objgraph.show_most_common_types()
 	return True
-	
-def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
-	"verbose is int [0, 4] for various levels of verbosity"
-	
+
+#~ @profile
+def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
+	"""verbose must be an int [0, 4] for various levels of verbosity"""
+
+	class Store(object) :
+		
+		def __init__(self, conf) :
+			self.conf = conf
+			self.chromosomes = {}
+			
+			self.genes = {}
+			self.transcripts = {}
+			self.proteins = {}
+			self.exons = {}
+
+		def batch_save(self) :
+			self.conf.db.beginTransaction()
+			
+			for c in self.genes.itervalues() :
+				c.save()
+				#~ del(c)
+			
+			for c in self.exons.itervalues() :
+				c.save()
+				#~ del(c)
+			
+			for c in self.transcripts.itervalues() :
+				c.save()
+				conf.removeFromDBRegistery(c.exons)
+				#~ del(c)
+				
+			for c in self.proteins.itervalues() :
+				c.save()
+				#~ del(c)
+				
+			self.conf.db.endTransaction()
+			
+			del(self.genes)
+			del(self.transcripts)
+			del(self.proteins)
+			del(self.exons)
+			
+			self.genes = {}
+			self.transcripts = {}
+			self.proteins = {}
+			self.exons = {}
+			#~ print "-----iop"
+			#~ print objgraph.show_most_common_types()
+
+			gc.collect()
+
+		def save_chros(self) :
+			pBar = ProgressBar(nbEpochs = len(self.chromosomes))
+			for c in self.chromosomes.itervalues() :
+				pBar.update(label = 'Chr %s' % c.number)
+				c.save()
+			pBar.close()
+		
 	printf('Importing gene set infos from %s...' % gtfFilePath)
 	
 	printf('Backuping indexes...')
@@ -193,38 +269,32 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	gtf = GTFFile(gtfFilePath, gziped = True)
 	printf('Done. Importation begins!')
 	
-	chromosomes = {}
-	genes = {}
-	transcripts = {}
-	proteins = {}
-	exons = {}
+	store = Store(conf)
 	chroNumber = None
-	
 	pBar = ProgressBar(nbEpochs = len(gtf))
-	for i in xrange(len(gtf)) :
-		chroN = str(gtf.get(i, 'seqname'))
+	for line in gtf :
+		chroN = line['seqname'] #str(line['seqname'])
 		pBar.update(label = "Chr %s" % chroN)
 		
 		if (chroN.upper() in chroSet or chroN.lower() in chroSet):
-			strand = gtf.get(i, 'strand')
-			gene_biotype = gtf.get(i, 'gene_biotype')
-			regionType = gtf.get(i, 'feature')
-			frame = gtf.get(i, 'frame')
+			strand = line['strand']#line['strand']
+			gene_biotype = line['gene_biotype']#line['gene_biotype']
+			regionType = line['feature']# line['feature']
+			frame = line['frame']#line['frame']
 
-			start = int(gtf.get(i, 'start')) - 1
-			end = int(gtf.get(i, 'end'))
+			start = int(line['start']) - 1
+			end = int(line['end'])
 			if start > end :
 				start, end = end, start
 
 			chroNumber = chroN.upper()
-			if chroNumber not in chromosomes :
-				chromosomes[chroNumber] = Chromosome_Raba()
-				chromosomes[chroNumber].set(genome = genome, number = chroNumber)
-				chromosomes[chroNumber].dataType = 'heavy'
-
+			if chroNumber not in store.chromosomes :
+				store.chromosomes[chroNumber] = Chromosome_Raba()
+				store.chromosomes[chroNumber].set(genome = genome, number = chroNumber)
+			
 			try :
-				geneId = gtf.get(i, 'gene_id')
-				geneName = gtf.get(i, 'gene_name')
+				geneId = line['gene_id']
+				geneName =  line['gene_name']
 			except KeyError :
 				geneId = None
 				geneName = None
@@ -232,18 +302,21 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 					printf('Warning: no gene_id/name found in line %s' % gtf[i])
 			
 			if geneId is not None :
-				if geneId not in genes :
+				if geneId not in store.genes :
+					if len(store.genes) > batchSize :
+						store.batch_save()
+					
 					if verbose > 0 :
 						printf('\tGene %s, %s...' % (geneId, geneName))
-					genes[geneId] = Gene_Raba()
-					genes[geneId].set(genome = genome, id = geneId, chromosome = chromosomes[chroNumber], name = geneName, strand = strand, biotype = gene_biotype)
-				if start < genes[geneId].start or genes[geneId].start is None :
-						genes[geneId].start = start
-				if end > genes[geneId].end or genes[geneId].end is None :
-					genes[geneId].end = end
+					store.genes[geneId] = Gene_Raba()
+					store.genes[geneId].set(genome = genome, id = geneId, chromosome = store.chromosomes[chroNumber], name = geneName, strand = strand, biotype = gene_biotype)
+				if start < store.genes[geneId].start or store.genes[geneId].start is None :
+						store.genes[geneId].start = start
+				if end > store.genes[geneId].end or store.genes[geneId].end is None :
+					store.genes[geneId].end = end
 			try :
-				transId = gtf.get(i, 'transcript_id')
-				transName = gtf.get(i, 'transcript_name')
+				transId = line['transcript_id']
+				transName = line['transcript_name']
 			except KeyError :
 				transId = None
 				transName = None
@@ -251,32 +324,32 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 					printf('\t\tWarning: no transcript_id, name found in line %s' % gtf[i])
 			
 			if transId is not None :
-				if transId not in transcripts :
+				if transId not in store.transcripts :
 					if verbose > 1 :
 						printf('\t\tTranscript %s, %s...' % (transId, transName))
-					transcripts[transId] = Transcript_Raba()
-					transcripts[transId].set(genome = genome, id = transId, chromosome = chromosomes[chroNumber], gene = genes.get(geneId, None), name = transName)
-				if start < transcripts[transId].start or transcripts[transId].start is None:
-					transcripts[transId].start = start
-				if end > transcripts[transId].end or transcripts[transId].end is None:
-					transcripts[transId].end = end
+					store.transcripts[transId] = Transcript_Raba()
+					store.transcripts[transId].set(genome = genome, id = transId, chromosome = store.chromosomes[chroNumber], gene = store.genes.get(geneId, None), name = transName)
+				if start < store.transcripts[transId].start or store.transcripts[transId].start is None:
+					store.transcripts[transId].start = start
+				if end > store.transcripts[transId].end or store.transcripts[transId].end is None:
+					store.transcripts[transId].end = end
 			
 				try :
-					protId = gtf.get(i, 'protein_id')
+					protId = line['protein_id']
 				except KeyError :
 					protId = None
 					if verbose > 2 :
 						printf('Warning: no protein_id found in line %s' % gtf[i])
 				
-				if protId is not None and protId not in proteins :
+				if protId is not None and protId not in store.proteins :
 					if verbose > 1 :
 						printf('\t\tProtein %s...' % (protId))
-					proteins[protId] = Protein_Raba()
-					proteins[protId].set(genome = genome, id = protId, chromosome = chromosomes[chroNumber], gene = genes.get(geneId, None), transcript = transcripts.get(transId, None), name = transName)
-					transcripts[transId].protein = proteins[protId]
+					store.proteins[protId] = Protein_Raba()
+					store.proteins[protId].set(genome = genome, id = protId, chromosome = store.chromosomes[chroNumber], gene = store.genes.get(geneId, None), transcript = store.transcripts.get(transId, None), name = transName)
+					store.transcripts[transId].protein = store.proteins[protId]
 
 				try :
-					exonNumber = int(gtf.get(i, 'exon_number')) - 1
+					exonNumber = int(line['exon_number']) - 1
 					exonKey = (transId, exonNumber)
 				except KeyError :
 					exonNumber = None
@@ -288,67 +361,46 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 					if verbose > 3 :
 						printf('\t\t\texon %s...' % (exonId))
 					
-					if exonKey not in exons :
-						exons[exonKey] = Exon_Raba()
-						exons[exonKey].set(genome = genome, chromosome = chromosomes[chroNumber], gene = genes.get(geneId, None), transcript = transcripts.get(transId, None), protein = proteins.get(protId, None), strand = strand, number = exonNumber, start = start, end = end)
-						transcripts[transId].exons.append(exons[exonKey])
+					if exonKey not in store.exons :
+						store.exons[exonKey] = Exon_Raba()
+						store.exons[exonKey].set(genome = genome, chromosome = store.chromosomes[chroNumber], gene = store.genes.get(geneId, None), transcript = store.transcripts.get(transId, None), protein = store.proteins.get(protId, None), strand = strand, number = exonNumber, start = start, end = end)
+						store.transcripts[transId].exons.append(store.exons[exonKey])
 					
 					try :
-						exons[exonKey].id = gtf.get(i, 'exon_id')
+						store.exons[exonKey].id = line['exon_id']
 					except KeyError :
 						pass
 					
 					if regionType == 'exon' :
-						if start < exons[exonKey].start or exons[exonKey].start is None:
-							exons[exonKey].start = start
-						if end > transcripts[transId].end or exons[exonKey].end is None:
-							exons[exonKey].end = end
+						if start < store.exons[exonKey].start or store.exons[exonKey].start is None:
+							store.exons[exonKey].start = start
+						if end > store.transcripts[transId].end or store.exons[exonKey].end is None:
+							store.exons[exonKey].end = end
 					elif regionType == 'CDS' :
-						exons[exonKey].CDS_start = start
-						exons[exonKey].CDS_end = end
-						exons[exonKey].frame = frame
+						store.exons[exonKey].CDS_start = start
+						store.exons[exonKey].CDS_end = end
+						store.exons[exonKey].frame = frame
 					elif regionType == 'stop_codon' :
 						if strand == '+' :
-							exons[exonKey].end += 3
-							if exons[exonKey].CDS_end != None :
-								exons[exonKey].CDS_end += 3
+							store.exons[exonKey].end += 3
+							if store.exons[exonKey].CDS_end != None :
+								store.exons[exonKey].CDS_end += 3
 						if strand == '-' :
-							if exons[exonKey].CDS_start != None :
-								exons[exonKey].CDS_start -= 3
-	
+							if store.exons[exonKey].CDS_start != None :
+								store.exons[exonKey].CDS_start -= 3
 	pBar.close()
+	
+	store.batch_save()
+	
 	conf.db.beginTransaction()
-	printf('saving %d chromsomes...' % len(chromosomes))
-	pBar = ProgressBar(nbEpochs = len(chromosomes))
-	for c in chromosomes.itervalues() :
-		pBar.update(label = 'Chr %s' % c.number)
-		c.save()
-	pBar.close()
+	printf('almost done saving chromosomes...')
+	store.save_chros()
 	
-	printf('saving %d genes...' % len(genes))
-	pBar = ProgressBar(nbEpochs = len(genes))
-	for c in genes.itervalues() :
-		pBar.update(label = 'gene %s' % c.id)
-		c.save()
-	pBar.close()
-
-	printf('saving %d transcripts and exons %d...' % (len(transcripts), len(exons)))
-	pBar = ProgressBar(nbEpochs = len(transcripts))
-	for c in transcripts.itervalues() :
-		pBar.update(label = 'transcript %s' % c.id)
-		c.save()
-	pBar.close()
-	
-	printf('saving %d proteins...' % len(proteins))
-	pBar = ProgressBar(nbEpochs = len(proteins))
-	for c in proteins.itervalues() :
-		pBar.update(label = 'protein %s' % c.id)
-		c.save()
-	pBar.close()
-
-	printf('saving genome...')
+	printf('saving genome object...')
 	genome.save()
+	conf.db.endTransaction()
 	
+	conf.db.beginTransaction()
 	printf('restoring core indexes...')
 	Genome.ensureGlobalIndex(('name', 'specie'))
 	Chromosome.ensureGlobalIndex('genome')
@@ -363,7 +415,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	
 	conf.db.beginTransaction()
 	printf('restoring user indexes')
-	pBar = ProgressBar(nbEpochs = len(indexes))
+	pBar = ProgressBar(label = "restoring", nbEpochs = len(indexes))
 	for idx in indexes :
 		pBar.update()
 		conf.db.execute(idx[-1].replace('CREATE INDEX', 'CREATE INDEX IF NOT EXISTS'))
@@ -372,8 +424,9 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, verbose = 0) :
 	printf('commiting changes...')
 	conf.db.endTransaction()
 	
-	return chromosomes.values()
+	return store.chromosomes.values()
 
+#~ @profile
 def _importSequence(chromosome, fastaFile, targetDir) :
 	"Serializes fastas into .dat files"
 

@@ -209,7 +209,7 @@ class CSVFile(object) :
 		self.currentPos += 1
 		if self.currentPos >= len(self) :
 			raise StopIteration
-		return self[self.currentPos]
+		return CSVEntry(self, self[self.currentPos])
 	
 	def __getitem__(self, line) :
 		if self.lines[line].__class__ is not CSVEntry :

@@ -1,6 +1,7 @@
 import sys, os, time
 from ConfigParser import SafeConfigParser
 import rabaDB.rabaSetup
+import rabaDB.Raba
 
 class PythonVersionError(Exception) :
 	pass
@@ -21,7 +22,7 @@ pyGeno_RABA_DBFILE = None
 pyGeno_DATA_PATH = None
 
 db = None #proxy for the raba database
-dbConf = None #proxy for the raba databse configuration
+dbConf = None #proxy for the raba database configuration
 
 def version() :
 	"""returns a tuple describing pyGeno's current version"""
@@ -57,6 +58,15 @@ def getSettingsPath() :
 	except :
 		createDefaultConfigFile()
 		return getSettingsPath()
+
+def removeFromDBRegistery(obj) :
+	"""rabaDB keeps a record of loaded objects to ensure consistency between different queries.
+	This function removes an object from the registery"""
+	rabaDB.Raba.removeFromRegistery(obj)
+
+def freeDBRegistery() :
+	"""rabaDB keeps a record of loaded objects to ensure consistency between different queries. This function empties the registery"""
+	rabaDB.Raba.freeRegistery()
 
 def pyGeno_init() :
 	"""This function is automaticly called at launch"""
