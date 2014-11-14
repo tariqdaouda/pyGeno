@@ -5,6 +5,19 @@ from pyGeno.Protein import Protein
 class pyGenoSNPTests(unittest.TestCase):
 
 	def setUp(self):
+	from pyGeno.bootstrap import importHumanReference_YOnly, importDummySRY
+		import unittest
+		
+		try :
+			importHumanReference_YOnly()
+		except ValueError :
+			print "--> Seems to already exist in db"
+			
+		try :
+			importDummySRY()
+		except ValueError :
+			print "--> Seems to already exist in db"
+		
 		self.ref = Genome(name = 'GRCh37.75_Y-Only')
 
 	def tearDown(self):
@@ -96,19 +109,6 @@ class pyGenoSNPTests(unittest.TestCase):
 		self.assertEqual(len(prot)-10, prot.find(needle))
 
 def runTests() :
-	from pyGeno.bootstrap import importHumanReference_YOnly, importDummySRY
-	import unittest
-	
-	try :
-		importHumanReference_YOnly()
-	except ValueError :
-		print "--> Seems to already exist in db"
-		
-	try :
-		importDummySRY()
-	except ValueError :
-		print "--> Seems to already exist in db"
-
 	unittest.main()
 
 if __name__ == "__main__" :
