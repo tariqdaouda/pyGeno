@@ -13,6 +13,10 @@ from SNP import *
 
 import rabaDB.fields as rf
 
+def runTests() :
+	from pyGeno.tests.tests import *
+	runTests()
+
 class Genome_Raba(pyGenoRabaObject) :
 	"""The wrapped Raba object that really holds the data"""
 	

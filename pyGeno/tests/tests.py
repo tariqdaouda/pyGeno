@@ -95,8 +95,9 @@ class pyGenoSNPTests(unittest.TestCase):
 		needle = prot.sequence[-10:]
 		self.assertEqual(len(prot)-10, prot.find(needle))
 
-if __name__ == "__main__" :
-	from pyGeno.bootstrap import importHumanReferenceYOnly, importDummySRY
+def runTests() :
+	from pyGeno.bootstrap import importHumanReference_YOnly, importDummySRY
+	import unittest
 	
 	try :
 		importHumanReference_YOnly()
@@ -108,4 +109,7 @@ if __name__ == "__main__" :
 	except ValueError :
 		print "--> Seems to already exist in db"
 
-	unittest.main()		
+	unittest.main()
+
+if __name__ == "__main__" :
+	runTests()

@@ -16,7 +16,7 @@ from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
 
 import gc
-import objgraph
+#~ import objgraph
 
 def backUpDB() :
 	"""backup the current database version. automatically called by importGenome(). Returns the filename of the backup"""
@@ -181,10 +181,10 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 	
 	shutil.rmtree(packageDir)
 	
-	objgraph.show_most_common_types(limit=20)
+	#~ objgraph.show_most_common_types(limit=20)
 	return True
 
-@profile
+#~ @profile
 def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 	"""verbose must be an int [0, 4] for various levels of verbosity"""
 
@@ -409,7 +409,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 	
 	return store.chromosomes.values()
 
-@profile
+#~ @profile
 def _importSequence(chromosome, fastaFile, targetDir) :
 	"Serializes fastas into .dat files"
 
