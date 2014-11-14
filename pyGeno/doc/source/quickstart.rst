@@ -6,19 +6,27 @@ Quick importation
 In order to use pyGeno you first need to populate its database by importing datawraps. An importation is a one time step
 and once the data has been imported, the datawrap can be discarded with no concequences to the database. 
 
-If your goal is simply to play with pyGeno to have a feel of its magic. PyGeno is shipped with a datawrap of the human reference Y chromosome::
+If your goal is simply to play with pyGeno to have a feel of its magic. PyGeno is shipped with a few datawrap that require very little memory
+to import.
+
+One fe importing the reference Y chromosome. This datawrap does not require any download::
 
 	import pyGeno.bootstrap as B
-	B.importHumanReferenceYOnly()
+	B.importHumanReference_YOnly()
 
-There's also a dummy SNP datawrap that you can import with the following::
+There's also one that imports both the first and the Y chormosome. This tome the sequences will be imported
+
+	import pyGeno.bootstrap as B
+	B.importHumanReference_1YOnly()
+
+And a dummy SNP datawrap that mimics a casava's snps.txt file with only one SNP athe begining of the gene SRY::
 	
 	import pyGeno.bootstrap as B
 	B.importDummySRY()
 
 For more serious work pyGeno is also shipped with a datawrap for the complete human reference genome.
-PyGeno will automatically download the needed data from Ensembl (~205MB), and the whole importation process
-may exceed an hour::
+PyGeno will automatically download the needed data from Ensembl (~205MB). The whole importation process
+may exceed an hour and requires something like 2GB of memory (according to tests)::
 	
 	import pyGeno.bootstrap as B
 	B.importHumanReference()

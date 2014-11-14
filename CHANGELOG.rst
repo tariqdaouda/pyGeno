@@ -6,6 +6,8 @@
 * BUG FIX: find in BinarySequence could not find subsequences at the tail of sequence
 
 * Added a built-in datawrap with only chr1 and y
+
+* Readme update with more infos about importation and link to doc
  
 1.1.1
 =====

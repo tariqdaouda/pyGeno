@@ -124,7 +124,7 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 	Verbose must be an int [0, 4] for various levels of verbosity
 	
 	batchSize sets the number of genes to parse before performing a database save. PCs with little ram like
-	small values, while those with endowed with more memory may perform faster with higher values.
+	small values, while those endowed with more memory may perform faster with higher ones.
 	"""
 
 	def reformatItems(items) :
