@@ -11,12 +11,14 @@ class pyGenoSNPTests(unittest.TestCase):
 		try :
 			importHumanReference_YOnly()
 		except ValueError :
-			print "--> Seems to already exist in db"
+			pass
+			#~ print "--> Seems to already exist in db"
 			
 		try :
 			importDummySRY()
 		except ValueError :
-			print "--> Seems to already exist in db"
+			pass
+			#~ print "--> Seems to already exist in db"
 		
 		self.ref = Genome(name = 'GRCh37.75_Y-Only')
 
