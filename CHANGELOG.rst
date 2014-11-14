@@ -4,6 +4,8 @@
 * Genome import is now much more memory efficient
 
 * BUG FIX: find in BinarySequence could not find subsequences at the tail of sequence
+
+* Added a built-in datawrap with only chr1 and y
  
 1.1.1
 =====

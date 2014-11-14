@@ -4,21 +4,60 @@ pyGeno: A python package for Personalized Proteogenomics
 	
 	pip install pyGeno #for the latest stable version
 
+For the latest stuff:
+
+.. code:: shell
+	
+	git clone https://github.com/tariqdaouda/pyGeno
+	cd pyGeno
+	python setup.py develop
+
+The full _doc is available here:
+
+.. _doc: http://bioinfo.iric.ca/~daoudat/pyGeno/
 
 Bootstraping:
 -------------
-There are two data wraps shipped with pyGeno, the reference genome GRCh37.75 and a dummy data wrap that mimics a casava's snps.txt with one SNP at the begining of the gene SRY. 
-You can bootstrap pyGeno with the following:
+
+pyGeno comes with a few datawraps, to get the list you can use:
 
 .. code:: python
 	
 	import pyGeno.bootstrap as B
-	#Downloads the whole genome (205MB), may take an hour, but done only once.
-	B.importHumanReference()
-	#Very fast, imports only the Y chromosome. Useful for playing around with pyGeno 
-	B.importHumanReferenceYOnly()
+	B.listDataWraps()
+
+Importing whole genomes is a demanding process that takes time and requires, according to tests, at least 2GB
+of memory. Depending on your configuration more might be required.
+
+That being said importating a datawrap is a one time operation and once the importation is complete the datawrap
+can be discarded without consequences.
+
+The bootstrap module also has some handy functions for importing built-in packages.
+
+Some of them for playing around with pyGeno. **Fast importation** and **Small memory requirements**:
+
+.. code:: python
+	
+	import pyGeno.bootstrap as B
+	
+	#Imports only the first and Y chromosomes from the human reference genome GRCh37.75
+	#Fast, and does not require much memory. Sequences of both chromosomes will be downloaded. 
+	B.importHumanReference_1YOnly()
+
+	#Imports only the Y chromosome from the human reference genome GRCh37.75
+	#Very fast, requires even less memory. No download required.
+	B.importHumanReference_YOnly()
+	
+	#A dummy datawrap for humans that mimics a casava's snps.txt with one SNP at the begining of the gene SRY
 	B.importDummySRY()
 
+For more **Serious Work**, the whole reference genome!
+
+.. code:: python
+
+	#Downloads the whole genome (205MB, sequences + annotations), may take an hour or more.
+	B.importHumanReference()
+	
 Importing a data wrap:
 ----------------------
 
@@ -34,8 +73,11 @@ To import a patient's specific polymorphisms
   from pyGeno.importation.SNPs import *
   importSNPs('patient1.tar.gz')
 
-You can easily make your own data wraps with any tar.gz compressor.
-For more details on how data wraps are made you can have a look inside the folder bootstrap_data. There are two there for you.
+You can easily make your own datawraps with any tar.gz compressor.
+For more details on how data wraps are made you can have a look inside the folder bootstrap_data, of check the documentation
+_Importation
+
+.. _Import: http://bioinfo.iric.ca/~daoudat/pyGeno/importation.html
 
 Instanciating a genome:
 -----------------------
