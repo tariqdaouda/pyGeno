@@ -2,12 +2,12 @@ import unittest
 from pyGeno.Genome import Genome
 from pyGeno.Protein import Protein
 
+from pyGeno.bootstrap import importHumanReference_YOnly, importDummySRY
+
+
 class pyGenoSNPTests(unittest.TestCase):
 
 	def setUp(self):
-	from pyGeno.bootstrap import importHumanReference_YOnly, importDummySRY
-		import unittest
-		
 		try :
 			importHumanReference_YOnly()
 		except ValueError :
