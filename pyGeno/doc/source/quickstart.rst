@@ -9,12 +9,12 @@ and once the data has been imported, the datawrap can be discarded with no conce
 If your goal is simply to play with pyGeno to have a feel of its magic. PyGeno is shipped with a few datawrap that require very little memory
 to import.
 
-One fe importing the reference Y chromosome. This datawrap does not require any download::
+One for importing the reference Y chromosome. This datawrap does not require any download::
 
 	import pyGeno.bootstrap as B
 	B.importHumanReference_YOnly()
 
-There's also one that imports both the first and the Y chormosome. This tome the sequences will be imported
+There's also one that imports both the first and the Y chormosome. This tome the sequences will be imported::
 
 	import pyGeno.bootstrap as B
 	B.importHumanReference_1YOnly()
