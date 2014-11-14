@@ -4,7 +4,7 @@ pyGeno: A python package for Personalized Proteogenomics
 	
 	pip install pyGeno #for the latest stable version
 
-For the latest stuff:
+For the latest developments:
 
 .. code:: shell
 	
@@ -12,9 +12,9 @@ For the latest stuff:
 	cd pyGeno
 	python setup.py develop
 
-The full _doc is available here:
+The full documentation is available here_:
 
-.. _doc: http://bioinfo.iric.ca/~daoudat/pyGeno/
+.. _here: http://bioinfo.iric.ca/~daoudat/pyGeno/
 
 Bootstraping:
 -------------
@@ -26,7 +26,7 @@ pyGeno comes with a few datawraps, to get the list you can use:
 	import pyGeno.bootstrap as B
 	B.listDataWraps()
 
-Importing whole genomes is a demanding process that takes time and requires, according to tests, at least 2GB
+Importing whole genomes is a demanding process that takes time and requires (according to tests) at least 2GB
 of memory. Depending on your configuration more might be required.
 
 That being said importating a datawrap is a one time operation and once the importation is complete the datawrap
@@ -34,7 +34,7 @@ can be discarded without consequences.
 
 The bootstrap module also has some handy functions for importing built-in packages.
 
-Some of them for playing around with pyGeno. **Fast importation** and **Small memory requirements**:
+Some of them just for playing around with pyGeno (**Fast importation** and **Small memory requirements**):
 
 .. code:: python
 	
@@ -51,7 +51,7 @@ Some of them for playing around with pyGeno. **Fast importation** and **Small me
 	#A dummy datawrap for humans that mimics a casava's snps.txt with one SNP at the begining of the gene SRY
 	B.importDummySRY()
 
-For more **Serious Work**, the whole reference genome!
+And for more **Serious Work**, the whole reference genome.
 
 .. code:: python
 
@@ -74,10 +74,10 @@ To import a patient's specific polymorphisms
   importSNPs('patient1.tar.gz')
 
 You can easily make your own datawraps with any tar.gz compressor.
-For more details on how data wraps are made you can have a look inside the folder bootstrap_data, of check the documentation
-_Importation
+For more details on how data wraps are made you can have a look inside the folder bootstrap_data, 
+of check the documentation Importation_.
 
-.. _Import: http://bioinfo.iric.ca/~daoudat/pyGeno/importation.html
+.. _Importation: http://bioinfo.iric.ca/~daoudat/pyGeno/importation.html
 
 Instanciating a genome:
 -----------------------
