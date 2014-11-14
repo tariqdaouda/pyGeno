@@ -7,11 +7,17 @@ pyGeno: A python package for Personalized Proteogenomics
 For the latest developments:
 
 .. code:: shell
-	
-	git clone https://github.com/tariqdaouda/pyGeno
+
+	git clone https://github.com/tariqdaouda/pyGeno.git
 	cd pyGeno
 	python setup.py develop
 
+To run tests:
+
+.. code:: shell
+
+	python setup.py test
+	
 The full documentation is available here_:
 
 .. _here: http://bioinfo.iric.ca/~daoudat/pyGeno/
