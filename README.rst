@@ -32,8 +32,8 @@ pyGeno comes with a few datawraps, to get the list you can use:
 	import pyGeno.bootstrap as B
 	B.listDataWraps()
 
-Importing whole genomes is a demanding process that takes time and requires (according to tests) at least 2GB
-of memory. Depending on your configuration more might be required.
+Importing whole genomes is a demanding process that takes time and requires (according to tests) at least 3GB
+of memory. Depending on your configuration, more might be required.
 
 That being said importating a datawrap is a one time operation and once the importation is complete the datawrap
 can be discarded without consequences.
