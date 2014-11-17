@@ -74,7 +74,7 @@ class ProgressBar :
 
 	def update(self, label = '', forceRefresh = False, log = False) :
 		"""the function to be called at each iteration. Setting log = True is the same as calling log() just after update()"""
-		
+		self.currEpoch += 1
 		tim = time.time()
 		if (tim - self.lastPrintTime > self.minRefeshTime) or forceRefresh :
 			self._update()
@@ -119,3 +119,10 @@ class ProgressBar :
 		self.update(forceRefresh = True)
 		print '\n'
 		
+if __name__ == "__main__" :
+	p = ProgressBar(nbEpochs = 100000000000)
+	for i in xrange(100000000000) :
+		p.update()
+		#time.sleep(3)
+	p.close()
+	

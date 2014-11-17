@@ -123,9 +123,7 @@ class pyGenoRabaObjectWrapper(object) :
 		
 			* myGene.get(Protein, id = 'ENSID...')
 		
-			* myGenome.get(Transcript, {'start >' : x, 'end <' : y})
-
-		You can use string as the object type to avoid circular imports"""
+			* myGenome.get(Transcript, {'start >' : x, 'end <' : y})"""
 		
 		ret = []
 		for e in self._makeLoadQuery(objectType, *args, **coolArgs).iterRun() :

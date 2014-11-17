@@ -1,3 +1,8 @@
+1.1.3
+=====
+
+* Small BUG FIX in the progress bar that caused epochs to be misrepresented
+
 1.1.2
 =====
 
