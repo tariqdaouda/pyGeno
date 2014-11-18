@@ -24,7 +24,7 @@ You can also do it for the **specific genomes** of your subjects:
 
  pers = Genome(name = 'GRCh37.75', SNPs = ["RNA_S1"], SNPFilter = myFilter())
 
-And much more.
+And much more: https://github.com/tariqdaouda/pyGeno
 
 Verbose Description:
 --------------------
