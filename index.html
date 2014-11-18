@@ -43,19 +43,21 @@
   
   #load a genome
   ref = Genome(name = 'GRCh37.75')
+  
   #load a gene
   gene = ref.get(Gene, name = 'TPST2')[0]
+  
   #print the sequences of all the isoforms
   for prot in gene.get(Protein) :
-   print prot.sequence
+      print prot.sequence
 </code></pre>
 
-<p>You can also do it for the specific genomes of your subjects:</p>
+<p>You can even do it for the <strong>specific genomes</strong> of your subjects:</p>
 <pre><code>
   pers = Genome(name = 'GRCh37.75', SNPs = ["RNA_S1"], SNPFilter = myFilter())
 </code></pre>
 
-<p>And much more: https://github.com/tariqdaouda/pyGeno</p>
+<p>And you can do <strong>much more</strong> than that </p>
 
 <h2>
 <a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h2>
