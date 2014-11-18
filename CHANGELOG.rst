@@ -8,6 +8,8 @@
 
 * Small BUG FIX in the progress bar that caused epochs to be misrepresented
 
+* 'Specie' has been changed to 'species' everywhere. That breaks the database the only way to fix it is to redo all importations
+
 1.1.2
 =====
 
