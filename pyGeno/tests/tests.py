@@ -7,7 +7,7 @@ from pyGeno.bootstrap import importHumanReference_YOnly, importDummySRY
 
 class pyGenoSNPTests(unittest.TestCase):
 
-	def setUp(self):
+	def importAll(self) :
 		try :
 			importHumanReference_YOnly()
 		except ValueError :
@@ -19,12 +19,23 @@ class pyGenoSNPTests(unittest.TestCase):
 		except ValueError :
 			pass
 			#~ print "--> Seems to already exist in db"
-		
+
 		self.ref = Genome(name = 'GRCh37.75_Y-Only')
+		
+	def setUp(self):
+		self.importAll()
 
 	def tearDown(self):
 		pass
 
+	def testVanilla(self) :
+		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY')
+		persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
+		refProt = self.ref.get(Protein, id = 'ENSP00000438917')[0]
+		
+		self.assertEqual('ATGCAATCATATGCTTCTGC', refProt.transcript.cDNA[:20])
+		self.assertEqual('HTGCAATCATATGCTTCTGC', persProt.transcript.cDNA[:20])
+		
 	def testNoModif(self) :
 		from pyGeno.SNPFiltering import SNPFilter
 

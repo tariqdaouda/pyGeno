@@ -1,3 +1,10 @@
+1.1.5
+=====
+
+* BUG FIX in default SNP filter
+
+* Updated description
+
 1.1.4
 =====
 
