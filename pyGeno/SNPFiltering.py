@@ -81,6 +81,7 @@ class DefaultSNPFilter(SNPFilter) :
 		
 		warn = 'Warning: the default snp filter ignores indels. IGNORED %s of SNP set: %s at pos: %s of chromosome: %s'
 		
+		sources = {}
 		alleles = []
 		for snpSet, snp in kwargs.iteritems() :
 			pos = snp.start
