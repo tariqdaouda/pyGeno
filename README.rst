@@ -100,6 +100,17 @@ Printing all the proteins of a gene:
   from pyGeno.Genome import Genome
   from pyGeno.Gene import Gene
   from pyGeno.Protein import Protein
+
+Or simply:
+
+.. code:: python
+
+  from pyGeno.Genome import *
+
+then:
+
+.. code:: python
+
   ref = Genome(name = 'GRCh37.75')
   #get returns a list of elements
   gene = ref.get(Gene, name = 'TPST2')[0]
@@ -145,9 +156,9 @@ You can even mix several SNPs together.
   #the name of the snp set is defined inside the package's manifest.ini file
   dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY')
   #you can also define a filter (ex: a quality filter) for the SNPs
-  dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY', SNPFilter = myFilter)
+  dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY', SNPFilter = myFilter())
   #and even mix several snp sets  
-  dummy = Genome(name = 'GRCh37.75', SNPs = ['dummySRY', 'anotherSet'], SNPFilter = myFilter)
+  dummy = Genome(name = 'GRCh37.75', SNPs = ['dummySRY', 'anotherSet'], SNPFilter = myFilter())
 
 
 Filtering SNPs:
