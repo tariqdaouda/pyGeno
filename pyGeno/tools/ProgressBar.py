@@ -45,7 +45,6 @@ class ProgressBar :
 			return '%dh %dmin' % (int(val)/3600, int(val/60)%60)
 
 	def _update(self) :
-		self.currEpoch += 1
 		tim = time.time()
 		if self.nbEpochs > 1 :
 			if self.currTime > 0 :

@@ -1,3 +1,8 @@
+1.1.4
+=====
+
+* Another BUG FIX in progress bar
+
 1.1.3
 =====
 
