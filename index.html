@@ -13,13 +13,13 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <title>Pygeno by tariqdaouda</title>
+    <title>pyGeno by tariqdaouda</title>
   </head>
 
   <body>
     <header>
       <div class="inner">
-        <h1>Pygeno</h1>
+        <h1>pyGeno</h1>
         <h2>pyGeno: A python package for Personalized Proteogenomics</h2>
         <a href="https://github.com/tariqdaouda/pyGeno" class="button"><small>View project on</small> GitHub</a>
       </div>
@@ -31,8 +31,31 @@
           <h1>
 <a id="pygeno-a-python-package-for-personalized-proteogenomics" class="anchor" href="#pygeno-a-python-package-for-personalized-proteogenomics" aria-hidden="true"><span class="octicon octicon-link"></span></a>pyGeno: A python package for Personalized Proteogenomics</h1>
 
+<p>pip install pyGeno #for the latest stable version</p>
+
 <pre><code>pip install pyGeno #for the latest stable version
 </code></pre>
+
+<p>With pyGeno you can do that:</p>
+
+<pre><code>
+  from pyGeno.Genome import *
+  
+  #load a genome
+  ref = Genome(name = 'GRCh37.75')
+  #load a gene
+  gene = ref.get(Gene, name = 'TPST2')[0]
+  #print the sequences of all the isoforms
+  for prot in gene.get(Protein) :
+   print prot.sequence
+</code></pre>
+
+<p>You can also do it for the specific genomes of your subjects:</p>
+<pre><code>
+  pers = Genome(name = 'GRCh37.75', SNPs = ["RNA_S1"], SNPFilter = myFilter())
+</code></pre>
+
+<p>And much more: https://github.com/tariqdaouda/pyGeno</p>
 
 <h2>
 <a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h2>
