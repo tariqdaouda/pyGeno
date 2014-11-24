@@ -179,7 +179,7 @@ class BinarySequence :
 					if lst is None :
 						return -1
 		else :
-			if (offset < (len(self) - len(needle))) :
+			if (offset <= (len(self) - len(needle))) :
 				if lst is not None :
 					self._dichFind(needle, currHaystack[:len(currHaystack)/2], offset, lst)
 					self._dichFind(needle, currHaystack[len(currHaystack)/2:], offset + len(currHaystack)/2, lst)
