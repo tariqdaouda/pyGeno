@@ -24,9 +24,29 @@ The full documentation is available here_:
 
 .. _here: http://bioinfo.iric.ca/~daoudat/pyGeno/
 
+A brief introduction
+--------------------
+
+.. code:: python
+	
+	from pyGeno.Genome import *
+	
+	g = Genome(name = "GRCh37.75", SNPs = "SUBJECT_1_RNA")
+	prot = g.get(Protein, id = 'ENSP00000438917')[0]
+	#the specific protein sequence of SUBJECT_1
+	print prot.sequence
+	print prot.gene.biotype
+	
+	...
+	
+	#fancy queries
+	for exons in g.get(Exons, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :
+		print exon.CDS
+	
 Bootstraping:
 -------------
 
+pyGeno's database is populated by importing datawraps.
 pyGeno comes with a few datawraps, to get the list you can use:
 
 .. code:: python
@@ -66,7 +86,7 @@ And for more **Serious Work**, the whole reference genome.
 	#Downloads the whole genome (205MB, sequences + annotations), may take an hour or more.
 	B.importHumanReference()
 	
-Importing a data wrap:
+Importing a custom datawrap:
 ----------------------
 
 .. code:: python
