@@ -42,7 +42,18 @@ A brief introduction
 	#fancy queries
 	for exons in g.get(Exons, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :
 		print exon.CDS
+
+And if you ever get lost, there's an online **help()** function for each object type:
+
+.. code:: python
+
+	from pyGeno.Genome import *
 	
+	print Exon.help()
+
+Should output:
+	'Available fields for Exon_Raba: CDS_start, end, chromosome, CDS_length, frame, number, CDS_end, start, genome, length, protein, gene, transcript, id, strand'
+
 Bootstraping:
 -------------
 
