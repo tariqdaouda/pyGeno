@@ -1,3 +1,8 @@
+1.1.6
+=====
+
+* BUG FIX: find in BinarySequence could not find some subsequences at the tail of sequence
+
 1.1.5
 =====
 
