@@ -57,7 +57,8 @@ And if you ever get lost, there's an online **help()** function for each object 
 	print Exon.help()
 
 Should output:
-	'Available fields for Exon_Raba: CDS_start, end, chromosome, CDS_length, frame, number, CDS_end, start, genome, length, protein, gene, transcript, id, strand'
+
+	Available fields for Exon: CDS_start, end, chromosome, CDS_length, frame, number, CDS_end, start, genome, length, protein, gene, transcript, id, strand
 
 Bootstraping:
 -------------
