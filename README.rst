@@ -98,7 +98,7 @@ And for more **Serious Work**, the whole reference genome.
 	B.importHumanReference()
 	
 Importing a custom datawrap:
-----------------------
+--------------------------
 
 .. code:: python
 
@@ -113,10 +113,9 @@ To import a patient's specific polymorphisms
   importSNPs('patient1.tar.gz')
 
 You can easily make your own datawraps with any tar.gz compressor.
-For more details on how data wraps are made you can have a look inside the folder bootstrap_data, 
-of check the documentation Importation_.
+For more details on how datawraps are made you can check wiki_ or have a look inside the folder bootstrap_data.
 
-.. _Importation: http://bioinfo.iric.ca/~daoudat/pyGeno/importation.html
+.. _wiki: https://github.com/tariqdaouda/pyGeno/wiki/How-to-create-a-pyGeno-friendly-package-to-import-your-data%3F
 
 Instanciating a genome:
 -----------------------
