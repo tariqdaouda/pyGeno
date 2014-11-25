@@ -33,7 +33,6 @@ A brief introduction
 	
 	g = Genome(name = "GRCh37.75")
 	prot = g.get(Protein, id = 'ENSP00000438917')[0]
-	#the specific protein sequence of SUBJECT_1
 	print prot.sequence
 	print prot.gene.biotype
 	
