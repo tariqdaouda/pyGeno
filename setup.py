@@ -11,7 +11,7 @@ with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
 setup(
     name='pyGeno',
 
-    version='1.1.6',
+    version='1.1.7',
 
     description='A python package for Personalized Proteogenomics',
     long_description=long_description,
@@ -21,7 +21,7 @@ setup(
     author='Tariq Daouda',
     author_email='tariq.daouda@umontreal.ca',
 
-	test_suite="pyGeno.tests.tests", 
+	test_suite="pyGeno.tests", 
 	
     license='ApacheV2.0',
 

@@ -7,28 +7,13 @@ from pyGeno.bootstrap import importHumanReference_YOnly, importDummySRY
 
 class pyGenoSNPTests(unittest.TestCase):
 
-	def importAll(self) :
-		try :
-			importHumanReference_YOnly()
-		except ValueError :
-			pass
-			#~ print "--> Seems to already exist in db"
-			
-		try :
-			importDummySRY()
-		except ValueError :
-			pass
-			#~ print "--> Seems to already exist in db"
-
-		self.ref = Genome(name = 'GRCh37.75_Y-Only')
-		
 	def setUp(self):
-		self.importAll()
+		self.ref = Genome(name = 'GRCh37.75_Y-Only')
 
 	def tearDown(self):
 		pass
 
-	def testVanilla(self) :
+	def test_vanilla(self) :
 		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY')
 		persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
 		refProt = self.ref.get(Protein, id = 'ENSP00000438917')[0]
@@ -36,7 +21,7 @@ class pyGenoSNPTests(unittest.TestCase):
 		self.assertEqual('ATGCAATCATATGCTTCTGC', refProt.transcript.cDNA[:20])
 		self.assertEqual('HTGCAATCATATGCTTCTGC', persProt.transcript.cDNA[:20])
 		
-	def testNoModif(self) :
+	def test_noModif(self) :
 		from pyGeno.SNPFiltering import SNPFilter
 
 		class MyFilter(SNPFilter) :
@@ -52,7 +37,7 @@ class pyGenoSNPTests(unittest.TestCase):
 
 		self.assertEqual(persProt.transcript.cDNA[:20], refProt.transcript.cDNA[:20])
 	
-	def testInsert(self) :
+	def test_insert(self) :
 		from pyGeno.SNPFiltering import SNPFilter
 
 		class MyFilter(SNPFilter) :
@@ -72,7 +57,7 @@ class pyGenoSNPTests(unittest.TestCase):
 		self.assertEqual('ATGCAATCATATGCTTCTGC', refProt.transcript.cDNA[:20])
 		self.assertEqual('ATGATGCAATCATATGCTTC', persProt.transcript.cDNA[:20])
 	
-	def testSNP(self) :
+	def test_SNP(self) :
 		from pyGeno.SNPFiltering import SNPFilter
 
 		class MyFilter(SNPFilter) :
@@ -90,7 +75,7 @@ class pyGenoSNPTests(unittest.TestCase):
 		self.assertEqual('M', refProt.sequence[0])
 		self.assertEqual('L', persProt.sequence[0])
 		
-	def testDeletion(self) :
+	def test_deletion(self) :
 		from pyGeno.SNPFiltering import SNPFilter
 
 		class MyFilter(SNPFilter) :
@@ -122,6 +107,16 @@ class pyGenoSNPTests(unittest.TestCase):
 		self.assertEqual(len(prot)-10, prot.find(needle))
 
 def runTests() :
+	try :
+		importHumanReference_YOnly()
+	except ValueError :
+		print "--> Seems to already exist in db"
+		
+	try :
+		importDummySRY()
+	except ValueError :
+		print "--> Seems to already exist in db"
+		
 	unittest.main()
 
 if __name__ == "__main__" :
