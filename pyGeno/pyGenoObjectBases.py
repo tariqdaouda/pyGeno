@@ -198,7 +198,7 @@ class pyGenoRabaObjectWrapper(object) :
 	def help(cls) :
 		"""Returns a list of available field for queries. Ex 
 		Transcript.help()"""
-		return cls._wrapped_class.help()
+		return cls._wrapped_class.help().replace("_Raba", "")
 
 	@classmethod
 	def ensureGlobalIndex(cls, fields) :

@@ -1,3 +1,9 @@
+1.1.7
+=====
+
+* BUG FIX: looping through CSV lines now works
+* Added tests for CSV
+
 1.1.6
 =====
 
