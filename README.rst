@@ -60,21 +60,21 @@ Should output:
 
 	Available fields for Exon: CDS_start, end, chromosome, CDS_length, frame, number, CDS_end, start, genome, length, protein, gene, transcript, id, strand
 
-Bootstraping:
--------------
+Batteries included (bootstraping):
+---------------------------------
 
-pyGeno's database is populated by importing datawraps.
-pyGeno comes with a few datawraps, to get the list you can use:
+pyGeno's database is populated by importing data wraps.
+pyGeno comes with a few data wraps, to get the list you can use:
 
 .. code:: python
 	
 	import pyGeno.bootstrap as B
 	B.listDataWraps()
 
-Importing whole genomes is a demanding process that takes time and requires (according to tests) at least 3GB
-of memory. Depending on your configuration, more might be required.
+Importing whole genomes is a demanding process that take more than an hour and requires (according to tests) 
+at least 3GB of memory. Depending on your configuration, more might be required.
 
-That being said importating a datawrap is a one time operation and once the importation is complete the datawrap
+That being said importating a data wrap is a one time operation and once the importation is complete the datawrap
 can be discarded without consequences.
 
 The bootstrap module also has some handy functions for importing built-in packages.
