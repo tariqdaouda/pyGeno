@@ -205,8 +205,7 @@ pyGeno allows you to select the Polymorphisms that end up into the final sequenc
 
 .. code:: python
 
-	from pyGeno.SNPFiltering import SNPFilter
-	from pyGeno.SNPFiltering import SequenceSNP
+	from pyGeno.SNPFiltering import SNPFilter, SequenceSNP
 
 	class QMax_gt_filter(SNPFilter) :
 		
