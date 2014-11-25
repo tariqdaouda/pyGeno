@@ -70,6 +70,7 @@ class CSVEntry(object) :
 		self.data = []
 		if lineNumber != None :
 			self.lineNumber = lineNumber
+			
 			tmpL = csvFile.lines[lineNumber].replace('\r', '\n').replace('\n', '')
 			tmpData = tmpL.split(csvFile.separator)
 
@@ -91,7 +92,11 @@ class CSVEntry(object) :
 
 	def __getitem__(self, key) :
 		"""Returns the value of field 'key'"""
-		return self.data[self.csvFile.legend[key.lower()]]
+		try :
+			indice = self.csvFile.legend[key.lower()]
+		except KeyError :
+			raise KeyError("CSV File has no column: '%s'" % key)
+		return self.data[indice]
 
 	def __setitem__(self, key, value) :
 		"""Sets the value of field 'key' to 'value' """
@@ -209,7 +214,7 @@ class CSVFile(object) :
 		self.currentPos += 1
 		if self.currentPos >= len(self) :
 			raise StopIteration
-		return CSVEntry(self, self[self.currentPos])
+		return CSVEntry(self, self.currentPos)
 	
 	def __getitem__(self, line) :
 		if self.lines[line].__class__ is not CSVEntry :
