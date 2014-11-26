@@ -146,12 +146,15 @@ class CSVFile(object) :
 		self.separator = separator
 		self.currentPos = -1
 	
-	def parse(self, filePath, separator = ',', stringSeparator = '"') :
+	def parse(self, filePath, separator = ',', stringSeparator = '"', lineSeparator = '\n') :
 		"""Open a CSV"""
 		
 		self.filename = filePath
 		f = open(filePath)
-		self.lines = f.readlines()
+		if lineSeparator == '\n' :
+			self.lines = f.readlines()
+		else :
+			self.lines = f.read().split(lineSeparator)
 		f.close()
 		
 		self.separator = separator
