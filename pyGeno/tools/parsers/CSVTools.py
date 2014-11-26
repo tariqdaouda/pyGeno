@@ -52,7 +52,7 @@ def joinCSVs(csvFilePaths, column, ouputFileName, separator = ',') :
 					line += separator + separator.join(c[j])
 					
 		lines.append( line )
-	print len(lines)
+	
 	res = legend + '\n' + '\n'.join(lines)
 	
 	f = open(ouputFileName, 'w')
