@@ -26,7 +26,7 @@ You can also do it for the **specific genomes** of your subjects:
 
 And much more: https://github.com/tariqdaouda/pyGeno
 
-Verbose Description:
+Verbose Description
 --------------------
 
 pyGeno is a python package mainly intended for personal 
@@ -40,3 +40,10 @@ proteomes. Compared to a standalone program, pyGeno gives
 the user access to the complete expressivity of 
 python, a general programming language. It’s range of application
 therefore encompasses both short scripts and large scale genome-wide studies.
+
+Full Documentation
+------------------
+
+The full documentation is available here_:
+
+.. _here: http://bioinfo.iric.ca/~daoudat/pyGeno/
