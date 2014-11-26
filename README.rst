@@ -20,7 +20,7 @@ To run tests:
 
 	python setup.py test
 	
-The full documentation is available here_:
+The full documentation is available here_
 
 .. _here: http://bioinfo.iric.ca/~daoudat/pyGeno/
 
