@@ -1,7 +1,13 @@
 pyGeno: A python package for Personalized Proteogenomics
 ========================================================
+
+pyGeno is developed and actively used at the IRIC_ :
+
+.. _IRIC: http://www.iric.ca 
+
 Installation:
 -------------
+
 .. code:: python
 	
 	pip install pyGeno #for the latest stable version
