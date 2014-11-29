@@ -1,9 +1,10 @@
 pyGeno: A python package for Personalized Proteogenomics
 ========================================================
 
-pyGeno is developed and actively used at the IRIC_.
+pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_).
 
-.. _IRIC: http://www.iric.ca 
+.. _Tariq Daouda: http://bioinfo.iric.ca/~daoudat/
+.. _IRIC: http://www.iric.ca
 
 Installation:
 -------------
