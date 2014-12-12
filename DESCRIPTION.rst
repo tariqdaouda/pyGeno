@@ -34,12 +34,13 @@ And much more: https://github.com/tariqdaouda/pyGeno
 Verbose Description
 --------------------
 
-pyGeno is a python package that integrates reference sequences and annotations from Ensembl,
-genomic polymorphisms from the dbSNP database and data from next-gen sequencing into an easy
-to use, memory efficient and fast framework. Allowing the user to easily explore both reference 
-and specific genomes and proteomes. Compared to a standalone program, pyGeno gives the user access
-to the complete expressivity of python, a general programming language. It’s range of application 
-therefore encompasses both short scripts and large scale genome-wide studies.
+
+pyGeno integrates reference sequences and 
+annotations, genomic polymorphisms from the dbSNP database 
+and data from next-gen sequencing into an easy to use, 
+memory- efficient and fast framework, therefore allowing 
+the user to easily explore reference and custom genomes and 
+proteomes. pyGeno can be used for both short scripts and large scale genome-wide studies.
 
 Full Documentation
 ------------------
