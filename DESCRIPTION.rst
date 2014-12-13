@@ -1,13 +1,13 @@
-pyGeno: A python package for Personalized Proteogenomics
-=========================================================
+pyGeno: A python package for Personalized Medicine and Proteogenomics
+=====================================================================
+
+Short description:
+------------------
 
 pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_).
 
 .. _Tariq Daouda: http://bioinfo.iric.ca/~daoudat/
 .. _IRIC: http://www.iric.ca
-
-Short description:
-------------------
 
 With pyGeno you can do that:
 
@@ -34,8 +34,7 @@ And much more: https://github.com/tariqdaouda/pyGeno
 Verbose Description
 --------------------
 
-
-pyGeno integrates reference sequences and 
+pyGeno is mainly intended for personalized medicine, but it can serve many purposes. It integrates reference sequences and 
 annotations, genomic polymorphisms from the dbSNP database 
 and data from next-gen sequencing into an easy to use, 
 memory- efficient and fast framework, therefore allowing 
@@ -45,6 +44,6 @@ proteomes. pyGeno can be used for both short scripts and large scale genome-wide
 Full Documentation
 ------------------
 
-The full documentation is available here_.
+The full documentation is available here_
 
 .. _here: http://bioinfo.iric.ca/~daoudat/pyGeno/
