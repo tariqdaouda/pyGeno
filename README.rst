@@ -178,7 +178,6 @@ These are all possible query formats:
   chr12.get(Exon, { "start >=" : 12000, "end <" : 12300 })
   ref.get(Transcript, { "gene.name" : 'SRY' })
 
-
 Creating indexes to speed up queries:
 ------------------------------------
 .. code:: python
@@ -188,7 +187,7 @@ Creating indexes to speed up queries:
   Gene.ensureGlobalIndex('name')
   #removing the index
   Gene.dropIndex('name')
-  
+
 Creating a Personalized Genome:
 -------------------------------
 Personalized Genomes are a powerful feature that allow to work on the specific genomes and proteomes of your patients.
@@ -225,6 +224,17 @@ pyGeno allows you to select the Polymorphisms that end up into the final sequenc
 			return None #None means keep the reference allele
 	
 	persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = QMax_gt_filter(10))
+
+Getting an arbitrary sequence:
+------------------------------
+You can ask for any sequence of any chromosome:
+
+.. code:: python
+	
+	chr12 = myGenome.get(Chromosome, number = "12")
+	print chr12.sequence[x1:x2]
+	# for the reference sequence
+  	print chr12.refSequence[x1:x2]
 	
 Progress Bar:
 -------------
