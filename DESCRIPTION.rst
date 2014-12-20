@@ -50,4 +50,4 @@ The full documentation is available here_
 
 For the latest news about pyGeno you can follow me on twitter `@tariqdaouda`_.
 
-.. _@tariqdaouda: hhtps://www.twitter.com/tariqdaouda
+.. _@tariqdaouda: https://www.twitter.com/tariqdaouda
