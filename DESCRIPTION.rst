@@ -48,6 +48,6 @@ The full documentation is available here_
 
 .. _here: http://bioinfo.iric.ca/~daoudat/pyGeno/
 
-For the latest news about pyGeno you can follow me on twitter `@tariqdaouda`_.
+For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 
 .. _@tariqdaouda: https://www.twitter.com/tariqdaouda
