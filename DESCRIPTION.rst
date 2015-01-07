@@ -6,7 +6,7 @@ Short description:
 
 pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_).
 
-.. _Tariq Daouda: http://bioinfo.iric.ca/~daoudat/
+.. _Tariq Daouda: http://www.tariqdaouda.com
 .. _IRIC: http://www.iric.ca
 
 With pyGeno you can do that:
