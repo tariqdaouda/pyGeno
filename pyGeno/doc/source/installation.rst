@@ -8,3 +8,5 @@ The latest stable version is available from pypi::
 If you're more adventurous, the bleeding edge version is available from github (look for the 'bloody' branch)::
 
 	git clone https://github.com/tariqdaouda/pyGeno.git
+	cd pyGeno
+	python setup.py develop

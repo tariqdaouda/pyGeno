@@ -11,7 +11,7 @@ class VCFEntry(object) :
 		self.data = {}
 		
 		tmpL = line.replace('\r', '\n').replace('\n', '')
-		tmpData = tmpL.split('\t')
+		tmpData = str(tmpL).split('\t')
 		for i in range(6) :
 			self.data[vcfFile.dnegel[i]] = tmpData[i]
 		self.data['POS'] = int(self.data['POS'])

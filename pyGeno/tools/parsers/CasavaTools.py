@@ -8,7 +8,7 @@ class SNPsTxtEntry(object) :
 		self.snpsTxtFile = snpsTxtFile
 		self.lineNumber = lineNumber
 		self.values = {}
-		sl = snpsTxtFile.data[lineNumber].replace('\t\t', '\t').split('\t')
+		sl = str(snpsTxtFile.data[lineNumber]).replace('\t\t', '\t').split('\t')
 		
 		self.values['chromosomeNumber'] = sl[0].upper().replace('CHR', '')
 		#first column: chro, second first of range (identical to second column)

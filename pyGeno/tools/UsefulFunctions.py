@@ -314,26 +314,36 @@ def showDifferences(seq1, seq2) :
 
 	return ''.join(ret)
 
-def highLightSubsequence(sequence, x1, x2, start=' [', stop = '] ') :
+def highlightSubsequence(sequence, x1, x2, start=' [', stop = '] ') :
 	"""returns a sequence where the subsequence in [x1, x2[ is placed 
 	in bewteen 'start' and 'stop'"""
 
 	seq = list(sequence)
-	ii = 0
-	acc = True
-	for i in range(len(seq)) :
-		if ii == x1 :
-			seq[i] = '['+seq[i]
-		if ii == x2-1 :
-			seq[i] = seq[i] + ']'
+	print x1, x2-1, len(seq)
+	seq[x1] = start + seq[x1]
+	seq[x2-1] = seq[x2-1] + stop
+	return ''.join(seq)
 
-		if i < len(seq-1) :
-			if seq[i+1] == '/':
-				acc = False
-			else :
-				acc = True
+# def highlightSubsequence(sequence, x1, x2, start=' [', stop = '] ') :
+# 	"""returns a sequence where the subsequence in [x1, x2[ is placed 
+# 	in bewteen 'start' and 'stop'"""
 
-		if acc :
-			ii += 1
+# 	seq = list(sequence)
+# 	ii = 0
+# 	acc = True
+# 	for i in range(len(seq)) :
+# 		if ii == x1 :
+# 			seq[i] = start+seq[i]
+# 		if ii == x2-1 :
+# 			seq[i] = seq[i] + stop
 
-	print ''.join(seq)
+# 		if i < len(seq) - 1 :
+# 			if seq[i+1] == '/':
+# 				acc = False
+# 			else :
+# 				acc = True
+
+# 		if acc :
+# 			ii += 1
+
+# 	return ''.join(seq)
