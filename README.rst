@@ -1,7 +1,22 @@
-pyGeno: A python package for Personalized Proteogenomics
-========================================================
+pyGeno: A python package for Personalized Medicine and Proteogenomics
+=====================================================================
+
+pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_).
+
+.. _Tariq Daouda: http://wwww.tariqdaouda.com
+.. _IRIC: http://www.iric.ca
+
+The full documentation is available here_.
+
+.. _here: http://pygeno.iric.ca/
+
+For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
+
+.. _@tariqdaouda: https://www.twitter.com/tariqdaouda
+
 Installation:
 -------------
+
 .. code:: python
 	
 	pip install pyGeno #for the latest stable version
@@ -19,10 +34,6 @@ To run tests:
 .. code:: shell
 
 	python setup.py test
-	
-The full documentation is available here_
-
-.. _here: http://bioinfo.iric.ca/~daoudat/pyGeno/
 
 A brief introduction
 --------------------
@@ -171,7 +182,6 @@ These are all possible query formats:
   chr12.get(Exon, { "start >=" : 12000, "end <" : 12300 })
   ref.get(Transcript, { "gene.name" : 'SRY' })
 
-
 Creating indexes to speed up queries:
 ------------------------------------
 .. code:: python
@@ -181,7 +191,7 @@ Creating indexes to speed up queries:
   Gene.ensureGlobalIndex('name')
   #removing the index
   Gene.dropIndex('name')
-  
+
 Creating a Personalized Genome:
 -------------------------------
 Personalized Genomes are a powerful feature that allow to work on the specific genomes and proteomes of your patients.
@@ -218,6 +228,17 @@ pyGeno allows you to select the Polymorphisms that end up into the final sequenc
 			return None #None means keep the reference allele
 	
 	persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = QMax_gt_filter(10))
+
+Getting an arbitrary sequence:
+------------------------------
+You can ask for any sequence of any chromosome:
+
+.. code:: python
+	
+	chr12 = myGenome.get(Chromosome, number = "12")
+	print chr12.sequence[x1:x2]
+	# for the reference sequence
+  	print chr12.refSequence[x1:x2]
 	
 Progress Bar:
 -------------
