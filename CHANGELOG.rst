@@ -1,3 +1,7 @@
+1.1.8
+=====
+* BUG FIX: Added cast of lines to str in VCF and CasavaSNP parsers. Sometimes unicode caracters made the translation bug  
+
 1.1.7
 =====
 
