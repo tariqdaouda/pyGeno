@@ -1,4 +1,4 @@
-pyGeno: A python package for Personalized Medicine and Proteogenomics
+pyGeno: Ensembl, Next-Gen Sequencing, dbSNP together on your laptop
 =====================================================================
 
 pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_).
