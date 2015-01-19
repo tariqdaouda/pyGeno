@@ -2,10 +2,17 @@
 =====
 * BUG FIX: Added cast of lines to str in VCF and CasavaSNP parsers. Sometimes unicode caracters made the translation bug  
 
+* pyGeno now comes with the murine reference genome GRCm38.78
+
+* pyGeno now comes with the human reference genome GRCh38.78, GRCh37.75 is still shipped with pyGeno but might be in the upcoming versions
+
+* pyGeno now comes with a datawrap for common dbSNPs human SNPs (SNP_dbSNP142_human_common_all.tar.gz)
+
 1.1.7
 =====
 
 * BUG FIX: looping through CSV lines now works
+
 * Added tests for CSV
 
 1.1.6
