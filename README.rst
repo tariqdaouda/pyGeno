@@ -29,12 +29,6 @@ For the latest developments:
 	cd pyGeno
 	python setup.py develop
 
-To run tests:
-
-.. code:: shell
-
-	python setup.py test
-
 A brief introduction
 --------------------
 
