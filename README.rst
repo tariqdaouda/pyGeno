@@ -229,7 +229,7 @@ You can ask for any sequence of any chromosome:
 
 .. code:: python
 	
-	chr12 = myGenome.get(Chromosome, number = "12")
+	chr12 = myGenome.get(Chromosome, number = "12")[0]
 	print chr12.sequence[x1:x2]
 	# for the reference sequence
   	print chr12.refSequence[x1:x2]
