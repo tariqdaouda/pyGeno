@@ -94,9 +94,9 @@ def deleteGenome(species, name) :
 def importGenome(packageFile, batchSize = 50, verbose = 0) :
 	"""Import a pyGeno genome package. A genome packages is a tar.gz ball that contains at it's root:
 
-	* gziped fasta files for all chromosomes
+	* gziped fasta files for all chromosomes, or URLs from where them must be downloaded
 	
-	* gziped GTF gene_set file from ensembl
+	* gziped GTF gene_set file from Ensembl, or an URL from where it must be downloaded
 	
 	* a manifest.ini file such as::
 	
@@ -121,10 +121,10 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 	
 	A rollback is performed if an exception is caught during importation
 	
-	Verbose must be an int [0, 4] for various levels of verbosity
-	
 	batchSize sets the number of genes to parse before performing a database save. PCs with little ram like
 	small values, while those endowed with more memory may perform faster with higher ones.
+	
+	Verbose must be an int [0, 4] for various levels of verbosity
 	"""
 
 	def reformatItems(items) :
