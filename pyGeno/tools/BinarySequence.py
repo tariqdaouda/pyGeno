@@ -200,7 +200,7 @@ class BinarySequence :
 		"""Same as find but returns a list of all occurences"""
 		arr = self.encode(strSeq)
 		lst = []
-		self._dichFind(arr[0], self, self, 0, lst)
+		self._dichFind(arr[0], self, 0, lst)
 		return lst
 		
 	def __and__(self, arr) :
