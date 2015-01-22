@@ -136,7 +136,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		"""return the position of the first occurance of sequence"""
 		return self.bin_Sequence.find(sequence)
 
-	def findAll(self, seqence):
+	def findAll(self, sequence):
 		"""Returns a list of all positions where sequence was found"""
 		return self.bin_Sequence.findAll(sequence)
 
@@ -144,7 +144,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		"""return the position of the first occurance of sequence"""
 		return self.bin_cDNA.find(sequence)
 
-	def findAllIncDNA(self, seqence) :
+	def findAllIncDNA(self, sequence) :
 		"""Returns a list of all positions where sequence was found in the cDNA"""
 		return self.bin_cDNA.findAll(sequence)
 
@@ -156,7 +156,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		"""return the position of the first occurance of sequence in the 5'UTR"""
 		return self.bin_UTR5.find(sequence)
 
-	def findAllInUTR5(self, seqence) :
+	def findAllInUTR5(self, sequence) :
 		"""Returns a list of all positions where sequence was found in the 5'UTR"""
 		return self.bin_UTR5.findAll(sequence)
 
@@ -168,7 +168,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		"""return the position of the first occurance of sequence in the 3'UTR"""
 		return self.bin_UTR3.find(sequence)
 
-	def findAllInUTR3(self, seqence) :
+	def findAllInUTR3(self, sequence) :
 		"""Returns a lits of all positions where sequence was found in the 3'UTR"""
 		return self.bin_UTR3.findAll(sequence)
 
