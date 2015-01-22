@@ -189,8 +189,8 @@ Creating indexes to speed up queries:
 Find in sequences:
 ------------------
 
-Internally pyGeno uses a binary representation for nucleotides and amino acids, and offers several functions for
-looking for subsequences.
+Internally pyGeno uses a binary representation for nucleotides and amino acids to deal with polymorphisms. 
+For example,both "AGC" and "ATG" will match the following sequence "...AT/GCCG...".
 
 .. code:: python
 
