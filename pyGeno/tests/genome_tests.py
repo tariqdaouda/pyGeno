@@ -1,6 +1,5 @@
 import unittest
-from pyGeno.Genome import Genome
-from pyGeno.Protein import Protein
+from pyGeno.Genome import *
 
 from pyGeno.bootstrap import importHumanReference_YOnly, importDummySRY
 
@@ -99,13 +98,17 @@ class pyGenoSNPTests(unittest.TestCase):
 		dummy = Genome(name = 'GRCh37.75_Y-Only')
 		self.assertEqual(dummy.wrapped_object, self.ref.wrapped_object)
 	
-	def test_find(self) :
+	def test_prot_find(self) :
 		prot = self.ref.get(Protein, id = 'ENSP00000438917')[0]
 		needle = prot.sequence[:10]
 		self.assertEqual(0, prot.find(needle))
 		needle = prot.sequence[-10:]
 		self.assertEqual(len(prot)-10, prot.find(needle))
 
+	def test_trans_find(self) :
+		trans = self.ref.get(Transcript, name = "SRY-001")[0]
+		self.assertEqual(0, trans.find(trans[:5]))
+		
 def runTests() :
 	try :
 		importHumanReference_YOnly()

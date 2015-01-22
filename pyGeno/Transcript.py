@@ -134,11 +134,11 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 	def find(self, sequence) :
 		"""return the position of the first occurance of sequence"""
-		return self.bin_Sequence.find(sequence)
+		return self.bin_sequence.find(sequence)
 
 	def findAll(self, seqence):
 		"""Returns a list of all positions where sequence was found"""
-		return self.bin_Sequence.findAll(sequence)
+		return self.bin_sequence.findAll(sequence)
 
 	def findIncDNA(self, sequence) :
 		"""return the position of the first occurance of sequence"""

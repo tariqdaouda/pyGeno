@@ -11,7 +11,7 @@ pyGeno's `lair is on Github`_.
 .. _lair is on Github: http://www.github.com/tariqdaouda/pyGeno
 
 
-A compelling example:
+A Quick Example:
 ----------------------
 
 .. code::
@@ -47,7 +47,7 @@ pyGeno integrates:
 
 * SNPs from **next-gen** sequencing
 
-pyGeno was designed to be:
+pyGeno is a python package that  was designed to be:
 
 * Fast to install. It has no dependencies but its own backend: `rabaDB`_.
 * Fast to run and memory efficient, so you can use it on your laptop.
@@ -57,11 +57,11 @@ pyGeno was designed to be:
 It also comes with:
 
 * Parsers for: FASTA, FASTQ, GTF, VCF, CSV.
-* Useful tools for traduction etc...
+* Useful tools for translation etc...
 * Optimised genome indexation with *Segment Trees*.
 * A funky *Progress Bar*.
 
-But in my opinion the coolest thing about pyGeno is that it allows to create **personalized genomes**. Genomes that you design yourself by combining reference genomes and SNP sets derived next-gen sequencing or dbSNP.
+But in my opinion the coolest thing about pyGeno is that it allows to create **personalized genomes**. Genomes that you design yourself by combining a reference genome and SNP sets derived from next-gen sequencing or dbSNP.
 
 Give it a try and let me know what you think!
 
