@@ -29,12 +29,6 @@ For the latest developments:
 	cd pyGeno
 	python setup.py develop
 
-To run tests:
-
-.. code:: shell
-
-	python setup.py test
-
 A brief introduction
 --------------------
 
@@ -192,6 +186,38 @@ Creating indexes to speed up queries:
   #removing the index
   Gene.dropIndex('name')
 
+Find in sequences:
+------------------
+
+Internally pyGeno uses a binary representation for nucleotides and amino acids to deal with polymorphisms. 
+For example,both "AGC" and "ATG" will match the following sequence "...AT/GCCG...".
+
+.. code:: python
+
+	#returns the position of the first occurence
+	transcript.find("AT/GCCG")
+	#returns the positions of all occurences
+	transcript.findAll("AT/GCCG")
+	
+	#similarly, you can also do
+	transcript.findIncDNA("AT/GCCG")
+	transcript.findAllIncDNA("AT/GCCG")
+	transcript.findInUTR3("AT/GCCG")
+	transcript.findAllInUTR3("AT/GCCG")
+	transcript.findInUTR5("AT/GCCG")
+	transcript.findAllInUTR5("AT/GCCG")
+	
+	#same for proteins
+	protein.find("DEV/RDEM")
+	protein.findAll("DEV/RDEM")
+	
+	#and for exons
+	exon.find("AT/GCCG")
+	exon.findAll("AT/GCCG")
+	exon.findInCDS("AT/GCCG")
+	exon.findAllInCDS("AT/GCCG")
+	...
+	
 Creating a Personalized Genome:
 -------------------------------
 Personalized Genomes are a powerful feature that allow to work on the specific genomes and proteomes of your patients.
@@ -235,7 +261,7 @@ You can ask for any sequence of any chromosome:
 
 .. code:: python
 	
-	chr12 = myGenome.get(Chromosome, number = "12")
+	chr12 = myGenome.get(Chromosome, number = "12")[0]
 	print chr12.sequence[x1:x2]
 	# for the reference sequence
   	print chr12.refSequence[x1:x2]
