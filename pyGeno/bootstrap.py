@@ -49,6 +49,11 @@ def importHumanCommonSNPs() :
 	path = os.path.join(this_dir, "bootstrap_data", "dbSNP142_human_common_all.tar.gz")
 	importSNPs(path)
 
+def importHumanGRCh37CommonSNPs() :
+	"""Import a polymorphism datawrap pyGeno comes with"""
+	path = os.path.join(this_dir, "bootstrap_data", "dbSNP142_human_GRCh37_common_all.tar.gz")
+	importSNPs(path)
+
 def importGenomeDatawrap(name, batchSize = 100) :
 	"""Import a genome datawrap pyGeno comes with"""
 	path = os.path.join(this_dir, "bootstrap_data", name)
