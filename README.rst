@@ -32,6 +32,9 @@ For the latest developments:
 A brief introduction
 --------------------
 
+pyGeno is one of the simplest ways to get gene sequences, protein sequences, exons, ... in fact anything referenced
+in Ensembl's GTF gene sets in python.
+
 .. code:: python
 	
 	from pyGeno.Genome import *
