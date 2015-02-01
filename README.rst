@@ -6,9 +6,9 @@ pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunol
 .. _Tariq Daouda: http://wwww.tariqdaouda.com
 .. _IRIC: http://www.iric.ca
 
-The full documentation is available here_.
+Click here for The `full documentation`_.
 
-.. _here: http://pygeno.iric.ca/
+.. _full documentation: http://pygeno.iric.ca/
 
 For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 
