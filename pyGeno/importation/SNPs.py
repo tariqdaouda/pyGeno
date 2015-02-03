@@ -144,6 +144,7 @@ def _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile) :
 		snp.setName = setName
 		snp.start = snpEntry['POS']-1
 		snp.alt = snpEntry['ALT']
+		snp.ref = snpEntry['REF']
 		snp.end = snp.start+len(snp.alt)
 		snp.save()
 	
