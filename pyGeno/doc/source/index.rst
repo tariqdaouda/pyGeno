@@ -10,9 +10,9 @@ pyGeno's `lair is on Github`_.
 
 .. _lair is on Github: http://www.github.com/tariqdaouda/pyGeno
 
-
 A Quick Example:
-----------------------
+-----------------
+pyGeno is a personal bioinformatic database that runs directly into python on your laptop.
 pyGeno is here to make extracting data such as gene sequences a breeze.
 
 .. code::
