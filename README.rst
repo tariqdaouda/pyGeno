@@ -32,8 +32,7 @@ For the latest developments:
 A brief introduction
 --------------------
 
-pyGeno is one of the simplest ways to get gene sequences, protein sequences, exons, ... in fact anything referenced
-in Ensembl's GTF gene sets in python.
+pyGeno is a personal bioinformatic database that runs directly into python and on your laptop. pyGeno is here to make extracting data such as gene sequences a breeze.
 
 .. code:: python
 	
