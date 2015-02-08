@@ -13,6 +13,7 @@ pyGeno's `lair is on Github`_.
 
 A Quick Example:
 ----------------------
+pyGeno is here to make extracting data such as gene sequences a breeze.
 
 .. code::
 
@@ -20,15 +21,21 @@ A Quick Example:
 
 	g = Genome(name = "GRCh37.75")
 	prot = g.get(Protein, id = 'ENSP00000438917')[0]
+	#print the protein sequence
 	print prot.sequence
+	#print the protein's gene biotype
 	print prot.gene.biotype
+	#print protein's transcript sequence
 	print protein.transcript.sequence
 
 	...
 
 	#fancy queries
 	for exons in g.get(Exons, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :
-		    print exon.CDS
+		#print the exon's coding sequence
+		print exon.CDS
+		#print the exon's transcript sequence
+		print exon.transcript.sequence
 
 	...
 
