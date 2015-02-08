@@ -35,10 +35,10 @@ A brief introduction
 pyGeno is a personal bioinformatic database that runs directly into python and on your laptop. 
 pyGeno is here to make extracting data such as gene sequences a breeze.
 
-.. code::
+.. code:: python
 
 	from pyGeno.Genome import *
-
+	
 	g = Genome(name = "GRCh37.75")
 	prot = g.get(Protein, id = 'ENSP00000438917')[0]
 	#print the protein sequence
@@ -47,19 +47,20 @@ pyGeno is here to make extracting data such as gene sequences a breeze.
 	print prot.gene.biotype
 	#print protein's transcript sequence
 	print protein.transcript.sequence
-
+	
 	...
-
+	
 	#fancy queries
 	for exons in g.get(Exons, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :
 		#print the exon's coding sequence
 		print exon.CDS
 		#print the exon's transcript sequence
 		print exon.transcript.sequence
-
+	
 	...
-
-	#and you can do the same for your subject specific genomes
+	
+	#You can do the same for your subject specific genomes
+	#by combining a reference genome with polymorphisms 
 	g = Genome(name = "GRCh37.75", SNPs = ["STY21_RNA"], SNPFilter = MyFilter())
 
 And if you ever get lost, there's an online **help()** function for each object type:
