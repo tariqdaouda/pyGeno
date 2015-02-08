@@ -12,7 +12,7 @@ pyGeno's `lair is on Github`_.
 
 A Quick Example:
 -----------------
-pyGeno is a personal bioinformatic database that runs directly into python on your laptop.
+pyGeno is a personal bioinformatic database that runs directly into python and on your laptop. 
 pyGeno is here to make extracting data such as gene sequences a breeze.
 
 .. code::
