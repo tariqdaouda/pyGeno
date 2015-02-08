@@ -38,10 +38,9 @@ pyGeno is here to make extracting data such as gene sequences a breeze.
 		print exon.transcript.sequence
 
 	...
-
-	#and you can do the same for your subject specific genomes
+	#You can do the same for your subject specific genomes
+	#by combining a reference genome with polymorphisms 
 	g = Genome(name = "GRCh37.75", SNPs = ["STY21_RNA"], SNPFilter = MyFilter())
-
 
 Verbose Introduction
 ---------------------
