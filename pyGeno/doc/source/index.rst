@@ -67,11 +67,8 @@ It also comes with:
 * Optimised genome indexation with *Segment Trees*.
 * A funky *Progress Bar*.
 
-But in my opinion the coolest thing about pyGeno is that it allows to create **personalized genomes**. Genomes that you design yourself by combining a reference genome and SNP sets derived from next-gen sequencing or dbSNP.
-
-Give it a try and let me know what you think!
-
-Cheers,
+One of the the coolest thing about pyGeno is that it also allows to quickly create **personalized genomes**.
+Genomes that you design yourself by combining a reference genome and SNP sets derived from dbSNP or next-gen sequencing.
 
 pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_), its logo is the work of the freelance designer `Sawssan Kaddoura`_.
 For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
