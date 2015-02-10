@@ -1,6 +1,5 @@
 import time, types, string
 import configuration as conf
-
 from rabaDB.rabaSetup import *
 from rabaDB.Raba import *
 from rabaDB.filters import RabaQuery

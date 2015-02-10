@@ -90,6 +90,10 @@ class CSVEntry(object) :
 			for i in range(len(self.csvFile.legend)) :
 				self.data.append('')
 
+	def commit(self) :
+		"""commits the line so it is added to a file stream"""
+		self.csvFile.commitLine(self)
+
 	def __getitem__(self, key) :
 		"""Returns the value of field 'key'"""
 		try :
@@ -146,8 +150,13 @@ class CSVFile(object) :
 		self.separator = separator
 		self.currentPos = -1
 	
+		self.streamFile = None
+		self.writeRate = None
+		self.streamBuffer = None
+		self.keepInMemory = True
+
 	def parse(self, filePath, separator = ',', stringSeparator = '"', lineSeparator = '\n') :
-		"""Open a CSV"""
+		"""Loads a CSV file"""
 		
 		self.filename = filePath
 		f = open(filePath)
@@ -170,7 +179,55 @@ class CSVFile(object) :
 	
 		self.strLegend = self.lines[0].replace('\r', '\n').replace('\n', '')
 		self.lines = self.lines[1:]
+	
+	def streamToFile(self, filename, keepInMemory = False, writeRate = 10) :
+		"""Starts a stream to a file. Every line must be committed (l.commit()) to be appended in to the file.
+
+		If keepInMemory is set to True, the parser will keep a version of the whole CSV in memory, writeRate is the number
+		of lines that must be committed before an automatic save is triggered.
+		"""
+		if len(self.legend) < 1 :
+			raise ValueError("There's no legend defined")
+
+		try :
+			os.remove(filename)
+		except :
+			pass
 		
+		self.streamFile = open(filename, "a")
+		self.writeRate = writeRate
+		self.streamBuffer = []
+		self.keepInMemory = keepInMemory
+
+		self.streamFile.write(self.strLegend + "\n")
+
+	def commitLine(self, line) :
+		"""Commits a line making it ready to be streamed to a file and saves the current buffer if needed. If no stream is active, raises a ValueError"""
+		if self.streamBuffer is None :
+			raise ValueError("Commit lines is only for when you are streaming to a file")
+
+		self.streamBuffer.append(line)
+		if len(self.streamBuffer) % self.writeRate == 0 :
+			for i in xrange(len(self.streamBuffer)) :
+				self.streamBuffer[i] = str(self.streamBuffer[i])
+			self.streamFile.write("%s\n" % ('\n'.join(self.streamBuffer)))
+			self.streamBuffer = []
+
+	def closeStreamToFile(self) :
+		"""Appends the remaining commited lines and closes the stream. If no stream is active, raises a ValueError"""
+		if self.streamBuffer is None :
+			raise ValueError("Commit lines is only for when you are streaming to a file")
+
+		for i in xrange(len(self.streamBuffer)) :
+			self.streamBuffer[i] = str(self.streamBuffer[i])
+		self.appendFile.write('\n'.join(self.streamBuffer))
+		self.appendFile.close()
+
+		self.streamFile = None
+		self.writeRate = None
+		self.streamBuffer = None
+		self.keepInMemory = True
+
 	def _developLine(self, line) :
 		self.lines[line] = CSVEntry(self, line)
 	
@@ -187,8 +244,10 @@ class CSVFile(object) :
 	
 	def newLine(self) :
 		"""Appends an empty line at the end of the CSV and returns it"""
-		self.lines.append(CSVEntry(self))
-		return self.lines[-1]
+		l = CSVEntry(self)
+		if self.keepInMemory :
+			self.lines.append(l)
+		return l
 	
 	def insertLine(self, i) :
 		"""Inserts an empty line at position i and returns it"""

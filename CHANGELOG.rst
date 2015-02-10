@@ -2,11 +2,15 @@
 =====
 * BUG FIX: Added cast of lines to str in VCF and CasavaSNP parsers. Sometimes unicode caracters made the translation bug  
 
+* BUG FIX: Corrected a typo that caused find in Transcript to recursively die 
+
 * pyGeno now comes with the murine reference genome GRCm38.78
 
 * pyGeno now comes with the human reference genome GRCh38.78, GRCh37.75 is still shipped with pyGeno but might be in the upcoming versions
 
 * pyGeno now comes with a datawrap for common dbSNPs human SNPs (SNP_dbSNP142_human_common_all.tar.gz)
+
+* CSV Parser has now the ability to stream directly to a file
 
 1.1.7
 =====
