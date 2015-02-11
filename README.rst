@@ -32,7 +32,7 @@ For the latest developments:
 A brief introduction
 --------------------
 
-pyGeno is a personal bioinformatic database that runs directly into python and on your laptop and does not depend
+pyGeno is a personal bioinformatic database that runs directly into python, on your laptop and does not depend
 upon any REST API. pyGeno is here to make extracting data such as gene sequences a breeze, and is designed to
 be able cope with huge queries.
 
