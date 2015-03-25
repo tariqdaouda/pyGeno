@@ -1,10 +1,16 @@
 pyGeno: Ensembl, Next-Gen Sequencing, dbSNP together on your laptop
 =====================================================================
 
-pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_).
+.. image:: http://bioinfo.iric.ca/~daoudat/pyGeno/_static/logo.png
+   :alt: pyGeno's logo
+
+pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_), its logo is the work of the freelance designer `Sawssan Kaddoura`_.
+For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 
 .. _Tariq Daouda: http://wwww.tariqdaouda.com
 .. _IRIC: http://www.iric.ca
+.. _Sawssan Kaddoura: http://www.sawssankaddoura.com
+
 
 Click here for The `full documentation`_.
 
