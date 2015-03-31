@@ -15,9 +15,11 @@ def removeDuplicates(inFileName, outFileName) :
 			h[l] = 0
 			data += l
 			
+	f.flush()
 	f.close()
 	f = open(outFileName, 'w')
 	f.write(legend+data)
+	f.flush()
 	f.close()
 
 def catCSVs(folder, ouputFileName, removeDups = False) :
@@ -57,6 +59,7 @@ def joinCSVs(csvFilePaths, column, ouputFileName, separator = ',') :
 	
 	f = open(ouputFileName, 'w')
 	f.write(res)
+	f.flush()
 	f.close()
 	
 	return res
@@ -164,6 +167,7 @@ class CSVFile(object) :
 			self.lines = f.readlines()
 		else :
 			self.lines = f.read().split(lineSeparator)
+		f.flush()
 		f.close()
 		
 		self.separator = separator
@@ -180,7 +184,7 @@ class CSVFile(object) :
 		self.strLegend = self.lines[0].replace('\r', '\n').replace('\n', '')
 		self.lines = self.lines[1:]
 	
-	def streamToFile(self, filename, keepInMemory = False, writeRate = 10) :
+	def streamToFile(self, filename, keepInMemory = False, writeRate = 100) :
 		"""Starts a stream to a file. Every line must be committed (l.commit()) to be appended in to the file.
 
 		If keepInMemory is set to True, the parser will keep a version of the whole CSV in memory, writeRate is the number
@@ -211,6 +215,7 @@ class CSVFile(object) :
 			for i in xrange(len(self.streamBuffer)) :
 				self.streamBuffer[i] = str(self.streamBuffer[i])
 			self.streamFile.write("%s\n" % ('\n'.join(self.streamBuffer)))
+			self.streamFile.flush()
 			self.streamBuffer = []
 
 	def closeStreamToFile(self) :
@@ -259,6 +264,7 @@ class CSVFile(object) :
 		self.filename = filePath
 		f = open(filePath, 'w')
 		f.write(self.toStr())
+		f.flush()
 		f.close()
 
 	def toStr(self) :
