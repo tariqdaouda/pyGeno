@@ -12,6 +12,8 @@
 
 * CSV Parser has now the ability to stream directly to a file
 
+* Changed the interface of the bootstrap module
+
 1.1.7
 =====
 
