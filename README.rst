@@ -91,7 +91,26 @@ pyGeno comes with a few data wraps, to get the list you can use:
 .. code:: python
 	
 	import pyGeno.bootstrap as B
-	B.listDataWraps()
+	B.printDatawraps()
+
+.. code::
+
+	Available datawraps for boostraping
+	
+	SNPs
+	~~~~|
+	    |~~~:> Homo_sapiens_agnostic.dummySRY.tar.gz
+	    |~~~:> Homo_sapiens.dummySRY_casava.tar.gz
+	    |~~~:> dbSNP142_human_GRCh37_common_all.tar.gz
+	    |~~~:> dbSNP142_human_common_all.tar.gz
+	
+	
+	Genomes
+	~~~~~~~|
+	       |~~~:> Homo_sapiens.GRCh37.75.tar.gz
+	       |~~~:> Homo_sapiens.GRCh37.75_Y-Only.tar.gz
+	       |~~~:> Homo_sapiens.GRCh38.78.tar.gz
+	       |~~~:> Mus_musculus.GRCm38.78.tar.gz
 
 Importing whole genomes is a demanding process that take more than an hour and requires (according to tests) 
 at least 3GB of memory. Depending on your configuration, more might be required.
@@ -106,24 +125,21 @@ Some of them just for playing around with pyGeno (**Fast importation** and **Sma
 .. code:: python
 	
 	import pyGeno.bootstrap as B
-	
-	#Imports only the first and Y chromosomes from the human reference genome GRCh37.75
-	#Fast, and does not require much memory. Sequences of both chromosomes will be downloaded. 
-	B.importHumanReference_1YOnly()
 
 	#Imports only the Y chromosome from the human reference genome GRCh37.75
 	#Very fast, requires even less memory. No download required.
-	B.importHumanReference_YOnly()
+	B.importGenome("Homo_sapiens.GRCh37.75_Y-Only.tar.gz)
 	
-	#A dummy datawrap for humans that mimics a casava's snps.txt with one SNP at the begining of the gene SRY
-	B.importDummySRY()
+	#A dummy datawrap for humans SNPs and Indels in pyGeno's AgnosticSNP  format. 
+	# This one has one SNP at the begining of the gene SRY
+	B.importSNPs("Homo_sapiens.dummySRY_casava.tar.gz")
 
 And for more **Serious Work**, the whole reference genome.
 
 .. code:: python
 
 	#Downloads the whole genome (205MB, sequences + annotations), may take an hour or more.
-	B.importHumanReference()
+	B.importGenome("Homo_sapiens.GRCh38.78.tar.gz")
 	
 Importing a custom datawrap:
 --------------------------
