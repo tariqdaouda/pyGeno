@@ -27,7 +27,7 @@ class SNPMaster(Raba) :
 		self.species = self.species.lower()
 		self.setName = self.setName.lower()
 
-class SNP_INDEL(pyGenoRabaObject) :
+class SNP_INDEL(Raba) :
 	"All SNPs should inherit from me. The name of the class must end with SNP"
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
 	_raba_abstract = True # not saved in db
@@ -44,19 +44,22 @@ class SNP_INDEL(pyGenoRabaObject) :
 	#every SNP_INDEL must have a field alt. This variable allows you to set an alias for it. Chamging the alias does not impact the schema
 	altAlias = 'alt'
 	
+	def __init__(self, *args, **kwargs) :
+		pass
+
 	def __getattribute__(self, k) :
 		if k == 'alt' :
-			cls = pyGenoRabaObject.__getattribute__(self, '__class__')
-			return pyGenoRabaObject.__getattribute__(self, cls.altAlias)
+			cls = Raba.__getattribute__(self, '__class__')
+			return Raba.__getattribute__(self, cls.altAlias)
 		
-		return pyGenoRabaObject.__getattribute__(self, k)
+		return Raba.__getattribute__(self, k)
 
 	def __setattr__(self, k, v) :
 		if k == 'alt' :
-			cls = pyGenoRabaObject.__getattribute__(self, '__class__')
-			pyGenoRabaObject.__setattr__(self, cls.altAlias, v)
+			cls = Raba.__getattribute__(self, '__class__')
+			Raba.__setattr__(self, cls.altAlias, v)
 			
-		pyGenoRabaObject.__setattr__(self, k, v)
+		Raba.__setattr__(self, k, v)
 	
 	def _curate(self) :
 		self.species = self.species.lower()
@@ -64,6 +67,9 @@ class SNP_INDEL(pyGenoRabaObject) :
 	@classmethod
 	def ensureGlobalIndex(cls, fields) :
 		cls.ensureIndex(fields)
+
+	def __repr__(self) :
+		return "%s> chr: %s, start: %s, end: %s, alt: %s, ref: %s" %(self.__class__.__name__, self.chromosomeNumber, self.start, self.end, self.alleles, self.ref)
 	
 class CasavaSNP(SNP_INDEL) :
 	"A SNP of Casava"
@@ -82,6 +88,28 @@ class CasavaSNP(SNP_INDEL) :
 	T_used = rf.Primitive()
 	
 	altAlias = 'alleles'
+
+class AgnosticSNP(SNP_INDEL) :
+	"""This is a generic SNPs/Indels format that you can easily make from the result of any SNP caller. AgnosticSNP files are tab delimited files such as:
+
+	chromosomeNumber	start	end	ref	alleles	quality	caller
+	Y	2655643	2655644	T	AG	30	test
+	Y	2655645	2655647	-	AG	30	test
+	Y	2655648	2655650	TT	-	30	test
+
+	The '-' indicates a deletion or an insertion. Collumn order has no importance.
+	"""
+
+	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
+	
+	alleles = rf.Primitive()
+	quality = rf.Primitive()
+	caller = rf.Primitive()
+	
+	altAlias = 'alleles'
+
+	def __repr__(self) :
+		return "AgnosticSNP> start: %s, end: %s, quality: %s, caller %s, alt: %s, ref: %s" %(self.start, self.end, self.quality, self.caller, self.alleles, self.ref)
 
 class dbSNPSNP(SNP_INDEL) :
 	"This class is for SNPs from dbSNP. Feel free to uncomment the fields that you need"

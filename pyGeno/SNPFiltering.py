@@ -78,7 +78,6 @@ class DefaultSNPFilter(SNPFilter) :
 
 	def filter(self, chromosome, **kwargs) :
 		"""The default filter mixes applied all SNPs and ignores Insertions and Deletions."""
-		
 		warn = 'Warning: the default snp filter ignores indels. IGNORED %s of SNP set: %s at pos: %s of chromosome: %s'
 		
 		sources = {}
@@ -86,9 +85,11 @@ class DefaultSNPFilter(SNPFilter) :
 		for snpSet, snp in kwargs.iteritems() :
 			pos = snp.start
 			if snp.alt[0] == '-' :
-				print warn % ('DELETION', snpSet, snp.pos, snp.chromosomeNumber)
-			if snp.ref[0] == '-' :
-				print warn % ('INSERTION', snpSet, snp.pos, snp.chromosomeNumber)
+				pass
+				# print warn % ('DELETION', snpSet, snp.start, snp.chromosomeNumber)
+			elif snp.ref[0] == '-' :
+				pass
+				# print warn % ('INSERTION', snpSet, snp.start, snp.chromosomeNumber)
 			else :
 				sources[snpSet] = snp
 				alleles.append(snp.alt) #if not an indel append the polymorphism

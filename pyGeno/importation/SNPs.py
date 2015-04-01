@@ -9,6 +9,7 @@ from Genomes import _decompressPackage, _getFile
 
 from pyGeno.tools.parsers.CasavaTools import SNPsTxtFile
 from pyGeno.tools.parsers.VCFTools import VCFFile
+from pyGeno.tools.parsers.CSVTools import CSVFile
 
 def importSNPs(packageFile) :
 	"""The big wrapper, this function should detect the SNP type by the package manifest and then launch the corresponding function.
@@ -46,7 +47,6 @@ def importSNPs(packageFile) :
 	
 	try :
 		SMaster = SNPMaster(setName = setName)
-		raise ValueError("There's already a SNP set by the name %s. Use deleteSNPs() to remove it first" %setName)
 	except KeyError :
 		if typ == 'CasavaSNP' :
 			return _importSNPs_CasavaSNP(setName, species, genomeSource, snpsFile)
@@ -54,8 +54,12 @@ def importSNPs(packageFile) :
 			return _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile)
 		elif typ == 'TopHatSNP' :
 			return _importSNPs_TopHatSNP(setName, species, genomeSource, snpsFile)
+		elif typ == 'AgnosticSNP' :
+			return _importSNPs_AgnosticSNP(setName, species, genomeSource, snpsFile)
 		else :
 			raise FutureWarning('Unknown SNP type in manifest %s' % typ)
+	else :
+		raise KeyError("There's already a SNP set by the name %s. Use deleteSNPs() to remove it first" %setName)
 	
 	shutil.rmtree(packageDir)
 
@@ -73,6 +77,54 @@ def deleteSNPs(setName) :
 		raise KeyError("Can't delete the setName %s because i can't find it in SNPMaster, maybe there's not set by that name" % setName)
 		#~ printf("can't delete the setName %s because i can't find it in SNPMaster, maybe there's no set by that name" % setName)
 		return False
+	return True
+
+def _importSNPs_AgnosticSNP(setName, species, genomeSource, snpsFile) :
+	"This function will also create an index on start->chromosomeNumber->setName. Warning : pyGeno wil interpret all positions as 0 based"
+	printf('importing SNP set %s for species %s...' % (setName, species))
+
+	snpData = CSVFile()
+	snpData.parse(snpsFile, separator = "\t")
+
+	AgnosticSNP.dropIndex(('start', 'chromosomeNumber', 'setName'))
+	conf.db.beginTransaction()
+	
+	pBar = ProgressBar(len(snpData))
+	pLabel = ''
+	currChrNumber = None
+	for snpEntry in snpData :
+		print snpEntry
+		tmpChr = snpEntry['chromosomeNumber']
+		if tmpChr != currChrNumber :
+			currChrNumber = tmpChr
+			pLabel = 'Chr %s...' % currChrNumber
+
+		snp = AgnosticSNP()
+		snp.species = species
+		snp.setName = setName
+		for f in snp.getFields() :
+			try :
+				setattr(snp, f, snpEntry[f])
+			except KeyError :
+				if f != 'species' and f != 'setName' :
+					printf("Warning filetype as no key %s", f)
+		snp.start = int(snp.start)
+		snp.end = int(snp.end)
+		snp.save()
+		pBar.update(label = pLabel)
+
+	pBar.close()
+	
+	snpMaster = SNPMaster()
+	snpMaster.set(setName = setName, SNPType = 'AgnosticSNP', species = species)
+	snpMaster.save()
+
+	printf('saving...')
+	conf.db.endTransaction()
+	printf('creating indexes...')
+	CasavaSNP.ensureGlobalIndex(('start', 'chromosomeNumber', 'setName'))
+	printf('importation of SNP set %s for species %s done.' %(setName, species))
+	
 	return True
 
 def _importSNPs_CasavaSNP(setName, species, genomeSource, snpsFile) :
@@ -94,10 +146,9 @@ def _importSNPs_CasavaSNP(setName, species, genomeSource, snpsFile) :
 			pLabel = 'Chr %s...' % currChrNumber
 
 		snp = CasavaSNP()
-		#snp.chromosomeNumber = currChrNumber
 		snp.species = species
 		snp.setName = setName
-		#first column: chro, second first of range (identical to second column)
+		
 		for f in snp.getFields() :
 			try :
 				setattr(snp, f, snpEntry[f])

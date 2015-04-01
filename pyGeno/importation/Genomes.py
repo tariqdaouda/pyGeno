@@ -146,7 +146,7 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 	
 	seqTargetDir = conf.getGenomeSequencePath(species.lower(), genomeName)
 	if os.path.isdir(seqTargetDir) :
-		raise ValueError("The directory %s already exists, Please call deleteGenome() first if you want to reinstall" % seqTargetDir)
+		raise KeyError("The directory %s already exists, Please call deleteGenome() first if you want to reinstall" % seqTargetDir)
 		
 	gtfFile = _getFile(parser.get('gene_set', 'gtf'), packageDir)
 	
@@ -158,9 +158,10 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 
 	try :
 		genome = Genome(name = genomeName, species = species)
-		raise ValueError("There seems to be already a genome (%s, %s), please call deleteGenome() first if you want to reinstall it" % (genomeName, species))
 	except KeyError:
 		pass
+	else :
+		raise KeyError("There seems to be already a genome (%s, %s), please call deleteGenome() first if you want to reinstall it" % (genomeName, species))
 
 	genome = Genome_Raba()
 	genome.set(name = genomeName, species = species, source = genomeSource, packageInfos = packageInfos)

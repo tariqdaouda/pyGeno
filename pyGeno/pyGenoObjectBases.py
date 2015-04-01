@@ -124,16 +124,24 @@ class pyGenoRabaObjectWrapper(object) :
 		
 			* myGenome.get(Transcript, {'start >' : x, 'end <' : y})"""
 		
+		# conf.db.enableDebug(True)
 		ret = []
 		for e in self._makeLoadQuery(objectType, *args, **coolArgs).iterRun() :
-			ret.append(objectType(wrapped_object_and_bag = (e, self.bagKey)))
+			if issubclass(objectType, pyGenoRabaObjectWrapper) :
+				ret.append(objectType(wrapped_object_and_bag = (e, self.bagKey)))
+			else :
+				ret.append(e)
+
 		return ret
 
 	def iterGet(self, objectType, *args, **coolArgs) :
 		"""Same as get. But retuns the elements one by one, much more efficient for large outputs"""
 
 		for e in self._makeLoadQuery(objectType, *args, **coolArgs).iterRun() :
-			yield objectType(wrapped_object_and_bag = (e, self.bagKey))
+			if issubclass(objectType, pyGenoRabaObjectWrapper) :
+				yield objectType(wrapped_object_and_bag = (e, self.bagKey))
+			else :
+				yield e
 
 	#~ def ensureIndex(self, fields) :
 		#~ """

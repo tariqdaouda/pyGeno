@@ -1,5 +1,6 @@
 import pyGeno.importation.Genomes as PG
 import pyGeno.importation.SNPs as PS
+from pyGeno.tools.io import printf
 import os
 
 this_dir, this_filename = os.path.split(__file__)
@@ -21,20 +22,20 @@ def listDatawraps() :
 def printDatawraps() :
 	"""print all available datawraps for boostraping"""
 	l = listDatawraps()
-	print "Available datawraps for boostraping\n"
+	printf("Available datawraps for boostraping\n")
 	for k, v in l.iteritems() :
-		print k
-		print "~"*len(k) + "|"
+		printf(k)
+		printf("~"*len(k) + "|")
 		for vv in v :
-			print " "*len(k) + "|" + "~~~:> " + vv
-		print
+			printf(" "*len(k) + "|" + "~~~:> " + vv)
+		printf('\n')
 
 def importGenome(name, batchSize = 100) :
 	"""Import a genome shipped with pyGeno. Most of the datawraps only contain URLs towards data provided by third parties."""
 	path = os.path.join(this_dir, "bootstrap_data", "genomes/" + name)
-	PG.importGenome(path, batchSize = 100)
+	PG.importGenome(path, batchSize)
 
 def importSNPs(name) :
 	"""Import a SNP set shipped with pyGeno. Most of the datawraps only contain URLs towards data provided by third parties."""
-	path = os.path.join(this_dir, "bootstrap_data", "genomes/" + name)
-	PS.importSNPs(path, batchSize = 100)
+	path = os.path.join(this_dir, "bootstrap_data", "SNPs/" + name)
+	PS.importSNPs(path)

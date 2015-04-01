@@ -1,8 +1,12 @@
-1.1.8
+1.2.0
 =====
+* BUG FIX: get()/iterGet() now works with SNPs
+
 * BUG FIX: Added cast of lines to str in VCF and CasavaSNP parsers. Sometimes unicode caracters made the translation bug  
 
 * BUG FIX: Corrected a typo that caused find in Transcript to recursively die 
+
+* Added a new AgnosticSNP type of SNPs that can be easily made from the results of any snp caller. To make for the loss of support for casava by illumina. See SNP.AgnosticSNP for documentation
 
 * pyGeno now comes with the murine reference genome GRCm38.78
 
@@ -10,9 +14,12 @@
 
 * pyGeno now comes with a datawrap for common dbSNPs human SNPs (SNP_dbSNP142_human_common_all.tar.gz)
 
-* CSV Parser has now the ability to stream directly to a file
+* Added a dummy AgnosticSNP datawrap example for boostraping
 
 * Changed the interface of the bootstrap module
+
+* CSV Parser has now the ability to stream directly to a file
+
 
 1.1.7
 =====

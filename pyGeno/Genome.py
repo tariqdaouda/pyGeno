@@ -86,6 +86,7 @@ class Genome(pyGenoRabaObjectWrapper) :
 
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
 		if issubclass(objectType, SNP_INDEL) :
+			# conf.db.enableDebug(True)
 			f = RabaQuery(objectType, namespace = self._wrapped_class._raba_namespace)
 			coolArgs['species'] = self.species
 

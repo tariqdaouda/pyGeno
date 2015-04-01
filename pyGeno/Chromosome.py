@@ -41,7 +41,7 @@ class ChrosomeSequence(object) :
 		for setName, SNPType in SNPTypes.iteritems() :
 			f = RabaQuery(str(SNPType), namespace = self.chromosome._raba_namespace)
 			f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : self.chromosome.number})
-			#conf.db.enableDebug(True)
+			# conf.db.enableDebug(True)
 			iterators.append(f.iterRun(sqlTail = 'ORDER BY start'))
 		
 		if len(iterators) < 1 :
@@ -60,6 +60,7 @@ class ChrosomeSequence(object) :
 			
 			seqPos = start - slic.start
 			sequenceModifier = self.SNPFilter.filter(self.chromosome, **setPolys)
+			# print sequenceModifier.alleles
 			if sequenceModifier is not None :
 				if sequenceModifier.__class__ is SF.SequenceDel :
 					data = data[:seqPos] + data[seqPos + sequenceModifier.length:]
@@ -69,7 +70,7 @@ class ChrosomeSequence(object) :
 					data[seqPos] = "%s%s" % (sequenceModifier.bases, data[seqPos])
 				else :
 					raise TypeError("sequenceModifier on chromosome: %s starting at: %s is of unknown type: %s" % (self.chromosome.number, snp.start, sequenceModifier.__class__))
-		
+		# print data
 		return ''.join(data)
 
 	def __getitem__(self, i) :
@@ -113,6 +114,7 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
 		if issubclass(objectType, SNP_INDEL) :
 			f = RabaQuery(objectType, namespace = self._wrapped_class._raba_namespace)
+			coolArgs['species'] = self.genome.species
 			coolArgs['chromosomeNumber'] = self.number
 
 			if len(args) > 0 and type(args[0]) is types.ListType :
