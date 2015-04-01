@@ -1,6 +1,8 @@
 1.2.0
 =====
-* BUG FIX: get()/iterGet() now works with SNPs
+* BUG FIX: get()/iterGet() now works for SNPs and Indels
+
+* BUG FIX: Default SNP filter used to return unwanted Nones for insertions
 
 * BUG FIX: Added cast of lines to str in VCF and CasavaSNP parsers. Sometimes unicode caracters made the translation bug  
 
