@@ -80,6 +80,8 @@ And if you ever get lost, there's an online **help()** function for each object 
 
 Should output:
 
+.. code::
+	
 	Available fields for Exon: CDS_start, end, chromosome, CDS_length, frame, number, CDS_end, start, genome, length, protein, gene, transcript, id, strand
 
 Batteries included (bootstraping):
