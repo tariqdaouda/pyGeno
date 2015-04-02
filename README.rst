@@ -1,5 +1,5 @@
-pyGeno: Ensembl, Next-Gen Sequencing, dbSNP together on your laptop
-=====================================================================
+pyGeno: Personalized Genomics and Protemomics
+=============================================
 
 .. image:: http://bioinfo.iric.ca/~daoudat/pyGeno/_static/logo.png
    :alt: pyGeno's logo
@@ -80,6 +80,8 @@ And if you ever get lost, there's an online **help()** function for each object 
 
 Should output:
 
+.. code::
+	
 	Available fields for Exon: CDS_start, end, chromosome, CDS_length, frame, number, CDS_end, start, genome, length, protein, gene, transcript, id, strand
 
 Batteries included (bootstraping):
@@ -128,7 +130,7 @@ Some of them just for playing around with pyGeno (**Fast importation** and **Sma
 
 	#Imports only the Y chromosome from the human reference genome GRCh37.75
 	#Very fast, requires even less memory. No download required.
-	B.importGenome("Homo_sapiens.GRCh37.75_Y-Only.tar.gz)
+	B.importGenome("Homo_sapiens.GRCh37.75_Y-Only.tar.gz")
 	
 	#A dummy datawrap for humans SNPs and Indels in pyGeno's AgnosticSNP  format. 
 	# This one has one SNP at the begining of the gene SRY
