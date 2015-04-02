@@ -130,7 +130,7 @@ Some of them just for playing around with pyGeno (**Fast importation** and **Sma
 
 	#Imports only the Y chromosome from the human reference genome GRCh37.75
 	#Very fast, requires even less memory. No download required.
-	B.importGenome("Homo_sapiens.GRCh37.75_Y-Only.tar.gz)
+	B.importGenome("Homo_sapiens.GRCh37.75_Y-Only.tar.gz")
 	
 	#A dummy datawrap for humans SNPs and Indels in pyGeno's AgnosticSNP  format. 
 	# This one has one SNP at the begining of the gene SRY
