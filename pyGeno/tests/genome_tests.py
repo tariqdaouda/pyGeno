@@ -1,7 +1,7 @@
 import unittest
 from pyGeno.Genome import *
 
-from pyGeno.bootstrap import importHumanReference_YOnly, importDummySRY
+from pyGeno.bootstrap import importGenome, importSNPs
 
 
 class pyGenoSNPTests(unittest.TestCase):
@@ -13,7 +13,7 @@ class pyGenoSNPTests(unittest.TestCase):
 		pass
 
 	def test_vanilla(self) :
-		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY')
+		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY_AGN')
 		persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
 		refProt = self.ref.get(Protein, id = 'ENSP00000438917')[0]
 		
@@ -27,10 +27,10 @@ class pyGenoSNPTests(unittest.TestCase):
 			def __init__(self) :
 				SNPFilter.__init__(self)
 
-			def filter(self, chromosome, dummySRY) :
+			def filter(self, chromosome, dummySRY_AGN) :
 				return None
 
-		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = MyFilter())
+		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY_AGN', SNPFilter = MyFilter())
 		persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
 		refProt = self.ref.get(Protein, id = 'ENSP00000438917')[0]
 
@@ -43,13 +43,13 @@ class pyGenoSNPTests(unittest.TestCase):
 			def __init__(self) :
 				SNPFilter.__init__(self)
 
-			def filter(self, chromosome, dummySRY) :
+			def filter(self, chromosome, dummySRY_AGN) :
 				from pyGeno.SNPFiltering import  SequenceInsert
 					
-				refAllele = chromosome.refSequence[dummySRY.start]
+				refAllele = chromosome.refSequence[dummySRY_AGN.start]
 				return SequenceInsert('TCA')
 
-		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = MyFilter())
+		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY_AGN', SNPFilter = MyFilter())
 		persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
 		refProt = self.ref.get(Protein, id = 'ENSP00000438917')[0]
 
@@ -63,12 +63,12 @@ class pyGenoSNPTests(unittest.TestCase):
 			def __init__(self) :
 				SNPFilter.__init__(self)
 
-			def filter(self, chromosome, dummySRY) :
+			def filter(self, chromosome, dummySRY_AGN) :
 				from pyGeno.SNPFiltering import SequenceSNP
 				
-				return SequenceSNP(dummySRY.alt)
+				return SequenceSNP(dummySRY_AGN.alt)
 		
-		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = MyFilter())
+		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY_AGN', SNPFilter = MyFilter())
 		persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
 		refProt = self.ref.get(Protein, id = 'ENSP00000438917')[0]
 		self.assertEqual('M', refProt.sequence[0])
@@ -81,13 +81,13 @@ class pyGenoSNPTests(unittest.TestCase):
 			def __init__(self) :
 				SNPFilter.__init__(self)
 
-			def filter(self, chromosome, dummySRY) :
+			def filter(self, chromosome, dummySRY_AGN) :
 				from pyGeno.SNPFiltering import SequenceDel
 					
-				refAllele = chromosome.refSequence[dummySRY.start]
+				refAllele = chromosome.refSequence[dummySRY_AGN.start]
 				return SequenceDel(1)
 		
-		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = MyFilter())
+		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY_AGN', SNPFilter = MyFilter())
 		persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
 		refProt = self.ref.get(Protein, id = 'ENSP00000438917')[0]
 
@@ -111,13 +111,13 @@ class pyGenoSNPTests(unittest.TestCase):
 		
 def runTests() :
 	try :
-		importHumanReference_YOnly()
-	except ValueError :
+		importGenome("Homo_sapiens.GRCh37.75_Y-Only.tar.gz")
+	except KeyError :
 		print "--> Seems to already exist in db"
 		
 	try :
-		importDummySRY()
-	except ValueError :
+		importSNPs("Homo_sapiens_agnostic.dummySRY.tar.gz")
+	except KeyError :
 		print "--> Seems to already exist in db"
 		
 	unittest.main()

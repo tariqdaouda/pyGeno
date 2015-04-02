@@ -97,6 +97,7 @@ class AgnosticSNP(SNP_INDEL) :
 	Y	2655645	2655647	-	AG	30	test
 	Y	2655648	2655650	TT	-	30	test
 
+	All positions must be 0 based
 	The '-' indicates a deletion or an insertion. Collumn order has no importance.
 	"""
 

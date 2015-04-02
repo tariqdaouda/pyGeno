@@ -93,7 +93,6 @@ def _importSNPs_AgnosticSNP(setName, species, genomeSource, snpsFile) :
 	pLabel = ''
 	currChrNumber = None
 	for snpEntry in snpData :
-		print snpEntry
 		tmpChr = snpEntry['chromosomeNumber']
 		if tmpChr != currChrNumber :
 			currChrNumber = tmpChr
