@@ -93,9 +93,9 @@ class AgnosticSNP(SNP_INDEL) :
 	"""This is a generic SNPs/Indels format that you can easily make from the result of any SNP caller. AgnosticSNP files are tab delimited files such as:
 
 	chromosomeNumber	start	end	ref	alleles	quality	caller
-	Y	2655643	2655644	T	AG	30	test
-	Y	2655645	2655647	-	AG	30	test
-	Y	2655648	2655650	TT	-	30	test
+	Y	2655643	2655644	T	AG	30	TopHat
+	Y	2655645	2655647	-	AG	30	TopHat
+	Y	2655648	2655650	TT	-	30	TopHat
 
 	All positions must be 0 based
 	The '-' indicates a deletion or an insertion. Collumn order has no importance.

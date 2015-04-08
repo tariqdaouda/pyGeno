@@ -14,6 +14,13 @@ And a SNP set datawrap::
 	from pyGeno.importation.SNPs import *
 	importSNPs("my_datawrap.tar.gz")
 
+Natively pyGeno supports dbSNP and casava(snp.txt), but it also has its own polymorphism file format wich is simply a tab delemited file in the following format::
+
+	chromosomeNumber	start	end	ref	alleles	quality	caller
+	Y	2655643	2655644	T	AG	30	TopHat
+	Y	2655645	2655647	-	AG	30	TopHat
+	Y	2655648	2655650	TT	-	30	TopHat
+
 To learn more about datawraps and how to make your own you can have a look at :doc:`/importation`, and the Wiki_.
 
 .. _Wiki: https://github.com/tariqdaouda/pyGeno/wiki/How-to-create-a-pyGeno-datawrap-to-import-your-data
@@ -32,5 +39,7 @@ Mouse reference genomes
 
 dbSNP
 -------
+
+**dbSNP regularly drops the support of previous versions. You might need to update the URLs in the manifest.ini file of the datawrap. If you do so, please send it to me an email so I can update this page**
 
 * :download:`Human common SNPs for build 142 <./datawraps/dbSNP142_human_common_all.tar.gz>`

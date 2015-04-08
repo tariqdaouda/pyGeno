@@ -1,3 +1,8 @@
+1.2.1
+=====
+
+* Fixed tests
+
 1.2.0
 =====
 * BUG FIX: get()/iterGet() now works for SNPs and Indels

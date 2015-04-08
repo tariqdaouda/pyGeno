@@ -3,33 +3,61 @@ Quickstart
 
 Quick importation
 -----------------
-In order to use pyGeno you first need to populate its database by importing datawraps. An importation is a one time step
-and once the data has been imported, the datawrap can be discarded with no concequences to the database. 
+pyGeno's database is populated by importing data wraps.
+pyGeno comes with a few data wraps, to get the list you can use:
 
-If your goal is simply to play with pyGeno to have a feel of its magic. PyGeno is shipped with a few datawrap that require very little memory
-to import.
-
-One for importing the reference Y chromosome. This datawrap does not require any download::
-
-	import pyGeno.bootstrap as B
-	B.importHumanReference_YOnly()
-
-There's also one that imports both the first and the Y chormosome. This tome the sequences will be imported::
-
-	import pyGeno.bootstrap as B
-	B.importHumanReference_1YOnly()
-
-And a dummy SNP datawrap that mimics a casava's snps.txt file with only one SNP athe begining of the gene SRY::
+.. code:: python
 	
 	import pyGeno.bootstrap as B
-	B.importDummySRY()
+	B.printDatawraps()
 
-For more serious work pyGeno is also shipped with a datawrap for the complete human reference genome.
-PyGeno will automatically download the needed data from Ensembl (~205MB). The whole importation process
-may exceed an hour and requires something like 2GB of memory (according to tests)::
+.. code::
+
+	Available datawraps for boostraping
+	
+	SNPs
+	~~~~|
+	    |~~~:> Homo_sapiens_agnostic.dummySRY.tar.gz
+	    |~~~:> Homo_sapiens.dummySRY_casava.tar.gz
+	    |~~~:> dbSNP142_human_GRCh37_common_all.tar.gz
+	    |~~~:> dbSNP142_human_common_all.tar.gz
+	
+	
+	Genomes
+	~~~~~~~|
+	       |~~~:> Homo_sapiens.GRCh37.75.tar.gz
+	       |~~~:> Homo_sapiens.GRCh37.75_Y-Only.tar.gz
+	       |~~~:> Homo_sapiens.GRCh38.78.tar.gz
+	       |~~~:> Mus_musculus.GRCm38.78.tar.gz
+
+Importing whole genomes is a demanding process that take more than an hour and requires (according to tests) 
+at least 3GB of memory. Depending on your configuration, more might be required.
+
+That being said importating a data wrap is a one time operation and once the importation is complete the datawrap
+can be discarded without consequences.
+
+The bootstrap module also has some handy functions for importing built-in packages.
+
+Some of them just for playing around with pyGeno (**Fast importation** and **Small memory requirements**):
+
+.. code:: python
 	
 	import pyGeno.bootstrap as B
-	B.importHumanReference()
+
+	#Imports only the Y chromosome from the human reference genome GRCh37.75
+	#Very fast, requires even less memory. No download required.
+	B.importGenome("Homo_sapiens.GRCh37.75_Y-Only.tar.gz")
+	
+	#A dummy datawrap for humans SNPs and Indels in pyGeno's AgnosticSNP  format. 
+	# This one has one SNP at the begining of the gene SRY
+	B.importSNPs("Homo_sapiens.dummySRY_casava.tar.gz")
+
+And for more serious work, the whole reference genome.
+
+.. code:: python
+
+	#Downloads the whole genome (205MB, sequences + annotations), may take an hour or more.
+	B.importGenome("Homo_sapiens.GRCh38.78.tar.gz")
 
 That's it, you can now print the sequences of all the proteins that a gene can produce::
 

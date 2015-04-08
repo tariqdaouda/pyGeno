@@ -1,11 +1,11 @@
 Tools
 =====
 
-PyGeno provides a set of tools that can be used independentely. Here you'll find goodies for translation, indexation, and more.
+pyGeno provides a set of tools that can be used independentely. Here you'll find goodies for translation, indexation, and more.
 
 Progress Bar
 -------------
-PyGeno's awesome progress bar, with logging capabilities and remaining time estimation.
+pyGeno's awesome progress bar, with logging capabilities and remaining time estimation.
 
 .. automodule:: tools.ProgressBar
    :members:
