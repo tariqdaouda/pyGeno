@@ -2,6 +2,10 @@ Datawraps
 =========
 
 Datawraps are used by pyGeno to import data into it's database. All reference genomes are downloaded from Ensembl, dbSNP data from dbSNP.
+The :doc:`/bootstraping` module has functions to import datawraps shipped with pyGeno and also to import datawraps made available on remote location.
+
+Importation
+-----------
 
 Here's how you import a reference genome datawrap::
 
@@ -14,32 +18,59 @@ And a SNP set datawrap::
 	from pyGeno.importation.SNPs import *
 	importSNPs("my_datawrap.tar.gz")
 
+
+Creating you own datawraps
+--------------------------
+
+For ploymorphims, create a file called **manifest.ini** with the following format::
+
+	[package_infos]
+	description = SNPs for testing purposes
+	maintainer = Tariq Daouda
+	maintainer_contact = tariq.daouda [at] umontreal
+	version = 1
+
+	[set_infos]
+	species = human
+	name = mySNPSET
+	type = Agnostic
+	source = Where do these snps come from?
+
+	[snps]
+	filename = snps.txt # or http://www.example.com/snps.txt or ftp://www.example.com/snps.txt if you chose not to include the file in the archive
+
+And compress the **manifest.ini** file along sith the snps.txt (if you chose to include it and not to specify an url) into a tar.gz archive
+
+
 Natively pyGeno supports dbSNP and casava(snp.txt), but it also has its own polymorphism file format wich is simply a tab delemited file in the following format::
 
-	chromosomeNumber	start	end	ref	alleles	quality	caller
-	Y	2655643	2655644	T	AG	30	TopHat
-	Y	2655645	2655647	-	AG	30	TopHat
-	Y	2655648	2655650	TT	-	30	TopHat
+	chromosomeNumber uniqueId   start        end      ref    alleles   quality       caller
+	        Y          1       2655643      2655644	   T       AG        30          TopHat
+	        Y          2       2655645      2655647    -       AG        28          TopHat
+	        Y          3       2655648      2655650    TT      -         10          TopHat
+	        
+For genomes, the manifet.ini file looks like this::
+
+	[package_infos]
+	description = Test package. This package installs only chromosome Y of mus musculus
+	maintainer = Tariq Daouda
+	maintainer_contact = tariq.daouda [at] umontreal
+	version = GRCm38.73
+
+	[genome]
+	species = Mus_musculus
+	name = GRCm38_test
+	source = http://useast.ensembl.org/info/data/ftp/index.html
+
+	[chromosome_files]
+	Y = Mus_musculus.GRCm38.73.dna.chromosome.Y.fa.gz # or an url such as ftp://... or http://
+
+	[gene_set]
+	gtf = Mus_musculus.GRCm38.73_Y-only.gtf.gz # or an url such as ftp://... or http://
+
+File URLs for refercence genomes can be found on `Ensembl: http://useast.ensembl.org/info/data/ftp/index.html`_
 
 To learn more about datawraps and how to make your own you can have a look at :doc:`/importation`, and the Wiki_.
 
 .. _Wiki: https://github.com/tariqdaouda/pyGeno/wiki/How-to-create-a-pyGeno-datawrap-to-import-your-data
-
-Human reference genomes
-------------------------
-
-* :download:`GRCh37.75 <./datawraps/Homo_sapiens.GRCh37.75.tar.gz>`
-
-* :download:`GRCh38.78 <./datawraps/Homo_sapiens.GRCh38.78.tar.gz>`
-
-Mouse reference genomes
-------------------------
-
-* :download:`GRCm38.78 <./datawraps/Mus_musculus.GRCm38.78.tar.gz>`
-
-dbSNP
--------
-
-**dbSNP regularly drops the support of previous versions. You might need to update the URLs in the manifest.ini file of the datawrap. If you do so, please send it to me an email so I can update this page**
-
-* :download:`Human common SNPs for build 142 <./datawraps/dbSNP142_human_common_all.tar.gz>`
+.. _`Ensembl: http://useast.ensembl.org/info/data/ftp/index.html`: http://useast.ensembl.org/info/data/ftp/index.html

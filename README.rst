@@ -114,6 +114,12 @@ pyGeno comes with a few data wraps, to get the list you can use:
 	       |~~~:> Homo_sapiens.GRCh38.78.tar.gz
 	       |~~~:> Mus_musculus.GRCm38.78.tar.gz
 
+To get a list of remote datawraps that pyGeno can download for you, do:
+
+.. code:: python
+
+	B.printRemoteDatawraps()
+
 Importing whole genomes is a demanding process that take more than an hour and requires (according to tests) 
 at least 3GB of memory. Depending on your configuration, more might be required.
 

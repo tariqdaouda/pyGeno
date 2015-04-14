@@ -4,7 +4,7 @@ Quickstart
 Quick importation
 -----------------
 pyGeno's database is populated by importing data wraps.
-pyGeno comes with a few data wraps, to get the list you can use:
+pyGeno comes with a few datawraps, to get the list you can use:
 
 .. code:: python
 	
@@ -13,7 +13,7 @@ pyGeno comes with a few data wraps, to get the list you can use:
 
 .. code::
 
-	Available datawraps for boostraping
+	Available datawraps for bootstraping
 	
 	SNPs
 	~~~~|
@@ -29,6 +29,13 @@ pyGeno comes with a few data wraps, to get the list you can use:
 	       |~~~:> Homo_sapiens.GRCh37.75_Y-Only.tar.gz
 	       |~~~:> Homo_sapiens.GRCh38.78.tar.gz
 	       |~~~:> Mus_musculus.GRCm38.78.tar.gz
+
+To get a list of remote datawraps that pyGeno can download for you, do:
+
+.. code:: python
+
+	B.printRemoteDatawraps()
+
 
 Importing whole genomes is a demanding process that take more than an hour and requires (according to tests) 
 at least 3GB of memory. Depending on your configuration, more might be required.
