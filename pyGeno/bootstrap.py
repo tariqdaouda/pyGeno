@@ -6,15 +6,15 @@ import os, tempfile, urllib, urllib2, json
 this_dir, this_filename = os.path.split(__file__)
 
 
-def listRemoteDatawraps() :
-	"""Lists all the datawraps availabe from http://pygeno.iric.ca"""
-	response = urllib2.urlopen('http://pygeno.iric.ca/_downloads/datawraps.json')
+def listRemoteDatawraps(location = 'http://pygeno.iric.ca/_downloads/datawraps.json') :
+	"""Lists all the datawraps availabe from a remote location default is 'http://pygeno.iric.ca/_downloads/datawraps.json'"""
+	response = urllib2.urlopen(location)
 	js = json.loads(response.read())
 
 	return js
 
-def printRemoteDatawraps() :
-	"""print all available datawraps from http://pygeno.iric.ca"""
+def printRemoteDatawraps(location) :
+	"""print all available datawraps from a remote location default is 'http://pygeno.iric.ca/_downloads/datawraps.json'"""
 	l = listDatawraps_url()
 	printf("Available datawraps for bootstraping\n")
 	for typ, dw in l.iteritems() :

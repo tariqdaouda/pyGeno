@@ -24,7 +24,7 @@ def importSNPs(packageFile) :
 		[set_infos]
 		species = human
 		name = dummySRY
-		type = Casava
+		type = Agnostic
 		source = my place at IRIC
 
 		[snps]
@@ -48,13 +48,13 @@ def importSNPs(packageFile) :
 	try :
 		SMaster = SNPMaster(setName = setName)
 	except KeyError :
-		if typ == 'CasavaSNP' :
+		if typ.lower() == 'casavasnp' :
 			return _importSNPs_CasavaSNP(setName, species, genomeSource, snpsFile)
-		elif typ == 'dbSNPSNP' :
+		elif typ.lower() == 'dbsnpsnp' :
 			return _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile)
-		elif typ == 'TopHatSNP' :
+		elif typ.lower() == 'topHatsnp' :
 			return _importSNPs_TopHatSNP(setName, species, genomeSource, snpsFile)
-		elif typ == 'AgnosticSNP' :
+		elif typ.lower() == 'agnosticsnp' :
 			return _importSNPs_AgnosticSNP(setName, species, genomeSource, snpsFile)
 		else :
 			raise FutureWarning('Unknown SNP type in manifest %s' % typ)

@@ -3,7 +3,7 @@
 
 * Added functions to retrieve the names of imported snps sets and genomes
 
-* Added remote datawraps to the boostrap module that can be downloaded from pyGeno's website
+* Added remote datawraps to the boostrap module that can be downloaded from pyGeno's website or any other location
 
 * Added a field uniqueId to AgnosticSNPs
 
