@@ -13,6 +13,15 @@ from SNP import *
 
 import rabaDB.fields as rf
 
+def getGenomeList() :
+	"""Return the names of all imported genomes"""
+	import rabaDB.filters as rfilt
+	f = rfilt.RabaQuery(Genome_Raba)
+	names = []
+	for g in f.iterRun() :
+		names.append(g.name)
+	return names
+
 class Genome_Raba(pyGenoRabaObject) :
 	"""The wrapped Raba object that really holds the data"""
 	

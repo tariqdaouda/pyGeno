@@ -17,7 +17,7 @@ def listDatawraps_url() :
 def printDatawraps_url() :
 	"""print all available datawraps for bootstraping"""
 	l = listDatawraps_url()
-	printf("Available datawraps for boostraping\n")
+	printf("Available datawraps for bootstraping\n")
 	for k, v in l.iteritems() :
 		printf(k)
 		printf("~"*len(k) + "|")

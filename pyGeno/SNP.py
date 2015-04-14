@@ -15,6 +15,15 @@ import rabaDB.fields as rf
 -User can define an alias for the alt field (snp_indel alleles) to indicate the default field from wich to extract alleles
 """
 
+def getSNPSetsList() :
+	"""Return the names of all imported snp sets"""
+	import rabaDB.filters as rfilt
+	f = rfilt.RabaQuery(SNPMaster)
+	names = []
+	for g in f.iterRun() :
+		names.append(g.setName)
+	return names
+
 class SNPMaster(Raba) :
 	'This object keeps track of SNP sets and their types'
 	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
@@ -92,10 +101,10 @@ class CasavaSNP(SNP_INDEL) :
 class AgnosticSNP(SNP_INDEL) :
 	"""This is a generic SNPs/Indels format that you can easily make from the result of any SNP caller. AgnosticSNP files are tab delimited files such as:
 
-	chromosomeNumber	start	end	ref	alleles	quality	caller
-	Y	2655643	2655644	T	AG	30	TopHat
-	Y	2655645	2655647	-	AG	30	TopHat
-	Y	2655648	2655650	TT	-	30	TopHat
+	chromosomeNumber	pid  start	 end	   ref    alleles	quality	 caller
+	Y					 1 	2655643	2655644		T		AG	     30		 TopHat
+	Y					 2 	2655645	2655647		-		AG	     28		 TopHat
+	Y					 3 	2655648	2655650		TT		-	     10		 TopHat
 
 	All positions must be 0 based
 	The '-' indicates a deletion or an insertion. Collumn order has no importance.
@@ -106,6 +115,7 @@ class AgnosticSNP(SNP_INDEL) :
 	alleles = rf.Primitive()
 	quality = rf.Primitive()
 	caller = rf.Primitive()
+	pid = rf.Primitive() # polymorphism id
 	
 	altAlias = 'alleles'
 
