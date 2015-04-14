@@ -1,7 +1,7 @@
 import unittest
 from pyGeno.Genome import *
 
-from pyGeno.bootstrap import importGenome, importSNPs
+import pyGeno.bootstrap as B
 
 
 class pyGenoSNPTests(unittest.TestCase):
@@ -108,15 +108,21 @@ class pyGenoSNPTests(unittest.TestCase):
 	def test_trans_find(self) :
 		trans = self.ref.get(Transcript, name = "SRY-001")[0]
 		self.assertEqual(0, trans.find(trans[:5]))
-		
+	
+	def test_import_remote_genome(self) :
+		self.assertRaises(KeyError, B.importRemoteGenome, "Human.GRCh37.75_Y-Only.tar.gz")
+
+	def test_import_remote_snps(self) :
+		self.assertRaises(KeyError, B.importRemoteSNPs, "Human_agnostic.dummySRY.tar.gz")
+
 def runTests() :
 	try :
-		importGenome("Homo_sapiens.GRCh37.75_Y-Only.tar.gz")
+		B.importGenome("Human.GRCh37.75_Y-Only.tar.gz")
 	except KeyError :
 		print "--> Seems to already exist in db"
 		
 	try :
-		importSNPs("Homo_sapiens_agnostic.dummySRY.tar.gz")
+		B.importSNPs("Human_agnostic.dummySRY.tar.gz")
 	except KeyError :
 		print "--> Seems to already exist in db"
 		
