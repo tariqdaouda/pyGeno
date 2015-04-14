@@ -1,3 +1,21 @@
+1.2.3
+=====
+
+* Added functions to retrieve the names of imported snps sets and genomes
+
+* Added remote datawraps to the boostrap module that can be downloaded from pyGeno's website
+
+* Added a field uniqueId to AgnosticSNPs
+
+* Changed all latin datawrap names to english
+
+* Removed datawrap for dbSNP GRCh37
+
+1.2.2
+=====
+
+* Updated pypi package to include bootstrap datawraps
+
 1.2.1
 =====
 

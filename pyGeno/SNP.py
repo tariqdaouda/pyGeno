@@ -101,10 +101,10 @@ class CasavaSNP(SNP_INDEL) :
 class AgnosticSNP(SNP_INDEL) :
 	"""This is a generic SNPs/Indels format that you can easily make from the result of any SNP caller. AgnosticSNP files are tab delimited files such as:
 
-	chromosomeNumber	pid  start	 end	   ref    alleles	quality	 caller
-	Y					 1 	2655643	2655644		T		AG	     30		 TopHat
-	Y					 2 	2655645	2655647		-		AG	     28		 TopHat
-	Y					 3 	2655648	2655650		TT		-	     10		 TopHat
+	chromosomeNumber	uniqueId  start	      end	   ref    alleles	quality	 caller
+	Y					   1 	 2655643	2655644		T		AG	     30		 TopHat
+	Y					   2 	 2655645	2655647		-		AG	     28		 TopHat
+	Y					   3 	 2655648	2655650		TT		-	     10		 TopHat
 
 	All positions must be 0 based
 	The '-' indicates a deletion or an insertion. Collumn order has no importance.
@@ -115,7 +115,7 @@ class AgnosticSNP(SNP_INDEL) :
 	alleles = rf.Primitive()
 	quality = rf.Primitive()
 	caller = rf.Primitive()
-	pid = rf.Primitive() # polymorphism id
+	uniqueId = rf.Primitive() # polymorphism id
 	
 	altAlias = 'alleles'
 

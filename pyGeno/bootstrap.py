@@ -1,29 +1,59 @@
 import pyGeno.importation.Genomes as PG
 import pyGeno.importation.SNPs as PS
 from pyGeno.tools.io import printf
-import os
+import os, tempfile, urllib, urllib2, json
 
 this_dir, this_filename = os.path.split(__file__)
 
 
-def listDatawraps_url() :
-	"""Lists all the datawraps pyGeno comes with"""
-	import urllib2, json
+def listRemoteDatawraps() :
+	"""Lists all the datawraps availabe from http://pygeno.iric.ca"""
 	response = urllib2.urlopen('http://pygeno.iric.ca/_downloads/datawraps.json')
 	js = json.loads(response.read())
 
 	return js
 
-def printDatawraps_url() :
-	"""print all available datawraps for bootstraping"""
+def printRemoteDatawraps() :
+	"""print all available datawraps from http://pygeno.iric.ca"""
 	l = listDatawraps_url()
 	printf("Available datawraps for bootstraping\n")
-	for k, v in l.iteritems() :
-		printf(k)
-		printf("~"*len(k) + "|")
-		for vv in v :
-			printf(" "*len(k) + "|" + "~~~:> " + vv["name"])
+	for typ, dw in l.iteritems() :
+		printf(typ)
+		printf("~"*len(typ) + "|")
+		for name in dw :
+			printf(" "*len(typ) + "|" + "~~~:> " + name)
 		printf('\n')
+
+def _DW(name, url) :
+	packageDir = tempfile.mkdtemp(prefix = "pyGeno_remote_")
+	
+	printf("~~~:>\n\tDownloading datawrap: %s..." % name)
+	finalFile = os.path.normpath('%s/%s' %(packageDir, name))
+	urllib.urlretrieve (url, finalFile)
+	printf('\tdone.\n~~~:>')
+	return finalFile
+
+def importRemoteGenome(name, batchSize = 100) :
+	"""Import a genome available from http://pygeno.iric.ca."""
+	
+	try :
+		dw = listRemoteDatawraps()["genomes"][name]
+	except AttributeError :
+		raise AttributeError("There's no remote genome datawrap by the name of: '%s'" % name)
+
+	finalFile = _DW(name, dw["url"])
+	PG.importGenome(finalFile, batchSize)
+
+def importRemoteSNPs(name) :
+	"""Import a SNP set available from http://pygeno.iric.ca."""
+	
+	try :
+		dw = listRemoteDatawraps()["snps"][name]
+	except AttributeError :
+		raise AttributeError("There's no remote genome datawrap by the name of: '%s'" % name)
+
+	finalFile = _DW(name, dw["url"])
+	PS.importSNPs(finalFile)
 
 def listDatawraps() :
 	"""Lists all the datawraps pyGeno comes with"""
