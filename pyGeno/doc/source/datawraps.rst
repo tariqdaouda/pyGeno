@@ -22,7 +22,7 @@ And a SNP set datawrap::
 Creating you own datawraps
 --------------------------
 
-For ploymorphims, create a file called **manifest.ini** with the following format::
+For polymorphims, create a file called **manifest.ini** with the following format::
 
 	[package_infos]
 	description = SNPs for testing purposes
@@ -33,7 +33,7 @@ For ploymorphims, create a file called **manifest.ini** with the following forma
 	[set_infos]
 	species = human
 	name = mySNPSET
-	type = Agnostic
+	type = Agnostic # or CasavaSNP or dbSNPSNP
 	source = Where do these snps come from?
 
 	[snps]
@@ -48,7 +48,7 @@ Natively pyGeno supports dbSNP and casava(snp.txt), but it also has its own poly
 	        Y          1       2655643      2655644	   T       AG        30          TopHat
 	        Y          2       2655645      2655647    -       AG        28          TopHat
 	        Y          3       2655648      2655650    TT      -         10          TopHat
-	        
+
 For genomes, the manifet.ini file looks like this::
 
 	[package_infos]

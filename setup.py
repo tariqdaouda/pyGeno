@@ -11,12 +11,12 @@ with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
 setup(
     name='pyGeno',
 
-    version='1.2.3',
+    version='1.2.5',
 
-    description='A python package for Personalized Proteogenomics',
+    description='A python package for Personalized Genomics and Proteomics',
     long_description=long_description,
     
-    url='https://github.com/tariqdaouda/pyGeno',
+    url='http://pyGeno.iric.ca',
 
     author='Tariq Daouda',
     author_email='tariq.daouda@umontreal.ca',
@@ -44,7 +44,7 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
 
-    keywords='proteogenomics genomics proteomics annotations medicine research personalized',
+    keywords='proteogenomics genomics proteomics annotations medicine research personalized gene sequence protein',
 
     packages=find_packages(exclude=[]),
 
