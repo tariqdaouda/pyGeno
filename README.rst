@@ -101,18 +101,17 @@ pyGeno comes with a few data wraps, to get the list you can use:
 	
 	SNPs
 	~~~~|
-	    |~~~:> Homo_sapiens_agnostic.dummySRY.tar.gz
-	    |~~~:> Homo_sapiens.dummySRY_casava.tar.gz
-	    |~~~:> dbSNP142_human_GRCh37_common_all.tar.gz
+	    |~~~:> Human_agnostic.dummySRY.tar.gz
+	    |~~~:> Human.dummySRY_casava.tar.gz
 	    |~~~:> dbSNP142_human_common_all.tar.gz
 	
 	
 	Genomes
 	~~~~~~~|
-	       |~~~:> Homo_sapiens.GRCh37.75.tar.gz
-	       |~~~:> Homo_sapiens.GRCh37.75_Y-Only.tar.gz
-	       |~~~:> Homo_sapiens.GRCh38.78.tar.gz
-	       |~~~:> Mus_musculus.GRCm38.78.tar.gz
+	       |~~~:> Human.GRCh37.75.tar.gz
+	       |~~~:> Human.GRCh37.75_Y-Only.tar.gz
+	       |~~~:> Human.GRCh38.78.tar.gz
+	       |~~~:> Mouse.GRCm38.78.tar.gz
 
 To get a list of remote datawraps that pyGeno can download for you, do:
 
@@ -136,18 +135,18 @@ Some of them just for playing around with pyGeno (**Fast importation** and **Sma
 
 	#Imports only the Y chromosome from the human reference genome GRCh37.75
 	#Very fast, requires even less memory. No download required.
-	B.importGenome("Homo_sapiens.GRCh37.75_Y-Only.tar.gz")
+	B.importGenome("Human.GRCh37.75_Y-Only.tar.gz")
 	
 	#A dummy datawrap for humans SNPs and Indels in pyGeno's AgnosticSNP  format. 
 	# This one has one SNP at the begining of the gene SRY
-	B.importSNPs("Homo_sapiens.dummySRY_casava.tar.gz")
+	B.importSNPs("Human.dummySRY_casava.tar.gz")
 
 And for more **Serious Work**, the whole reference genome.
 
 .. code:: python
 
 	#Downloads the whole genome (205MB, sequences + annotations), may take an hour or more.
-	B.importGenome("Homo_sapiens.GRCh38.78.tar.gz")
+	B.importGenome("Human.GRCh38.78.tar.gz")
 	
 Importing a custom datawrap:
 --------------------------
