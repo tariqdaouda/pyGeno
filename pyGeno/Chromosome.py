@@ -107,8 +107,13 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 
 		path = '%s/chromosome%s.dat'%(self.genome.getSequencePath(), self.number)
-		self.sequence = ChrosomeSequence(SingletonManager.add(SecureMmap(path), path), self)
-		self.refSequence = ChrosomeSequence(SingletonManager.add(SecureMmap(path), path), self, refOnly = True)
+		if not SingletonManager.contains(path) :
+			datMap = SingletonManager.add(SecureMmap(path), path)
+		else :
+			datMap = SingletonManager.get(path)
+			
+		self.sequence = ChrosomeSequence(datMap, self)
+		self.refSequence = ChrosomeSequence(datMap, self, refOnly = True)
 		self.loadSequences = False
 
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :

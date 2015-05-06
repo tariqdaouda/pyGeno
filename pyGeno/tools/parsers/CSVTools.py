@@ -184,7 +184,7 @@ class CSVFile(object) :
 		self.strLegend = self.lines[0].replace('\r', '\n').replace('\n', '')
 		self.lines = self.lines[1:]
 	
-	def streamToFile(self, filename, keepInMemory = False, writeRate = 100) :
+	def streamToFile(self, filename, keepInMemory = False, writeRate = 1) :
 		"""Starts a stream to a file. Every line must be committed (l.commit()) to be appended in to the file.
 
 		If keepInMemory is set to True, the parser will keep a version of the whole CSV in memory, writeRate is the number

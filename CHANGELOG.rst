@@ -1,3 +1,8 @@
+1.2.5
+=====
+
+* BUG FIX: Opening a lot of chromosomes caused mmap to die screaming
+
 1.2.3
 =====
 
