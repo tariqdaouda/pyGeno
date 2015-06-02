@@ -42,7 +42,7 @@ For polymorphims, create a file called **manifest.ini** with the following forma
 And compress the **manifest.ini** file along sith the snps.txt (if you chose to include it and not to specify an url) into a tar.gz archive
 
 
-Natively pyGeno supports dbSNP and casava(snp.txt), but it also has its own polymorphism file format wich is simply a tab delemited file in the following format::
+Natively pyGeno supports dbSNP and casava(snp.txt), but it also has its own polymorphism file format (AgnosticSNP) wich is simply a tab delemited file in the following format::
 
 	chromosomeNumber uniqueId   start        end      ref    alleles   quality       caller
 	        Y          1       2655643      2655644	   T       AG        30          TopHat

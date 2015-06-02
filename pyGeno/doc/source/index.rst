@@ -15,8 +15,16 @@ pyGeno's `lair is on Github`_.
 
 A Quick Example:
 -----------------
-pyGeno is a personal bioinformatic database that runs directly into python and on your laptop. 
-pyGeno is here to make extracting data such as gene sequences a breeze.
+
+pyGeno is a personal bioinformatic database that runs directly into python, on your laptop and does not depend
+upon any REST API. pyGeno is here to make extracting data such as gene sequences a breeze, and is designed to
+be able cope with huge queries. The most exciting feature of pyGeno, is that it allows to work with seamlessly with both reference and **Presonalized Genomes**.
+
+Personalized Genomes, are custom genomes that you create by combining a reference genome, sets of polymorphims and an optional filter.
+pyGeno will take care of applying the filter and inserting the polymorphisms at their right place, so you get
+direct access to the DNA and Protein sequences of your patients.
+
+To know more about how to create a Personalized Genome, have a look at the :doc:`/quickstart` section.
 
 .. code::
 
@@ -31,8 +39,6 @@ pyGeno is here to make extracting data such as gene sequences a breeze.
 	#print protein's transcript sequence
 	print protein.transcript.sequence
 
-	...
-
 	#fancy queries
 	for exons in g.get(Exons, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :
 		#print the exon's coding sequence
@@ -40,10 +46,10 @@ pyGeno is here to make extracting data such as gene sequences a breeze.
 		#print the exon's transcript sequence
 		print exon.transcript.sequence
 
-	...
 	#You can do the same for your subject specific genomes
 	#by combining a reference genome with polymorphisms 
 	g = Genome(name = "GRCh37.75", SNPs = ["STY21_RNA"], SNPFilter = MyFilter())
+
 
 Verbose Introduction
 ---------------------
