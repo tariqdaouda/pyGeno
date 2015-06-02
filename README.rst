@@ -93,7 +93,7 @@ You can even mix several SNPs together.
 .. code:: python
   
   from pyGeno.Genome import Genome
-  #the name of the snp set is defined inside the package's manifest.ini file
+  #the name of the snp set is defined inside the datawrap's manifest.ini file
   dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY')
   #you can also define a filter (ex: a quality filter) for the SNPs
   dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY', SNPFilter = myFilter())
@@ -135,7 +135,7 @@ You can ask for any sequence of any chromosome:
 Batteries included (bootstraping):
 ---------------------------------
 
-pyGeno's database is populated by importing data wraps.
+pyGeno's database is populated by importing datawraps.
 pyGeno comes with a few data wraps, to get the list you can use:
 
 .. code:: python
