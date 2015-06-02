@@ -40,7 +40,11 @@ A brief introduction
 
 pyGeno is a personal bioinformatic database that runs directly into python, on your laptop and does not depend
 upon any REST API. pyGeno is here to make extracting data such as gene sequences a breeze, and is designed to
-be able cope with huge queries.
+be able cope with huge queries. The most exciting feature of pyGeno, is that it allows to work with seamlessly with both reference and **Presonalized Genomes**.
+
+Personalized Genomes, are custom genomes that you create by combining a reference genome, sets of polymorphims and an optional filter.
+pyGeno will take care of applying the filter and inserting the polymorphisms at their right place, so you get
+direct access to the DNA and Protein sequences of your patients.
 
 .. code:: python
 
@@ -55,8 +59,6 @@ be able cope with huge queries.
 	#print protein's transcript sequence
 	print protein.transcript.sequence
 	
-	...
-	
 	#fancy queries
 	for exons in g.get(Exons, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :
 		#print the exon's coding sequence
@@ -64,10 +66,8 @@ be able cope with huge queries.
 		#print the exon's transcript sequence
 		print exon.transcript.sequence
 	
-	...
-	
 	#You can do the same for your subject specific genomes
-	#by combining a reference genome with polymorphisms 
+	#by combining a reference genome with polymorphisms
 	g = Genome(name = "GRCh37.75", SNPs = ["STY21_RNA"], SNPFilter = MyFilter())
 
 And if you ever get lost, there's an online **help()** function for each object type:
@@ -83,6 +83,54 @@ Should output:
 .. code::
 	
 	Available fields for Exon: CDS_start, end, chromosome, CDS_length, frame, number, CDS_end, start, genome, length, protein, gene, transcript, id, strand
+
+	
+Creating a Personalized Genome:
+-------------------------------
+Personalized Genomes are a powerful feature that allow to work on the specific genomes and proteomes of your patients.
+You can even mix several SNPs together.
+
+.. code:: python
+  
+  from pyGeno.Genome import Genome
+  #the name of the snp set is defined inside the package's manifest.ini file
+  dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY')
+  #you can also define a filter (ex: a quality filter) for the SNPs
+  dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY', SNPFilter = myFilter())
+  #and even mix several snp sets  
+  dummy = Genome(name = 'GRCh37.75', SNPs = ['dummySRY', 'anotherSet'], SNPFilter = myFilter())
+
+Filtering SNPs:
+---------------
+pyGeno allows you to select the Polymorphisms that end up into the final sequences. It supports SNPs, Inserts and Deletions.
+
+.. code:: python
+
+	from pyGeno.SNPFiltering import SNPFilter, SequenceSNP
+
+	class QMax_gt_filter(SNPFilter) :
+		
+		def __init__(self, threshold) :
+			self.threshold = threshold
+			
+		def filter(self, chromosome, dummySRY = None) :
+			if dummySRY.Qmax_gt > self.threshold :
+				#other possibilities of return are SequenceInsert(<bases>), SequenceDelete(<length>)
+				return SequenceSNP(dummySRY.alt)
+			return None #None means keep the reference allele
+	
+	persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = QMax_gt_filter(10))
+
+Getting an arbitrary sequence:
+------------------------------
+You can ask for any sequence of any chromosome:
+
+.. code:: python
+	
+	chr12 = myGenome.get(Chromosome, number = "12")[0]
+	print chr12.sequence[x1:x2]
+	# for the reference sequence
+  	print chr12.refSequence[x1:x2]
 
 Batteries included (bootstraping):
 ---------------------------------
@@ -260,55 +308,8 @@ For example,both "AGC" and "ATG" will match the following sequence "...AT/GCCG..
 	exon.findAll("AT/GCCG")
 	exon.findInCDS("AT/GCCG")
 	exon.findAllInCDS("AT/GCCG")
-	...
-	
-Creating a Personalized Genome:
--------------------------------
-Personalized Genomes are a powerful feature that allow to work on the specific genomes and proteomes of your patients.
-You can even mix several SNPs together.
+	#...
 
-.. code:: python
-  
-  from pyGeno.Genome import Genome
-  #the name of the snp set is defined inside the package's manifest.ini file
-  dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY')
-  #you can also define a filter (ex: a quality filter) for the SNPs
-  dummy = Genome(name = 'GRCh37.75', SNPs = 'dummySRY', SNPFilter = myFilter())
-  #and even mix several snp sets  
-  dummy = Genome(name = 'GRCh37.75', SNPs = ['dummySRY', 'anotherSet'], SNPFilter = myFilter())
-
-
-Filtering SNPs:
----------------
-pyGeno allows you to select the Polymorphisms that end up into the final sequences. It supports SNPs, Inserts and Deletions.
-
-.. code:: python
-
-	from pyGeno.SNPFiltering import SNPFilter, SequenceSNP
-
-	class QMax_gt_filter(SNPFilter) :
-		
-		def __init__(self, threshold) :
-			self.threshold = threshold
-			
-		def filter(self, chromosome, dummySRY = None) :
-			if dummySRY.Qmax_gt > self.threshold :
-				#other possibilities of return are SequenceInsert(<bases>), SequenceDelete(<length>)
-				return SequenceSNP(dummySRY.alt)
-			return None #None means keep the reference allele
-	
-	persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = QMax_gt_filter(10))
-
-Getting an arbitrary sequence:
-------------------------------
-You can ask for any sequence of any chromosome:
-
-.. code:: python
-	
-	chr12 = myGenome.get(Chromosome, number = "12")[0]
-	print chr12.sequence[x1:x2]
-	# for the reference sequence
-  	print chr12.refSequence[x1:x2]
 	
 Progress Bar:
 -------------
