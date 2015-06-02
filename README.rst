@@ -87,8 +87,7 @@ Should output:
 	
 Creating a Personalized Genome:
 -------------------------------
-Personalized Genomes are a powerful feature that allow to work on the specific genomes and proteomes of your patients.
-You can even mix several SNPs together.
+Personalized Genomes are a powerful feature that allow you to work on the specific genomes and proteomes of your patients. You can even mix several SNP sets together.
 
 .. code:: python
   
