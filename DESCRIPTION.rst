@@ -34,7 +34,13 @@ And much more: https://github.com/tariqdaouda/pyGeno
 Verbose Description
 --------------------
 
-pyGeno is a python package that allows you to easily combine Reference Genomes and sets of Polymorphisms together to create personalized genomes. Personalized genomes can be used to work directly on the genomes of you subjects and be translated into Personalized Proteomes, 
+pyGeno is a personal bioinformatic database that runs directly into python, on your laptop and does not depend
+upon any REST API. pyGeno is here to make extracting data such as gene sequences a breeze, and is designed to
+be able cope with huge queries. The most exciting feature of pyGeno, is that it allows to work with seamlessly with both reference and **Presonalized Genomes**.
+
+Personalized Genomes, are custom genomes that you create by combining a reference genome, sets of polymorphims and an optional filter.
+pyGeno will take care of applying the filter and inserting the polymorphisms at their right place, so you get
+direct access to the DNA and Protein sequences of your patients.
 
 Multiple sets of of polymorphisms can also be combined together to leverage their independent benefits ex: 
 
