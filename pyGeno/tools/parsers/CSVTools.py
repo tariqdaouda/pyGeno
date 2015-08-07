@@ -285,8 +285,13 @@ class CSVFile(object) :
 		return CSVEntry(self, self.currentPos)
 	
 	def __getitem__(self, line) :
-		if self.lines[line].__class__ is not CSVEntry :
-			self._developLine(line)
+		try :
+			if self.lines[line].__class__ is not CSVEntry :
+				self._developLine(line)
+		except AttributeError :
+			for l in xrange(line.start, line.stop) :
+				self._developLine(l)
+
 		return self.lines[line]
 
 	def __len__(self) :
