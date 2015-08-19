@@ -49,7 +49,7 @@ Natively pyGeno supports dbSNP and casava(snp.txt), but it also has its own poly
 	        Y          2       2655645      2655647    -       AG        28          TopHat
 	        Y          3       2655648      2655650    TT      -         10          TopHat
 
-Even tough all field are mandatory, the only ones that are critical for pyGeno to be able insert polymorphisms at the right places are: *chromosomeNumber* and *start*. All the other fields are non critical and can follow any convention you wish to apply to them, including the *end* field.
+Even tough all field are mandatory, the only ones that are critical for pyGeno to be able insert polymorphisms at the right places are: *chromosomeNumber* and *start*. All the other fields are non critical and can follow any convention you wish to apply to them, including the *end* field. You can choose the convention that suits best the query that you are planning to make on SNPs through .get(), or the way you intend to filter them using filtering objtecs.
 
 For genomes, the manifet.ini file looks like this::
 
