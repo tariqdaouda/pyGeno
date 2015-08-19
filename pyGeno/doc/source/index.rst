@@ -16,15 +16,14 @@ pyGeno's `lair is on Github`_.
 A Quick Example:
 -----------------
 
-pyGeno is a personal bioinformatic database that runs directly into python, on your laptop and does not depend
-upon any REST API. pyGeno is here to make extracting data such as gene sequences a breeze, and is designed to
-be able cope with huge queries. The most exciting feature of pyGeno, is that it allows to work with seamlessly with both reference and **Presonalized Genomes**.
-
-Personalized Genomes, are custom genomes that you create by combining a reference genome, sets of polymorphims and an optional filter.
+pyGeno allows you to create and work on **Personalized Genomes**: custom genomes that you create by combining a reference genome, sets of polymorphims and an optional filter.
 pyGeno will take care of applying the filter and inserting the polymorphisms at their right place, so you get
-direct access to the DNA and Protein sequences of your patients.
-
+direct access to the DNA and Protein sequences of your patients/subjects.
 To know more about how to create a Personalized Genome, have a look at the :doc:`/quickstart` section.
+
+pyGeno can also function as a personal bioinformatic database for Ensembl, that runs directly into python, on your laptop, making faster aned more reliable than any REST API. pyGeno makes extracting data such as gene sequences a breeze, and is designed to
+be able cope with huge queries.
+
 
 .. code::
 
