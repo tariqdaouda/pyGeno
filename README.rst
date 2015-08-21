@@ -4,6 +4,10 @@ pyGeno: Personalized Genomics and Protemomics
 .. image:: http://bioinfo.iric.ca/~daoudat/pyGeno/_static/logo.png
    :alt: pyGeno's logo
 
+Even tough more and more research focuses on Personalized/Precision Medicine, treatments that are specically tailored to the patient, pyGeno is (to our knowlege) the only tool available that will gladly build your specific genomes for you and you give an easy access to them.
+
+I really want pyGeno to help as many people as possible do as much life saving research as possible. Therefor, if you find any bug, please fill in a github issue, or even better, fix it and send me a pull request :). I'll gladly mention your contribution on the website. That also goes for the doc.
+
 pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_), its logo is the work of the freelance designer `Sawssan Kaddoura`_.
 For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 
