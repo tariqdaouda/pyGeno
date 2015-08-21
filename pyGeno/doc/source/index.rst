@@ -11,10 +11,16 @@ pyGeno: Personalized Genomics and Proteomics
 
 pyGeno's `lair is on Github`_.
 
+I really want pyGeno to help as many people as possible do as much life saving research as possible. Therefor, if you find any bug, please fill in a github issue, or even better, fix it and send me a pull request :). I'll gladly mention your contribution on the website. That also goes for the doc.
+
+If you are using pyGeno please mention it to the rest of the universe by including a link to: https://github.com/tariqdaouda/pyGeno
+
 .. _lair is on Github: http://www.github.com/tariqdaouda/pyGeno
 
-A Quick Example:
+A Quick Intro:
 -----------------
+
+Even tough more and more research focuses on Personalized/Precision Medicine, treatments that are specically tailored to the patient, pyGeno is (to our knowlege) the only tool available that will gladly build your specific genomes for you and you give an easy access to them.
 
 pyGeno allows you to create and work on **Personalized Genomes**: custom genomes that you create by combining a reference genome, sets of polymorphims and an optional filter.
 pyGeno will take care of applying the filter and inserting the polymorphisms at their right place, so you get
