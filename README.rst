@@ -1,4 +1,4 @@
-pyGeno: Personalized Genomics and Protemomics
+pyGeno: a Python Package for Precision Medicine
 =============================================
 
 .. image:: http://bioinfo.iric.ca/~daoudat/pyGeno/_static/logo.png
