@@ -66,7 +66,7 @@ direct access to the DNA and Protein sequences of your patients.
 	print prot.transcript.sequence
 	
 	#fancy queries
-	for exons in g.get(Exon, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :
+	for exon in g.get(Exon, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :
 		#print the exon's coding sequence
 		print exon.CDS
 		#print the exon's transcript sequence
