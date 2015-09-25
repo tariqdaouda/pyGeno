@@ -6,7 +6,7 @@ pyGeno is a personal database that you can query un many ways. Special emphasis 
 	* get()
 	* help()
 
-**get()** can be called from any pyGeno object to get any other object 
+**get()** can be called from any pyGeno object to get any objects.
 
 **help()** is you best friend when you get lost using **get()**. When called, it will give the list of all field that you can use in get queries. You can call it either of the class::
 

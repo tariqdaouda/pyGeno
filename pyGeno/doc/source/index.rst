@@ -42,7 +42,7 @@ be able cope with huge queries.
 	#print the protein's gene biotype
 	print prot.gene.biotype
 	#print protein's transcript sequence
-	print protein.transcript.sequence
+	print prot.transcript.sequence
 
 	#fancy queries
 	for exons in g.get(Exons, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :

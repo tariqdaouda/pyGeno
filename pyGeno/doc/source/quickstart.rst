@@ -17,18 +17,18 @@ pyGeno comes with a few datawraps, to get the list you can use:
 	
 	SNPs
 	~~~~|
-	    |~~~:> Homo_sapiens_agnostic.dummySRY.tar.gz
-	    |~~~:> Homo_sapiens.dummySRY_casava.tar.gz
+	    |~~~:> Human_agnostic.dummySRY.tar.gz
+	    |~~~:> Human.dummySRY_casava.tar.gz
 	    |~~~:> dbSNP142_human_GRCh37_common_all.tar.gz
 	    |~~~:> dbSNP142_human_common_all.tar.gz
 	
 	
 	Genomes
 	~~~~~~~|
-	       |~~~:> Homo_sapiens.GRCh37.75.tar.gz
-	       |~~~:> Homo_sapiens.GRCh37.75_Y-Only.tar.gz
-	       |~~~:> Homo_sapiens.GRCh38.78.tar.gz
-	       |~~~:> Mus_musculus.GRCm38.78.tar.gz
+	       |~~~:> Human.GRCh37.75.tar.gz
+	       |~~~:> Human.GRCh37.75_Y-Only.tar.gz
+	       |~~~:> Human.GRCh38.78.tar.gz
+	       |~~~:> Mouse.GRCm38.78.tar.gz
 
 To get a list of remote datawraps that pyGeno can download for you, do:
 
@@ -89,7 +89,7 @@ You can see pyGeno achitecture as a graph where everything is connected to every
 Queries
 -------
 
-PyGeno allows for several kinds of queries::
+PyGeno allows for several kinds of queries, here are some snippets::
 
 	#in this case both queries will yield the same result
 	myGene.get(Protein, id = "ENSID...")
@@ -118,6 +118,24 @@ For more speed create indexes on the fields you need the most::
 	
 	Gene.ensureGlobalIndex('name')
 
+
+Getting sequences
+-------------------
+
+Anything that has a sequence can be indexed using the usual python list syntax::
+
+	protein[34] # for the 34th amino acid
+	protein[34:40] # for amino acids in [34, 40[
+
+	transcript[23] #for the 23rd nucleotide of the transcript
+	transcript[23:30] #for nucletotides in [23, 30[
+
+	transcript.cDNA[23:30] #the same but for the protein coding DNA (without the UTRs)
+
+Transcripts, Proteins, Exons also have a *.sequence* attribute. This attribute is the string rendered sequence, it is perfect for printing but it  may contain '/'s 
+in case of polymorphic sequence that you must
+take into account in the indexing. On the other hand if you use indexes directly on the object (as shown in the snippet above) pyGeno will use a binary representaion
+of the sequences thus the indexing is independent of the polymorphisms present in the sequences.
 
 Personalized Genomes
 --------------------
