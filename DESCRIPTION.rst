@@ -1,5 +1,5 @@
-pyGeno: A python package for Personalized Genomics and Proteomics
-=================================================================
+pyGeno: A python package for Precision Medicine, Personalized Genomics and Proteomics
+=====================================================================================
 
 Short description:
 ------------------

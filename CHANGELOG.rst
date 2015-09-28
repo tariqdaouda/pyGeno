@@ -3,6 +3,10 @@
 
 * BUG FIX: Opening a lot of chromosomes caused mmap to die screaming
 
+* Removed core indexes. Sqlite sometimes chose them instead of user defined positional indexes, resulting un slow queries
+
+* Doc updates
+
 1.2.3
 =====
 
