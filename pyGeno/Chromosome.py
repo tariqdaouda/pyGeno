@@ -133,5 +133,8 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 		
 		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 
+	def __getitem__(self, i) :
+		return self.sequence[i]
+
 	def __str__(self) :
 		return "Chromosome: number %s > %s" %(self.wrapped_object.number, str(self.wrapped_object.genome))

@@ -225,8 +225,8 @@ class CSVFile(object) :
 
 		for i in xrange(len(self.streamBuffer)) :
 			self.streamBuffer[i] = str(self.streamBuffer[i])
-		self.appendFile.write('\n'.join(self.streamBuffer))
-		self.appendFile.close()
+		self.streamFile.write('\n'.join(self.streamBuffer))
+		self.streamFile.close()
 
 		self.streamFile = None
 		self.writeRate = None
@@ -289,7 +289,14 @@ class CSVFile(object) :
 			if self.lines[line].__class__ is not CSVEntry :
 				self._developLine(line)
 		except AttributeError :
-			for l in xrange(line.start, line.stop) :
+			start, stop = line.start, line.stop
+			if start is None :
+				start = 0
+			
+			if stop is None :
+				stop = 0
+
+			for l in xrange(start, stop) :
 				self._developLine(l)
 
 		return self.lines[line]
