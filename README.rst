@@ -110,21 +110,59 @@ Filtering SNPs:
 pyGeno allows you to select the Polymorphisms that end up into the final sequences. It supports SNPs, Inserts and Deletions.
 
 .. code:: python
-
+	
 	from pyGeno.SNPFiltering import SNPFilter, SequenceSNP
 
 	class QMax_gt_filter(SNPFilter) :
 		
 		def __init__(self, threshold) :
 			self.threshold = threshold
-			
-		def filter(self, chromosome, dummySRY = None) :
-			if dummySRY.Qmax_gt > self.threshold :
-				#other possibilities of return are SequenceInsert(<bases>), SequenceDelete(<length>)
-				return SequenceSNP(dummySRY.alt)
-			return None #None means keep the reference allele
+		
+		#Here SNPs is a dictionary: SNPSet Name => polymorphism  
+		#This filter ignores deletions and insertions and
+		#but applis all SNPs
+		def filter(self, chromosome, **SNPs) :
+			sources = {}
+			alleles = []
+			for snpSet, snp in SNPs.iteritems() :
+				pos = snp.start
+				if snp.alt[0] == '-' :
+					pass
+				elif snp.ref[0] == '-' :
+					pass
+				else :
+					sources[snpSet] = snp
+					alleles.append(snp.alt) #if not an indel append the polymorphism
+				
+			#appends the refence allele to the lot
+			refAllele = chromosome.refSequence[pos]
+			alleles.append(refAllele)
+			sources['ref'] = refAllele
 	
+			#optional we keep a record of the polymorphisms that were used during the process
+			return SequenceSNP(alleles, sources = sources)
+		
+The filter function can also be made more specific by using arguments that have the same names as the SNPSets
+
+.. code:: python
+
+	def filter(self, chromosome, dummySRY = None) :
+		if dummySRY.Qmax_gt > self.threshold :
+			#other possibilities of return are SequenceInsert(<bases>), SequenceDelete(<length>)
+			return SequenceSNP(dummySRY.alt)
+		return None #None means keep the reference allele
+
+To apply the filter simply specify if while loading the genome.
+
+.. code:: python
+
 	persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = QMax_gt_filter(10))
+
+To include several SNPSets use a list.
+
+.. code:: python
+
+	persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = ['ARN_P1', 'ARN_P2'], SNPFilter = myFilter())
 
 Getting an arbitrary sequence:
 ------------------------------
