@@ -4,9 +4,9 @@ pyGeno: a Python Package for Precision Medicine
 .. image:: http://bioinfo.iric.ca/~daoudat/pyGeno/_static/logo.png
    :alt: pyGeno's logo
 
-Even tough more and more research focuses on Personalized/Precision Medicine, treatments that are specically tailored to the patient, pyGeno is (to our knowlege) the only tool available that will gladly build your specific genomes for you and you give an easy access to them.
+Even though more and more research focuses on Personalized/Precision Medicine, treatments that are specially tailored to the patient, pyGeno is (to our knowledge) the only tool available that will gladly build your specific genomes for you and you give an easy access to them.
 
-I really want pyGeno to help as many people as possible do as much life saving research as possible. Therefor, if you find any bug, please fill in a github issue, or even better, fix it and send me a pull request :). I'll gladly mention your contribution on the website. That also goes for the doc.
+I really want pyGeno to help as many people as possible do as much life saving research as possible. Therefore, if you find any bug, please fill in a github issue, or even better, fix it and send me a pull request :). I'll gladly mention your contribution on the website. That also goes for the doc.
 
 If you are using pyGeno please mention it to the rest of the universe by including a link to: https://github.com/tariqdaouda/pyGeno
 
@@ -46,9 +46,9 @@ A brief introduction
 
 pyGeno is a personal bioinformatic database that runs directly into python, on your laptop and does not depend
 upon any REST API. pyGeno is here to make extracting data such as gene sequences a breeze, and is designed to
-be able cope with huge queries. The most exciting feature of pyGeno, is that it allows to work with seamlessly with both reference and **Presonalized Genomes**.
+be able cope with huge queries. The most exciting feature of pyGeno, is that it allows to work with seamlessly with both reference and **Personalized Genomes**.
 
-Personalized Genomes, are custom genomes that you create by combining a reference genome, sets of polymorphims and an optional filter.
+Personalized Genomes, are custom genomes that you create by combining a reference genome, sets of polymorphisms and an optional filter.
 pyGeno will take care of applying the filter and inserting the polymorphisms at their right place, so you get
 direct access to the DNA and Protein sequences of your patients.
 
@@ -110,21 +110,59 @@ Filtering SNPs:
 pyGeno allows you to select the Polymorphisms that end up into the final sequences. It supports SNPs, Inserts and Deletions.
 
 .. code:: python
-
+	
 	from pyGeno.SNPFiltering import SNPFilter, SequenceSNP
 
 	class QMax_gt_filter(SNPFilter) :
 		
 		def __init__(self, threshold) :
 			self.threshold = threshold
-			
-		def filter(self, chromosome, dummySRY = None) :
-			if dummySRY.Qmax_gt > self.threshold :
-				#other possibilities of return are SequenceInsert(<bases>), SequenceDelete(<length>)
-				return SequenceSNP(dummySRY.alt)
-			return None #None means keep the reference allele
+		
+		#Here SNPs is a dictionary: SNPSet Name => polymorphism  
+		#This filter ignores deletions and insertions and
+		#but applis all SNPs
+		def filter(self, chromosome, **SNPs) :
+			sources = {}
+			alleles = []
+			for snpSet, snp in SNPs.iteritems() :
+				pos = snp.start
+				if snp.alt[0] == '-' :
+					pass
+				elif snp.ref[0] == '-' :
+					pass
+				else :
+					sources[snpSet] = snp
+					alleles.append(snp.alt) #if not an indel append the polymorphism
+				
+			#appends the refence allele to the lot
+			refAllele = chromosome.refSequence[pos]
+			alleles.append(refAllele)
+			sources['ref'] = refAllele
 	
+			#optional we keep a record of the polymorphisms that were used during the process
+			return SequenceSNP(alleles, sources = sources)
+		
+The filter function can also be made more specific by using arguments that have the same names as the SNPSets
+
+.. code:: python
+
+	def filter(self, chromosome, dummySRY = None) :
+		if dummySRY.Qmax_gt > self.threshold :
+			#other possibilities of return are SequenceInsert(<bases>), SequenceDelete(<length>)
+			return SequenceSNP(dummySRY.alt)
+		return None #None means keep the reference allele
+
+To apply the filter simply specify if while loading the genome.
+
+.. code:: python
+
 	persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY', SNPFilter = QMax_gt_filter(10))
+
+To include several SNPSets use a list.
+
+.. code:: python
+
+	persGenome = Genome(name = 'GRCh37.75_Y-Only', SNPs = ['ARN_P1', 'ARN_P2'], SNPFilter = myFilter())
 
 Getting an arbitrary sequence:
 ------------------------------
