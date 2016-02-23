@@ -4,9 +4,9 @@ pyGeno: a Python Package for Precision Medicine
 .. image:: http://bioinfo.iric.ca/~daoudat/pyGeno/_static/logo.png
    :alt: pyGeno's logo
 
-Even tough more and more research focuses on Personalized/Precision Medicine, treatments that are specically tailored to the patient, pyGeno is (to our knowlege) the only tool available that will gladly build your specific genomes for you and you give an easy access to them.
+Even though more and more research focuses on Personalized/Precision Medicine, treatments that are specially tailored to the patient, pyGeno is (to our knowledge) the only tool available that will gladly build your specific genomes for you and you give an easy access to them.
 
-I really want pyGeno to help as many people as possible do as much life saving research as possible. Therefor, if you find any bug, please fill in a github issue, or even better, fix it and send me a pull request :). I'll gladly mention your contribution on the website. That also goes for the doc.
+I really want pyGeno to help as many people as possible do as much life saving research as possible. Therefore, if you find any bug, please fill in a github issue, or even better, fix it and send me a pull request :). I'll gladly mention your contribution on the website. That also goes for the doc.
 
 If you are using pyGeno please mention it to the rest of the universe by including a link to: https://github.com/tariqdaouda/pyGeno
 
@@ -46,9 +46,9 @@ A brief introduction
 
 pyGeno is a personal bioinformatic database that runs directly into python, on your laptop and does not depend
 upon any REST API. pyGeno is here to make extracting data such as gene sequences a breeze, and is designed to
-be able cope with huge queries. The most exciting feature of pyGeno, is that it allows to work with seamlessly with both reference and **Presonalized Genomes**.
+be able cope with huge queries. The most exciting feature of pyGeno, is that it allows to work with seamlessly with both reference and **Personalized Genomes**.
 
-Personalized Genomes, are custom genomes that you create by combining a reference genome, sets of polymorphims and an optional filter.
+Personalized Genomes, are custom genomes that you create by combining a reference genome, sets of polymorphisms and an optional filter.
 pyGeno will take care of applying the filter and inserting the polymorphisms at their right place, so you get
 direct access to the DNA and Protein sequences of your patients.
 
