@@ -20,6 +20,7 @@ pyGeno_SETTINGS_DIR = os.path.normpath(os.path.expanduser('~/.pyGeno/'))
 pyGeno_SETTINGS_PATH = None
 pyGeno_RABA_DBFILE = None
 pyGeno_DATA_PATH = None
+pyGeno_REMOTE_LOCATION = 'http://bioinfo.iric.ca/~daoudat/pyGeno_datawraps'
 
 db = None #proxy for the raba database
 dbConf = None #proxy for the raba database configuration
@@ -44,7 +45,7 @@ def getGenomeSequencePath(specie, name) :
 
 def createDefaultConfigFile() :
 	"""Creates a default configuration file"""
-	s = "[pyGeno_config]\nsettings_dir = %s" % pyGeno_SETTINGS_DIR
+	s = "[pyGeno_config]\nsettings_dir=%s\nremote_location=%s" % (pyGeno_SETTINGS_DIR, pyGeno_DEFAULT_REMOTE_LOCATION)
 	f = open('%s/config.ini' % pyGeno_SETTINGS_DIR, 'w')
 	f.write(s)
 	f.close()

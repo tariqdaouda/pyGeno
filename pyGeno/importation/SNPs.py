@@ -25,7 +25,7 @@ def importSNPs(packageFile) :
 		species = human
 		name = dummySRY
 		type = Agnostic
-		source = my place at IRIC
+		source = my place at the IRIC
 
 		[snps]
 		filename = snps.txt # as with genomes you can either include de file at the root of the package or specify an URL from where it must be downloaded
