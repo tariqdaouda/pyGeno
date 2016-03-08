@@ -31,20 +31,28 @@ For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 Installation:
 -------------
 
-.. code:: python
+It is recommended to install pyGeno within a `virtual environement`_, to setup one you can use:
+
+.. code:: shell
+
+        virtualenv ~/.pyGenoEnv
+        source ~/.pyGenoEnv/bin/activate
+
+pyGeno can be installed through pip:
+
+.. code:: shell
 	
 	pip install pyGeno #for the latest stable version
 
-For the latest developments:
-
+Or github, for the latest developments:
 
 .. code:: shell
 
 	git clone https://github.com/tariqdaouda/pyGeno.git
 	cd pyGeno
-        virtualenv .pyGeno
-        source .pyGeno/bin/activate
-	python setup.py develop
+        python setup.py develop
+
+.. _`virtual environement`: http://virtualenv.readthedocs.org/
 
 A brief introduction
 --------------------
