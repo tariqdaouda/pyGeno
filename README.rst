@@ -37,10 +37,13 @@ Installation:
 
 For the latest developments:
 
+
 .. code:: shell
 
 	git clone https://github.com/tariqdaouda/pyGeno.git
 	cd pyGeno
+        virtualenv .pyGeno
+        source .pyGeno/bin/activate
 	python setup.py develop
 
 A brief introduction
