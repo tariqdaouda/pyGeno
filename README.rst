@@ -5,7 +5,7 @@ pyGeno: a Python Package for Precision Medicine
    :alt: pyGeno's logo
 
 
-Even though more and more research focuses on Personalized/Precision Medicine, treatments that are specially tailored to the patient, pyGeno is (to our knowledge) the only tool available that will gladly build your specific genomes for you and you give an easy access to them.
+Even though more and more research focuses on Personalized/Precision Medicine, treatments that are specially tailored to the patient, pyGeno is (to our knowledge) the only tool available that will gladly build your specific genomes for you.
 
 
 I really want pyGeno to help as many people as possible do as much life saving research as possible. Therefore, if you find any bug, please fill in a github issue, or even better, fix it and send me a pull request :). I'll gladly mention your contribution on the website. That also goes for the doc.
