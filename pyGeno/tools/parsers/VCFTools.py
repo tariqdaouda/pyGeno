@@ -161,9 +161,13 @@ class VCFFile(object) :
 			except IndexError:
 				raise StopIteration
 		else :
-			line = self.f.readline()
-			if not line :
-				raise StopIteration
+			midfile_header = True
+			while midfile_header:
+				line = self.f.readline()
+				if not line :
+					raise StopIteration
+				if not line.startswith('#'):
+					midfile_header = False
 			return VCFEntry(self, line, self.currentPos)
 	
 	def __getitem__(self, line) :
