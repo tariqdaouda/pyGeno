@@ -45,7 +45,7 @@ def getGenomeSequencePath(specie, name) :
 
 def createDefaultConfigFile() :
 	"""Creates a default configuration file"""
-	s = "[pyGeno_config]\nsettings_dir=%s\nremote_location=%s" % (pyGeno_SETTINGS_DIR, pyGeno_DEFAULT_REMOTE_LOCATION)
+	s = "[pyGeno_config]\nsettings_dir=%s\nremote_location=%s" % (pyGeno_SETTINGS_DIR, pyGeno_REMOTE_LOCATION)
 	f = open('%s/config.ini' % pyGeno_SETTINGS_DIR, 'w')
 	f.write(s)
 	f.close()
