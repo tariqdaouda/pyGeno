@@ -13,10 +13,9 @@ pyGeno's `lair is on Github`_.
 
 I really want pyGeno to help as many people as possible do as much life saving research as possible. Therefore, if you find any bug, please fill in a github issue, or even better, fix it and send me a pull request! I'll gladly mention your contribution on the website. That also goes for the doc.
 
-If you are using pyGeno please mention it to the rest of the universe by citing: `http://f1000research.com/articles/5-381/v1`_
-
+If you are using pyGeno please mention it to the rest of the universe by citing this paper_.
 .. _lair is on Github: http://www.github.com/tariqdaouda/pyGeno
-.. _`http://f1000research.com/articles/5-381/v1`
+.. _paper: http://f1000research.com/articles/5-381/v1
 
 A Quick Intro:
 -----------------
