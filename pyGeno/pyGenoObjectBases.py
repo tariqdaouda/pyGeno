@@ -23,7 +23,7 @@ class pyGenoRabaObject(Raba) :
 	def __init__(self) :
 		if self is pyGenoRabaObject :
 			raise TypeError("This class is abstract")
-		
+	
 	def _curate(self) :
 		"Last operations performed before saving, must be implemented in child"
 		raise TypeError("This method is abstract and should be implemented in child")
@@ -73,7 +73,6 @@ class pyGenoRabaObjectWrapper(object) :
 	def __init__(self, wrapped_object_and_bag = (), *args, **kwargs) :
 		if self is pyGenoRabaObjectWrapper :
 			raise TypeError("This class is abstract")
-
 		if wrapped_object_and_bag != () :
 			assert wrapped_object_and_bag[0]._rabaClass is self._wrapped_class
 			self.wrapped_object = wrapped_object_and_bag[0]
@@ -96,6 +95,7 @@ class pyGenoRabaObjectWrapper(object) :
 		return (obj._rabaClass.__name__, obj.raba_id)
 
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
+		# conf.db.enableDebug(True)
 		f = RabaQuery(objectType._wrapped_class, namespace = self._wrapped_class._raba_namespace)
 		coolArgs[self._wrapped_class.__name__[:-5]] = self.wrapped_object #[:-5] removes _Raba from class name
 
@@ -124,7 +124,6 @@ class pyGenoRabaObjectWrapper(object) :
 		
 			* myGenome.get(Transcript, {'start >' : x, 'end <' : y})"""
 		
-		# conf.db.enableDebug(True)
 		ret = []
 		for e in self._makeLoadQuery(objectType, *args, **coolArgs).iterRun() :
 			if issubclass(objectType, pyGenoRabaObjectWrapper) :

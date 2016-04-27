@@ -69,10 +69,14 @@ def freeDBRegistery() :
 	"""rabaDB keeps a record of loaded objects to ensure consistency between different queries. This function empties the registery"""
 	rabaDB.Raba.freeRegistery()
 
+def reload() :
+	"""reinitialize pyGeno"""
+	pyGeno_init()
+
 def pyGeno_init() :
-	"""This function is automaticly called at launch"""
+	"""This function is automatically called at launch"""
 	
-	global db
+	global db, dbConf
 	
 	global pyGeno_SETTINGS_PATH
 	global pyGeno_RABA_DBFILE

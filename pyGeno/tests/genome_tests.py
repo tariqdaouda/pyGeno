@@ -69,7 +69,10 @@ class pyGenoSNPTests(unittest.TestCase):
 				return SequenceSNP(dummySRY_AGN.alt)
 		
 		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY_AGN', SNPFilter = MyFilter())
+		# persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
 		persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
+		# print persProt, dummy.count(Protein)
+		# persProt = persProt[0]
 		refProt = self.ref.get(Protein, id = 'ENSP00000438917')[0]
 		self.assertEqual('M', refProt.sequence[0])
 		self.assertEqual('L', persProt.sequence[0])
@@ -127,7 +130,8 @@ def runTests() :
 		B.importSNPs("Human_agnostic.dummySRY.tar.gz")
 	except KeyError :
 		print "--> Seems to already exist in db"
-		
+	# import time
+	# time.sleep(10)	
 	unittest.main()
 
 if __name__ == "__main__" :
