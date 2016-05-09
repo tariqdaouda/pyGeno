@@ -1,5 +1,5 @@
-pyGeno: a Python Package for Precision Medicine
-=============================================
+pyGeno: A Python package for precision medicine and proteogenomics
+==================================================================
 
 .. image:: http://depsy.org/api/package/pypi/pyGeno/badge.svg
    :alt: depsy
