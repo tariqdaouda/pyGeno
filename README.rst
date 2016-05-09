@@ -1,6 +1,10 @@
 pyGeno: a Python Package for Precision Medicine
 =============================================
 
+.. image:: http://depsy.org/api/package/pypi/pyGeno/badge.svg
+   :alt: depsy
+   :target: http://depsy.org/package/python/pyGeno
+ 
 .. image:: http://bioinfo.iric.ca/~daoudat/pyGeno/_static/logo.png
    :alt: pyGeno's logo
 
