@@ -11,18 +11,12 @@ pyGeno: A Python package for precision medicine and proteogenomics
 
 Even though more and more research focuses on Personalized/Precision Medicine, treatments that are specially tailored to the patient, pyGeno is (to our knowledge) the only tool available that will gladly build your specific genomes for you.
 
-
-I really want pyGeno to help as many people as possible do as much life saving research as possible. Therefore, if you find any bug, please fill in a github issue, or even better, fix it and send me a pull request! I'll gladly mention your contribution on the website. That also goes for the doc.
-
-If you are using pyGeno please mention it to the rest of the universe by including a link to: https://github.com/tariqdaouda/pyGeno
-
 pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_), its logo is the work of the freelance designer `Sawssan Kaddoura`_.
 For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 
 .. _Tariq Daouda: http://wwww.tariqdaouda.com
 .. _IRIC: http://www.iric.ca
 .. _Sawssan Kaddoura: http://www.sawssankaddoura.com
-
 
 Click here for The `full documentation`_.
 
@@ -31,6 +25,12 @@ Click here for The `full documentation`_.
 For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 
 .. _@tariqdaouda: https://www.twitter.com/tariqdaouda
+
+Citing pyGeno:
+--------------
+Please cite this paper_.
+
+.. _paper: http://f1000research.com/articles/5-381/v1
 
 Installation:
 -------------
