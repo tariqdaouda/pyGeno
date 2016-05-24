@@ -175,8 +175,11 @@ class CSVFile(object) :
 		if field.lower() in self.legend :
 			raise  ValueError("%s is already in the legend" % field.lower())
 		self.legend[field.lower()] = len(self.legend)
-		self.strLegend += self.separator + field.lower()
-
+		if len(self.strLegend) > :
+			self.strLegend += self.separator + field.lower()
+		else :
+			self.strLegend += field.lower()
+			
 	def parse(self, filePath, separator = ',', stringSeparator = '"', lineSeparator = '\n') :
 		"""Loads a CSV file"""
 		
