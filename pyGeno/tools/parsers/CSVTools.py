@@ -148,7 +148,6 @@ class CSVFile(object) :
 				if legend[i].lower() in self.legend :
 					raise  ValueError("%s is already in the legend" % legend[i].lower())
 				self.legend[legend[i].lower()] = i
-
 			self.strLegend = separator.join(legend)
 			
 		elif type(legend) is types.DictType :
@@ -159,7 +158,9 @@ class CSVFile(object) :
 				self.legend[k.lower()] = legend[k]
 				self.strLegend.insert(legend[k], k.lower())
 			self.strLegend = separator.join(self.strLegend)
-		
+		else :
+			raise ValueError("Unsupported type for legend (not list nor dict)")
+
 		self.filename = ""
 		self.lines = []	
 		self.separator = separator
@@ -175,7 +176,7 @@ class CSVFile(object) :
 		if field.lower() in self.legend :
 			raise  ValueError("%s is already in the legend" % field.lower())
 		self.legend[field.lower()] = len(self.legend)
-		if len(self.strLegend) > :
+		if len(self.strLegend) > 0 :
 			self.strLegend += self.separator + field.lower()
 		else :
 			self.strLegend += field.lower()
