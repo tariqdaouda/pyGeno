@@ -149,7 +149,7 @@ class CSVFile(object) :
 					raise  ValueError("%s is already in the legend" % legend[i].lower())
 				self.legend[legend[i].lower()] = i
 			self.strLegend = separator.join(legend)
-			
+
 		elif type(legend) is types.DictType :
 			self.strLegend = []
 			for k in legend :
@@ -177,9 +177,9 @@ class CSVFile(object) :
 			raise  ValueError("%s is already in the legend" % field.lower())
 		self.legend[field.lower()] = len(self.legend)
 		if len(self.strLegend) > 0 :
-			self.strLegend += self.separator + field.lower()
+			self.strLegend += self.separator + field
 		else :
-			self.strLegend += field.lower()
+			self.strLegend += field
 			
 	def parse(self, filePath, separator = ',', stringSeparator = '"', lineSeparator = '\n') :
 		"""Loads a CSV file"""
