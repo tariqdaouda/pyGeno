@@ -107,7 +107,14 @@ class CSVEntry(object) :
 
 	def __setitem__(self, key, value) :
 		"""Sets the value of field 'key' to 'value' """
-		self.data[self.csvFile.legend[key.lower()]] = str(value)
+		try :
+			field = self.csvFile.legend[key.lower()]
+		except KeyError :
+			self.csvFile.addField(key)
+			field = self.csvFile.legend[key.lower()]
+			self.data.append(str(value))
+		else :
+			self.data[field] =(str(value))
 	
 	def __repr__(self) :
 		return "<line %d: %s>" %(self.lineNumber, str(self.data))
@@ -138,12 +145,17 @@ class CSVFile(object) :
 		self.legend = {}
 		if type(legend) is types.ListType :
 			for i in range(len(legend)) :
+				if legend[i].lower() in self.legend :
+					raise  ValueError("%s is already in the legend" % legend[i].lower())
 				self.legend[legend[i].lower()] = i
+
 			self.strLegend = separator.join(legend)
 			
 		elif type(legend) is types.DictType :
 			self.strLegend = []
 			for k in legend :
+				if k.lower() in self.legend :
+					raise  ValueError("%s is already in the legend" % k.lower())
 				self.legend[k.lower()] = legend[k]
 				self.strLegend.insert(legend[k], k.lower())
 			self.strLegend = separator.join(self.strLegend)
@@ -157,6 +169,13 @@ class CSVFile(object) :
 		self.writeRate = None
 		self.streamBuffer = None
 		self.keepInMemory = True
+
+	def addField(self, field) :
+		"""add a filed to the legend"""
+		if field.lower() in self.legend :
+			raise  ValueError("%s is already in the legend" % field.lower())
+		self.legend[field.lower()] = len(self.legend)
+		self.strLegend += self.separator + field.lower()
 
 	def parse(self, filePath, separator = ',', stringSeparator = '"', lineSeparator = '\n') :
 		"""Loads a CSV file"""

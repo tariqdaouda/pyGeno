@@ -17,26 +17,29 @@ def listRemoteDatawraps(location = conf.pyGeno_REMOTE_LOCATION) :
 	return js
 
 def printRemoteDatawraps(location = conf.pyGeno_REMOTE_LOCATION) :
-	"""print all available datawraps from a remote location the location must have a datawraps.json in the following format::
-		{
-		"Ordered": {
-			"Reference genomes": {
-				"Human" :	["GRCh37.75", "GRCh38.78"],
-				"Mouse" : ["GRCm38.78"],
+	"""
+		print all available datawraps from a remote location the location must have a datawraps.json in the following format::
+
+			{
+			"Ordered": {
+				"Reference genomes": {
+					"Human" :	["GRCh37.75", "GRCh38.78"],
+					"Mouse" : ["GRCm38.78"],
+				},
+				"SNPs":{
+					}
 			},
-			"SNPs":{		
+			"Flat":{
+				"Reference genomes": {
+					"GRCh37.75": "Human.GRCh37.75.tar.gz",
+					"GRCh38.78": "Human.GRCh37.75.tar.gz",
+					"GRCm38.78": "Mouse.GRCm38.78.tar.gz"
+				},
+				"SNPs":{
 				}
-		},
-		"Flat":{
-			"Reference genomes": {
-				"GRCh37.75": "Human.GRCh37.75.tar.gz",
-				"GRCh38.78": "Human.GRCh37.75.tar.gz",
-				"GRCm38.78": "Mouse.GRCm38.78.tar.gz"
-			},
-			"SNPs":{		
 			}
 		}
-	}
+		
 	"""
 	
 	l = listRemoteDatawraps(location)
