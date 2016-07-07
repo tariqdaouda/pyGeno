@@ -32,14 +32,25 @@ def importSNPs(packageFile) :
 	"""
 	printf("Importing polymorphism set: %s... (This may take a while)" % packageFile)
 	
-	packageDir = _decompressPackage(packageFile)
+	if not os.path.isdir(packageFile) :
+		packageDir = _decompressPackage(packageFile)
+	else :
+		packageDir = packageFile
+
+	fpMan = os.path.normpath(packageDir+'/manifest.ini')
+	if not os.path.isfile(fpMan) :
+		raise ValueError("Not file named manifest.ini! Mais quel SCANDALE!!!!")
 
 	parser = SafeConfigParser()
 	parser.read(os.path.normpath(packageDir+'/manifest.ini'))
 	packageInfos = parser.items('package_infos')
 
 	setName = parser.get('set_infos', 'name')
-	typ = parser.get('set_infos', 'type')+'SNP'
+	typ = parser.get('set_infos', 'type')
+	
+	if typ.lower()[-3:] != 'snp' :
+		typ += 'SNP'
+
 	species = parser.get('set_infos', 'species').lower()
 	genomeSource = parser.get('set_infos', 'source')
 	snpsFileTmp = parser.get('snps', 'filename').strip()

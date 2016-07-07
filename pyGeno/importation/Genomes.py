@@ -92,7 +92,7 @@ def deleteGenome(species, name) :
 	return allGood
 
 def importGenome(packageFile, batchSize = 50, verbose = 0) :
-	"""Import a pyGeno genome package. A genome packages is a tar.gz ball that contains at it's root:
+	"""Import a pyGeno genome package. A genome packages is folder or a tar.gz ball that contains at it's root:
 
 	* gziped fasta files for all chromosomes, or URLs from where them must be downloaded
 	
@@ -134,7 +134,10 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 
 	printf('Importing genome package: %s... (This may take a while)' % packageFile)
 
-	packageDir = _decompressPackage(packageFile)
+	if not os.path.isdir(packageFile) :
+		packageDir = _decompressPackage(packageFile)
+	else :
+		packageDir = packageFile
 
 	parser = SafeConfigParser()
 	parser.read(os.path.normpath(packageDir+'/manifest.ini'))

@@ -2,7 +2,8 @@ Datawraps
 =========
 
 Datawraps are used by pyGeno to import data into it's database. All reference genomes are downloaded from Ensembl, dbSNP data from dbSNP.
-The :doc:`/bootstraping` module has functions to import datawraps shipped with pyGeno and also to import datawraps made available on remote location.
+The :doc:`/bootstraping` module has functions to import datawraps shipped with pyGeno.
+Datawraps can either be tar.gz.archives or folders.
 
 Importation
 -----------
@@ -39,7 +40,7 @@ For polymorphims, create a file called **manifest.ini** with the following forma
 	[snps]
 	filename = snps.txt # or http://www.example.com/snps.txt or ftp://www.example.com/snps.txt if you chose not to include the file in the archive
 
-And compress the **manifest.ini** file along sith the snps.txt (if you chose to include it and not to specify an url) into a tar.gz archive
+And compress the **manifest.ini** file along sith the snps.txt (if you chose to include it and not to specify an url) into a tar.gz archive.
 
 
 Natively pyGeno supports dbSNP and casava(snp.txt), but it also has its own polymorphism file format (AgnosticSNP) wich is simply a tab delemited file in the following format::

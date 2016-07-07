@@ -1,7 +1,7 @@
 Querying
 =========
 
-pyGeno is a personal database that you can query un many ways. Special emphasis has been placed upon ease of use, and you only need to remember two functions::
+pyGeno is a personal database that you can query in many ways. Special emphasis has been placed upon ease of use, and you only need to remember two functions::
 
 	* get()
 	* help()

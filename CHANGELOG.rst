@@ -1,6 +1,17 @@
-1.2.6
-====
+1.2.9
+=====
 
+* It is no longer mandatory to set the whole legend of CSV file at initialization. It can figure it out by itself
+
+* Datawraps can now be uncompressed folders
+
+* Explicit error message if there's no file name manifest.ini in datawrap
+
+
+1.2.8
+=====
+
+* Fixed BUG that prevented proper initialization and importation
 
 1.2.5
 =====

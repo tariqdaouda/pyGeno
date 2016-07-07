@@ -113,6 +113,7 @@ Contents:
    quickstart
    installation
    bootstraping
+   querying
    datawraps
    importation
    objects
