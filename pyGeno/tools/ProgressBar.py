@@ -93,7 +93,7 @@ class ProgressBar :
 				if snakeLen + voidLen < self.width :
 					snakeLen = self.width - voidLen
 				
-				self.bar = "%s %s[%s:>%s] %.2f%% (%d/%d) runtime: %s, remaing: %s, avg: %s" %(wheelState, slabel, "~-" * snakeLen, "  " * voidLen, ratio*100, self.currEpoch, self.nbEpochs, self.runtime_hr, self.remtime_hr, self.formatTime(self.avg))
+				self.bar = "%s %s[%s:>%s] %.2f%% (%d/%d) runtime: %s, remaining: %s, avg: %s" %(wheelState, slabel, "~-" * snakeLen, "  " * voidLen, ratio*100, self.currEpoch, self.nbEpochs, self.runtime_hr, self.remtime_hr, self.formatTime(self.avg))
 				if self.currEpoch == self.nbEpochs :
 					self.close()
 				
