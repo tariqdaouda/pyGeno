@@ -1,4 +1,4 @@
-import os, glob, gzip, tarfile, shutil, time, sys, gc, cPickle, tempfile, urllib
+import os, glob, gzip, tarfile, shutil, time, sys, gc, cPickle, tempfile, urllib2, contextlib
 from ConfigParser import SafeConfigParser
 
 from pyGeno.tools.ProgressBar import ProgressBar
@@ -43,7 +43,11 @@ def _getFile(fil, directory) :
 	if fil.find("http://") == 0 or fil.find("ftp://") == 0 :
 		printf("Downloading file: %s..." % fil)
 		finalFile = os.path.normpath('%s/%s' %(directory, fil.split('/')[-1]))
-		urllib.urlretrieve (fil, finalFile)
+		#urllib.urlretrieve (fil, finalFile)
+		with closing(urllib2.urlopen(fil)) as r:
+                    with open(finalFile, 'wb') as f:
+                        shutil.copyfileobj(r, f)
+		
 		printf('done.')
 	else :
 		finalFile = os.path.normpath('%s/%s' %(directory, fil))
