@@ -1,4 +1,5 @@
-import os, glob, gzip, tarfile, shutil, time, sys, gc, cPickle, tempfile, urllib2, contextlib
+import os, glob, gzip, tarfile, shutil, time, sys, gc, cPickle, tempfile, urllib2
+from contextlib import closing
 from ConfigParser import SafeConfigParser
 
 from pyGeno.tools.ProgressBar import ProgressBar
