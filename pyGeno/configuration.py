@@ -89,8 +89,8 @@ def pyGeno_init() :
 		os.makedirs(pyGeno_SETTINGS_DIR)
 	
 	pyGeno_SETTINGS_PATH = getSettingsPath()
-	pyGeno_RABA_DBFILE = os.path.normpath('%s/pyGenoRaba.db' % pyGeno_SETTINGS_PATH)
-	pyGeno_DATA_PATH = os.path.normpath('%s/data' % pyGeno_SETTINGS_PATH)
+	pyGeno_RABA_DBFILE = os.path.normpath( os.path.join(pyGeno_SETTINGS_PATH, "pyGenoRaba.db") )
+	pyGeno_DATA_PATH = os.path.normpath( os.path.join(pyGeno_SETTINGS_PATH, "data") )
 	
 	if not os.path.exists(pyGeno_SETTINGS_PATH) :
 		os.makedirs(pyGeno_SETTINGS_PATH)
