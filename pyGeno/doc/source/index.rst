@@ -12,10 +12,6 @@ pyGeno: A Python package for precision medicine and proteogenomics
    :alt: depsy
    :target: http://depsy.org/package/python/pyGeno
 
-.. image:: https://img.shields.io/pypi/dm/pyGeno.svg
-   :alt: downloads
-   :target: https://pypi.python.org/pypi/pyGeno
-
 pyGeno's `lair is on Github`_.
 
 .. _lair is on Github: http://www.github.com/tariqdaouda/pyGeno
@@ -114,8 +110,8 @@ Contents:
    installation
    bootstraping
    querying
-   datawraps
    importation
+   datawraps
    objects
    snp_filter
    tools

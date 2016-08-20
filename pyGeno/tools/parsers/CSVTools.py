@@ -1,5 +1,16 @@
 import os, types
 
+class EmptyLine(Exception) :
+	"""Raised when an empty or comment line is found (dealt with internally)"""
+
+	def __init__(self, lineNumber) :
+		message = "Empty line: #%d" % lineNumber 
+		Exception.__init__(self, message)
+		self.message = message
+
+	def __str__(self) :
+		return self.message
+
 def removeDuplicates(inFileName, outFileName) :
 	"""removes duplicated lines from a 'inFileName' CSV file, the results are witten in 'outFileName'"""
 	f = open(inFileName)
@@ -75,6 +86,9 @@ class CSVEntry(object) :
 			self.lineNumber = lineNumber
 			
 			tmpL = csvFile.lines[lineNumber].replace('\r', '\n').replace('\n', '')
+			if len(tmpL) == 0 or tmpL[0] in ["#", "\r", "\n", csvFile.lineSeparator] :
+				raise EmptyLine(lineNumber)
+
 			tmpData = tmpL.split(csvFile.separator)
 
 			tmpDatum = []
@@ -87,7 +101,7 @@ class CSVEntry(object) :
 						self.data.append(csvFile.separator.join(tmpDatum))
 						tmpDatum = []
 				else :
-					self.data.append(sd) 
+					self.data.append(sd)
 		else :
 			self.lineNumber = len(csvFile)
 			for i in range(len(self.csvFile.legend)) :
@@ -103,6 +117,7 @@ class CSVEntry(object) :
 			indice = self.csvFile.legend[key.lower()]
 		except KeyError :
 			raise KeyError("CSV File has no column: '%s'" % key)
+		
 		return self.data[indice]
 
 	def __setitem__(self, key, value) :
@@ -140,7 +155,7 @@ class CSVFile(object) :
 		f.save('myCSV.csv')		
 	"""
 	
-	def __init__(self, legend = [], separator = ',') :
+	def __init__(self, legend = [], separator = ',', lineSeparator = '\n') :
 		
 		self.legend = {}
 		if type(legend) is types.ListType :
@@ -164,6 +179,7 @@ class CSVFile(object) :
 		self.filename = ""
 		self.lines = []	
 		self.separator = separator
+		self.lineSeparator = lineSeparator
 		self.currentPos = -1
 	
 		self.streamFile = None
@@ -194,6 +210,7 @@ class CSVFile(object) :
 		f.close()
 		
 		self.separator = separator
+		self.lineSeparator = lineSeparator
 		self.stringSeparator = stringSeparator
 		self.legend = {}
 		
@@ -257,17 +274,25 @@ class CSVFile(object) :
 		self.keepInMemory = True
 
 	def _developLine(self, line) :
-		self.lines[line] = CSVEntry(self, line)
+		stop = False
+		while not stop :
+			try :
+				if self.lines[line].__class__ is not CSVEntry :
+					devL = CSVEntry(self, line)
+					stop = True
+				else :
+					stop = True
+			except EmptyLine as e :
+				del(self.lines[line])
+					
+		self.lines[line] = devL
 	
 	def get(self, line, key) :
-		if self.lines[line].__class__ is not CSVEntry :
-			self._developLine(line)
-		
+		self._developLine(line)
 		return self.lines[line][key]
 
 	def set(self, line, key, val) :
-		if self.lines[line].__class__ is not CSVEntry :
-			self._developLine(line)
+		self._developLine(line)
 		self.lines[line][key] = val
 	
 	def newLine(self) :
@@ -295,7 +320,7 @@ class CSVFile(object) :
 		s = [self.strLegend]
 		for l in self.lines :
 			s.append(str(l))
-		return '\n'.join(s)
+		return self.lineSeparator.join(s)
 	
 	def __iter__(self) :
 		self.currentPos = -1
@@ -305,7 +330,9 @@ class CSVFile(object) :
 		self.currentPos += 1
 		if self.currentPos >= len(self) :
 			raise StopIteration
-		return CSVEntry(self, self.currentPos)
+			
+		self._developLine(self.currentPos)
+		return self.lines[self.currentPos]
 	
 	def __getitem__(self, line) :
 		try :
