@@ -281,6 +281,7 @@ class CSVFile(object) :
 					devL = CSVEntry(self, line)
 					stop = True
 				else :
+					devL = self.lines[line]
 					stop = True
 			except EmptyLine as e :
 				del(self.lines[line])
