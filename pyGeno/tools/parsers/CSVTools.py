@@ -340,15 +340,18 @@ class CSVFile(object) :
 			if self.lines[line].__class__ is not CSVEntry :
 				self._developLine(line)
 		except AttributeError :
-			start, stop = line.start, line.stop
-			if start is None :
-				start = 0
-			
-			if stop is None :
-				stop = 0
+			for l in xrange(len(self.lines[line])) :
+				self._developLine(l + line.start)
 
-			for l in xrange(start, stop) :
-				self._developLine(l)
+			# start, stop = line.start, line.stop
+			# if start is None :
+			# 	start = 0
+			
+			# if stop is None :
+			# 	stop = 0
+
+			# for l in xrange(start, stop) :
+			# 	self._developLine(l)
 
 		return self.lines[line]
 
