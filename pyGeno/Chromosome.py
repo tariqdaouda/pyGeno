@@ -132,9 +132,6 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 			return f
 		
 		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
-	
-	def _load_bin_sequence(self) :
-		self.bin_sequence = NucBinarySequence(self.sequence)
 
 	def __getitem__(self, i) :
 		return self.sequence[i]
