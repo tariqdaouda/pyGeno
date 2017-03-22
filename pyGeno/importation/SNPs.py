@@ -63,6 +63,8 @@ def importSNPs(packageFile) :
 			return _importSNPs_CasavaSNP(setName, species, genomeSource, snpsFile)
 		elif typ.lower() == 'dbsnpsnp' :
 			return _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile)
+		elif typ.lower() == 'dbsnp' :
+			return _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile)
 		elif typ.lower() == 'tophatsnp' :
 			return _importSNPs_TopHatSNP(setName, species, genomeSource, snpsFile)
 		elif typ.lower() == 'agnosticsnp' :
