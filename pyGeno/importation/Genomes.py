@@ -181,6 +181,7 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 		chro.start = startChro
 		chro.end = startChro+length
 		startChro = chro.end
+		chro.save()
 	pBar.close()
 	
 	shutil.rmtree(packageDir)
@@ -369,12 +370,23 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 						store.exons[exonKey].frame = frame
 					elif regionType == 'stop_codon' :
 						if strand == '+' :
-							store.exons[exonKey].end += 3
 							if store.exons[exonKey].CDS_end != None :
 								store.exons[exonKey].CDS_end += 3
+								if store.exons[exonKey].end < store.exons[exonKey].CDS_end :
+									store.exons[exonKey].end = store.exons[exonKey].CDS_end
+								if store.transcripts[transId].end < store.exons[exonKey].CDS_end :
+									store.transcripts[transId].end = store.exons[exonKey].CDS_end
+								if store.genes[geneId].end < store.exons[exonKey].CDS_end :
+									store.genes[geneId].end = store.exons[exonKey].CDS_end
 						if strand == '-' :
 							if store.exons[exonKey].CDS_start != None :
 								store.exons[exonKey].CDS_start -= 3
+								if store.exons[exonKey].start > store.exons[exonKey].CDS_start :
+									store.exons[exonKey].start = store.exons[exonKey].CDS_start
+								if store.transcripts[transId].start > store.exons[exonKey].CDS_start :
+									store.transcripts[transId].start = store.exons[exonKey].CDS_start
+								if store.genes[geneId].start > store.exons[exonKey].CDS_start :
+									store.genes[geneId].start = store.exons[exonKey].CDS_start
 	pBar.close()
 	
 	store.batch_save()
