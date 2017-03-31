@@ -34,7 +34,15 @@ class Transcript_Raba(pyGenoRabaObject) :
 			self.name = self.name.upper()
 		
 		self.length = abs(self.end - self.start)
-		if self.exons[0].CDS_start is not None and self.exons[-1].CDS_end is not None :
+		have_CDS_start = False
+		have_CDS_end = False
+		for exon in self.exons :
+			if exon.CDS_start is not None :
+				have_CDS_start = True
+			if exon.CDS_end is not None :
+				have_CDS_end = True
+
+		if have_CDS_start and have_CDS_end :
 			self.coding = True
 		else :
 			self.coding = False
@@ -78,6 +86,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			return pyGenoRabaObjectWrapper.__setattr__(self, k, v)
 
 		sequence = []
+		self.data = []
 		cDNA = []
 		UTR5 = []
 		UTR3 = []
@@ -88,7 +97,8 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			self.exonsDict[(e.start, e.end)] = e
 			exons.append(e)
 			sequence.append(e.sequence)
-
+			self.data.extend(e.data)
+			
 			if e.hasCDS() :
 				UTR5.append(e.UTR5)
 				cDNA.append(e.CDS)
