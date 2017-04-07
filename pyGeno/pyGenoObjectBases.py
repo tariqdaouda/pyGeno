@@ -163,20 +163,22 @@ class pyGenoRabaObjectWrapper(object) :
 	def __getattr__(self, name) :
 		"""If a wrapper does not have a specific field, pyGeno will 
 		look for it in the wrapped_object"""
+		# print "pyGenoObjectBases __getattr__ : " + name + " from " + str(type(self))
+
 		
 		if name == 'save' or name == 'delete' :
 			raise AttributeError("You can't delete or save an object from wrapper, try .wrapped_object.delete()/save()")
 		
 		if name in self._load_sequencesTriggers and self.loadSequences :
 			self.loadSequences = False
-			self._load_sequences()
+			self._load_data()
 			return getattr(self, name)
 			
 		if name[:4] == 'bin_' and self.loadBinarySequences :
 			self.updateBinarySequence = False
 			self._load_bin_sequence()
 			return getattr(self, name)
-			
+		
 		attr = getattr(self.wrapped_object, name)
 		if isRabaObject(attr) :
 			attrKey = self._getObjBagKey(attr)
@@ -219,7 +221,17 @@ class pyGenoRabaObjectWrapper(object) :
 		"""Drops an index, the opposite of ensureGlobalIndex()"""
 		cls._wrapped_class.dropIndex(fields)
 
+	def getSequencesData(self) :
+		"""This lazy abstract function is only called if the object 
+		sequences need to be loaded"""
+		raise NotImplementedError("This fct loads non binary sequences and should be implemented in child if needed")
+
 	def _load_sequences(self) :
+		"""This lazy abstract function is only called if the object 
+		sequences need to be loaded"""
+		self._load_data()
+
+	def _load_data(self) :
 		"""This lazy abstract function is only called if the object 
 		sequences need to be loaded"""
 		raise NotImplementedError("This fct loads non binary sequences and should be implemented in child if needed")

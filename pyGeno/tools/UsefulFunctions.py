@@ -122,19 +122,21 @@ def complementTab(seq=[]):
                   'W': 'W', 'S': 'S', 'B': 'V', 'D': 'H', 'H': 'D', 'V': 'B', 'N': 'N', 'a': 't',
                   'c': 'g', 'g': 'c', 't': 'a', 'r': 'y', 'y': 'r', 'm': 'k', 'k': 'm', 'w': 'w',
                   's': 's', 'b': 'v', 'd': 'h', 'h': 'd', 'v': 'b', 'n': 'n'}
-    #Need manage '' for deletion
-    #Need manage 'ACT' for insertion
     seq_tmp = []
     for bps in seq:
         if len(bps) == 0:
+        	#Need manage '' for deletion
             seq_tmp.append('') 
         elif len(bps) == 1:
             seq_tmp.append(complement[bps])
         else:
-            for bp in bps:
-                seq_tmp.append(complement[bp])
+        	#Need manage 'ACT' for insertion
+        	#The insertion need to be reverse complement (like seq)
+            seq_tmp.append(reverseComplement(bps))
+            
     #Doesn't work in the second for when bps==''
     #seq = [complement[bp] if bp != '' else '' for bps in seq for bp in bps]
+
     return seq_tmp
 
 def reverseComplementTab(seq):
@@ -154,7 +156,8 @@ def complement(seq) :
 	tb = string.maketrans("ACGTRYMKWSBDHVNacgtrymkwsbdhvn",
 						  "TGCAYRKMWSVHDBNtgcayrkmwsvhdbn")
 	
-	return seq.translate(tb)
+	#just to be sure that seq isn't unicode
+	return str(seq).translate(tb)
 
 def translateDNA_6Frames(sequence) :
 	"""returns 6 translation of sequence. One for each reading frame"""

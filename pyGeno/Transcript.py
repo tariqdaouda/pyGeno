@@ -55,7 +55,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 	def __init__(self, *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 		self.exons = RLWrapper(self, Exon, self.wrapped_object.exons)
-		self._load_sequencesTriggers = set(["UTR5", "UTR3", "cDNA", "sequence"])
+		self._load_sequencesTriggers = set(["UTR5", "UTR3", "cDNA", "sequence", "data"])
 		self.exonsDict = {}
 	
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
@@ -78,14 +78,13 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		
 		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 		
-	def _load_sequences(self) :
+	def _load_data(self) :
 		def getV(k) :
 			return pyGenoRabaObjectWrapper.__getattribute__(self, k)
 
 		def setV(k, v) :
 			return pyGenoRabaObjectWrapper.__setattr__(self, k, v)
 
-		sequence = []
 		self.data = []
 		cDNA = []
 		UTR5 = []
@@ -96,21 +95,20 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			e = pyGenoRabaObjectWrapper_metaclass._wrappers[Exon_Raba](wrapped_object_and_bag = (ee, getV('bagKey')))
 			self.exonsDict[(e.start, e.end)] = e
 			exons.append(e)
-			sequence.append(e.sequence)
 			self.data.extend(e.data)
 			
 			if e.hasCDS() :
-				UTR5.append(e.UTR5)
-				cDNA.append(e.CDS)
-				UTR3.append(e.UTR3)
+				UTR5.append(''.join(e.UTR5))
+				cDNA.append(''.join(e.CDS))
+				UTR3.append(''.join(e.UTR3))
 				prime5 = False
 			else :
 				if prime5 :
-					UTR5.append(e.sequence)
+					UTR5.append(''.join(e.data))
 				else :
-					UTR3.append(e.sequence)
+					UTR3.append(''.join(e.data))
 		
-		sequence = ''.join(sequence)
+		sequence = ''.join(self.data)
 		cDNA = ''.join(cDNA)
 		UTR5 = ''.join(UTR5)
 		UTR3 = ''.join(UTR3)
