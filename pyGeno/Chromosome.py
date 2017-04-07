@@ -1,4 +1,7 @@
-import copy
+#import copy
+#import types
+#from tools import UsefulFunctions as uf
+
 from types import *
 import configuration as conf
 from pyGenoObjectBases import *
@@ -10,10 +13,7 @@ from rabaDB.filters import RabaQuery
 import rabaDB.fields as rf
 
 from tools.SecureMmap import SecureMmap as SecureMmap
-from tools import UsefulFunctions as uf
 from tools import SingletonManager
-
-import types
 
 import pyGeno.configuration as conf
 
@@ -30,7 +30,7 @@ class ChrosomeSequence(object) :
 	def setSNPFilter(self, SNPFilter) :
 		self.SNPFilter = SNPFilter
 	
-	def _getSequence(self, slic) :
+	def getSequenceData(self, slic) :
 		data = self.data[slic]
 		SNPTypes = self.chromosome.genome.SNPTypes
 		
@@ -63,15 +63,26 @@ class ChrosomeSequence(object) :
 			# print sequenceModifier.alleles
 			if sequenceModifier is not None :
 				if sequenceModifier.__class__ is SF.SequenceDel :
-					data = data[:seqPos] + data[seqPos + sequenceModifier.length:]
+					seqPos = seqPos + sequenceModifier.offset
+					#change the length of the sequence who can create some bug or side effect
+					#data = data[:seqPos] + data[seqPos + sequenceModifier.length:]
+					data[seqPos:(seqPos + sequenceModifier.length)] = [''] * sequenceModifier.length
+					#raise TypeError("STOP!!!!!")
+
 				elif sequenceModifier.__class__ is SF.SequenceSNP :
 					data[seqPos] = sequenceModifier.alleles
 				elif sequenceModifier.__class__ is SF.SequenceInsert :
-					data[seqPos] = "%s%s" % (sequenceModifier.bases, data[seqPos])
+					seqPos = seqPos + sequenceModifier.offset
+					data[seqPos] = "%s%s" % (data[seqPos], sequenceModifier.bases)
+					#raise TypeError("STOP!!!!!")
 				else :
 					raise TypeError("sequenceModifier on chromosome: %s starting at: %s is of unknown type: %s" % (self.chromosome.number, snp.start, sequenceModifier.__class__))
+
+		return data
+	
+	def _getSequence(self, slic) :
 		# print data
-		return ''.join(data)
+		return ''.join(self.getSequenceData(slic))
 
 	def __getitem__(self, i) :
 		return self._getSequence(i)
@@ -115,6 +126,9 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 		self.sequence = ChrosomeSequence(datMap, self)
 		self.refSequence = ChrosomeSequence(datMap, self, refOnly = True)
 		self.loadSequences = False
+
+	def getSequenceData(self, slic) :
+		return self.sequence.getSequenceData(slic)
 
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
 		if issubclass(objectType, SNP_INDEL) :

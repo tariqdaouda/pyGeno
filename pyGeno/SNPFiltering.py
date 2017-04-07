@@ -33,8 +33,10 @@ class SequenceInsert(Sequence_modifiers) :
 		# Allow to use format like C/CCTGGAA(dbSNP) or CCT/CCTGGAA(samtools)
 		if ref != '-':
 			if ref == bases[:len(ref)]:
-				self.offset = len(ref)
+				self.offset = len(ref) 
 				self.bases = self.bases[self.offset:]
+				#-1 because if the insertion are after the last nuc we go out of table
+				self.offset -= 1
 			else:
 				raise NotImplemented("This format of Insetion is not accepted. Please change your format, or implement your format in pyGeno.")
 
