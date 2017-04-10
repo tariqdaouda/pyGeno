@@ -64,25 +64,20 @@ class ChrosomeSequence(object) :
 			if sequenceModifier is not None :
 				if sequenceModifier.__class__ is SF.SequenceDel :
 					seqPos = seqPos + sequenceModifier.offset
-					#change the length of the sequence who can create some bug or side effect
-					#data = data[:seqPos] + data[seqPos + sequenceModifier.length:]
+					#To avoid to change the length of the sequence who can create some bug or side effect
 					data[seqPos:(seqPos + sequenceModifier.length)] = [''] * sequenceModifier.length
-					#raise TypeError("STOP!!!!!")
-
 				elif sequenceModifier.__class__ is SF.SequenceSNP :
 					data[seqPos] = sequenceModifier.alleles
 				elif sequenceModifier.__class__ is SF.SequenceInsert :
 					seqPos = seqPos + sequenceModifier.offset
 					data[seqPos] = "%s%s" % (data[seqPos], sequenceModifier.bases)
-					#raise TypeError("STOP!!!!!")
 				else :
 					raise TypeError("sequenceModifier on chromosome: %s starting at: %s is of unknown type: %s" % (self.chromosome.number, snp.start, sequenceModifier.__class__))
 
 		return data
 	
 	def _getSequence(self, slic) :
-		# print data
-		return ''.join(self.getSequenceData(slic))
+		return ''.join(self.getSequenceData())[slic]
 
 	def __getitem__(self, i) :
 		return self._getSequence(i)
