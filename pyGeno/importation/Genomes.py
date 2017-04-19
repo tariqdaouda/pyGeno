@@ -181,6 +181,7 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 		chro.start = startChro
 		chro.end = startChro+length
 		startChro = chro.end
+		chro.save()
 	pBar.close()
 	
 	shutil.rmtree(packageDir)
