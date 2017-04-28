@@ -55,7 +55,7 @@ class Protein(pyGenoRabaObjectWrapper) :
 		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 	
 	def _load_sequences(self) :
-		self.sequence = uf.translateDNA(self.transcript.cDNA[:-3])
+		self.sequence = uf.translateDNA(self.transcript.cDNA).rstrip('*')
 	
 	def getSequence(self):
 		return self.sequence
