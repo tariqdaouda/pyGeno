@@ -86,6 +86,7 @@ class pyGenoRabaObjectWrapper(object) :
 
 		self._load_sequencesTriggers = set()
 		self.loadSequences = True
+		self.loadData = True
 		self.loadBinarySequences = True
 
 	def _getObjBagKey(self, obj) :
@@ -171,6 +172,11 @@ class pyGenoRabaObjectWrapper(object) :
 		
 		if name in self._load_sequencesTriggers and self.loadSequences :
 			self.loadSequences = False
+			self._load_sequences()
+			return getattr(self, name)
+
+		if name in self._load_sequencesTriggers and self.loadData :
+			self.loadData = False
 			self._load_data()
 			return getattr(self, name)
 			
