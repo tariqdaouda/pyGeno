@@ -161,15 +161,10 @@ def complement(seq) :
 
 def translateDNA_6Frames(sequence) :
 	"""returns 6 translation of sequence. One for each reading frame"""
-	trans = (
-				translateDNA(sequence, 'f1'),
-				translateDNA(sequence, 'f2'),
-				translateDNA(sequence, 'f3'),
-
-				translateDNA(sequence, 'r1'),
-				translateDNA(sequence, 'r2'),
-				translateDNA(sequence, 'r3'),
-			)
+	trans, d, p = (), ['f', 'r'], ['1', '2', '3']
+	for i in d:
+		for j in p:
+			trans += (translateDNA(sequence, i + j),)	
 
 	return trans
 
