@@ -307,17 +307,11 @@ def decodePolymorphicNucleotide_str(nuc) :
 def getNucleotideCodon(sequence, x1) :
 	"""Returns the entire codon of the nucleotide at pos x1 in sequence, 
 	and the position of that nocleotide in the codon in a tuple"""
-
-	if x1 < 0 or x1 >= len(sequence) :
-		return None
-
-	p = x1%3
-	if p == 0 :
-		return (sequence[x1: x1+3], 0)
-	elif p ==1 :
-		return (sequence[x1-1: x1+2], 1)
-	elif p == 2 :
-		return (sequence[x1-2: x1+1], 2)
+	r = None
+	if -1 < x1 < len(sequence):
+		p = x1 % 3
+		r = (sequence[x1 - p : x1 + 3 - p], p)
+	return r
 
 def showDifferences(seq1, seq2) :
 	"""Returns a string highligthing differences between seq1 and seq2:
