@@ -383,7 +383,7 @@ def highlightSubsequence(sequence, x1, x2, start=' [', stop = '] ') :
 	in bewteen 'start' and 'stop'"""
 
 	seq = list(sequence)
-	print(x1, x2-1, len(seq))
+	print(x1, x2-1, len(seq)) #??
 	seq[x1] = start + seq[x1]
 	seq[x2-1] = seq[x2-1] + stop
 	return ''.join(seq)
