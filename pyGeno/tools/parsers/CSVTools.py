@@ -1,4 +1,4 @@
-import os, types
+import os, types, collections
 
 class EmptyLine(Exception) :
 	"""Raised when an empty or comment line is found (dealt with internally)"""
@@ -111,6 +111,19 @@ class CSVEntry(object) :
 		"""commits the line so it is added to a file stream"""
 		self.csvFile.commitLine(self)
 
+	def __iter__(self) :
+		self.currentField = -1
+		return self
+	
+	def next(self) :
+		self.currentField += 1
+		if self.currentField >= len(self.csvFile.legend) :
+			raise StopIteration
+			
+		k = self.csvFile.legend.keys()[self.currentField]
+		v = self.data[self.currentField]
+		return k, v
+
 	def __getitem__(self, key) :
 		"""Returns the value of field 'key'"""
 		try :
@@ -152,29 +165,21 @@ class CSVFile(object) :
 		l = f.newLine()
 		l['name'] = 'toto'
 		l['email'] = "hop@gmail.com"
+		
+		for field, value in l :
+			print field, value
+
 		f.save('myCSV.csv')		
 	"""
 	
 	def __init__(self, legend = [], separator = ',', lineSeparator = '\n') :
 		
-		self.legend = {}
-		if type(legend) is types.ListType :
-			for i in range(len(legend)) :
-				if legend[i].lower() in self.legend :
-					raise  ValueError("%s is already in the legend" % legend[i].lower())
-				self.legend[legend[i].lower()] = i
-			self.strLegend = separator.join(legend)
-
-		elif type(legend) is types.DictType :
-			self.strLegend = []
-			for k in legend :
-				if k.lower() in self.legend :
-					raise  ValueError("%s is already in the legend" % k.lower())
-				self.legend[k.lower()] = legend[k]
-				self.strLegend.insert(legend[k], k.lower())
-			self.strLegend = separator.join(self.strLegend)
-		else :
-			raise ValueError("Unsupported type for legend (not list nor dict)")
+		self.legend = collections.OrderedDict()
+		for i in range(len(legend)) :
+			if legend[i].lower() in self.legend :
+				raise  ValueError("%s is already in the legend" % legend[i].lower())
+			self.legend[legend[i].lower()] = i
+		self.strLegend = separator.join(legend)
 
 		self.filename = ""
 		self.lines = []	
@@ -212,7 +217,7 @@ class CSVFile(object) :
 		self.separator = separator
 		self.lineSeparator = lineSeparator
 		self.stringSeparator = stringSeparator
-		self.legend = {}
+		self.legend = collections.OrderedDict()
 		
 		i = 0
 		for c in self.lines[0].lower().replace(stringSeparator, '').split(separator) :
