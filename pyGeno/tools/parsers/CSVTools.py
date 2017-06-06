@@ -227,8 +227,8 @@ class CSVFile(object) :
 			i+=1
 	
 		self.strLegend = self.lines[0].replace('\r', '\n').replace('\n', '')
-		sk = skipLines
-		for l in lines :
+		sk = skipLines+1
+		for l in self.lines :
 			if l[0] == "#" :
 				sk += 1
 			else :
@@ -237,6 +237,7 @@ class CSVFile(object) :
 		self.header = self.lines[:sk]
 		self.lines = self.lines[sk:]
 	
+
 	def streamToFile(self, filename, keepInMemory = False, writeRate = 1) :
 		"""Starts a stream to a file. Every line must be committed (l.commit()) to be appended in to the file.
 
