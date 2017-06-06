@@ -202,7 +202,7 @@ class CSVFile(object) :
 		else :
 			self.strLegend += field
 			
-	def parse(self, filePath, separator = ',', stringSeparator = '"', lineSeparator = '\n') :
+	def parse(self, filePath, skipLines=0, separator = ',', stringSeparator = '"', lineSeparator = '\n') :
 		"""Loads a CSV file"""
 		
 		self.filename = filePath
@@ -227,7 +227,15 @@ class CSVFile(object) :
 			i+=1
 	
 		self.strLegend = self.lines[0].replace('\r', '\n').replace('\n', '')
-		self.lines = self.lines[1:]
+		sk = skipLines
+		for l in lines :
+			if l[0] == "#" :
+				sk += 1
+			else :
+				break
+
+		self.header = self.lines[:sk]
+		self.lines = self.lines[sk:]
 	
 	def streamToFile(self, filename, keepInMemory = False, writeRate = 1) :
 		"""Starts a stream to a file. Every line must be committed (l.commit()) to be appended in to the file.
