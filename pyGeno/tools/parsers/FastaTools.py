@@ -76,7 +76,13 @@ class FastaFile(object) :
 	
 	def next(self) :
 		#self to call getitem, and split he line if necessary
-		return self[self.currentPos]
+		i = self.currentPos +1
+		#print i-1, self.currentPos
+		if i > len(self) :
+			raise StopIteration()
+			
+		self.currentPos = i
+		return self[self.currentPos-1]
 
 	def __getitem__(self, i) :
 		"""returns the ith entry"""
