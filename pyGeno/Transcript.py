@@ -1,14 +1,14 @@
-import configuration as conf
+from . import configuration as conf
 
-from pyGenoObjectBases import *
+from .pyGenoObjectBases import *
 
 import rabaDB.fields as rf
 
-from tools import UsefulFunctions as uf
-from Exon import *
-from SNP import SNP_INDEL
+from .tools import UsefulFunctions as uf
+from .Exon import *
+from .SNP import SNP_INDEL
 
-from tools.BinarySequence import NucBinarySequence
+from .tools.BinarySequence import NucBinarySequence
 
 
 class Transcript_Raba(pyGenoRabaObject):
@@ -31,7 +31,7 @@ class Transcript_Raba(pyGenoRabaObject):
     exons = rf.Relation('Exon_Raba')
 
     def _curate(self):
-        if self.name != None:
+        if self.name is not None:
             self.name = self.name.upper()
 
         self.length = abs(self.end - self.start)
@@ -64,24 +64,22 @@ class Transcript(pyGenoRabaObjectWrapper):
     def _makeLoadQuery(self, objectType, *args, **coolArgs):
         if issubclass(objectType, SNP_INDEL):
             # conf.db.enableDebug(True)
-            f = RabaQuery(
-                objectType, namespace=self._wrapped_class._raba_namespace)
+            f = RabaQuery(bjectType, namespace=self._wrapped_class._raba_namespace)
             coolArgs['species'] = self.genome.species
             coolArgs['chromosomeNumber'] = self.chromosome.number
             coolArgs['start >='] = self.start
             coolArgs['start <'] = self.end
 
-            if len(args) > 0 and type(args[0]) is types.ListType:
+            if len(args) > 0 and isinstance(args[0], list):
                 for a in args[0]:
-                    if type(a) is types.DictType:
+                    if isinstance(a, dict):
                         f.addFilter(**a)
             else:
                 f.addFilter(*args, **coolArgs)
 
             return f
 
-        return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args,
-                                                      **coolArgs)
+        return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 
     def _load_data(self):
         def getV(k):
@@ -136,7 +134,8 @@ class Transcript(pyGenoRabaObjectWrapper):
         self.bin_UTR3 = NucBinarySequence(self.UTR3)
 
     def getNucleotideCodon(self, cdnaX1):
-        """Returns the entire codon of the nucleotide at pos cdnaX1 in the cdna, and the position of that nocleotide in the codon"""
+        """Returns the entire codon of the nucleotide at pos cdnaX1 in the
+        cdna, and the position of that nocleotide in the codon"""
         return uf.getNucleotideCodon(self.cDNA, cdnaX1)
 
     def getCodon(self, i):
