@@ -29,17 +29,17 @@ class Exon_Raba(pyGenoRabaObject):
     protein = rf.RabaObject('Protein_Raba')
 
     def _curate(self):
-        if self.start != None and self.end != None:
+        if self.start is not None and self.end is not None:
             if self.start > self.end:
                 self.start, self.end = self.end, self.start
             self.length = self.end - self.start
 
-        if self.CDS_start != None and self.CDS_end != None:
+        if self.CDS_start is not None and self.CDS_end is not None:
             if self.CDS_start > self.CDS_end:
                 self.CDS_start, self.CDS_end = self.CDS_end, self.CDS_start
             self.CDS_length = self.CDS_end - self.CDS_start
 
-        if self.number != None:
+        if self.number is not None:
             self.number = int(self.number)
 
         if not self.frame or self.frame == '.':
@@ -60,24 +60,22 @@ class Exon(pyGenoRabaObjectWrapper):
 
     def _makeLoadQuery(self, objectType, *args, **coolArgs):
         if issubclass(objectType, SNP_INDEL):
-            f = RabaQuery(
-                objectType, namespace=self._wrapped_class._raba_namespace)
+            f = RabaQuery(objectType, namespace=self._wrapped_class._raba_namespace)
             coolArgs['species'] = self.genome.species
             coolArgs['chromosomeNumber'] = self.chromosome.number
             coolArgs['start >='] = self.start
             coolArgs['start <'] = self.end
 
-            if len(args) > 0 and type(args[0]) is types.ListType:
+            if len(args) > 0 and isinstance(args[0], list):
                 for a in args[0]:
-                    if type(a) is types.DictType:
+                    if isinstance(a, dict):
                         f.addFilter(**a)
             else:
                 f.addFilter(*args, **coolArgs)
 
             return f
 
-        return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args,
-                                                      **coolArgs)
+        return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 
     def _load_data(self):
         data = self.chromosome.getSequenceData(slice(self.start, self.end))
@@ -117,7 +115,7 @@ class Exon(pyGenoRabaObjectWrapper):
 
     def hasCDS(self):
         """returns true or false depending on if the exon has a CDS"""
-        if self.CDS_start != None and self.CDS_end != None:
+        if self.CDS_start is not None and self.CDS_end is not None:
             return True
         return False
 
@@ -129,21 +127,23 @@ class Exon(pyGenoRabaObjectWrapper):
         """return the position of the first occurance of sequence"""
         return self.bin_sequence.find(sequence)
 
-    def findAll(self, seqence):
-        """Returns a lits of all positions where sequence was found"""
+    def findAll(self, sequence):
+        """Returns a list of all positions where sequence was found"""
         return self.bin_sequence.findAll(sequence)
 
     def findInCDS(self, sequence):
         """return the position of the first occurance of sequence"""
         return self.bin_CDS.find(sequence)
 
-    def findAllInCDS(self, seqence):
+    def findAllInCDS(self, sequence):
         """Returns a lits of all positions where sequence was found"""
         return self.bin_CDS.findAll(sequence)
 
     def pluck(self):
-        """Returns a plucked object. Plucks the exon off the tree, set the value of self.transcript into str(self.transcript). This effectively disconnects the object and
-		makes it much more lighter in case you'd like to pickle it"""
+        """Returns a plucked object. Plucks the exon off the tree, set the
+        value of self.transcript into str(self.transcript). This effectively
+        disconnects the object and makes it much more lighter in case you'd
+        like to pickle it"""
         e = copy.copy(self)
         e.transcript = str(self.transcript)
         return e
@@ -156,7 +156,8 @@ class Exon(pyGenoRabaObjectWrapper):
             return None
 
     def previousExon(self):
-        """Returns the previous exon of the transcript, or None if there is none"""
+        """Returns the previous exon of the transcript, or None if there is
+        none"""
 
         if self.number == 0:
             return None
@@ -167,7 +168,7 @@ class Exon(pyGenoRabaObjectWrapper):
             return None
 
     def __str__(self):
-        return """EXON, id %s, number: %s, (start, end): (%s, %s), cds: (%s, %s) > %s""" % (
+        return "EXON, id %s, number: %s, (start, end): (%s, %s), cds: (%s, %s) > %s" % (
             self.id, self.number, self.start, self.end, self.CDS_start,
             self.CDS_end, str(self.transcript))
 
