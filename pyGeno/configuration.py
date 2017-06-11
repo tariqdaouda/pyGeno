@@ -1,7 +1,7 @@
 import sys
 import os
 import time
-from ConfigParser import SafeConfigParser
+from six.moves.configparser import SafeConfigParser
 import rabaDB.rabaSetup
 import rabaDB.Raba
 
