@@ -1,12 +1,12 @@
-import configuration as conf
+from . import configuration as conf
 
-from pyGenoObjectBases import *
-from SNP import SNP_INDEL
+from .pyGenoObjectBases import *
+from .SNP import SNP_INDEL
 
 import rabaDB.fields as rf
 
-from tools import UsefulFunctions as uf
-from tools.BinarySequence import AABinarySequence
+from .tools import UsefulFunctions as uf
+from .tools.BinarySequence import AABinarySequence
 
 
 class Protein_Raba(pyGenoRabaObject):
