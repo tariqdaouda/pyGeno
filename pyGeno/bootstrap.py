@@ -13,12 +13,12 @@ def listRemoteDatawraps(location = conf.pyGeno_REMOTE_LOCATION) :
 	loc = location + "/datawraps.json"
 	response = urllib2.urlopen(loc)
 	js = json.loads(response.read())
-	
+
 	return js
 
 def printRemoteDatawraps(location = conf.pyGeno_REMOTE_LOCATION) :
 	"""
-		print all available datawraps from a remote location the location must have a datawraps.json in the following format::
+		print all available datawraps from a remote location the location must have a datawraps.json in the following format:
 
 			{
 			"Ordered": {
@@ -39,16 +39,16 @@ def printRemoteDatawraps(location = conf.pyGeno_REMOTE_LOCATION) :
 				}
 			}
 		}
-		
+
 	"""
-	
+
 	l = listRemoteDatawraps(location)
 	printf("Available datawraps for bootstraping\n")
 	print json.dumps(l["Ordered"], sort_keys=True, indent=4, separators=(',', ': '))
 
 def _DW(name, url) :
 	packageDir = tempfile.mkdtemp(prefix = "pyGeno_remote_")
-	
+
 	printf("~~~:>\n\tDownloading datawrap: %s..." % name)
 	finalFile = os.path.normpath('%s/%s' %(packageDir, name))
 	urllib.urlretrieve (url, finalFile)
@@ -81,7 +81,7 @@ def listDatawraps() :
 	for f in os.listdir(os.path.join(this_dir, "bootstrap_data/genomes")) :
 		if f.find(".tar.gz") > -1 :
 			l["Genomes"].append(f)
-	
+
 	for f in os.listdir(os.path.join(this_dir, "bootstrap_data/SNPs")) :
 		if f.find(".tar.gz") > -1 :
 			l["SNPs"].append(f)
