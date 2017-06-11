@@ -1,15 +1,15 @@
 import six
-import configuration as conf
+from . import configuration as conf
 import pyGeno.tools.UsefulFunctions as uf
-from pyGenoObjectBases import *
+from .pyGenoObjectBases import *
 
-from Chromosome import Chromosome
-from Gene import Gene
-from Transcript import Transcript
-from Protein import Protein
-from Exon import Exon
-import SNPFiltering as SF
-from SNP import *
+from . import SNPFiltering as SF
+from .Chromosome import Chromosome
+from .Gene import Gene
+from .Transcript import Transcript
+from .Protein import Protein
+from .Exon import Exon
+from .SNP import *
 
 import rabaDB.fields as rf
 
