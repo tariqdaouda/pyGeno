@@ -18,7 +18,7 @@ For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 .. _IRIC: http://www.iric.ca
 .. _Sawssan Kaddoura: http://www.sawssankaddoura.com
 
-Click here for The `full documentation`_.
+Click here for the `full documentation`_.
 
 .. _full documentation: http://pygeno.iric.ca/
 
