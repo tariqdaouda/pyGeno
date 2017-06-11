@@ -1,8 +1,8 @@
 import os
 import tempfile
-import urllib
-import urllib2
 import json
+import six
+import six.moves.urllib.request as urllib
 
 import pyGeno.importation.Genomes as PG
 import pyGeno.importation.SNPs as PS
@@ -15,7 +15,7 @@ this_dir, this_filename = os.path.split(__file__)
 def listRemoteDatawraps(location=conf.pyGeno_REMOTE_LOCATION):
     """Lists all the datawraps availabe from a remote a remote location."""
     loc = location + "/datawraps.json"
-    response = urllib2.urlopen(loc)
+    response = urllib.urlopen(loc)
     js = json.loads(response.read())
 
     return js
@@ -107,7 +107,7 @@ def printDatawraps():
     """print all available datawraps for bootstraping"""
     l = listDatawraps()
     printf("Available datawraps for boostraping\n")
-    for k, v in l.iteritems():
+    for k, v in six.iteritems(l):
         printf(k)
         printf("~" * len(k) + "|")
         for vv in v:
