@@ -1,19 +1,16 @@
-#import copy
-#import types
-#from tools import UsefulFunctions as uf
+import six
 
-from types import *
-import configuration as conf
-from pyGenoObjectBases import *
+from . import configuration as conf
+from .pyGenoObjectBases import *
 
-from SNP import *
-import SNPFiltering as SF
+from .SNP import *
+from . import SNPFiltering as SF
 
 from rabaDB.filters import RabaQuery
 import rabaDB.fields as rf
 
-from tools.SecureMmap import SecureMmap as SecureMmap
-from tools import SingletonManager
+from .tools.SecureMmap import SecureMmap as SecureMmap
+from .tools import SingletonManager
 
 import pyGeno.configuration as conf
 
@@ -40,7 +37,7 @@ class ChrosomeSequence(object):
             return data
 
         iterators = []
-        for setName, SNPType in SNPTypes.iteritems():
+        for setName, SNPType in six.iteritems(SNPTypes):
             f = RabaQuery(
                 str(SNPType), namespace=self.chromosome._raba_namespace)
             f.addFilter({
@@ -64,7 +61,7 @@ class ChrosomeSequence(object):
                     polys[poly.start][poly.setName] = poly
 
         data = list(data)
-        for start, setPolys in polys.iteritems():
+        for start, setPolys in six.iteritems(polys):
 
             seqPos = start - slic.start
             sequenceModifier = self.SNPFilter.filter(self.chromosome,
@@ -149,9 +146,9 @@ class Chromosome(pyGenoRabaObjectWrapper):
             coolArgs['species'] = self.genome.species
             coolArgs['chromosomeNumber'] = self.number
 
-            if len(args) > 0 and type(args[0]) is types.ListType:
+            if len(args) > 0 and isinstance(args[0], list):
                 for a in args[0]:
-                    if type(a) is types.DictType:
+                    if isinstance(a, dict):
                         f.addFilter(**a)
             else:
                 f.addFilter(*args, **coolArgs)
