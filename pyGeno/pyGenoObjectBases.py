@@ -1,6 +1,7 @@
 import time
+from six import add_metaclass
 
-import configuration as conf
+from . import configuration as conf
 from rabaDB.rabaSetup import *
 from rabaDB.Raba import *
 from rabaDB.filters import RabaQuery
@@ -69,12 +70,12 @@ class RLWrapper(object):
         return getattr(rl, name)
 
 
+@add_metaclass(pyGenoRabaObjectWrapper_metaclass)
 class pyGenoRabaObjectWrapper(object):
     """All the wrapper classes such as Genome and Chromosome inherit
     from this class. It has most that make pyGeno useful, such as
     get(), count(), ensureIndex(). This class is to be considered
     abstract, and is not meant to be instanciated"""
-    __metaclass__ = pyGenoRabaObjectWrapper_metaclass
 
     _wrapped_class = None
     _bags = {}
