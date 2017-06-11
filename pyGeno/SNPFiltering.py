@@ -1,6 +1,7 @@
+import six
 from . import configuration as conf
 
-from tools import UsefulFunctions as uf
+from .tools import UsefulFunctions as uf
 
 
 class Sequence_modifiers(object):
@@ -125,7 +126,7 @@ class DefaultSNPFilter(SNPFilter):
 
         sources = {}
         alleles = []
-        for snpSet, snp in kwargs.iteritems():
+        for snpSet, snp in six.iteritems(kwargs):
             pos = snp.start
             if snp.alt[0] == '-':
                 pass
