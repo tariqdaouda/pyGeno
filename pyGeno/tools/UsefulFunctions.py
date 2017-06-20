@@ -63,10 +63,23 @@ humanCodonRatios = {'CTT': 0.013880302580651288, 'ACC': 0.017916263496731935, 'A
 synonymousCodonsFrequencies = {'A': {'GCA': 0.24472833804337418, 'GCC': 0.38180943946027124, 'GCT': 0.2748297757275403, 'GCG': 0.09863244676881429}, 'C': {'TGC': 0.5274613220815753, 'TGT': 0.47253867791842474}, 'E': {'GAG': 0.5542731864894314, 'GAA': 0.44572681351056864}, 'D': {'GAT': 0.48745614313610314, 'GAC': 0.5125438568638969}, 'G': {'GGT': 0.1682082284016543, 'GGG': 0.24240206742876733, 'GGA': 0.26795045906236126, 'GGC': 0.3214392451072171}, 'F': {'TTC': 0.51760124870901, 'TTT': 0.48239875129098997}, 'I': {'ATT': 0.3744155479793762, 'ATC': 0.4473324534485262, 'ATA': 0.17825199857209761}, 'H': {'CAC': 0.5593224017231121, 'CAT': 0.4406775982768879}, 'K': {'AAG': 0.552763002048904, 'AAA': 0.44723699795109595}, '*': {'TAG': 0.19233348084375965, 'TGA': 0.5562081774416328, 'TAA': 0.25145834171460757}, 'M': {'ATG': 1.0}, 'L': {'CTT': 0.14142445416797428, 'CTG': 0.37916443861342136, 'CTA': 0.07490652981477404, 'CTC': 0.18548840407837594, 'TTA': 0.08364882247135866, 'TTG': 0.13536735085409574}, 'N': {'AAT': 0.48946102144446174, 'AAC': 0.5105389785555383}, 'Q': {'CAA': 0.27844698705060605, 'CAG': 0.721553012949394}, 'P': {'CCT': 0.29583684315158226, 'CCG': 0.1076409230535928, 'CCA': 0.2909924451987384, 'CCC': 0.30552978859608654}, 'S': {'TCT': 0.19052256484488883, 'AGC': 0.23307146458142142, 'TCG': 0.05229964811768493, 'AGT': 0.15764260007543762, 'TCC': 0.2059139249534016, 'TCA': 0.1605497974271656}, 'R': {'AGG': 0.21322832103906786, 'CGC': 0.16586259289315397, 'CGG': 0.19570924878057572, 'CGA': 0.11330250857089251, 'AGA': 0.2296552676219967, 'CGT': 0.0822420610943132}, 'T': {'ACC': 0.33621349966301256, 'ACA': 0.2967846446949689, 'ACG': 0.10993573358004469, 'ACT': 0.2570661220619738}, 'W': {'TGG': 1.0}, 'V': {'GTA': 0.12674172810489015, 'GTC': 0.230566755353321, 'GTT': 0.19472010868151218, 'GTG': 0.44797140786027667}, 'Y': {'TAT': 0.46315236005272553, 'TAC': 0.5368476399472745}}
 
 
-codonTable = {
+# Translation tables
+# Ref: https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
+translTable = dict()
+
+# Standard Code (translTable_id=1)
+translTable[1] = {
 'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C',
 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C',
 'TTA' : 'L', 'TCA' : 'S', 'TAA' : '*', 'TGA' : '*',
+'GGT' : 'G', 'GGC' : 'G', 'GGA' : 'G', 'GGG' : 'G'
+}
+
+# Vertebrate Mitochondrial Code (translTable_id=2)
+translTable[2] = {
+'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C',
+'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C',
+'TTA' : 'L', 'TCA' : 'S', 'TAA' : '*', 'TGA' : 'W',
 'TTG' : 'L', 'TCG' : 'S', 'TAG' : '*', 'TGG' : 'W',
 
 'CTT' : 'L', 'CTC' : 'L', 'CTA' : 'L', 'CTG' : 'L',
@@ -74,16 +87,17 @@ codonTable = {
 'CAT' : 'H', 'CAC' : 'H', 'CAA' : 'Q', 'CAG' : 'Q',
 'CGT' : 'R', 'CGC' : 'R', 'CGA' : 'R', 'CGG' : 'R',
 
-'ATT' : 'I', 'ATC' : 'I', 'ATA' : 'I', 'ATG' : 'M',
+'ATT' : 'I', 'ATC' : 'I', 'ATA' : 'M', 'ATG' : 'M',
 'ACT' : 'T', 'ACC' : 'T', 'ACA' : 'T', 'ACG' : 'T',
 'AAT' : 'N', 'AAC' : 'N', 'AAA' : 'K', 'AAG' : 'K',
-'AGT' : 'S', 'AGC' : 'S', 'AGA' : 'R', 'AGG' : 'R',
+'AGT' : 'S', 'AGC' : 'S', 'AGA' : '*', 'AGG' : '*',
 
 'GTT' : 'V', 'GTC' : 'V', 'GTA' : 'V', 'GTG' : 'V',
 'GCT' : 'A', 'GCC' : 'A', 'GCA' : 'A', 'GCG' : 'A',
 'GAT' : 'D', 'GAC' : 'D', 'GAA' : 'E', 'GAG' : 'E',
 'GGT' : 'G', 'GGC' : 'G', 'GGA' : 'G', 'GGG' : 'G'
 }
+
 
 
 AATable = {'A': ['GCA', 'GCC', 'GCG', 'GCT'], 'C': ['TGT', 'TGC'], 'E': ['GAG', 'GAA'], 'D': ['GAT', 'GAC'], 'G': ['GGT', 'GGG', 'GGA', 'GGC'], 'F': ['TTT', 'TTC'], 'I': ['ATC', 'ATA', 'ATT'], 'H': ['CAT', 'CAC'], 'K': ['AAG', 'AAA'], '*': ['TAG', 'TGA', 'TAA'], 'M': ['ATG'], 'L': ['CTT', 'CTG', 'CTA', 'CTC', 'TTA', 'TTG'], 'N': ['AAC', 'AAT'], 'Q': ['CAA', 'CAG'], 'P': ['CCT', 'CCG', 'CCA', 'CCC'], 'S': ['AGC', 'AGT', 'TCT', 'TCG', 'TCC', 'TCA'], 'R': ['AGG', 'AGA', 'CGA', 'CGG', 'CGT', 'CGC'], 'T': ['ACA', 'ACG', 'ACT', 'ACC'], 'W': ['TGG'], 'V': ['GTA', 'GTC', 'GTG', 'GTT'], 'Y': ['TAT', 'TAC']}
@@ -173,7 +187,7 @@ def translateDNA_6Frames(sequence) :
 
 	return trans
 
-def translateDNA(sequence, frame = 'f1') :
+def translateDNA(sequence, frame = 'f1', translTable_id=1) :
 	"""Translates DNA code, frame : fwd1, fwd2, fwd3, rev1, rev2, rev3"""
 
 	protein = ""
@@ -198,12 +212,12 @@ def translateDNA(sequence, frame = 'f1') :
 	for i in range(0, len(dna),  3) :
 		if (len(dna[i:i+3]) == 3) :
 			try :
-				protein += codonTable[dna[i:i+3]]
+				protein += translTable[translTable_id][dna[i:i+3]]
 			except KeyError :
 				combinaisons = polymorphicCodonCombinaisons(list(dna[i:i+3]))
 				translations = set()
 				for ci in range(len(combinaisons)):
-					translations.add(codonTable[combinaisons[ci]])
+					translations.add(translTable[translTable_id][combinaisons[ci]])
 				protein += '/'.join(translations)
 
 	return protein
