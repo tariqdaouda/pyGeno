@@ -53,18 +53,18 @@ Some of them just for playing around with pyGeno (**Fast importation** and **Sma
 
 	#Imports only the Y chromosome from the human reference genome GRCh37.75
 	#Very fast, requires even less memory. No download required.
-	B.importGenome("Homo_sapiens.GRCh37.75_Y-Only.tar.gz")
+	B.importGenome("Human.GRCh37.75_Y-Only.tar.gz")
 	
 	#A dummy datawrap for humans SNPs and Indels in pyGeno's AgnosticSNP  format. 
 	# This one has one SNP at the begining of the gene SRY
-	B.importSNPs("Homo_sapiens.dummySRY_casava.tar.gz")
+	B.importSNPs("Human.dummySRY_casava.tar.gz")
 
 And for more serious work, the whole reference genome.
 
 .. code:: python
 
 	#Downloads the whole genome (205MB, sequences + annotations), may take an hour or more.
-	B.importGenome("Homo_sapiens.GRCh38.78.tar.gz")
+	B.importGenome("Human.GRCh38.78.tar.gz")
 
 That's it, you can now print the sequences of all the proteins that a gene can produce::
 
