@@ -135,7 +135,7 @@ def _importSNPs_AgnosticSNP(setName, species, genomeSource, snpsFile) :
 	printf('saving...')
 	conf.db.endTransaction()
 	printf('creating indexes...')
-	CasavaSNP.ensureGlobalIndex(('start', 'chromosomeNumber', 'setName'))
+	AgnosticSNP.ensureGlobalIndex(('start', 'chromosomeNumber', 'setName'))
 	printf('importation of SNP set %s for species %s done.' %(setName, species))
 	
 	return True
