@@ -120,6 +120,7 @@ def _importSNPs_AgnosticSNP(setName, species, genomeSource, snpsFile) :
 			except KeyError :
 				if f != 'species' and f != 'setName' :
 					printf("Warning filetype as no key %s", f)
+		snp.quality = float(snp.quality)
 		snp.start = int(snp.start)
 		snp.end = int(snp.end)
 		snp.save()
