@@ -55,9 +55,6 @@ class pyGenoSNPTests(unittest.TestCase):
 		persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
 		refProt = self.ref.get(Protein, id = 'ENSP00000438917')[0]
 
-		print refProt.transcript.data[:20]
-		print persProt.transcript.data[:20]
-
 		self.assertEqual('ATGCAATCATATGCTTCTGC', refProt.transcript.cDNA[:20])
 		self.assertEqual('TGAATGCAATCATATGCTTC', persProt.transcript.cDNA[:20])
 
@@ -75,10 +72,8 @@ class pyGenoSNPTests(unittest.TestCase):
 				return SequenceSNP(dummySRY_AGN.alt)
 		
 		dummy = Genome(name = 'GRCh37.75_Y-Only', SNPs = 'dummySRY_AGN', SNPFilter = MyFilter())
-		# persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
 		persProt = dummy.get(Protein, id = 'ENSP00000438917')[0]
-		# print persProt, dummy.count(Protein)
-		# persProt = persProt[0]
+		
 		refProt = self.ref.get(Protein, id = 'ENSP00000438917')[0]
 		self.assertEqual('M', refProt.sequence[0])
 		self.assertEqual('L', persProt.sequence[0])
