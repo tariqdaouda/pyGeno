@@ -47,7 +47,7 @@ class ChrosomeSequence(object) :
 				chromosomeNumber = 'M'
 
 			
-			f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : self.chromosome.number})
+			f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : chromosomeNumber})
 			# conf.db.enableDebug(True)
 			iterators.append(f.iterRun(sqlTail = 'ORDER BY start'))
 		
