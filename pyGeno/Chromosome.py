@@ -40,6 +40,13 @@ class ChrosomeSequence(object) :
 		iterators = []
 		for setName, SNPType in SNPTypes.iteritems() :
 			f = RabaQuery(str(SNPType), namespace = self.chromosome._raba_namespace)
+			
+			chromosomeNumber = self.chromosome.number
+
+			if chromosomeNumber == 'MT':
+				chromosomeNumber = 'M'
+
+			
 			f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : self.chromosome.number})
 			# conf.db.enableDebug(True)
 			iterators.append(f.iterRun(sqlTail = 'ORDER BY start'))
