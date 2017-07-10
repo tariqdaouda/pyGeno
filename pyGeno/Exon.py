@@ -123,7 +123,7 @@ class Exon(pyGenoRabaObjectWrapper) :
 		"""return the position of the first occurance of sequence"""
 		return self.bin_sequence.find(sequence)
 
-	def findAll(self, seqence):
+	def findAll(self, sequence):
 		"""Returns a lits of all positions where sequence was found"""
 		return self.bin_sequence.findAll(sequence)
 
@@ -131,7 +131,7 @@ class Exon(pyGenoRabaObjectWrapper) :
 		"""return the position of the first occurance of sequence"""
 		return self.bin_CDS.find(sequence)
 
-	def findAllInCDS(self, seqence):
+	def findAllInCDS(self, sequence):
 		"""Returns a lits of all positions where sequence was found"""
 		return self.bin_CDS.findAll(sequence)
 
