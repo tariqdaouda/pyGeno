@@ -194,7 +194,7 @@ class BinarySequence :
 			return -1
 
         def _kmp_construct_next(self, pattern):
-                """the helper function for KMP-string-searching is to construct the DFA."""
+                """the helper function for KMP-string-searching is to construct the DFA. pattern should be an integer array. return a 2D array representing the DFA for moving the pattern."""
                 alphabet = range(self.ALPHABETA_SIZE)
                 next = [[0 for state in pattern] for input_token in alphabet]
                 next[pattern[0]][0] = 1
@@ -207,6 +207,7 @@ class BinarySequence :
                 return next
 
         def _kmp_search_first(self, input_sequence, pattern):
+                """use KMP algorithm to search the first occurrence in the input_sequence of the pattern. both arguments are integer arrays. return the position of the occurence if found; otherwise, -1."""
                 n, m = len(input_sequence), len(pattern)
                 d = p = 0
                 next = self._kmp_construct_next(pattern)
@@ -217,6 +218,7 @@ class BinarySequence :
                 else: return -1
 
         def _kmp_search_all(self, input_sequence, pattern):
+                """use KMP algorithm to search all occurrence in the input_sequence of the pattern. both arguments are integer arrays. return a list of the positions of the occurences if found; otherwise, []."""
                 r = []
                 n, m = len(input_sequence), len(pattern)
                 d = p = 0
@@ -230,7 +232,7 @@ class BinarySequence :
                 return r
 
         def _kmp_find(self, needle, haystack, lst = None):
-		"""KMP-string-searching, if lst is None, will return the first position found. If it's a list, will return a list of all positions in lst. returns -1 or [] if no match found"""
+		"""find with KMP-searching. needle is an integer array, reprensenting a pattern. haystack is an integer array, reprensenting the input sequence. if lst is None, return the first position found or -1 if no match found. If it's a list, will return a list of all positions in lst. returns -1 or [] if no match found."""
                 if lst != None: return self._kmp_search_all(haystack, needle)
                 else: return self._kmp_search_first(haystack, needle)
 		
