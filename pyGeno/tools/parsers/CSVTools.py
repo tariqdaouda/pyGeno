@@ -142,8 +142,13 @@ class CSVEntry(object) :
 			field = self.csvFile.legend[key.lower()]
 			self.data.append(str(value))
 		else :
-			self.data[field] =(str(value))
-	
+			try:
+				self.data[field] = str(value)
+			except Exception as e:
+				for i in xrange(field-len(self.data)+1) :
+					self.data.append("")
+				self.data[field] = str(value)
+
 	def __repr__(self) :
 		return "<line %d: %s>" %(self.lineNumber, str(self.data))
 		
