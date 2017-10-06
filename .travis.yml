@@ -17,6 +17,7 @@ before_install:
 install:
     - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy scipy
     - pip install coverage
+    - pip install https://github.com/tariqdaouda/rabaDB/archive/stable.zip
     - python setup.py install
 
 script: coverage run -m unittest discover pyGeno/tests/
