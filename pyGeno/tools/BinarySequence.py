@@ -5,6 +5,7 @@ class BinarySequence :
 	"""A class for representing sequences in a binary format"""
 
         ALPHABETA_SIZE = 32
+        ALPHABETA_KMP = range(ALPHABETA_SIZE)
         
 	def __init__(self, sequence, arrayForma, charToBinDict) :
 	
@@ -195,42 +196,32 @@ class BinarySequence :
 
         def _kmp_construct_next(self, pattern):
                 """the helper function for KMP-string-searching is to construct the DFA. pattern should be an integer array. return a 2D array representing the DFA for moving the pattern."""
-                alphabet = range(self.ALPHABETA_SIZE)
-                next = [[0 for state in pattern] for input_token in alphabet]
-                print('##############################')
-                print(alphabet)
-                print('-----')
-                print(pattern)
-                for e in pattern: print(e)
-                print('222222222222222')
-                print(next)
-                print(pattern[0])
-                print('3333333333333333333333')
+                next = [[0 for state in pattern] for input_token in self.ALPHABETA_KMP]
                 next[pattern[0]][0] = 1
                 restart_state = 0
                 for state in range(1, len(pattern)):
-                        for input_token in alphabet:
+                        for input_token in self.ALPHABETA_KMP:
                                 next[input_token][state] = next[input_token][restart_state]
                         next[pattern[state]][state] = state + 1
                         restart_state = next[pattern[state]][restart_state]
                 return next
 
-        def _kmp_search_first(self, pinput_sequence, ppattern):
+        def _kmp_search_first(self, pInput_sequence, pPattern):
                 """use KMP algorithm to search the first occurrence in the input_sequence of the pattern. both arguments are integer arrays. return the position of the occurence if found; otherwise, -1."""
-                input_sequence, pattern = [len(bin(e)) for e in pinput_sequence], [len(bin(e)) for e in ppattern]
+                input_sequence, pattern = pInput_sequence, [len(bin(e)) for e in pPattern]
                 n, m = len(input_sequence), len(pattern)
                 d = p = 0
                 next = self._kmp_construct_next(pattern)
                 while d < n and p < m:
-                        p = next[input_sequence[d]][p]
+                        p = next[len(bin(input_sequence[d]))][p]
                         d += 1
                 if p == m: return d - p
                 else: return -1
 
-        def _kmp_search_all(self, pinput_sequence, ppattern):
+        def _kmp_search_all(self, pInput_sequence, pPattern):
                 """use KMP algorithm to search all occurrence in the input_sequence of the pattern. both arguments are integer arrays. return a list of the positions of the occurences if found; otherwise, []."""
                 r = []
-                input_sequence, pattern = [len(bin(e)) for e in pinput_sequence], [len(bin(e)) for e in ppattern]
+                input_sequence, pattern = [len(bin(e)) for e in pInput_sequence], [len(bin(e)) for e in pPattern]
                 n, m = len(input_sequence), len(pattern)
                 d = p = 0
                 next = self._kmp_construct_next(pattern)
@@ -391,10 +382,10 @@ if __name__=="__main__":
 	testVariants()
 
         from random import randint
-        alphabet = ['A', 'C', 'G', 'T']
+        alphabeta = ['A', 'C', 'G', 'T']
         seq = ''
         for _ in range(8192):
-                seq += alphabet[randint(0, 3)]
+                seq += alphabeta[randint(0, 3)]
         seq += 'ATGAGTTTGCCGCGCN'
         bSeq = NucBinarySequence(seq)
 
