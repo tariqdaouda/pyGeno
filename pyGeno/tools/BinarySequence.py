@@ -196,6 +196,8 @@ class BinarySequence :
         def _kmp_construct_next(self, pattern):
                 """the helper function for KMP-string-searching is to construct the DFA. pattern should be an integer array. return a 2D array representing the DFA for moving the pattern."""
                 alphabet = range(self.ALPHABETA_SIZE)
+                pat = []
+                for e in pattern: pat.append(len(bin(e)))
                 next = [[0 for state in pattern] for input_token in alphabet]
                 print('##############################')
                 print(alphabet)
@@ -210,13 +212,13 @@ class BinarySequence :
                 print(next[8][0])
                 print(next[pattern[0]])
                 print(next[pattern[0]][0])
-                next[pattern[0]][0] = 1
+                next[pat[0]][0] = 1
                 restart_state = 0
-                for state in range(1, len(pattern)):
+                for state in range(1, len(pat)):
                         for input_token in alphabet:
                                 next[input_token][state] = next[input_token][restart_state]
-                        next[pattern[state]][state] = state + 1
-                        restart_state = next[pattern[state]][restart_state]
+                        next[pat[state]][state] = state + 1
+                        restart_state = next[pat[state]][restart_state]
                 return next
 
         def _kmp_search_first(self, input_sequence, pattern):
