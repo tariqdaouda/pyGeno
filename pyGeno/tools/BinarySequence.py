@@ -201,6 +201,7 @@ class BinarySequence :
                 print(alphabet)
                 print('-----')
                 print(pattern)
+                for e in pattern: print(e)
                 print('222222222222222')
                 print(next)
                 next[pattern[0]][0] = 1
