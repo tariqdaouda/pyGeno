@@ -4,7 +4,7 @@ import UsefulFunctions as uf
 class BinarySequence :
 	"""A class for representing sequences in a binary format"""
 
-        ALPHABETA_SIZE = 16
+        ALPHABETA_SIZE = 32
         
 	def __init__(self, sequence, arrayForma, charToBinDict) :
 	
