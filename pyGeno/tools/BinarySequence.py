@@ -201,6 +201,8 @@ class BinarySequence :
                 print(alphabet)
                 print('-----')
                 print(pattern)
+                print('222222222222222')
+                print(next)
                 next[pattern[0]][0] = 1
                 restart_state = 0
                 for state in range(1, len(pattern)):
