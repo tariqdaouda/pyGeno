@@ -63,6 +63,8 @@ def importSNPs(packageFile) :
 			return _importSNPs_CasavaSNP(setName, species, genomeSource, snpsFile)
 		elif typ.lower() == 'dbsnpsnp' :
 			return _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile)
+		elif typ.lower() == 'dbsnp' :
+			return _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile)
 		elif typ.lower() == 'tophatsnp' :
 			return _importSNPs_TopHatSNP(setName, species, genomeSource, snpsFile)
 		elif typ.lower() == 'agnosticsnp' :
@@ -118,6 +120,7 @@ def _importSNPs_AgnosticSNP(setName, species, genomeSource, snpsFile) :
 			except KeyError :
 				if f != 'species' and f != 'setName' :
 					printf("Warning filetype as no key %s", f)
+		snp.quality = float(snp.quality)
 		snp.start = int(snp.start)
 		snp.end = int(snp.end)
 		snp.save()
@@ -132,7 +135,7 @@ def _importSNPs_AgnosticSNP(setName, species, genomeSource, snpsFile) :
 	printf('saving...')
 	conf.db.endTransaction()
 	printf('creating indexes...')
-	CasavaSNP.ensureGlobalIndex(('start', 'chromosomeNumber', 'setName'))
+	AgnosticSNP.ensureGlobalIndex(('start', 'chromosomeNumber', 'setName'))
 	printf('importation of SNP set %s for species %s done.' %(setName, species))
 	
 	return True

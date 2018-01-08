@@ -21,11 +21,11 @@ class FastqEntry(object) :
 	
 class FastqFile(object) :
 	"""
-	Represents a whole CSV file::
+	Represents a whole Fastq file::
 		
 		#reading
 		f = FastqFile()
-		f.parse('hop.csv')
+		f.parse('hop.fastq')
 		for line in f :
 			print line['sequence']
 		

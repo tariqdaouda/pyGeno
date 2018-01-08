@@ -1,4 +1,15 @@
-import os, types
+import os, types, collections
+
+class EmptyLine(Exception) :
+	"""Raised when an empty or comment line is found (dealt with internally)"""
+
+	def __init__(self, lineNumber) :
+		message = "Empty line: #%d" % lineNumber 
+		Exception.__init__(self, message)
+		self.message = message
+
+	def __str__(self) :
+		return self.message
 
 def removeDuplicates(inFileName, outFileName) :
 	"""removes duplicated lines from a 'inFileName' CSV file, the results are witten in 'outFileName'"""
@@ -75,6 +86,9 @@ class CSVEntry(object) :
 			self.lineNumber = lineNumber
 			
 			tmpL = csvFile.lines[lineNumber].replace('\r', '\n').replace('\n', '')
+			if len(tmpL) == 0 or tmpL[0] in ["#", "\r", "\n", csvFile.lineSeparator] :
+				raise EmptyLine(lineNumber)
+
 			tmpData = tmpL.split(csvFile.separator)
 
 			tmpDatum = []
@@ -87,7 +101,7 @@ class CSVEntry(object) :
 						self.data.append(csvFile.separator.join(tmpDatum))
 						tmpDatum = []
 				else :
-					self.data.append(sd) 
+					self.data.append(sd)
 		else :
 			self.lineNumber = len(csvFile)
 			for i in range(len(self.csvFile.legend)) :
@@ -97,12 +111,26 @@ class CSVEntry(object) :
 		"""commits the line so it is added to a file stream"""
 		self.csvFile.commitLine(self)
 
+	def __iter__(self) :
+		self.currentField = -1
+		return self
+	
+	def next(self) :
+		self.currentField += 1
+		if self.currentField >= len(self.csvFile.legend) :
+			raise StopIteration
+			
+		k = self.csvFile.legend.keys()[self.currentField]
+		v = self.data[self.currentField]
+		return k, v
+
 	def __getitem__(self, key) :
 		"""Returns the value of field 'key'"""
 		try :
 			indice = self.csvFile.legend[key.lower()]
 		except KeyError :
 			raise KeyError("CSV File has no column: '%s'" % key)
+		
 		return self.data[indice]
 
 	def __setitem__(self, key, value) :
@@ -114,8 +142,13 @@ class CSVEntry(object) :
 			field = self.csvFile.legend[key.lower()]
 			self.data.append(str(value))
 		else :
-			self.data[field] =(str(value))
-	
+			try:
+				self.data[field] = str(value)
+			except Exception as e:
+				for i in xrange(field-len(self.data)+1) :
+					self.data.append("")
+				self.data[field] = str(value)
+
 	def __repr__(self) :
 		return "<line %d: %s>" %(self.lineNumber, str(self.data))
 		
@@ -137,33 +170,26 @@ class CSVFile(object) :
 		l = f.newLine()
 		l['name'] = 'toto'
 		l['email'] = "hop@gmail.com"
+		
+		for field, value in l :
+			print field, value
+
 		f.save('myCSV.csv')		
 	"""
 	
-	def __init__(self, legend = [], separator = ',') :
+	def __init__(self, legend = [], separator = ',', lineSeparator = '\n') :
 		
-		self.legend = {}
-		if type(legend) is types.ListType :
-			for i in range(len(legend)) :
-				if legend[i].lower() in self.legend :
-					raise  ValueError("%s is already in the legend" % legend[i].lower())
-				self.legend[legend[i].lower()] = i
-			self.strLegend = separator.join(legend)
-
-		elif type(legend) is types.DictType :
-			self.strLegend = []
-			for k in legend :
-				if k.lower() in self.legend :
-					raise  ValueError("%s is already in the legend" % k.lower())
-				self.legend[k.lower()] = legend[k]
-				self.strLegend.insert(legend[k], k.lower())
-			self.strLegend = separator.join(self.strLegend)
-		else :
-			raise ValueError("Unsupported type for legend (not list nor dict)")
+		self.legend = collections.OrderedDict()
+		for i in range(len(legend)) :
+			if legend[i].lower() in self.legend :
+				raise  ValueError("%s is already in the legend" % legend[i].lower())
+			self.legend[legend[i].lower()] = i
+		self.strLegend = separator.join(legend)
 
 		self.filename = ""
 		self.lines = []	
 		self.separator = separator
+		self.lineSeparator = lineSeparator
 		self.currentPos = -1
 	
 		self.streamFile = None
@@ -181,7 +207,7 @@ class CSVFile(object) :
 		else :
 			self.strLegend += field
 			
-	def parse(self, filePath, separator = ',', stringSeparator = '"', lineSeparator = '\n') :
+	def parse(self, filePath, skipLines=0, separator = ',', stringSeparator = '"', lineSeparator = '\n') :
 		"""Loads a CSV file"""
 		
 		self.filename = filePath
@@ -194,8 +220,9 @@ class CSVFile(object) :
 		f.close()
 		
 		self.separator = separator
+		self.lineSeparator = lineSeparator
 		self.stringSeparator = stringSeparator
-		self.legend = {}
+		self.legend = collections.OrderedDict()
 		
 		i = 0
 		for c in self.lines[0].lower().replace(stringSeparator, '').split(separator) :
@@ -205,8 +232,17 @@ class CSVFile(object) :
 			i+=1
 	
 		self.strLegend = self.lines[0].replace('\r', '\n').replace('\n', '')
-		self.lines = self.lines[1:]
+		sk = skipLines+1
+		for l in self.lines :
+			if l[0] == "#" :
+				sk += 1
+			else :
+				break
+
+		self.header = self.lines[:sk]
+		self.lines = self.lines[sk:]
 	
+
 	def streamToFile(self, filename, keepInMemory = False, writeRate = 1) :
 		"""Starts a stream to a file. Every line must be committed (l.commit()) to be appended in to the file.
 
@@ -257,17 +293,26 @@ class CSVFile(object) :
 		self.keepInMemory = True
 
 	def _developLine(self, line) :
-		self.lines[line] = CSVEntry(self, line)
+		stop = False
+		while not stop :
+			try :
+				if self.lines[line].__class__ is not CSVEntry :
+					devL = CSVEntry(self, line)
+					stop = True
+				else :
+					devL = self.lines[line]
+					stop = True
+			except EmptyLine as e :
+				del(self.lines[line])
+					
+		self.lines[line] = devL
 	
 	def get(self, line, key) :
-		if self.lines[line].__class__ is not CSVEntry :
-			self._developLine(line)
-		
+		self._developLine(line)
 		return self.lines[line][key]
 
 	def set(self, line, key, val) :
-		if self.lines[line].__class__ is not CSVEntry :
-			self._developLine(line)
+		self._developLine(line)
 		self.lines[line][key] = val
 	
 	def newLine(self) :
@@ -295,7 +340,7 @@ class CSVFile(object) :
 		s = [self.strLegend]
 		for l in self.lines :
 			s.append(str(l))
-		return '\n'.join(s)
+		return self.lineSeparator.join(s)
 	
 	def __iter__(self) :
 		self.currentPos = -1
@@ -305,22 +350,27 @@ class CSVFile(object) :
 		self.currentPos += 1
 		if self.currentPos >= len(self) :
 			raise StopIteration
-		return CSVEntry(self, self.currentPos)
+			
+		self._developLine(self.currentPos)
+		return self.lines[self.currentPos]
 	
 	def __getitem__(self, line) :
 		try :
 			if self.lines[line].__class__ is not CSVEntry :
 				self._developLine(line)
 		except AttributeError :
-			start, stop = line.start, line.stop
-			if start is None :
-				start = 0
-			
-			if stop is None :
-				stop = 0
+			for l in xrange(len(self.lines[line])) :
+				self._developLine(l + line.start)
 
-			for l in xrange(start, stop) :
-				self._developLine(l)
+			# start, stop = line.start, line.stop
+			# if start is None :
+			# 	start = 0
+			
+			# if stop is None :
+			# 	stop = 0
+
+			# for l in xrange(start, stop) :
+			# 	self._developLine(l)
 
 		return self.lines[line]
 

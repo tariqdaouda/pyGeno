@@ -53,7 +53,7 @@ class Exon(pyGenoRabaObjectWrapper) :
 
 	def __init__(self, *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
-		self._load_sequencesTriggers = set(["UTR5", "UTR3", "CDS", "sequence"])
+		self._load_sequencesTriggers = set(["UTR5", "UTR3", "CDS", "sequence", "data"])
 
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
 		if issubclass(objectType, SNP_INDEL) :
@@ -74,34 +74,34 @@ class Exon(pyGenoRabaObjectWrapper) :
 		
 		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 	
-	def _load_sequences(self) :
-		seq = self.chromosome.sequence[self.start : self.end]
-		diffLen = (self.end-self.start) - len(seq)
-		
-		# print "=---", len(seq), self.end-self.start
-		# print "=---", seq[-1], '...'
+	def _load_data(self) :
+		data = self.chromosome.getSequenceData(slice(self.start,self.end))
+
+		diffLen = (self.end-self.start) - len(data)
 		
 		if self.strand == '+' :
-			self.sequence = seq
+			self.data = data
 		else :
-			self.sequence =  uf.reverseComplement(str(seq))
-		
+			self.data = uf.reverseComplementTab(data)
+
 		if self.hasCDS() :
 			start = self.CDS_start-self.start
 			end = self.CDS_end-self.start
 			
 			if self.strand == '+' :
-				self.UTR5 = self.sequence[:start]
-				self.CDS = self.sequence[start:end+diffLen]
-				self.UTR3 = self.sequence[end+diffLen:]
+				self.UTR5 = self.data[:start]
+				self.CDS = self.data[start:end+diffLen]
+				self.UTR3 = self.data[end+diffLen:]
 			else :
-				self.UTR5 = self.sequence[:len(self.sequence)-(end-diffLen)]
-				self.CDS = self.sequence[len(self.sequence)-(end-diffLen):len(self.sequence)-start]
-				self.UTR3 = self.sequence[len(self.sequence)-start:]
+				self.UTR5 = self.data[:len(self.data)-(end-diffLen)]
+				self.CDS = self.data[len(self.data)-(end-diffLen):len(self.data)-start]
+				self.UTR3 = self.data[len(self.data)-start:]
 		else :
 			self.UTR5 = ''
 			self.CDS = ''
 			self.UTR3 = ''
+
+		self.sequence = ''.join(self.data)
 
 	def _load_bin_sequence(self) :
 		self.bin_sequence = NucBinarySequence(self.sequence)
@@ -123,7 +123,7 @@ class Exon(pyGenoRabaObjectWrapper) :
 		"""return the position of the first occurance of sequence"""
 		return self.bin_sequence.find(sequence)
 
-	def findAll(self, seqence):
+	def findAll(self, sequence):
 		"""Returns a lits of all positions where sequence was found"""
 		return self.bin_sequence.findAll(sequence)
 
@@ -131,7 +131,7 @@ class Exon(pyGenoRabaObjectWrapper) :
 		"""return the position of the first occurance of sequence"""
 		return self.bin_CDS.find(sequence)
 
-	def findAllInCDS(self, seqence):
+	def findAllInCDS(self, sequence):
 		"""Returns a lits of all positions where sequence was found"""
 		return self.bin_CDS.findAll(sequence)
 

@@ -17,7 +17,7 @@ class CSVTests(unittest.TestCase):
 		l = c.newLine()
 		l["col1"] = testVals[1]
 		c.save("test.csv")
-		
+		# print "----", l
 		c2 = CSVFile()
 		c2.parse("test.csv", separator = "\t")
 		i = 0

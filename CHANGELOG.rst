@@ -1,3 +1,22 @@
+1.3.2
+=====
+
+* Search now uses KMD by default instead of dichotomic search (massive speed gain). Many thanks to @Keija for the implementation. Go to https://github.com/tariqdaouda/pyGeno/pull/34 for details and benchmarks.
+
+1.3.1
+=====
+
+* AGN SNPs Quality cast to float by importer
+* Travis integration
+* Minor CSV parser updates
+
+1.3.0
+=====
+
+* CSVFile will now ignore empty lines and comments
+
+* Added synonymousCodonsFrequencies
+
 1.2.9
 =====
 

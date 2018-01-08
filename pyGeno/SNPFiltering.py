@@ -25,15 +25,41 @@ class SequenceSNP(Sequence_modifiers) :
 class SequenceInsert(Sequence_modifiers) :
 	"""Represents an Insertion to be applied to the sequence"""
 	
-	def __init__(self, bases, sources = {}) :
+	def __init__(self, bases, sources = {}, ref = '-') :
 		Sequence_modifiers.__init__(self, sources)
 		self.bases = bases
+		self.offset = 0
+
+		# Allow to use format like C/CCTGGAA(dbSNP) or CCT/CCTGGAA(samtools)
+		if ref != '-':
+			if ref == bases[:len(ref)]:
+				self.offset = len(ref) 
+				self.bases = self.bases[self.offset:]
+				#-1 because if the insertion are after the last nuc we go out of table
+				self.offset -= 1
+			else:
+				raise NotImplemented("This format of Insetion is not accepted. Please change your format, or implement your format in pyGeno.")
+
 
 class SequenceDel(Sequence_modifiers) :
 	"""Represents a Deletion to be applied to the sequence"""
-	def __init__(self, length, sources = {}) :
+	def __init__(self, length, sources = {}, ref = None, alt = '-') :
 		Sequence_modifiers.__init__(self, sources)
 		self.length = length
+		self.offset = 0
+
+		# Allow to use format like CCTGGAA/C(dbSNP) or CCTGGAA/CCT(samtools)
+		if alt != '-':
+			if ref is not None:
+				if alt == ref[:len(alt)]:
+					self.offset = len(alt)
+					self.length = self.length - len(alt)
+				else:
+					raise NotImplemented("This format of Deletion is not accepted. Please change your format, or implement your format in pyGeno.")
+			else:
+				raise Exception("You need to add a ref sequence in your call of SequenceDel. Or implement your format in pyGeno.")
+
+
 
 class SNPFilter(object) :
 	"""Abtract Class. All filters must inherit from me"""
