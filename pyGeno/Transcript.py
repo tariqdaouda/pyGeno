@@ -100,6 +100,10 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			
 			if e.hasCDS() :
 				UTR5.append(''.join(e.UTR5))
+				
+				if len(cDNA) == 0 and e.frame != 0 :
+					e.CDS = e.CDS[e.frame:]
+				
 				cDNA.append(''.join(e.CDS))
 				UTR3.append(''.join(e.UTR3))
 				prime5 = False

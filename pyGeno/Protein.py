@@ -55,7 +55,11 @@ class Protein(pyGenoRabaObjectWrapper) :
 		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
 	
 	def _load_sequences(self) :
-		self.sequence = uf.translateDNA(self.transcript.cDNA).rstrip('*')
+		if self.chromosome.number != 'MT':
+			self.sequence = uf.translateDNA(self.transcript.cDNA).rstrip('*')
+		else:
+			self.sequence = uf.translateDNA(self.transcript.cDNA, translTable_id='mt').rstrip('*')
+
 	
 	def getSequence(self):
 		return self.sequence
