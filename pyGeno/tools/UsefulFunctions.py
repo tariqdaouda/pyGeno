@@ -67,16 +67,33 @@ synonymousCodonsFrequencies = {'A': {'GCA': 0.24472833804337418, 'GCC': 0.381809
 # Ref: https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
 translTable = dict()
 
-# Standard Code (translTable_id=1)
-translTable[1] = {
+# Standard Code (NCBI transl_table=1)
+translTable['default'] = {
 'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C',
 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C',
 'TTA' : 'L', 'TCA' : 'S', 'TAA' : '*', 'TGA' : '*',
+'TTG' : 'L', 'TCG' : 'S', 'TAG' : '*', 'TGG' : 'W',
+
+'CTT' : 'L', 'CTC' : 'L', 'CTA' : 'L', 'CTG' : 'L',
+'CCT' : 'P', 'CCC' : 'P', 'CCA' : 'P', 'CCG' : 'P',
+'CAT' : 'H', 'CAC' : 'H', 'CAA' : 'Q', 'CAG' : 'Q',
+'CGT' : 'R', 'CGC' : 'R', 'CGA' : 'R', 'CGG' : 'R',
+
+'ATT' : 'I', 'ATC' : 'I', 'ATA' : 'I', 'ATG' : 'M',
+'ACT' : 'T', 'ACC' : 'T', 'ACA' : 'T', 'ACG' : 'T',
+'AAT' : 'N', 'AAC' : 'N', 'AAA' : 'K', 'AAG' : 'K',
+'AGT' : 'S', 'AGC' : 'S', 'AGA' : 'R', 'AGG' : 'R',
+
+'GTT' : 'V', 'GTC' : 'V', 'GTA' : 'V', 'GTG' : 'V',
+'GCT' : 'A', 'GCC' : 'A', 'GCA' : 'A', 'GCG' : 'A',
+'GAT' : 'D', 'GAC' : 'D', 'GAA' : 'E', 'GAG' : 'E',
 'GGT' : 'G', 'GGC' : 'G', 'GGA' : 'G', 'GGG' : 'G'
 }
+codonTable = translTable['default']
 
-# Vertebrate Mitochondrial Code (translTable_id=2)
-translTable[2] = {
+
+# The Vertebrate Mitochondrial Code (NCBI transl_table=2)
+translTable['mt'] = {
 'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C',
 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C',
 'TTA' : 'L', 'TCA' : 'S', 'TAA' : '*', 'TGA' : 'W',
@@ -187,7 +204,7 @@ def translateDNA_6Frames(sequence) :
 
 	return trans
 
-def translateDNA(sequence, frame = 'f1', translTable_id=1) :
+def translateDNA(sequence, frame = 'f1', translTable_id='default') :
 	"""Translates DNA code, frame : fwd1, fwd2, fwd3, rev1, rev2, rev3"""
 
 	protein = ""
