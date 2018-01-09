@@ -58,7 +58,7 @@ class Protein(pyGenoRabaObjectWrapper) :
 		if self.chromosome.number != 'MT':
 			self.sequence = uf.translateDNA(self.transcript.cDNA).rstrip('*')
 		else:
-			self.sequence = uf.translateDNA(self.transcript.cDNA, translTable_id=2).rstrip('*')
+			self.sequence = uf.translateDNA(self.transcript.cDNA, translTable_id='mt').rstrip('*')
 
 	
 	def getSequence(self):
