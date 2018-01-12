@@ -87,7 +87,10 @@ translTable['default'] = {
 'GTT' : 'V', 'GTC' : 'V', 'GTA' : 'V', 'GTG' : 'V',
 'GCT' : 'A', 'GCC' : 'A', 'GCA' : 'A', 'GCG' : 'A',
 'GAT' : 'D', 'GAC' : 'D', 'GAA' : 'E', 'GAG' : 'E',
-'GGT' : 'G', 'GGC' : 'G', 'GGA' : 'G', 'GGG' : 'G'
+'GGT' : 'G', 'GGC' : 'G', 'GGA' : 'G', 'GGG' : 'G',
+
+'!GA' : 'U'
+
 }
 codonTable = translTable['default']
 
@@ -227,11 +230,18 @@ def translateDNA(sequence, frame = 'f1', translTable_id='default') :
 		raise ValueError('unknown reading frame: %s, should be one of the following: fwd1, fwd2, fwd3, rev1, rev2, rev3' % frame)
 
 	for i in range(0, len(dna),  3) :
-		if (len(dna[i:i+3]) == 3) :
+		codon = dna[i:i+3]
+
+		# Check if variant messed with selenocysteine codon
+		if '!' in codon and codon != '!GA':
+			codon = codon.replace('!', 'T')
+
+		if (len(codon) == 3) :
 			try :
-				protein += translTable[translTable_id][dna[i:i+3]]
+				# MC
+				protein += translTable[translTable_id][codon]
 			except KeyError :
-				combinaisons = polymorphicCodonCombinaisons(list(dna[i:i+3]))
+				combinaisons = polymorphicCodonCombinaisons(list(codon))
 				translations = set()
 				for ci in range(len(combinaisons)):
 					translations.add(translTable[translTable_id][combinaisons[ci]])
