@@ -358,7 +358,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
                     if verbose > 3 :
                         printf('\t\t\texon %s...' % (exonId))
                     
-                    if exonKey not in store.exons :
+                    if exonKey not in store.exons and regionType == 'exon' :
                         store.exons[exonKey] = Exon_Raba()
                         store.exons[exonKey].set(genome = genome, chromosome = store.chromosomes[chroNumber], gene = store.genes.get(geneId, None), transcript = store.transcripts.get(transId, None), protein = store.proteins.get(protId, None), strand = strand, number = exonNumber, start = start, end = end)
                         store.transcripts[transId].exons.append(store.exons[exonKey])
