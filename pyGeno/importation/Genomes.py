@@ -340,14 +340,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 
                 # Store selenocysteine positions in transcript
                 if regionType == 'Selenocysteine':
-
-                    if store.transcripts[transId].selenocysteine is None:
-                        positions = list()
-                    else:
-                        positions = store.transcripts[transId].selenocysteine
-
-                    positions.append(start)
-                    store.transcripts[transId].set(selenocysteine=positions)
+                    store.transcripts[transId].selenocysteine.append(start)
                         
                 if protId is not None and protId not in store.proteins :
                     if verbose > 1 :
