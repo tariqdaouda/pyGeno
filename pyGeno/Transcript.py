@@ -23,7 +23,7 @@ class Transcript_Raba(pyGenoRabaObject) :
 	end = rf.Primitive()
 	coding = rf.Primitive()
 	biotype = rf.Primitive()
-	selenocysteine = rf.Primitive()
+	selenocysteine = rf.RList()
 	
 	genome = rf.RabaObject('Genome_Raba')
 	chromosome = rf.RabaObject('Chromosome_Raba')
