@@ -337,7 +337,11 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
                     protId = None
                     if verbose > 2 :
                         printf('Warning: no protein_id found in line %s' % gtf[i])
-                
+
+                # Store selenocysteine positions in transcript
+                if regionType == 'Selenocysteine':
+                    store.transcripts[transId].selenocysteine.append(start)
+                        
                 if protId is not None and protId not in store.proteins :
                     if verbose > 1 :
                         printf('\t\tProtein %s...' % (protId))

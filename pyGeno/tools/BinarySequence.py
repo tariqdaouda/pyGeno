@@ -330,8 +330,8 @@ class AABinarySequence(BinarySequence) :
 	"""A binary sequence of amino acids"""
 	
 	def __init__(self, sequence):
-		f = array.array('I', [1L, 2L, 4L, 8L, 16L, 32L, 64L, 128L, 256L, 512L, 1024L, 2048L, 4096L, 8192L, 16384L, 32768L, 65536L, 131072L, 262144L, 524288L, 1048576L])
-		c = {'A': 17, 'C': 14, 'E': 19, 'D': 15, 'G': 13, 'F': 16, 'I': 3, 'H': 9, 'K': 8, '*': 1, 'M': 20, 'L': 0, 'N': 4, 'Q': 11, 'P': 6, 'S': 7, 'R': 5, 'T': 2, 'W': 10, 'V': 18, 'Y': 12}
+		f = array.array('I', [1L, 2L, 4L, 8L, 16L, 32L, 64L, 128L, 256L, 512L, 1024L, 2048L, 4096L, 8192L, 16384L, 32768L, 65536L, 131072L, 262144L, 524288L, 1048576L, 2097152L])
+		c = {'A': 17, 'C': 14, 'E': 19, 'D': 15, 'G': 13, 'F': 16, 'I': 3, 'H': 9, 'K': 8, '*': 1, 'M': 20, 'L': 0, 'N': 4, 'Q': 11, 'P': 6, 'S': 7, 'R': 5, 'T': 2, 'W': 10, 'V': 18, 'Y': 12, 'U': 21}
 		BinarySequence.__init__(self, sequence, f, c)
 	
 class NucBinarySequence(BinarySequence) :
