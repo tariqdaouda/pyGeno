@@ -117,6 +117,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 				
 				if len(cDNA) == 0 and e.frame != 0 :
 					e.CDS = e.CDS[e.frame:]
+					e.CDS_start += e.frame
 				
 				if len(e.CDS):
 					cDNA.append(''.join(e.CDS))
