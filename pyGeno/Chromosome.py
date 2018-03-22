@@ -72,12 +72,23 @@ class ChrosomeSequence(object) :
 				if sequenceModifier.__class__ is SF.SequenceDel :
 					seqPos = seqPos + sequenceModifier.offset
 					#To avoid to change the length of the sequence who can create some bug or side effect
-					data[seqPos:(seqPos + sequenceModifier.length)] = [''] * sequenceModifier.length
+					if (sequenceModifier.indel == 0):
+						data[seqPos:(seqPos + sequenceModifier.length)] = [''] * sequenceModifier.length
+					else: # indel
+						data[seqPos] = sequenceModifier.bases
+						seqPos += 1
+						data[seqPos:(seqPos + sequenceModifier.indel)] = [''] * sequenceModifier.indel
+
 				elif sequenceModifier.__class__ is SF.SequenceSNP :
 					data[seqPos] = sequenceModifier.alleles
 				elif sequenceModifier.__class__ is SF.SequenceInsert :
 					seqPos = seqPos + sequenceModifier.offset
-					data[seqPos] = "%s%s" % (data[seqPos], sequenceModifier.bases)
+					if (sequenceModifier.indel == 0):
+						data[seqPos] = "%s%s" % (data[seqPos], sequenceModifier.bases)
+					else: # indel
+						data[seqPos] = sequenceModifier.bases
+						seqPos += 1
+						data[(seqPos):(seqPos + sequenceModifier.indel)] = [''] * sequenceModifier.indel
 				else :
 					raise TypeError("sequenceModifier on chromosome: %s starting at: %s is of unknown type: %s" % (self.chromosome.number, snp.start, sequenceModifier.__class__))
 
