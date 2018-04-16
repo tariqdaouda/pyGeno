@@ -60,8 +60,12 @@ class ChrosomeSequence(object) :
 				if poly.start not in polys :
 					polys[poly.start] = {poly.setName : poly}
 				else :
-					polys[poly.start][poly.setName] = poly
-		
+					try :
+						polys[poly.start][poly.setName].append(poly)
+					except :
+						polys[poly.start][poly.setName] = [polys[poly.start][poly.setName]]
+						polys[poly.start][poly.setName].append(poly)
+						
 		data = list(data)
 		for start, setPolys in polys.iteritems() :
 			
