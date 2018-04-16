@@ -70,7 +70,9 @@ class Genome(pyGenoRabaObjectWrapper) :
 			self.SNPsSets = [SNPs]
 		else :
 			self.SNPsSets = SNPs
-		
+
+		# print "pifpasdf", self.SNPsSets
+
 		if SNPFilter is None :
 			self.SNPFilter = SF.DefaultSNPFilter()
 		else :
@@ -91,6 +93,7 @@ class Genome(pyGenoRabaObjectWrapper) :
 				raise ValueError("There's no set of SNPs that goes by the name of %s for species %s" % (SNPs, self.species))
 
 			for s in res :
+				# print s.setName, s.SNPType
 				self.SNPTypes[s.setName] = s.SNPType
 
 	def _makeLoadQuery(self, objectType, *args, **coolArgs) :

@@ -33,7 +33,6 @@ class ChrosomeSequence(object) :
 	def getSequenceData(self, slic) :
 		data = self.data[slic]
 		SNPTypes = self.chromosome.genome.SNPTypes
-		
 		if SNPTypes is None or self.refOnly :
 			return data
 		
@@ -45,7 +44,6 @@ class ChrosomeSequence(object) :
 
 			if chromosomeNumber == 'MT':
 				chromosomeNumber = 'M'
-
 			
 			f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : chromosomeNumber})
 			# conf.db.enableDebug(True)
@@ -56,7 +54,7 @@ class ChrosomeSequence(object) :
 		
 		polys = {}
 		for iterator in iterators :
-			for poly in iterator : 
+			for poly in iterator :
 				if poly.start not in polys :
 					polys[poly.start] = {poly.setName : poly}
 				else :

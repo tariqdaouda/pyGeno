@@ -32,9 +32,11 @@ def importSNPs(packageFile) :
 	"""
 	printf("Importing polymorphism set: %s... (This may take a while)" % packageFile)
 	
+	isDir = False
 	if not os.path.isdir(packageFile) :
 		packageDir = _decompressPackage(packageFile)
 	else :
+		isDir = True
 		packageDir = packageFile
 
 	fpMan = os.path.normpath(packageDir+'/manifest.ini')
@@ -76,7 +78,8 @@ def importSNPs(packageFile) :
 	else :
 		raise KeyError("There's already a SNP set by the name %s. Use deleteSNPs() to remove it first" %setName)
 
-	shutil.rmtree(packageDir)
+	if not isDir :
+		shutil.rmtree(packageDir)
 
 	return return_value
 

@@ -115,6 +115,10 @@ class DefaultSNPFilter(SNPFilter) :
 			else :
 				sources[snpSet] = snp
 				alleles.append(snp.alt) #if not an indel append the polymorphism
+			
+			refAllele = chromosome.refSequence[pos]
+			alleles.append(refAllele)
+			sources['ref'] = refAllele
 			return alleles, sources
 				
 		warn = 'Warning: the default snp filter ignores indels. IGNORED %s of SNP set: %s at pos: %s of chromosome: %s'
@@ -123,14 +127,11 @@ class DefaultSNPFilter(SNPFilter) :
 		for snpSet, data in kwargs.iteritems() :
 			if type(data) is list :
 				for snp in data :
-					alleles, sources = appendSNP(alleles, sources, snp)
+					alleles, sources = appendAllele(alleles, sources, snp)
 			else :
-				allels, sources = appendSNP(alleles, sources, data)
+				allels, sources = appendAllele(alleles, sources, data)
 
 		#appends the refence allele to the lot
-		refAllele = chromosome.refSequence[pos]
-		alleles.append(refAllele)
-		sources['ref'] = refAllele
 
 		#optional we keep a record of the polymorphisms that were used during the process
 		return SequenceSNP(alleles, sources = sources)

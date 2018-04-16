@@ -139,9 +139,11 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 
     printf('Importing genome package: %s... (This may take a while)' % packageFile)
 
+    isDir = False
     if not os.path.isdir(packageFile) :
         packageDir = _decompressPackage(packageFile)
     else :
+        isDir = True
         packageDir = packageFile
 
     parser = SafeConfigParser()
@@ -189,7 +191,8 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
         chro.save()
     pBar.close()
     
-    shutil.rmtree(packageDir)
+    if not isDir :
+        shutil.rmtree(packageDir)
     
     #~ objgraph.show_most_common_types(limit=20)
     return True
