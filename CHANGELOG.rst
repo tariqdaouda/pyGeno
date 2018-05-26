@@ -1,6 +1,8 @@
 1.3.1
 =====
 
+* CSVFile: fixed bug when slice start was None
+* CSVFile: Better support for string separator
 * AGN SNPs Quality cast to float by importer
 * Travis integration
 * Minor CSV parser updates

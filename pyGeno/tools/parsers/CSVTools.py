@@ -91,17 +91,30 @@ class CSVEntry(object) :
 
 			tmpData = tmpL.split(csvFile.separator)
 
-			tmpDatum = []
-			for d in tmpData :
+			# tmpDatum = []
+			i = 0
+			while i < len(tmpData) :
+			# for d in tmpData :
+				d = tmpData[i]
 				sd = d.strip()
-				if len(tmpDatum) > 0 or (len(sd) > 0 and sd[0] == csvFile.stringSeparator) :
-					tmpDatum.append(sd)
-				
-					if len(sd) > 0 and sd[-1] == csvFile.stringSeparator :
-						self.data.append(csvFile.separator.join(tmpDatum))
-						tmpDatum = []
+				if sd[0] == csvFile.stringSeparator :
+					more = []	
+					for i in xrange(i, len(tmpData)) :
+						more.append(tmpData[i])
+						i+=1
+						if more[-1][-1] == csvFile.stringSeparator :
+							break
+					self.data.append(",".join(more)[1:-1])
+					
+				# if len(tmpDatum) > 0 or (len(sd) > 0 and sd[0] == csvFile.stringSeparator) :
+				# 	tmpDatum.append(sd)
+					
+				# 	if len(sd) > 0 and sd[-1] == csvFile.stringSeparator :
+				# 		self.data.append(csvFile.separator.join(tmpDatum))
+				# 		tmpDatum = []
 				else :
 					self.data.append(sd)
+					i += 1
 		else :
 			self.lineNumber = len(csvFile)
 			for i in range(len(self.csvFile.legend)) :
@@ -150,10 +163,16 @@ class CSVEntry(object) :
 				self.data[field] = str(value)
 
 	def __repr__(self) :
-		return "<line %d: %s>" %(self.lineNumber, str(self.data))
+		r = {}
+		for k, v in self.csvFile.legend.iteritems() :
+			r[k] = self.data[v]
+
+		# return "<line %d: %s>" %(self.lineNumber, str(self.data))
+		return "<line %d: %s>" %(self.lineNumber, str(r))
 		
 	def __str__(self) :
-		return self.csvFile.separator.join(self.data)
+		return repr(self)
+		# return self.csvFile.separator.join(self.data)
 	
 class CSVFile(object) :
 	"""
@@ -213,12 +232,22 @@ class CSVFile(object) :
 		self.filename = filePath
 		f = open(filePath)
 		if lineSeparator == '\n' :
-			self.lines = f.readlines()
+			lines = f.readlines()
 		else :
-			self.lines = f.read().split(lineSeparator)
+			lines = f.read().split(lineSeparator)
 		f.flush()
 		f.close()
 		
+		lines = lines[skipLines:]
+		self.lines = []
+		self.comments = []
+		for l in lines :
+			# print l
+			if len(l) != 0 and l[0] != "#" :
+				self.lines.append(l)
+			elif l[0] == "#" :
+				self.comments.append(l)
+
 		self.separator = separator
 		self.lineSeparator = lineSeparator
 		self.stringSeparator = stringSeparator
@@ -232,15 +261,16 @@ class CSVFile(object) :
 			i+=1
 	
 		self.strLegend = self.lines[0].replace('\r', '\n').replace('\n', '')
-		sk = skipLines+1
-		for l in self.lines :
-			if l[0] == "#" :
-				sk += 1
-			else :
-				break
+		self.lines = self.lines[1:]
+		# sk = skipLines+1
+		# for l in self.lines :
+		# 	if l[0] == "#" :
+		# 		sk += 1
+		# 	else :
+		# 		break
 
-		self.header = self.lines[:sk]
-		self.lines = self.lines[sk:]
+		# self.header = self.lines[:sk]
+		# self.lines = self.lines[sk:]
 	
 
 	def streamToFile(self, filename, keepInMemory = False, writeRate = 1) :
@@ -359,8 +389,12 @@ class CSVFile(object) :
 			if self.lines[line].__class__ is not CSVEntry :
 				self._developLine(line)
 		except AttributeError :
+			start = line.start
+			if start is None :
+				start = 0
+
 			for l in xrange(len(self.lines[line])) :
-				self._developLine(l + line.start)
+				self._developLine(l + start)
 
 			# start, stop = line.start, line.stop
 			# if start is None :
