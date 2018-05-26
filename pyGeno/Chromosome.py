@@ -33,14 +33,19 @@ class ChrosomeSequence(object) :
 	def getSequenceData(self, slic) :
 		data = self.data[slic]
 		SNPTypes = self.chromosome.genome.SNPTypes
-		
 		if SNPTypes is None or self.refOnly :
 			return data
 		
 		iterators = []
 		for setName, SNPType in SNPTypes.iteritems() :
 			f = RabaQuery(str(SNPType), namespace = self.chromosome._raba_namespace)
-			f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : self.chromosome.number})
+			
+			chromosomeNumber = self.chromosome.number
+
+			if chromosomeNumber == 'MT':
+				chromosomeNumber = 'M'
+			
+			f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : chromosomeNumber})
 			# conf.db.enableDebug(True)
 			iterators.append(f.iterRun(sqlTail = 'ORDER BY start'))
 		
@@ -49,12 +54,16 @@ class ChrosomeSequence(object) :
 		
 		polys = {}
 		for iterator in iterators :
-			for poly in iterator : 
+			for poly in iterator :
 				if poly.start not in polys :
 					polys[poly.start] = {poly.setName : poly}
 				else :
-					polys[poly.start][poly.setName] = poly
-		
+					try :
+						polys[poly.start][poly.setName].append(poly)
+					except :
+						polys[poly.start][poly.setName] = [polys[poly.start][poly.setName]]
+						polys[poly.start][poly.setName].append(poly)
+						
 		data = list(data)
 		for start, setPolys in polys.iteritems() :
 			

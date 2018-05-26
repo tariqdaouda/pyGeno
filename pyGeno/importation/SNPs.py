@@ -32,9 +32,11 @@ def importSNPs(packageFile) :
 	"""
 	printf("Importing polymorphism set: %s... (This may take a while)" % packageFile)
 	
+	isDir = False
 	if not os.path.isdir(packageFile) :
 		packageDir = _decompressPackage(packageFile)
 	else :
+		isDir = True
 		packageDir = packageFile
 
 	fpMan = os.path.normpath(packageDir+'/manifest.ini')
@@ -56,25 +58,30 @@ def importSNPs(packageFile) :
 	snpsFileTmp = parser.get('snps', 'filename').strip()
 	snpsFile = _getFile(parser.get('snps', 'filename'), packageDir)
 	
+	return_value = None
+
 	try :
 		SMaster = SNPMaster(setName = setName)
 	except KeyError :
 		if typ.lower() == 'casavasnp' :
-			return _importSNPs_CasavaSNP(setName, species, genomeSource, snpsFile)
+			return_value = _importSNPs_CasavaSNP(setName, species, genomeSource, snpsFile)
 		elif typ.lower() == 'dbsnpsnp' :
-			return _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile)
+			return_value = _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile)
 		elif typ.lower() == 'dbsnp' :
-			return _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile)
+			return_value = _importSNPs_dbSNPSNP(setName, species, genomeSource, snpsFile)
 		elif typ.lower() == 'tophatsnp' :
-			return _importSNPs_TopHatSNP(setName, species, genomeSource, snpsFile)
+			return_value = _importSNPs_TopHatSNP(setName, species, genomeSource, snpsFile)
 		elif typ.lower() == 'agnosticsnp' :
-			return _importSNPs_AgnosticSNP(setName, species, genomeSource, snpsFile)
+			return_value = _importSNPs_AgnosticSNP(setName, species, genomeSource, snpsFile)
 		else :
 			raise FutureWarning('Unknown SNP type in manifest %s' % typ)
 	else :
 		raise KeyError("There's already a SNP set by the name %s. Use deleteSNPs() to remove it first" %setName)
-	
-	shutil.rmtree(packageDir)
+
+	if not isDir :
+		shutil.rmtree(packageDir)
+
+	return return_value
 
 def deleteSNPs(setName) :
 	"""deletes a set of polymorphisms"""

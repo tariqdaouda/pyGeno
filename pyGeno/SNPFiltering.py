@@ -72,7 +72,7 @@ class SNPFilter(object) :
 
 class DefaultSNPFilter(SNPFilter) :
 	"""
-	Default filtering object, does not filter anything. Doesn't apply indels.
+	Default filtering object, does not filter anything. Doesn't apply insertions or deletions.
 	This is also a template that you can use for own filters. A prototype for a custom filter might be::
 	
 		class MyFilter(SNPFilter) :
@@ -85,7 +85,7 @@ class DefaultSNPFilter(SNPFilter) :
 				return None
 			
 	Where SNP_Set1 and SNP_Set2 are the actual names of the snp sets supplied to the genome. In the context of the function
-	they represent single polymorphisms derived from thoses sets that occur at the same position.
+	they represent single polymorphisms, or lists of polymorphisms, derived from thoses sets that occur at the same position.
 
 	Whatever goes on into the function is absolutely up to you, but in the end, it must return an object of one of the following classes:
 
@@ -104,11 +104,7 @@ class DefaultSNPFilter(SNPFilter) :
 
 	def filter(self, chromosome, **kwargs) :
 		"""The default filter mixes applied all SNPs and ignores Insertions and Deletions."""
-		warn = 'Warning: the default snp filter ignores indels. IGNORED %s of SNP set: %s at pos: %s of chromosome: %s'
-		
-		sources = {}
-		alleles = []
-		for snpSet, snp in kwargs.iteritems() :
+		def appendAllele(alleles, sources, snp) :
 			pos = snp.start
 			if snp.alt[0] == '-' :
 				pass
@@ -120,10 +116,22 @@ class DefaultSNPFilter(SNPFilter) :
 				sources[snpSet] = snp
 				alleles.append(snp.alt) #if not an indel append the polymorphism
 			
+			refAllele = chromosome.refSequence[pos]
+			alleles.append(refAllele)
+			sources['ref'] = refAllele
+			return alleles, sources
+				
+		warn = 'Warning: the default snp filter ignores indels. IGNORED %s of SNP set: %s at pos: %s of chromosome: %s'
+		sources = {}
+		alleles = []
+		for snpSet, data in kwargs.iteritems() :
+			if type(data) is list :
+				for snp in data :
+					alleles, sources = appendAllele(alleles, sources, snp)
+			else :
+				allels, sources = appendAllele(alleles, sources, data)
+
 		#appends the refence allele to the lot
-		refAllele = chromosome.refSequence[pos]
-		alleles.append(refAllele)
-		sources['ref'] = refAllele
 
 		#optional we keep a record of the polymorphisms that were used during the process
 		return SequenceSNP(alleles, sources = sources)

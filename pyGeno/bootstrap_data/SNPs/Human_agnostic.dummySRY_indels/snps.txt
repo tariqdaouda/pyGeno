@@ -1,0 +1,4 @@
+chromosomeNumber	uniqueId	start	end	ref	alleles	quality	caller
+Y	1	2655643	2655646	T	AG	30	test
+Y	2	2655643	2655647	-	AG	30	test
+Y	3	2655643	2655650	TT	-	30	test

@@ -139,9 +139,11 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
 
     printf('Importing genome package: %s... (This may take a while)' % packageFile)
 
+    isDir = False
     if not os.path.isdir(packageFile) :
         packageDir = _decompressPackage(packageFile)
     else :
+        isDir = True
         packageDir = packageFile
 
     parser = SafeConfigParser()
@@ -189,7 +191,8 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
         chro.save()
     pBar.close()
     
-    shutil.rmtree(packageDir)
+    if not isDir :
+        shutil.rmtree(packageDir)
     
     #~ objgraph.show_most_common_types(limit=20)
     return True
@@ -337,7 +340,11 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
                     protId = None
                     if verbose > 2 :
                         printf('Warning: no protein_id found in line %s' % gtf[i])
-                
+
+                # Store selenocysteine positions in transcript
+                if regionType == 'Selenocysteine':
+                    store.transcripts[transId].selenocysteine.append(start)
+                        
                 if protId is not None and protId not in store.proteins :
                     if verbose > 1 :
                         printf('\t\tProtein %s...' % (protId))
@@ -358,7 +365,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
                     if verbose > 3 :
                         printf('\t\t\texon %s...' % (exonId))
                     
-                    if exonKey not in store.exons :
+                    if exonKey not in store.exons and regionType == 'exon' :
                         store.exons[exonKey] = Exon_Raba()
                         store.exons[exonKey].set(genome = genome, chromosome = store.chromosomes[chroNumber], gene = store.genes.get(geneId, None), transcript = store.transcripts.get(transId, None), protein = store.proteins.get(protId, None), strand = strand, number = exonNumber, start = start, end = end)
                         store.transcripts[transId].exons.append(store.exons[exonKey])

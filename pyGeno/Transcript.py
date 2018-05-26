@@ -23,6 +23,7 @@ class Transcript_Raba(pyGenoRabaObject) :
 	end = rf.Primitive()
 	coding = rf.Primitive()
 	biotype = rf.Primitive()
+	selenocysteine = rf.RList()
 	
 	genome = rf.RabaObject('Genome_Raba')
 	chromosome = rf.RabaObject('Chromosome_Raba')
@@ -100,7 +101,30 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			
 			if e.hasCDS() :
 				UTR5.append(''.join(e.UTR5))
-				cDNA.append(''.join(e.CDS))
+
+				if self.selenocysteine is not None:
+					for position in self.selenocysteine:
+						if e.CDS_start <= position <= e.CDS_end:
+
+							if e.strand == '+':
+								ajusted_position = position - e.CDS_start
+							else:
+								ajusted_position = e.CDS_end - position - 3
+
+							if e.CDS[ajusted_position] == 'T':
+								e.CDS = list(e.CDS)
+								e.CDS[ajusted_position] = '!'			
+				
+				if len(cDNA) == 0 and e.frame != 0 :
+					e.CDS = e.CDS[e.frame:]
+					
+					if e.strand == '+':
+						e.CDS_start += e.frame
+					else:
+						e.CDS_end -= e.frame
+				
+				if len(e.CDS):
+					cDNA.append(''.join(e.CDS))
 				UTR3.append(''.join(e.UTR3))
 				prime5 = False
 			else :
