@@ -59,7 +59,7 @@ class FastaFile(object) :
 	def save(self, filePath) :
 		"""saves the file into filePath"""
 		f = open(filePath, 'w')
-		f.write(self.make())
+		f.write(self.toStr())
 		f.close()
 	
 	def toStr(self) :

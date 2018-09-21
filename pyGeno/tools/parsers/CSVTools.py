@@ -97,7 +97,8 @@ class CSVEntry(object) :
 			# for d in tmpData :
 				d = tmpData[i]
 				sd = d.strip()
-				if sd[0] == csvFile.stringSeparator :
+				# print sd, tmpData, i
+				if len(sd) > 0 and sd[0] == csvFile.stringSeparator :
 					more = []	
 					for i in xrange(i, len(tmpData)) :
 						more.append(tmpData[i])
@@ -162,17 +163,18 @@ class CSVEntry(object) :
 					self.data.append("")
 				self.data[field] = str(value)
 
+	def toStr(self) :
+		return self.csvFile.separator.join(self.data)
+		
 	def __repr__(self) :
 		r = {}
 		for k, v in self.csvFile.legend.iteritems() :
 			r[k] = self.data[v]
 
-		# return "<line %d: %s>" %(self.lineNumber, str(self.data))
 		return "<line %d: %s>" %(self.lineNumber, str(r))
 		
 	def __str__(self) :
 		return repr(self)
-		# return self.csvFile.separator.join(self.data)
 	
 class CSVFile(object) :
 	"""
@@ -369,7 +371,7 @@ class CSVFile(object) :
 		"""returns a string version of the CSV"""
 		s = [self.strLegend]
 		for l in self.lines :
-			s.append(str(l))
+			s.append(l.toStr())
 		return self.lineSeparator.join(s)
 	
 	def __iter__(self) :

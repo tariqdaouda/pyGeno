@@ -36,7 +36,7 @@ pyGeno will take care of applying the filter and inserting the polymorphisms at 
 direct access to the DNA and Protein sequences of your patients/subjects.
 To know more about how to create a Personalized Genome, have a look at the :doc:`/quickstart` section.
 
-pyGeno can also function as a personal bioinformatic database for Ensembl, that runs directly into python, on your laptop, making faster aned more reliable than any REST API. pyGeno makes extracting data such as gene sequences a breeze, and is designed to
+pyGeno can also function as a personal bioinformatic database for Ensembl, that runs directly into python, on your laptop, making faster and more reliable than any REST API. pyGeno makes extracting data such as gene sequences a breeze, and is designed to
 be able cope with huge queries.
 
 
@@ -81,7 +81,7 @@ pyGeno is a python package that  was designed to be:
 * Fast to install. It has no dependencies but its own backend: `rabaDB`_.
 * Fast to run and memory efficient, so you can use it on your laptop.
 * Fast to use. No queries to foreign APIs all the data rests on your computer, so it is readily accessible when you need it.
-* Fast to learn. One sigle function **get()** can do the job of several other tools at once. 
+* Fast to learn. One single function **get()** can do the job of several other tools at once. 
 
 It also comes with:
 
