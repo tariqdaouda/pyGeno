@@ -4,10 +4,22 @@ pyGeno: A Python package for precision medicine and proteogenomics
 .. image:: http://depsy.org/api/package/pypi/pyGeno/badge.svg
    :alt: depsy
    :target: http://depsy.org/package/python/pyGeno
-   
+
+.. image:: https://pepy.tech/badge/pygeno
+   :alt: downloads
+   :target: https://pepy.tech/project/pygeno
+
+.. image:: https://pepy.tech/badge/pygeno/month
+   :alt: downloads_month
+   :target: https://pepy.tech/project/pygeno/month
+
+.. image:: https://pepy.tech/badge/pygeno/week
+   :alt: downloads_week
+   :target: https://pepy.tech/project/pygeno/week
+
 .. image:: http://bioinfo.iric.ca/~daoudat/pyGeno/_static/logo.png
    :alt: pyGeno's logo
-
+   
 
 pyGeno is (to our knowledge) the only tool available that will gladly build your specific genomes for you.
 
