@@ -1,14 +1,14 @@
-import configuration as conf
+from . import configuration as conf
 
-from pyGenoObjectBases import *
+from .pyGenoObjectBases import *
 
 import rabaDB.fields as rf
 
-from tools import UsefulFunctions as uf
-from Exon import *
-from SNP import SNP_INDEL
+from .tools import UsefulFunctions as uf
+from .Exon import *
+from .SNP import SNP_INDEL
 
-from tools.BinarySequence import NucBinarySequence
+from .tools.BinarySequence import NucBinarySequence
 
 
 class Transcript_Raba(pyGenoRabaObject) :
@@ -69,9 +69,9 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			coolArgs['start >='] = self.start
 			coolArgs['start <'] = self.end
 		
-			if len(args) > 0 and type(args[0]) is types.ListType :
+			if len(args) > 0 and type(args[0]) is list :
 				for a in args[0] :
-					if type(a) is types.DictType :
+					if type(a) is dict :
 						f.addFilter(**a)
 			else :
 				f.addFilter(*args, **coolArgs)

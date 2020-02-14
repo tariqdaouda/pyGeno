@@ -38,7 +38,7 @@ class GTFFile(object) :
 		self.legend = {'seqname' : 0, 'source' : 1, 'feature' : 2, 'start' : 3, 'end' : 4, 'score' : 5, 'strand' : 6, 'frame' : 7, 'attributes' : 8}
 
 		if gziped : 
-			f = gzip.open(filename)
+			f = gzip.open(filename, 'rt')
 		else :
 			f = open(filename)
 		
@@ -58,7 +58,7 @@ class GTFFile(object) :
 		self.currentPos = -1
 		return self
 
-	def next(self) :
+	def __next__(self) :
 		self.currentPos += 1
 		try :
 			return GTFEntry(self, self.currentPos)

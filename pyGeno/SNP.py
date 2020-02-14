@@ -1,8 +1,6 @@
-import types
+from . import configuration as conf
 
-import configuration as conf
-
-from pyGenoObjectBases import *
+from .pyGenoObjectBases import *
 import rabaDB.fields as rf
 
 # from tools import UsefulFunctions as uf
@@ -20,7 +18,7 @@ def getSNPSetsList() :
 	import rabaDB.filters as rfilt
 	f = rfilt.RabaQuery(SNPMaster)
 	names = []
-	for g in f.iterRun() :
+	for g in f.run(generator=True) :
 		names.append(g.setName)
 	return names
 

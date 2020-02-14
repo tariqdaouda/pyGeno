@@ -93,7 +93,7 @@ class VCFFile(object) :
 		self.stream = stream
 		
 		if gziped :
-			self.f = gzip.open(filename)
+			self.f = gzip.open(filename, 'rt')
 		else :
 			self.f = open(filename)
 		
@@ -153,7 +153,7 @@ class VCFFile(object) :
 		self.currentPos = -1
 		return self
 	
-	def next(self) :
+	def __next__(self) :
 		self.currentPos += 1
 		if not self.stream :
 			try :

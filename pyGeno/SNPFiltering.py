@@ -1,8 +1,6 @@
-import types
+from . import configuration as conf
 
-import configuration as conf
-
-from tools import UsefulFunctions as uf
+from .tools import UsefulFunctions as uf
 
 class Sequence_modifiers(object) :
 	"""Abtract Class. All sequence must inherit from me"""
@@ -17,7 +15,7 @@ class SequenceSNP(Sequence_modifiers) :
 	"""Represents a SNP to be applied to the sequence"""
 	def __init__(self, alleles, sources = {}) :
 		Sequence_modifiers.__init__(self, sources)
-		if type(alleles) is types.ListType :
+		if type(alleles) is list :
 			self.alleles = uf.encodePolymorphicNucleotide(''.join(alleles))
 		else :
 			self.alleles = uf.encodePolymorphicNucleotide(alleles)
@@ -124,7 +122,7 @@ class DefaultSNPFilter(SNPFilter) :
 		warn = 'Warning: the default snp filter ignores indels. IGNORED %s of SNP set: %s at pos: %s of chromosome: %s'
 		sources = {}
 		alleles = []
-		for snpSet, data in kwargs.iteritems() :
+		for snpSet, data in kwargs.items() :
 			if type(data) is list :
 				for snp in data :
 					alleles, sources = appendAllele(alleles, sources, snp)

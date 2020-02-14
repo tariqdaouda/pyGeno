@@ -89,6 +89,9 @@ You can see pyGeno achitecture as a graph where everything is connected to every
 Queries
 -------
 
+Note that the way queries are handled is changing
+    Since pyGeno v1.4 the default method is to use generators
+
 PyGeno allows for several kinds of queries, here are some snippets::
 
 	#in this case both queries will yield the same result
@@ -109,9 +112,12 @@ To know the available fields for queries, there's a "help()" function::
 Faster queries
 ---------------
 
-To speed up loops use iterGet()::
+Note that the way queries are handled is changing
+    Since pyGeno v1.4 the default method is to use generators
+
+To speed up loops use get(generator=True)::
 	
-	for prot in gene.iterGet(Protein) :
+	for prot in gene.get(Protein, generator=True) :
 	  print prot.sequence
 
 For more speed create indexes on the fields you need the most::

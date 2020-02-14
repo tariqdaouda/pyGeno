@@ -1,12 +1,12 @@
 import array, copy
-import UsefulFunctions as uf
+from . import UsefulFunctions as uf
 
 class BinarySequence :
 	"""A class for representing sequences in a binary format"""
 
-        ALPHABETA_SIZE = 32
-        ALPHABETA_KMP = range(ALPHABETA_SIZE)
-        
+	ALPHABETA_SIZE = 32
+	ALPHABETA_KMP = range(ALPHABETA_SIZE)
+	 
 	def __init__(self, sequence, arrayForma, charToBinDict) :
 	
 		self.forma = arrayForma
@@ -169,7 +169,7 @@ class BinarySequence :
 		if len(currHaystack) == 1 :
 			if (offset <= (len(self) - len(needle))) and (currHaystack[0] & needle[0]) > 0 and (self[offset+len(needle)-1] & needle[-1]) > 0 :
 				found = True
-				for i in xrange(1, len(needle)-1) :
+				for i in range(1, len(needle)-1) :
 					if self[offset + i] & needle[i] == 0 :
 						found = False
 						break
@@ -194,49 +194,49 @@ class BinarySequence :
 					return self._dichFind(needle, currHaystack[len(currHaystack)/2:], offset + len(currHaystack)/2, lst)
 			return -1
 
-        def _kmp_construct_next(self, pattern):
-                """the helper function for KMP-string-searching is to construct the DFA. pattern should be an integer array. return a 2D array representing the DFA for moving the pattern."""
-                next = [[0 for state in pattern] for input_token in self.ALPHABETA_KMP]
-                next[pattern[0]][0] = 1
-                restart_state = 0
-                for state in range(1, len(pattern)):
-                        for input_token in self.ALPHABETA_KMP:
-                                next[input_token][state] = next[input_token][restart_state]
-                        next[pattern[state]][state] = state + 1
-                        restart_state = next[pattern[state]][restart_state]
-                return next
+	def _kmp_construct_next(self, pattern):
+		"""the helper function for KMP-string-searching is to construct the DFA. pattern should be an integer array. return a 2D array representing the DFA for moving the pattern."""
+		next = [[0 for state in pattern] for input_token in self.ALPHABETA_KMP]
+		next[pattern[0]][0] = 1
+		restart_state = 0
+		for state in range(1, len(pattern)):
+			for input_token in self.ALPHABETA_KMP:
+				next[input_token][state] = next[input_token][restart_state]
+			next[pattern[state]][state] = state + 1
+			restart_state = next[pattern[state]][restart_state]
+		return next
 
-        def _kmp_search_first(self, pInput_sequence, pPattern):
-                """use KMP algorithm to search the first occurrence in the input_sequence of the pattern. both arguments are integer arrays. return the position of the occurence if found; otherwise, -1."""
-                input_sequence, pattern = pInput_sequence, [len(bin(e)) for e in pPattern]
-                n, m = len(input_sequence), len(pattern)
-                d = p = 0
-                next = self._kmp_construct_next(pattern)
-                while d < n and p < m:
-                        p = next[len(bin(input_sequence[d]))][p]
-                        d += 1
-                if p == m: return d - p
-                else: return -1
+	def _kmp_search_first(self, pInput_sequence, pPattern):
+		"""use KMP algorithm to search the first occurrence in the input_sequence of the pattern. both arguments are integer arrays. return the position of the occurence if found; otherwise, -1."""
+		input_sequence, pattern = pInput_sequence, [len(bin(e)) for e in pPattern]
+		n, m = len(input_sequence), len(pattern)
+		d = p = 0
+		next = self._kmp_construct_next(pattern)
+		while d < n and p < m:
+			p = next[len(bin(input_sequence[d]))][p]
+			d += 1
+		if p == m: return d - p
+		else: return -1
 
-        def _kmp_search_all(self, pInput_sequence, pPattern):
-                """use KMP algorithm to search all occurrence in the input_sequence of the pattern. both arguments are integer arrays. return a list of the positions of the occurences if found; otherwise, []."""
-                r = []
-                input_sequence, pattern = [len(bin(e)) for e in pInput_sequence], [len(bin(e)) for e in pPattern]
-                n, m = len(input_sequence), len(pattern)
-                d = p = 0
-                next = self._kmp_construct_next(pattern)
-                while d < n:
-                        p = next[input_sequence[d]][p]
-                        d += 1
-                        if p == m:
-                                r.append(d - m)
-                                p = 0
-                return r
+	def _kmp_search_all(self, pInput_sequence, pPattern):
+		"""use KMP algorithm to search all occurrence in the input_sequence of the pattern. both arguments are integer arrays. return a list of the positions of the occurences if found; otherwise, []."""
+		r = []
+		input_sequence, pattern = [len(bin(e)) for e in pInput_sequence], [len(bin(e)) for e in pPattern]
+		n, m = len(input_sequence), len(pattern)
+		d = p = 0
+		next = self._kmp_construct_next(pattern)
+		while d < n:
+			p = next[input_sequence[d]][p]
+			d += 1
+			if p == m:
+				r.append(d - m)
+				p = 0
+		return r
 
-        def _kmp_find(self, needle, haystack, lst = None):
+	def _kmp_find(self, needle, haystack, lst = None):
 		"""find with KMP-searching. needle is an integer array, reprensenting a pattern. haystack is an integer array, reprensenting the input sequence. if lst is None, return the first position found or -1 if no match found. If it's a list, will return a list of all positions in lst. returns -1 or [] if no match found."""
-                if lst != None: return self._kmp_search_all(haystack, needle)
-                else: return self._kmp_search_first(haystack, needle)
+		if lst != None: return self._kmp_search_all(haystack, needle)
+		else: return self._kmp_search_first(haystack, needle)
 		
 	def findByBiSearch(self, strSeq) :
 		"""returns the first occurence of strSeq in self. Takes polymorphisms into account"""
@@ -253,13 +253,13 @@ class BinarySequence :
 	def find(self, strSeq) :
 		"""returns the first occurence of strSeq in self. Takes polymorphisms into account"""
 		arr = self.encode(strSeq)
-                return self._kmp_find(arr[0], self)
+		return self._kmp_find(arr[0], self)
 
 	def findAll(self, strSeq) :
 		"""Same as find but returns a list of all occurences"""
 		arr = self.encode(strSeq)
 		lst = []
-                lst = self._kmp_find(arr[0], self, lst)
+		lst = self._kmp_find(arr[0], self, lst)
 		return lst
 		
 	def __and__(self, arr) :
@@ -299,7 +299,7 @@ class BinarySequence :
 		"""decodes a binary sequence to return a string"""
 		try:
 			binSeq = iter(binSequence[0])
-		except TypeError, te:
+		except TypeError:
 			binSeq = binSequence
     
 		ret = ''
@@ -330,7 +330,7 @@ class AABinarySequence(BinarySequence) :
 	"""A binary sequence of amino acids"""
 	
 	def __init__(self, sequence):
-		f = array.array('I', [1L, 2L, 4L, 8L, 16L, 32L, 64L, 128L, 256L, 512L, 1024L, 2048L, 4096L, 8192L, 16384L, 32768L, 65536L, 131072L, 262144L, 524288L, 1048576L, 2097152L])
+		f = array.array('I', [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152])
 		c = {'A': 17, 'C': 14, 'E': 19, 'D': 15, 'G': 13, 'F': 16, 'I': 3, 'H': 9, 'K': 8, '*': 1, 'M': 20, 'L': 0, 'N': 4, 'Q': 11, 'P': 6, 'S': 7, 'R': 5, 'T': 2, 'W': 10, 'V': 18, 'Y': 12, 'U': 21}
 		BinarySequence.__init__(self, sequence, f, c)
 	
@@ -346,7 +346,7 @@ class NucBinarySequence(BinarySequence) :
 			'D' : 'A/G/T', 'H' : 'A/C/T', 'V' : 'A/C/G', 'N': 'A/C/G/T'
 			}
 		lstSeq = list(sequence)
-		for i in xrange(len(lstSeq)) :
+		for i in range(len(lstSeq)) :
 			if lstSeq[i] in ce :
 				lstSeq[i] = ce[lstSeq[i]]
 		lstSeq = ''.join(lstSeq)
@@ -364,56 +364,56 @@ if __name__=="__main__":
 		r = bSeq.getSequenceVariants(start, stop)
 		
 		#print start, stop, 'nb_comb_r', len(r[1]), set(rB[1])==set(r[1]) 
-		print start, stop#, 'nb_comb_r', len(r[1]), set(rB[1])==set(r[1]) 
+		print(start, stop)#, 'nb_comb_r', len(r[1]), set(rB[1])==set(r[1]) 
 		
 		#if set(rB[1])!=set(r[1]) :
-		print '-AV-'
-		print start, stop, 'nb_comb_r', len(rB[1])
-		print '\n'.join(rB[1])
-		print '=AP========'
-		print start, stop, 'nb_comb_r', len(r[1]) 
-		print '\n'.join(r[1])
+		print('-AV-')
+		print(start, stop, 'nb_comb_r', len(rB[1]))
+		print('\n'.join(rB[1]))
+		print('=AP========')
+		print(start, stop, 'nb_comb_r', len(r[1])) 
+		print('\n'.join(r[1]))
 	
 	def testVariants() :
 		seq = 'ATGAGTTTGCCGCGCN'
 		bSeq = NucBinarySequence(seq)
-		print bSeq.getSequenceVariants() 
+		print(bSeq.getSequenceVariants()) 
 
 	testVariants()
 
-        from random import randint
-        alphabeta = ['A', 'C', 'G', 'T']
-        seq = ''
-        for _ in range(8192):
-                seq += alphabeta[randint(0, 3)]
-        seq += 'ATGAGTTTGCCGCGCN'
-        bSeq = NucBinarySequence(seq)
+	from random import randint
+	alphabeta = ['A', 'C', 'G', 'T']
+	seq = ''
+	for _ in range(8192):
+		seq += alphabeta[randint(0, 3)]
+	seq += 'ATGAGTTTGCCGCGCN'
+	bSeq = NucBinarySequence(seq)
 
-        ROUND = 512
-        PATTERN = 'GCGC'
+	ROUND = 512
+	PATTERN = 'GCGC'
 
-        def testFind():
-                for i in range(ROUND):
-                        bSeq.find(PATTERN)
+	def testFind():
+		for i in range(ROUND):
+			bSeq.find(PATTERN)
 
-        def testFindByBiSearch():
-                for i in range(ROUND):
-                        bSeq.findByBiSearch(PATTERN)
-                        
-        def testFindAll():
-                for i in range(ROUND):
-                        bSeq.findAll(PATTERN)
+	def testFindByBiSearch():
+		for i in range(ROUND):
+			bSeq.findByBiSearch(PATTERN)
+			
+	def testFindAll():
+		for i in range(ROUND):
+			bSeq.findAll(PATTERN)
 
-        def testFindAllByBiSearch():
-                for i in range(ROUND):
-                        bSeq.findAllByBiSearch(PATTERN)
+	def testFindAllByBiSearch():
+		for i in range(ROUND):
+			bSeq.findAllByBiSearch(PATTERN)
 
-        import cProfile
-        print('find:\n')
+	import cProfile
+	print('find:\n')
 	cProfile.run('testFind()')
-        print('findAll:\n')
-        cProfile.run('testFindAll()')
-        print('findByBiSearch:\n')
-        cProfile.run('testFindByBiSearch()')
-        print('findAllByBiSearch:\n')
-        cProfile.run('testFindAllByBiSearch()')
+	print('findAll:\n')
+	cProfile.run('testFindAll()')
+	print('findByBiSearch:\n')
+	cProfile.run('testFindByBiSearch()')
+	print('findAllByBiSearch:\n')
+	cProfile.run('testFindAllByBiSearch()')

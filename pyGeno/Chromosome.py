@@ -3,17 +3,17 @@
 #from tools import UsefulFunctions as uf
 
 from types import *
-import configuration as conf
-from pyGenoObjectBases import *
+from . import configuration as conf
+from .pyGenoObjectBases import *
 
-from SNP import *
-import SNPFiltering as SF
+from .SNP import *
+from . import SNPFiltering as SF
 
 from rabaDB.filters import RabaQuery
 import rabaDB.fields as rf
 
-from tools.SecureMmap import SecureMmap as SecureMmap
-from tools import SingletonManager
+from .tools.SecureMmap import SecureMmap as SecureMmap
+from .tools import SingletonManager
 
 import pyGeno.configuration as conf
 
@@ -34,10 +34,10 @@ class ChrosomeSequence(object) :
 		data = self.data[slic]
 		SNPTypes = self.chromosome.genome.SNPTypes
 		if SNPTypes is None or self.refOnly :
-			return data
+			return data.decode('utf-8')
 		
 		iterators = []
-		for setName, SNPType in SNPTypes.iteritems() :
+		for setName, SNPType in SNPTypes.items() :
 			f = RabaQuery(str(SNPType), namespace = self.chromosome._raba_namespace)
 			
 			chromosomeNumber = self.chromosome.number
@@ -47,10 +47,10 @@ class ChrosomeSequence(object) :
 			
 			f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : chromosomeNumber})
 			# conf.db.enableDebug(True)
-			iterators.append(f.iterRun(sqlTail = 'ORDER BY start'))
+			iterators.append(f.run(sqlTail = 'ORDER BY start', generator=True))
 		
 		if len(iterators) < 1 :
-			return data
+			return data.decode('utf-8')
 		
 		polys = {}
 		for iterator in iterators :
@@ -65,7 +65,7 @@ class ChrosomeSequence(object) :
 						polys[poly.start][poly.setName].append(poly)
 						
 		data = list(data)
-		for start, setPolys in polys.iteritems() :
+		for start, setPolys in polys.items() :
 			
 			seqPos = start - slic.start
 			sequenceModifier = self.SNPFilter.filter(self.chromosome, **setPolys)
@@ -83,7 +83,7 @@ class ChrosomeSequence(object) :
 				else :
 					raise TypeError("sequenceModifier on chromosome: %s starting at: %s is of unknown type: %s" % (self.chromosome.number, snp.start, sequenceModifier.__class__))
 
-		return data
+		return data.decode('utf-8')
 	
 	def _getSequence(self, slic) :
 		return ''.join(self.getSequenceData(slice(0, None, 1)))[slic]
@@ -140,9 +140,9 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 			coolArgs['species'] = self.genome.species
 			coolArgs['chromosomeNumber'] = self.number
 
-			if len(args) > 0 and type(args[0]) is types.ListType :
+			if len(args) > 0 and type(args[0]) is list :
 				for a in args[0] :
-					if type(a) is types.DictType :
+					if type(a) is dict :
 						f.addFilter(**a)
 			else :
 				f.addFilter(*args, **coolArgs)

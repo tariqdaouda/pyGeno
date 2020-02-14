@@ -1,7 +1,8 @@
 import pyGeno.importation.Genomes as PG
 import pyGeno.importation.SNPs as PS
 from pyGeno.tools.io import printf
-import os, tempfile, urllib, urllib2, json
+import os, tempfile, json
+import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 import pyGeno.configuration as conf
 
 this_dir, this_filename = os.path.split(__file__)
@@ -10,8 +11,9 @@ this_dir, this_filename = os.path.split(__file__)
 
 def listRemoteDatawraps(location = conf.pyGeno_REMOTE_LOCATION) :
 	"""Lists all the datawraps availabe from a remote a remote location."""
+	print(location)
 	loc = location + "/datawraps.json"
-	response = urllib2.urlopen(loc)
+	response = urllib.request.urlopen(loc)
 	js = json.loads(response.read())
 	
 	return js
@@ -44,14 +46,14 @@ def printRemoteDatawraps(location = conf.pyGeno_REMOTE_LOCATION) :
 	
 	l = listRemoteDatawraps(location)
 	printf("Available datawraps for bootstraping\n")
-	print json.dumps(l["Ordered"], sort_keys=True, indent=4, separators=(',', ': '))
+	print(json.dumps(l["Ordered"], sort_keys=True, indent=4, separators=(',', ': ')))
 
 def _DW(name, url) :
 	packageDir = tempfile.mkdtemp(prefix = "pyGeno_remote_")
 	
 	printf("~~~:>\n\tDownloading datawrap: %s..." % name)
 	finalFile = os.path.normpath('%s/%s' %(packageDir, name))
-	urllib.urlretrieve (url, finalFile)
+	urllib.request.urlretrieve (url, finalFile)
 	printf('\tdone.\n~~~:>')
 	return finalFile
 
@@ -92,7 +94,7 @@ def printDatawraps() :
 	"""print all available datawraps for bootstraping"""
 	l = listDatawraps()
 	printf("Available datawraps for boostraping\n")
-	for k, v in l.iteritems() :
+	for k, v in l.items() :
 		printf(k)
 		printf("~"*len(k) + "|")
 		for vv in v :

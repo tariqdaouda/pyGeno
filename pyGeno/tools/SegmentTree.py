@@ -1,4 +1,4 @@
-import random, copy, types
+import random, copy
 
 def aux_insertTree(childTree, parentTree):
 	"""This a private (You shouldn't have to call it) recursive function that inserts a child tree into a parent tree."""
@@ -98,7 +98,7 @@ class SegmentTree :
 			
 			elif xx1 <= self.children[i].x1 and self.children[i].x2 <= xx2 :
 				if rt == None :
-					if type(referedObject) is types.ListType :
+					if type(referedObject) is list :
 						rt = SegmentTree(xx1, xx2, name, referedObject, self, self.level+1)
 					else :
 						rt = SegmentTree(xx1, xx2, name, [referedObject], self, self.level+1)
@@ -118,7 +118,7 @@ class SegmentTree :
 			for c in childrenToRemove :
 				self.children.remove(c)
 		else :
-			if type(referedObject) is types.ListType :
+			if type(referedObject) is list :
 				rt = SegmentTree(xx1, xx2, name, referedObject, self, self.level+1)
 			else :
 				rt = SegmentTree(xx1, xx2, name, [referedObject], self, self.level+1)
@@ -350,19 +350,19 @@ if __name__== "__main__" :
 	s.insert(35, 38, 'region 5')
 	s.insert(36, 37, 'region 6', 'aaa')
 	s.insert(36, 37, 'region 6', 'aaa2')
-	print "Tree:"
-	print s
-	print "indexed length", s.getIndexedLength()
-	print "removing gaps and adding region 7 : [13-37["
+	print("Tree:")
+	print(s)
+	print("indexed length", s.getIndexedLength())
+	print("removing gaps and adding region 7 : [13-37[")
 	s.removeGaps()
 	#s.insert(13, 37, 'region 7')
-	print s
-	print "indexed length", s.getIndexedLength()
+	print(s)
+	print("indexed length", s.getIndexedLength())
 	#print "intersections"
 	#for c in [6, 10, 14, 1000] :
 	#	print c, s.intersect(c)
 	
-	print "Move"
+	print("Move")
 	s.move(0)
-	print s
-	print "indexed length", s.getIndexedLength()
+	print(s)
+	print("indexed length", s.getIndexedLength())

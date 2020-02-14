@@ -1,9 +1,9 @@
-from pyGenoObjectBases import *
-from SNP import SNP_INDEL
+from .pyGenoObjectBases import *
+from .SNP import SNP_INDEL
 
 import rabaDB.fields as rf
-from tools import UsefulFunctions as uf
-from tools.BinarySequence import NucBinarySequence
+from .tools import UsefulFunctions as uf
+from .tools.BinarySequence import NucBinarySequence
 
 class Exon_Raba(pyGenoRabaObject) :
 	"""The wrapped Raba object that really holds the data"""
@@ -63,9 +63,9 @@ class Exon(pyGenoRabaObjectWrapper) :
 			coolArgs['start >='] = self.start
 			coolArgs['start <'] = self.end
 		
-			if len(args) > 0 and type(args[0]) is types.ListType :
+			if len(args) > 0 and type(args[0]) is list :
 				for a in args[0] :
-					if type(a) is types.DictType :
+					if type(a) is dict :
 						f.addFilter(**a)
 			else :
 				f.addFilter(*args, **coolArgs)

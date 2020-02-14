@@ -1,6 +1,7 @@
-import os, glob, gzip, tarfile, shutil, time, sys, gc, cPickle, tempfile, urllib2
+import os, glob, gzip, tarfile, shutil, time, sys, gc, pickle, tempfile
+import urllib.request, urllib.error, urllib.parse
 from contextlib import closing
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 
 from pyGeno.tools.ProgressBar import ProgressBar
 import pyGeno.configuration as conf
@@ -44,10 +45,10 @@ def _getFile(fil, directory) :
     if fil.find("http://") == 0 or fil.find("ftp://") == 0 :
         printf("Downloading file: %s..." % fil)
         finalFile = os.path.normpath('%s/%s' %(directory, fil.split('/')[-1]))
-        # urllib.urlretrieve (fil, finalFile)
-        with closing(urllib2.urlopen(fil)) as r:
-            with open(finalFile, 'wb') as f:
-                shutil.copyfileobj(r, f)
+        urllib.request.urlretrieve (fil, finalFile)
+        #with closing(urllib.request.urlopen(fil)) as r:
+        #    with open(finalFile, 'wb') as f:
+        #        shutil.copyfileobj(r, f)
         
         printf('done.')
     else :
@@ -71,7 +72,7 @@ def deleteGenome(species, name) :
             pBar.update()
             f = RabaQuery(typ, namespace = genome._raba_namespace)
             f.addFilter({'genome' : genome})
-            for e in f.iterRun() :
+            for e in f.run(generator=True) :
                 objs.append(e)
         pBar.close()
         
@@ -215,16 +216,16 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
         def batch_save(self) :
             self.conf.db.beginTransaction()
             
-            for c in self.genes.itervalues() :
+            for c in self.genes.values() :
                 c.save()
                 conf.removeFromDBRegistery(c)
                 
-            for c in self.transcripts.itervalues() :
+            for c in self.transcripts.values() :
                 c.save()
                 conf.removeFromDBRegistery(c.exons)
                 conf.removeFromDBRegistery(c)
             
-            for c in self.proteins.itervalues() :
+            for c in self.proteins.values() :
                 c.save()
                 conf.removeFromDBRegistery(c)
             
@@ -244,7 +245,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
 
         def save_chros(self) :
             pBar = ProgressBar(nbEpochs = len(self.chromosomes))
-            for c in self.chromosomes.itervalues() :
+            for c in self.chromosomes.values() :
                 pBar.update(label = 'Chr %s' % c.number)
                 c.save()
             pBar.close()
@@ -253,7 +254,7 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
     
     printf('Backuping indexes...')
     indexes = conf.db.getIndexes()
-    printf("Droping all your indexes, (don't worry i'll restore them later)...")
+    printf("Dropping all your indexes (don't worry I'll restore them later)...")
     Genome_Raba.flushIndexes()
     Chromosome_Raba.flushIndexes()
     Gene_Raba.flushIndexes()
@@ -306,9 +307,9 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
                         printf('\tGene %s, %s...' % (geneId, geneName))
                     store.genes[geneId] = Gene_Raba()
                     store.genes[geneId].set(genome = genome, id = geneId, chromosome = store.chromosomes[chroNumber], name = geneName, strand = strand, biotype = gene_biotype)
-                if start < store.genes[geneId].start or store.genes[geneId].start is None :
+                if store.genes[geneId].start is None or start < store.genes[geneId].start:
                         store.genes[geneId].start = start
-                if end > store.genes[geneId].end or store.genes[geneId].end is None :
+                if store.genes[geneId].end is None or end > store.genes[geneId].end:
                     store.genes[geneId].end = end
             try :
                 transId = line['transcript_id']
@@ -329,9 +330,9 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
                         printf('\t\tTranscript %s, %s...' % (transId, transName))
                     store.transcripts[transId] = Transcript_Raba()
                     store.transcripts[transId].set(genome = genome, id = transId, chromosome = store.chromosomes[chroNumber], gene = store.genes.get(geneId, None), name = transName, biotype=transcript_biotype)
-                if start < store.transcripts[transId].start or store.transcripts[transId].start is None:
+                if store.transcripts[transId].start is None or start < store.transcripts[transId].start:
                     store.transcripts[transId].start = start
-                if end > store.transcripts[transId].end or store.transcripts[transId].end is None:
+                if store.transcripts[transId].end is None or end > store.transcripts[transId].end:
                     store.transcripts[transId].end = end
             
                 try :
@@ -376,9 +377,9 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
                         pass
                     
                     if regionType == 'exon' :
-                        if start < store.exons[exonKey].start or store.exons[exonKey].start is None:
+                        if store.exons[exonKey].start is None or start < store.exons[exonKey].start:
                             store.exons[exonKey].start = start
-                        if end > store.transcripts[transId].end or store.exons[exonKey].end is None:
+                        if store.exons[exonKey].end is None or end > store.transcripts[transId].end:
                             store.exons[exonKey].end = end
                     elif regionType == 'CDS' :
                         store.exons[exonKey].CDS_start = start
@@ -439,13 +440,13 @@ def _importGenomeObjects(gtfFilePath, chroSet, genome, batchSize, verbose = 0) :
     printf('commiting changes...')
     conf.db.endTransaction()
     
-    return store.chromosomes.values()
+    return list(store.chromosomes.values())
 
 #~ @profile
 def _importSequence(chromosome, fastaFile, targetDir) :
     "Serializes fastas into .dat files"
 
-    f = gzip.open(fastaFile)
+    f = gzip.open(fastaFile, 'rt')
     header = f.readline()
     strRes = f.read().upper().replace('\n', '').replace('\r', '')
     f.close()

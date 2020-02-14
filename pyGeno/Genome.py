@@ -1,15 +1,14 @@
-import types
-import configuration as conf
+from . import configuration as conf
 import pyGeno.tools.UsefulFunctions as uf
-from pyGenoObjectBases import *
+from .pyGenoObjectBases import *
 
-from Chromosome import Chromosome
-from Gene import Gene
-from Transcript import Transcript
-from Protein import Protein
-from Exon import Exon
-import SNPFiltering as SF
-from SNP import *
+from .Chromosome import Chromosome
+from .Gene import Gene
+from .Transcript import Transcript
+from .Protein import Protein
+from .Exon import Exon
+from . import SNPFiltering as SF
+from .SNP import *
 
 import rabaDB.fields as rf
 
@@ -18,7 +17,7 @@ def getGenomeList() :
 	import rabaDB.filters as rfilt
 	f = rfilt.RabaQuery(Genome_Raba)
 	names = []
-	for g in f.iterRun() :
+	for g in f.run(generator=True) :
 		names.append(g.name)
 	return names
 
@@ -66,7 +65,7 @@ class Genome(pyGenoRabaObjectWrapper) :
 		
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 
-		if type(SNPs) is types.StringType :
+		if type(SNPs) is str :
 			self.SNPsSets = [SNPs]
 		else :
 			self.SNPsSets = SNPs
@@ -102,9 +101,9 @@ class Genome(pyGenoRabaObjectWrapper) :
 			f = RabaQuery(objectType, namespace = self._wrapped_class._raba_namespace)
 			coolArgs['species'] = self.species
 
-			if len(args) > 0 and type(args[0]) is types.ListType :
+			if len(args) > 0 and type(args[0]) is list :
 				for a in args[0] :
-					if type(a) is types.DictType :
+					if type(a) is dict :
 						f.addFilter(**a)
 			else :
 				f.addFilter(*args, **coolArgs)

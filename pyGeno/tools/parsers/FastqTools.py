@@ -99,7 +99,7 @@ class FastqFile(object) :
 		self.currentPos = 0
 		return self
 	
-	def next(self) :
+	def __next__(self) :
 		#self to call getitem, and split he line if necessary
 		i = self.currentPos +1
 		#print i-1, self.currentPos

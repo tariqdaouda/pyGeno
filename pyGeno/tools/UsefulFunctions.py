@@ -1,4 +1,4 @@
-import string, os, copy, types
+import string, os, copy
 
 class UnknownNucleotide(Exception) :
 	def __init__(self, nuc) :
@@ -15,7 +15,7 @@ def saveResults(directoryName, fileName, strResults, log = '', args = ''):
 
 	resPath = "%s/%s"%(directoryName, fileName)
 	resFile = open(resPath, 'w')
-	print "Saving results :\n\t%s..."%resPath
+	print("Saving results :\n\t%s..."%resPath)
 	resFile.write(strResults)
 	resFile.close()
 
@@ -23,7 +23,7 @@ def saveResults(directoryName, fileName, strResults, log = '', args = ''):
 		errPath = "%s.err.txt"%(resPath)
 		errFile = open(errPath, 'w')
 
-		print "Saving log :\n\t%s..." %errPath
+		print("Saving log :\n\t%s..." %errPath)
 		errFile.write(log)
 		errFile.close()
 
@@ -31,7 +31,7 @@ def saveResults(directoryName, fileName, strResults, log = '', args = ''):
 		paramPath = "%s.args.txt"%(resPath)
 		paramFile = open(paramPath, 'w')
 
-		print "Saving arguments :\n\t%s..." %paramPath
+		print("Saving arguments :\n\t%s..." %paramPath)
 		paramFile.write(args)
 		paramFile.close()
 
@@ -252,7 +252,7 @@ def translateDNA(sequence, frame = 'f1', translTable_id='default') :
 def getSequenceCombinaisons(polymorphipolymorphicDnaSeqSeq, pos = 0) :
 	"""Takes a dna sequence with polymorphismes and returns all the possible sequences that it can yield"""
 
-	if type(polymorphipolymorphicDnaSeqSeq) is not types.ListType :
+	if type(polymorphipolymorphicDnaSeqSeq) is not list :
 		seq = list(polymorphipolymorphicDnaSeqSeq)
 	else :
 		seq = polymorphipolymorphicDnaSeqSeq
@@ -282,7 +282,7 @@ def encodePolymorphicNucleotide(polySeq) :
 	in a single character. PolySeq must have one of the following forms: 
 	['A', 'T', 'G'], 'ATG', 'A/T/G'"""
 	
-	if type(polySeq) is types.StringType :
+	if type(polySeq) is str :
 		if polySeq.find("/") < 0 :
 			sseq = list(polySeq)
 		else :
@@ -394,7 +394,7 @@ def highlightSubsequence(sequence, x1, x2, start=' [', stop = '] ') :
 	in bewteen 'start' and 'stop'"""
 
 	seq = list(sequence)
-	print x1, x2-1, len(seq)
+	print(x1, x2-1, len(seq))
 	seq[x1] = start + seq[x1]
 	seq[x2-1] = seq[x2-1] + stop
 	return ''.join(seq)

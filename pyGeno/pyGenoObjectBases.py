@@ -1,5 +1,5 @@
-import time, types, string
-import configuration as conf
+import time, warnings
+from . import configuration as conf
 from rabaDB.rabaSetup import *
 from rabaDB.Raba import *
 from rabaDB.filters import RabaQuery
@@ -60,12 +60,11 @@ class RLWrapper(object) :
 		rl =  object.__getattribute__(self, 'rl')
 		return getattr(rl, name)
 
-class pyGenoRabaObjectWrapper(object) :
+class pyGenoRabaObjectWrapper(object, metaclass=pyGenoRabaObjectWrapper_metaclass) :
 	"""All the wrapper classes such as Genome and Chromosome inherit 
 	from this class. It has most that make pyGeno useful, such as 
 	get(), count(), ensureIndex(). This class is to be considered 
 	abstract, and is not meant to be instanciated"""
-	__metaclass__ = pyGenoRabaObjectWrapper_metaclass
 
 	_wrapped_class = None
 	_bags = {}
@@ -100,9 +99,9 @@ class pyGenoRabaObjectWrapper(object) :
 		f = RabaQuery(objectType._wrapped_class, namespace = self._wrapped_class._raba_namespace)
 		coolArgs[self._wrapped_class.__name__[:-5]] = self.wrapped_object #[:-5] removes _Raba from class name
 
-		if len(args) > 0 and type(args[0]) is types.ListType :
+		if len(args) > 0 and type(args[0]) is list :
 			for a in args[0] :
-				if type(a) is types.DictType :
+				if type(a) is dict :
 					f.addFilter(**a)
 		else :
 			f.addFilter(*args, **coolArgs)
@@ -113,7 +112,7 @@ class pyGenoRabaObjectWrapper(object) :
 		"""Returns the number of elements satisfying the query"""
 		return self._makeLoadQuery(objectType, *args, **coolArgs).count()
 
-	def get(self, objectType, *args, **coolArgs) :
+	def get(self, objectType, *args, gen=False, **coolArgs) :
 		"""Raba Magic inside. This is th function that you use for 
 		querying pyGeno's DB.
 		
@@ -125,22 +124,33 @@ class pyGenoRabaObjectWrapper(object) :
 		
 			* myGenome.get(Transcript, {'start >' : x, 'end <' : y})"""
 		
-		ret = []
-		for e in self._makeLoadQuery(objectType, *args, **coolArgs).iterRun() :
-			if issubclass(objectType, pyGenoRabaObjectWrapper) :
-				ret.append(objectType(wrapped_object_and_bag = (e, self.bagKey)))
-			else :
-				ret.append(e)
-
-		return ret
-
+		warnings.warn("At some point in the future 'get' will be returning a generator by default (gen=True).\n" +\
+                        "If you want to use the output in a list format, you can just wrap your call with list().\n" +\
+                        "These changes are in conformity with python3 as opposed to the now-deprecated python2.", DeprecationWarning)
+		
+		if gen:
+			return self.iterGet(objectType, *args, **coolArgs)
+		else:
+			ret = []
+			for e in self._makeLoadQuery(objectType, *args, **coolArgs).run(gen=True):
+				if issubclass(objectType, pyGenoRabaObjectWrapper) :
+					ret.append(objectType(wrapped_object_and_bag = (e, self.bagKey)))
+				else :
+					ret.append(e)
+		
+			return ret
+	
 	def iterGet(self, objectType, *args, **coolArgs) :
 		"""Same as get. But retuns the elements one by one, much more efficient for large outputs"""
 
-		for e in self._makeLoadQuery(objectType, *args, **coolArgs).iterRun() :
+		warnings.warn("At some point in the future 'iterGet' will stop existing and will get replaced by 'get'.\n" +\
+                        "If you have functions still using the iter method, you should start changing them now.\n" +\
+                        "These changes are in conformity with python3 as opposed to the now-deprecated python2.", DeprecationWarning)
+		
+		for e in self._makeLoadQuery(objectType, *args, **coolArgs).run(gen=True):
 			if issubclass(objectType, pyGenoRabaObjectWrapper) :
 				yield objectType(wrapped_object_and_bag = (e, self.bagKey))
-			else :
+			else:
 				yield e
 
 	#~ def ensureIndex(self, fields) :

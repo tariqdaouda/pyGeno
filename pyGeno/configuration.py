@@ -1,5 +1,5 @@
 import sys, os, time
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 import rabaDB.rabaSetup
 import rabaDB.Raba
 

@@ -1,11 +1,11 @@
-import urllib, shutil
+import urllib.request, urllib.parse, urllib.error, shutil
 
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 import pyGeno.configuration as conf
 from pyGeno.SNP import *
 from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
-from Genomes import _decompressPackage, _getFile
+from .Genomes import _decompressPackage, _getFile
 
 from pyGeno.tools.parsers.CasavaTools import SNPsTxtFile
 from pyGeno.tools.parsers.VCFTools import VCFFile
