@@ -23,7 +23,7 @@ def printing(gene) :
 def printVs(refGene, presGene) :
 	print("Vs personalized sequences\n------")
 
-	for trans in presGene.get(Transcript, generator=True):
+	for trans in presGene.get(Transcript, gen=True):
 		refProt = refGene.get(Protein, id = trans.protein.id)[0]
 		persProt = trans.protein
 		print(persProt.id)

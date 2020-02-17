@@ -17,7 +17,7 @@ def getGenomeList() :
 	import rabaDB.filters as rfilt
 	f = rfilt.RabaQuery(Genome_Raba)
 	names = []
-	for g in f.run(generator=True) :
+	for g in f.run(gen=True) :
 		names.append(g.name)
 	return names
 

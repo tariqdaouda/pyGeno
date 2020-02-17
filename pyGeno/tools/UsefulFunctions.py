@@ -1,4 +1,4 @@
-import string, os, copy
+import os, copy
 
 class UnknownNucleotide(Exception) :
 	def __init__(self, nuc) :
@@ -187,8 +187,8 @@ def reverseComplement(seq):
 
 def complement(seq) :
 	"""returns the complementary sequence without inversing it"""
-	tb = string.maketrans("ACGTRYMKWSBDHVNacgtrymkwsbdhvn",
-						  "TGCAYRKMWSVHDBNtgcayrkmwsvhdbn")
+	tb = str.maketrans("ACGTRYMKWSBDHVNacgtrymkwsbdhvn",
+					   "TGCAYRKMWSVHDBNtgcayrkmwsvhdbn")
 	
 	#just to be sure that seq isn't unicode
 	return str(seq).translate(tb)

@@ -18,7 +18,7 @@ def getSNPSetsList() :
 	import rabaDB.filters as rfilt
 	f = rfilt.RabaQuery(SNPMaster)
 	names = []
-	for g in f.run(generator=True) :
+	for g in f.run(gen=True) :
 		names.append(g.setName)
 	return names
 

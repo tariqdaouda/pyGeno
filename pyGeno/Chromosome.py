@@ -31,10 +31,10 @@ class ChrosomeSequence(object) :
 		self.SNPFilter = SNPFilter
 	
 	def getSequenceData(self, slic) :
-		data = self.data[slic]
+		data = self.data[slic].decode('utf-8')
 		SNPTypes = self.chromosome.genome.SNPTypes
 		if SNPTypes is None or self.refOnly :
-			return data.decode('utf-8')
+			return data
 		
 		iterators = []
 		for setName, SNPType in SNPTypes.items() :
@@ -47,10 +47,10 @@ class ChrosomeSequence(object) :
 			
 			f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : chromosomeNumber})
 			# conf.db.enableDebug(True)
-			iterators.append(f.run(sqlTail = 'ORDER BY start', generator=True))
+			iterators.append(f.run(sqlTail = 'ORDER BY start', gen=True))
 		
 		if len(iterators) < 1 :
-			return data.decode('utf-8')
+			return data
 		
 		polys = {}
 		for iterator in iterators :
@@ -83,7 +83,7 @@ class ChrosomeSequence(object) :
 				else :
 					raise TypeError("sequenceModifier on chromosome: %s starting at: %s is of unknown type: %s" % (self.chromosome.number, snp.start, sequenceModifier.__class__))
 
-		return data.decode('utf-8')
+		return data
 	
 	def _getSequence(self, slic) :
 		return ''.join(self.getSequenceData(slice(0, None, 1)))[slic]
@@ -121,7 +121,7 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 	def __init__(self, *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 
-		path = '%s/chromosome%s.dat'%(self.genome.getSequencePath(), self.number)
+		path = '%s/chromosome%s.dat' % (self.genome.getSequencePath(), self.number)
 		if not SingletonManager.contains(path) :
 			datMap = SingletonManager.add(SecureMmap(path), path)
 		else :

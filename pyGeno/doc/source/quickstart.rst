@@ -115,9 +115,9 @@ Faster queries
 Note that the way queries are handled is changing
     Since pyGeno v1.4 the default method is to use generators
 
-To speed up loops use get(generator=True)::
+To speed up loops use get(gen=True)::
 	
-	for prot in gene.get(Protein, generator=True) :
+	for prot in gene.get(Protein, gen=True) :
 	  print prot.sequence
 
 For more speed create indexes on the fields you need the most::
@@ -126,6 +126,7 @@ For more speed create indexes on the fields you need the most::
 
 
 Getting sequences
+
 -------------------
 
 Anything that has a sequence can be indexed using the usual python list syntax::

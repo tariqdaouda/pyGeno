@@ -72,7 +72,7 @@ def deleteGenome(species, name) :
             pBar.update()
             f = RabaQuery(typ, namespace = genome._raba_namespace)
             f.addFilter({'genome' : genome})
-            for e in f.run(generator=True) :
+            for e in f.run(gen=True) :
                 objs.append(e)
         pBar.close()
         
