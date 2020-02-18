@@ -26,7 +26,7 @@ def printRemoteDatawraps(location = conf.pyGeno_REMOTE_LOCATION) :
 			"Ordered": {
 				"Reference genomes": {
 					"Human" :	["GRCh37.75", "GRCh38.78"],
-					"Mouse" : ["GRCm38.78"],
+					"Mouse" : ["GRCm38.78"]
 				},
 				"SNPs":{
 					}

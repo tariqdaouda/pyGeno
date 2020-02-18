@@ -51,7 +51,7 @@ It is recommended to install pyGeno within a `virtual environement`_, to setup o
 
 .. code:: shell
 
-        virtualenv ~/.pyGenoEnv
+        python venv ~/.pyGenoEnv
         source ~/.pyGenoEnv/bin/activate
 
 pyGeno can be installed through pip:

@@ -20,7 +20,7 @@ pyGeno_SETTINGS_DIR = os.path.normpath(os.path.expanduser('~/.pyGeno/'))
 pyGeno_SETTINGS_PATH = None
 pyGeno_RABA_DBFILE = None
 pyGeno_DATA_PATH = None
-pyGeno_REMOTE_LOCATION = 'http://bioinfo.iric.ca/~daoudat/pyGeno_datawraps'
+pyGeno_REMOTE_LOCATION = 'http://bioinfo.iric.ca/~feghalya/pyGeno_datawraps'
 
 db = None #proxy for the raba database
 dbConf = None #proxy for the raba database configuration
