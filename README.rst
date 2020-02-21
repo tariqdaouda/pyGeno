@@ -23,7 +23,7 @@ pyGeno: A Python package for precision medicine and proteogenomics
 
 pyGeno is (to our knowledge) the only tool available that will gladly build your specific genomes for you.
 
-pyGeno is developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_), its logo is the work of the freelance designer `Sawssan Kaddoura`_.
+pyGeno was developed by `Tariq Daouda`_ at the *Institute for Research in Immunology and Cancer* (IRIC_), its logo is the work of the freelance designer `Sawssan Kaddoura`_.
 For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 
 .. _Tariq Daouda: http://wwww.tariqdaouda.com
