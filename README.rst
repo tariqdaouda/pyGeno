@@ -38,6 +38,12 @@ For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 
 .. _@tariqdaouda: https://www.twitter.com/tariqdaouda
 
+Contributions:
+--------------
+
+pyGeno was started by Tariq Daouda with contributions from: Albert Feghaly, Éric Audemard, Jean-Philippe Laverdure.
+If you would like to contribute, please get in touch.
+
 Citing pyGeno:
 --------------
 Please cite this paper_.
