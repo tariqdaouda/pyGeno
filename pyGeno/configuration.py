@@ -1,104 +1,71 @@
 import sys, os, time
-from configparser import SafeConfigParser
-import rabaDB.rabaSetup
-import rabaDB.Raba
 
-class PythonVersionError(Exception) :
-	pass
+# from configparser import SafeConfigParser
 
-pyGeno_FACE = "~-~-:>"
-pyGeno_BRANCH = "V2"
+# class PythonVersionError(Exception) :
+#     pass
 
-pyGeno_VERSION_NAME = 'Lean Viper!'
-pyGeno_VERSION_RELEASE_LEVEL = 'Release'
-pyGeno_VERSION_NUMBER = 14.09
-pyGeno_VERSION_BUILD_TIME = time.ctime(os.path.getmtime(__file__))
+_FACE = "~-~-:>"
+_CHAPTER = "3"
 
-pyGeno_RABA_NAMESPACE = 'pyGenoRaba'
+_VERSION_NAME = 'Mighty Cobra'
+_VERSION_RELEASE_LEVEL = 'Alpha'
+_VERSION_NUMBER = 20.03
+_VERSION_BUILD_TIME = time.ctime(os.path.getmtime(__file__))
 
-pyGeno_SETTINGS_DIR = os.path.normpath(os.path.expanduser('~/.pyGeno/'))
-pyGeno_SETTINGS_PATH = None
-pyGeno_RABA_DBFILE = None
-pyGeno_DATA_PATH = None
-pyGeno_REMOTE_LOCATION = 'http://bioinfo.iric.ca/~feghalya/pyGeno_datawraps'
+_SETTINGS_DIR = os.path.normpath(os.path.expanduser('~/.pyGeno/'))
+_DB_CONF_FILE = os.path.join(_SETTINGS_DIR, "db_conf.json")
+_REMOTE_LOCATION = 'http://bioinfo.iric.ca/~feghalya/pyGeno_datawraps'
 
-db = None #proxy for the raba database
-dbConf = None #proxy for the raba database configuration
+_BACKEND = None
+
+def system_message(msg):
+    sys.stderr.write(_FACE + " " + msg + "\n")
 
 def version() :
-	"""returns a tuple describing pyGeno's current version"""
-	return (pyGeno_FACE, pyGeno_BRANCH, pyGeno_VERSION_NAME, pyGeno_VERSION_RELEASE_LEVEL, pyGeno_VERSION_NUMBER, pyGeno_VERSION_BUILD_TIME )
+    """returns a tuple describing pyGeno's current version"""
+    return (_CHAPTER, _VERSION_NAME, _VERSION_RELEASE_LEVEL, _VERSION_NUMBER, _VERSION_BUILD_TIME )
 
 def prettyVersion() :
-	"""returns pyGeno's current version in a pretty human readable way"""
-	return "pyGeno %s Branch: %s, Name: %s, Release Level: %s, Version: %s, Build time: %s" % version()
+    """returns pyGeno's current version in a pretty human readable way"""
+    return "pyGeno Chapter: %s, Name: %s, Release Level: %s, Version: %s, Build time: %s" % version()
 
-def checkPythonVersion() :
-	"""pyGeno needs python 2.7+"""
-	
-	if sys.version_info[0] < 2 or (sys.version_info[0] > 2  and sys.version_info[1] < 7) :
-		return False
-	return True
+def setBackend(backend=None, make_default=False):
+    """
+    Set the backend for pyGeno. if backend=None, pyGeno will revert to the
+    default engine: RabaDB. If make_default, the backend will be stored
+    as the new default.
+    """
+    from pyGeno.backends.rabadb.configuration import DatabaseConf
+    import json
 
-def getGenomeSequencePath(specie, name) :
-	return os.path.normpath(pyGeno_DATA_PATH+'/%s/%s' % (specie.lower(), name))
+    global _BACKEND
+    global _SETTINGS_DIR
+    global _DB_CONF_FILE
 
-def createDefaultConfigFile() :
-	"""Creates a default configuration file"""
-	s = "[pyGeno_config]\nsettings_dir=%s\nremote_location=%s" % (pyGeno_SETTINGS_DIR, pyGeno_REMOTE_LOCATION)
-	f = open('%s/config.ini' % pyGeno_SETTINGS_DIR, 'w')
-	f.write(s)
-	f.close()
+    if backend is not None:
+        sys.stderr.write("Switching to custom backend.")
+        _BACKEND = backend
+    else:
+        if backend is None and _BACKEND is None:
+            if os.path.exists(_DB_CONF_FILE):
+                system_message("Using user defined default backend.")
+                with open(_DB_CONF_FILE, 'r') as file:
+                    json_conf = json.load(file)
+                backend_module = importlib.import_module(json_conf["python_module"]+".configuration")
+                _BACKEND = backend_module(**json_conf["arguments"])
+            else:
+                system_message("Using default RabaDB backend.")
+                _BACKEND = DatabaseConf(_SETTINGS_DIR) 
 
-def getSettingsPath() :
-	"""Returns the path where the settings are stored"""
-	parser = SafeConfigParser()
-	try :
-		parser.read(os.path.normpath(pyGeno_SETTINGS_DIR+'/config.ini'))
-		return parser.get('pyGeno_config', 'settings_dir')
-	except :
-		createDefaultConfigFile()
-		return getSettingsPath()
+    if make_default:
+        with open(_DB_CONF_FILE, 'w') as file:
+            json_conf = json.dump(_BACKEND.get_configuration(), file)
+        system_message("Saved new default backend configuration.")
 
-def removeFromDBRegistery(obj) :
-	"""rabaDB keeps a record of loaded objects to ensure consistency between different queries.
-	This function removes an object from the registery"""
-	rabaDB.Raba.removeFromRegistery(obj)
-
-def freeDBRegistery() :
-	"""rabaDB keeps a record of loaded objects to ensure consistency between different queries. This function empties the registery"""
-	rabaDB.Raba.freeRegistery()
-
-def reload() :
-	"""reinitialize pyGeno"""
-	pyGeno_init()
-
-def pyGeno_init() :
-	"""This function is automatically called at launch"""
-	
-	global db, dbConf
-	
-	global pyGeno_SETTINGS_PATH
-	global pyGeno_RABA_DBFILE
-	global pyGeno_DATA_PATH
-	
-	if not checkPythonVersion() :
-		raise PythonVersionError("==> FATAL: pyGeno only works with python 2.7 and above, please upgrade your python version")
-
-	if not os.path.exists(pyGeno_SETTINGS_DIR) :
-		os.makedirs(pyGeno_SETTINGS_DIR)
-	
-	pyGeno_SETTINGS_PATH = getSettingsPath()
-	pyGeno_RABA_DBFILE = os.path.normpath( os.path.join(pyGeno_SETTINGS_PATH, "pyGenoRaba.db") )
-	pyGeno_DATA_PATH = os.path.normpath( os.path.join(pyGeno_SETTINGS_PATH, "data") )
-	
-	if not os.path.exists(pyGeno_SETTINGS_PATH) :
-		os.makedirs(pyGeno_SETTINGS_PATH)
-
-	if not os.path.exists(pyGeno_DATA_PATH) :
-		os.makedirs(pyGeno_DATA_PATH)
-
-	#launching the db
-	rabaDB.rabaSetup.RabaConfiguration(pyGeno_RABA_NAMESPACE, pyGeno_RABA_DBFILE)
-	db = rabaDB.rabaSetup.RabaConnection(pyGeno_RABA_NAMESPACE)
-	dbConf = rabaDB.rabaSetup.RabaConfiguration(pyGeno_RABA_NAMESPACE)
+def pyGeno_init():
+    global _SETTINGS_DIR
+    if not os.path.isdir(_SETTINGS_DIR):
+        os.mkdir(_SETTINGS_DIR)
+    system_message(prettyVersion())
+    setBackend()

@@ -50,7 +50,7 @@ class Genome_Raba(pyGenoRabaObject) :
 
 		return l
 
-class Genome(pyGenoRabaObjectWrapper) :	
+class Genome(pyGenoRabaObjectWrapper) :
 	"""
 	This is the entry point to pyGeno::
 		

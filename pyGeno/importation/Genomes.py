@@ -20,13 +20,13 @@ from pyGeno.tools.io import printf
 import gc
 #~ import objgraph
 
-def backUpDB() :
-    """backup the current database version. automatically called by importGenome(). Returns the filename of the backup"""
-    st = time.ctime().replace(' ', '_')
-    fn = conf.pyGeno_RABA_DBFILE.replace('.db', '_%s-bck.db' % st)
-    shutil.copy2(conf.pyGeno_RABA_DBFILE, fn)
+# def backUpDB() :
+#     """backup the current database version. automatically called by importGenome(). Returns the filename of the backup"""
+#     st = time.ctime().replace(' ', '_')
+#     fn = conf.pyGeno_RABA_DBFILE.replace('.db', '_%s-bck.db' % st)
+#     shutil.copy2(conf.pyGeno_RABA_DBFILE, fn)
 
-    return fn
+#     return fn
 
 def _decompressPackage(packageFile) :
     pFile = tarfile.open(packageFile)
