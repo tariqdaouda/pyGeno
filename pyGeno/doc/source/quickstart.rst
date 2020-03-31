@@ -77,7 +77,7 @@ That's it, you can now print the sequences of all the proteins that a gene can p
 	#get returns a list of elements
 	gene = ref.get(Gene, name = 'SRY')[0]
 	for prot in gene.get(Protein) :
-		  print prot.sequence
+		  print(prot.sequence)
 
 You can see pyGeno achitecture as a graph where everything is connected to everything. For instance you can do things such as::
 
@@ -118,7 +118,7 @@ Note that the way queries are handled is changing
 To speed up loops use get(gen=True)::
 	
 	for prot in gene.get(Protein, gen=True) :
-	  print prot.sequence
+	  print(prot.sequence)
 
 For more speed create indexes on the fields you need the most::
 	

@@ -31,7 +31,7 @@ Windows
 * Type *"cmd"* and click on it to launch the command line interface
 * In the command line interface type::
 	
-	 cd C:\Python27\Scripts
+	 cd C:\Python35\Scripts
 
 * Now type: pip install pyGeno
 * Now click on the windows start menu. In the python 2.7 menu you can either launch *Python (Command line)* or *IDLE (Python GUI)*
