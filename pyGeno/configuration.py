@@ -34,9 +34,9 @@ def prettyVersion() :
 	return "pyGeno %s Branch: %s, Name: %s, Release Level: %s, Version: %s, Build time: %s" % version()
 
 def checkPythonVersion() :
-	"""pyGeno needs python 2.7+"""
+	"""pyGeno needs python 3.5+"""
 	
-	if sys.version_info[0] < 2 or (sys.version_info[0] > 2  and sys.version_info[1] < 7) :
+	if sys.version_info[0] < 3 or (sys.version_info[0] > 3  and sys.version_info[1] < 5) :
 		return False
 	return True
 
@@ -83,7 +83,7 @@ def pyGeno_init() :
 	global pyGeno_DATA_PATH
 	
 	if not checkPythonVersion() :
-		raise PythonVersionError("==> FATAL: pyGeno only works with python 2.7 and above, please upgrade your python version")
+		raise PythonVersionError("==> FATAL: pyGeno only works with python 3.5 and above, please upgrade your python version")
 
 	if not os.path.exists(pyGeno_SETTINGS_DIR) :
 		os.makedirs(pyGeno_SETTINGS_DIR)

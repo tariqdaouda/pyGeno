@@ -13,7 +13,7 @@ pyGeno: A Python package for precision medicine and proteogenomics
    :target: http://depsy.org/package/python/pyGeno
 .. image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
     :target: https://opensource.org/licenses/Apache-2.0
-.. image:: https://img.shields.io/badge/python-2.7-blue.svg 
+.. image:: https://img.shields.io/badge/python-3.5-blue.svg 
 
 pyGeno's `lair is on Github`_.
 
