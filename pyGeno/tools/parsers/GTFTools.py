@@ -31,7 +31,10 @@ class GTFEntry(object) :
                 return self.data[self.gtfFile.legend['attributes']][k]
             except KeyError :
                 #return None
-                raise KeyError("Line %d does not have an element %s.\nline:%s" %(self.lineNumber, k, self.gtfFile.lines[self.lineNumber]))
+                raise KeyError(
+                        "Line %d does not have an element %s.\nline:%s" % (
+                            self.lineNumber, k, self.gtfFile.lines[self.lineNumber])
+                        )
     
     def __repr__(self) :
         return "<GTFEntry line: %d>" % self.lineNumber
@@ -40,11 +43,15 @@ class GTFEntry(object) :
         return  "<GTFEntry line: %d, %s>" % (self.lineNumber, str(self.data))
 
 class GTFFile(object) :
-    """This is a simple GTF2.2 (Revised Ensembl GTF) parser, see http://mblab.wustl.edu/GTF22.html for more infos"""
+    """This is a simple GTF2.2 (Revised Ensembl GTF) parser, 
+       see http://mblab.wustl.edu/GTF22.html for more infos
+    """
     def __init__(self, filename, gziped = False) :
         
         self.filename = filename
-        self.legend = {'seqname' : 0, 'source' : 1, 'feature' : 2, 'start' : 3, 'end' : 4, 'score' : 5, 'strand' : 6, 'frame' : 7, 'attributes' : 8}
+        self.legend = {
+                'seqname' : 0, 'source' : 1, 'feature' : 2, 'start' : 3,
+                'end' : 4, 'score' : 5, 'strand' : 6, 'frame' : 7, 'attributes' : 8}
         self.gziped = gziped
 
         if gziped : 
@@ -66,7 +73,8 @@ class GTFFile(object) :
 
     def get_transcripts(self, transcript_ids=None):
         """returns genes with its transcripts and associated exons and CDSs from a GTF
-        if transcript_ids is used, only these transcripts will be returned"""
+           if transcript_ids is used, only these transcripts will be returned
+        """
         
         if transcript_ids is not None:
             #transcript_ids = [y for x in transcript_ids for y in [x, x.split('.')[0]]]
@@ -97,6 +105,8 @@ class GTFFile(object) :
             transcripts = []
             exons = []
             cdss = []
+            start_codons = []
+            stop_codons = []
             
             # pop-out all lines that come before first transcript in gene
             while line['feature'] != 'transcript':
@@ -110,6 +120,8 @@ class GTFFile(object) :
                 tr = line
                 ex = []
                 cds = []
+                start_codon = []
+                stop_codon = []
                 
                 try:
                     line = next(gtf)
@@ -122,6 +134,10 @@ class GTFFile(object) :
                         ex.append(line)
                     if line['feature'] == 'CDS':
                         cds.append(line)
+                    if line['feature'] == 'start_codon':
+                        start_codon.append(line)
+                    if line['feature'] == 'stop_codon':
+                        stop_codon.append(line)
                     
                     try:
                         line = next(gtf)
@@ -133,9 +149,11 @@ class GTFFile(object) :
                     transcripts.append(tr)
                     exons.append(ex)
                     cdss.append(cds)
+                    start_codons.append(start_codon)
+                    stop_codons.append(stop_codon)
                     
             assert len(transcripts)
-            yield (gene, transcripts, exons, cdss)
+            yield (gene, transcripts, exons, cdss, start_codons, stop_codons)
         
         assert end_reached # in a normal GTF file, this value should be true
         assert self.currentPos == len(self)
@@ -156,21 +174,23 @@ class GTFFile(object) :
         """Retrieves transcript information from gtf in bed12 format"""
         
         f_out = open(bed_filename, 'w')
-        for gene, transcripts, exons, cdss in self.get_transcripts():
-            for tr, ex, cds in zip(transcripts, exons, cdss):
+        for gene, transcripts, exons, cdss, start_codons, stop_codons in self.get_transcripts():
+            for tr, ex, cds, stt, stp in zip(transcripts, exons, cdss, start_codons, stop_codons):
                 has_exon = bool(len(ex))
                 assert has_exon
+                
+                has_stop_codon = bool(len(stp))
+                if has_stop_codon:
+                    stop_codon_length = 0
+                    for stp_cod in stp:
+                        stop_codon_length += int(stp_cod['end']) - int(stp_cod['start']) + 1
+                    assert stop_codon_length == 3
                 
                 chromosome = tr['seqname']
                 tid = tr['transcript_id']
                 strand = tr['strand']
                 start = int(tr['start']) - 1  # 0-base
                 end = int(tr['end'])
-                
-                try:
-                    has_stop_codon = 'cds_end_NF' not in set(tr['tag']) and len(cds)
-                except KeyError:
-                    has_stop_codon = True and len(cds)
                 
                 exon_lengths = []
                 exon_start_pos = []
@@ -199,9 +219,19 @@ class GTFFile(object) :
                 if strand == '+':
                     if has_stop_codon:
                         cds_end_pos += 3
+                        try:
+                            assert cds_end_pos <= end
+                        except AssertionError:
+                            print("NOTE: Transcript %s has incorrect stop_codon annotation" % tid)
+                            cds_end_pos -= 3
                 elif strand == '-':
                     if has_stop_codon:
                         cds_start_pos -= 3
+                        try:
+                            assert cds_start_pos >= start
+                        except AssertionError:
+                            print("NOTE: Transcript %s has incorrect stop_codon annotation" % tid)
+                            cds_start_pos += 3
                     exon_lengths = exon_lengths[::-1]
                     exon_start_pos = exon_start_pos[::-1]
                 else:
@@ -223,9 +253,9 @@ class GTFFile(object) :
         
         chromosome_list = []
         exon_positions_dict = dict()
-        for gene, transcripts, exons, cdss in self.get_transcripts():
+        for gene, transcripts, exons, cdss, start_codons, stop_codons in self.get_transcripts():
             gene_exon_positions = []
-            for tr, ex, cds in zip(transcripts, exons, cdss):
+            for tr, ex, cds, stt, stp in zip(transcripts, exons, cdss, start_codons, stop_codons):
                 if len(ex):
                     chromosome = tr['seqname']
                     gid = tr['gene_id']
@@ -269,17 +299,25 @@ class GTFFile(object) :
         
         chromosome_list = []
         cds_positions_dict = dict()
-        for gene, transcripts, exons, cdss in self.get_transcripts():
+        for gene, transcripts, exons, cdss, start_codons, stop_codons in self.get_transcripts():
             gene_cds_positions = []
-            for tr, ex, cds in zip(transcripts, exons, cdss):
+            for tr, ex, cds, stt, stp in zip(transcripts, exons, cdss, start_codons, stop_codons):
                 if len(cds):
                     chromosome = tr['seqname']
                     gid = tr['gene_id']
                     strand = tr['strand']
-                    try:
-                        has_stop_codon = 'cds_end_NF' not in set(tr['tag'])
-                    except KeyError:
-                        has_stop_codon = True
+                    
+                    has_stop_codon = bool(len(stp))
+                    if has_stop_codon:
+                        stop_codon_length = 0
+                        for stp_cod in stp:
+                            stop_codon_length += int(stp_cod['end']) - int(stp_cod['start']) + 1
+                        assert stop_codon_length == 3
+                    
+                    #try:
+                    #    has_stop_codon = 'cds_end_NF' not in set(tr['tag'])
+                    #except KeyError:
+                    #    has_stop_codon = True
                     
                     if chromosome not in cds_positions_dict:
                         cds_positions_dict[chromosome] = []
@@ -353,8 +391,10 @@ class GTFFile(object) :
         return "<GTFFile: %s>" % (os.path.basename(self.filename))
 
     def __str__(self) :
-        return "<GTFFile: %s, gziped: %s, len: %d, currentPosition: %d>" % (os.path.basename(self.filename), self.gziped, len(self), self.currentPos)
-        return "<GTFFile: %s, gziped: %s, len: %d>" % (os.path.basename(self.filename), self.gziped, len(self))
+        return "<GTFFile: %s, gziped: %s, len: %d, currentPosition: %d>" % (
+                os.path.basename(self.filename), self.gziped, len(self), self.currentPos)
+        return "<GTFFile: %s, gziped: %s, len: %d>" % (
+                os.path.basename(self.filename), self.gziped, len(self))
     
     def __len__(self) :
         return len(self.lines)
