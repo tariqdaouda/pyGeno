@@ -30,9 +30,10 @@ For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 .. _IRIC: http://www.iric.ca
 .. _Sawssan Kaddoura: http://sawssankaddoura.com
 
-Click here for the `full documentation`_, or here for a `notebook`_ that illustrates that _simple_ can very well equate with _efficient_.
+Click here for the `full documentation`_, or here for a `notebook`_ that shows how *simple* can equate with *efficient*.
 
 .. _full documentation: http://pygeno.iric.ca/
+.. _notebook: pyGeno/examples/genomic_graph.ipynb
 
 For the latest news about pyGeno, you can follow me on twitter `@tariqdaouda`_.
 
