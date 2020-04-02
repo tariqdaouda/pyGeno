@@ -41,7 +41,7 @@ setup(
 
         'License :: OSI Approved :: Apache Software License',
 
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.5',
     ],
 
     keywords='proteogenomics genomics proteomics annotations medicine research personalized gene sequence protein',

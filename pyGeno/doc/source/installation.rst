@@ -25,7 +25,7 @@ If you're more adventurous, the bleeding edge version is available from github (
 Windows
 -------
 
-* Goto: https://www.python.org/downloads/ and download the installer for the lastest version of python 2.7
+* Goto: https://www.python.org/downloads/ and download the installer for the lastest version of python 3.5
 * Double click on the installer to begin installation
 * Click on the windows start menu
 * Type *"cmd"* and click on it to launch the command line interface
@@ -34,7 +34,7 @@ Windows
 	 cd C:\Python27\Scripts
 
 * Now type: pip install pyGeno
-* Now click on the windows start menu. In the python 2.7 menu you can either launch *Python (Command line)* or *IDLE (Python GUI)*
+* Now click on the windows start menu. In the python 3.5 menu you can either launch *Python (Command line)* or *IDLE (Python GUI)*
 * You can now go to: http://pygeno.iric.ca/quickstart.html and type the commands into either one of them
 
 **UPGRADE:** to upgrade pyGeno to the latest version, launch *cmd* and type::

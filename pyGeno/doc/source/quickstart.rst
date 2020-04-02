@@ -28,7 +28,9 @@ pyGeno comes with a few datawraps, to get the list you can use:
 	       |~~~:> Human.GRCh37.75.tar.gz
 	       |~~~:> Human.GRCh37.75_Y-Only.tar.gz
 	       |~~~:> Human.GRCh38.78.tar.gz
+	       |~~~:> Human.GRCh38.98.tar.gz
 	       |~~~:> Mouse.GRCm38.78.tar.gz
+	       |~~~:> Mouse.GRCm38.98.tar.gz
 
 To get a list of remote datawraps that pyGeno can download for you, do:
 
