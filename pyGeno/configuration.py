@@ -36,7 +36,7 @@ def prettyVersion() :
 def checkPythonVersion() :
 	"""pyGeno needs python 3.5+"""
 	
-	if sys.version_info[0] < 3 or (sys.version_info[0] > 3  and sys.version_info[1] < 5) :
+	if sys.version_info[0] < 3 or (sys.version_info[0] == 3  and sys.version_info[1] < 5) :
 		return False
 	return True
 
