@@ -13,7 +13,7 @@ pyGeno: A Python package for precision medicine and proteogenomics
    :target: http://depsy.org/package/python/pyGeno
 .. image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
     :target: https://opensource.org/licenses/Apache-2.0
-.. image:: https://img.shields.io/badge/python-2.7-blue.svg 
+.. image:: https://img.shields.io/badge/python-3.5-blue.svg 
 
 pyGeno's `lair is on Github`_.
 
@@ -44,21 +44,22 @@ be able cope with huge queries.
 
 	from pyGeno.Genome import *
 
+   # In case the Genome cannot be found (i.e., KeyError), please consider the below section on bootstrapping
 	g = Genome(name = "GRCh37.75")
 	prot = g.get(Protein, id = 'ENSP00000438917')[0]
 	#print the protein sequence
-	print prot.sequence
+	print(prot.sequence)
 	#print the protein's gene biotype
-	print prot.gene.biotype
+	print(prot.gene.biotype)
 	#print protein's transcript sequence
-	print prot.transcript.sequence
+	print(prot.transcript.sequence)
 
 	#fancy queries
 	for exons in g.get(Exons, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :
 		#print the exon's coding sequence
-		print exon.CDS
+		print(exon.CDS)
 		#print the exon's transcript sequence
-		print exon.transcript.sequence
+		print(exon.transcript.sequence)
 
 	#You can do the same for your subject specific genomes
 	#by combining a reference genome with polymorphisms 

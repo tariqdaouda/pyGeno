@@ -1,5 +1,4 @@
 import array, copy
-from . import UsefulFunctions as uf
 
 class BinarySequence :
 	"""A class for representing sequences in a binary format"""
@@ -28,6 +27,11 @@ class BinarySequence :
 		i = 0
 		trueI = 0 #not inc in case if poly
 		poly = set()
+		
+		# Handle stop variant at the end
+		if sequence.endswith('/'):
+			sequence += '*'
+		
 		while i < len(sequence)-1:
 			b = b | self.forma[self.charToBin[sequence[i]]]
 			if sequence[i+1] == '/' :
@@ -40,7 +44,6 @@ class BinarySequence :
 					polymorphisms.append((trueI, poly))
 					poly = set()
 				
-				bb = 0
 				while b % 2 != 0 :
 					b = b/2
 					
@@ -110,7 +113,7 @@ class BinarySequence :
 			pk = self.polymorphisms[polyStart]
 			posInSequence = pk[0]-x1
 			if posInSequence < len(listSequence) : 
-				for allele in pk[1] :
+				for allele in sorted(pk[1]):
 					sequence[posInSequence] = allele
 					ret.extend(self.__getSequenceVariants(x1, polyStart+1, polyStop, sequence))
 			

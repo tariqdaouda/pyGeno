@@ -41,7 +41,7 @@ setup(
 
         'License :: OSI Approved :: Apache Software License',
 
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.5',
     ],
 
     keywords='proteogenomics genomics proteomics annotations medicine research personalized gene sequence protein',
@@ -52,7 +52,7 @@ setup(
     # project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/technical.html#install-requires-vs-requirements-files
-    install_requires=['rabaDB >= 1.0.5'],
+    install_requires=['rabaDB >= 2.0.0'],
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  OBSOLETE [If using Python 2.6 or less, then these
