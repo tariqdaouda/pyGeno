@@ -133,10 +133,10 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
     Verbose must be an int [0, 4] for various levels of verbosity
     """
 
-    def reformatItems(items) :
+    def cleanString(items) :
         s = str(items)
         s = s.replace('[', '').replace(']', '').replace("',", ': ').replace('), ', '\n').replace("'", '').replace('(', '').replace(')', '')
-        return s
+        return s.replace('\n', '\n\t')
 
     printf('Importing genome package: %s... (This may take a while)' % packageFile)
 
@@ -177,7 +177,7 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
     genome = Genome_Raba()
     genome.set(name = genomeName, species = species, source = genomeSource, packageInfos = packageInfos)
 
-    printf("Importing:\n\t%s\nGenome:\n\t%s\n..."  % (reformatItems(packageInfos).replace('\n', '\n\t'), reformatItems(parser.items('genome')).replace('\n', '\n\t')))
+    printf("Importing:\n\t%s\nGenome:\n\t%s\n..."  % (cleanString(packageInfos), cleanString(parser.items('genome'))))
 
     chros = _importGenomeObjects(gtfFile, chromosomeSet, genome, batchSize, verbose)
     os.makedirs(seqTargetDir)
