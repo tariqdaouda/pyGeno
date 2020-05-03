@@ -1,9 +1,10 @@
 class DatabaseConfiguration_ABS:
     """The general interface for objects storing database configurations"""
-    def __init__(self, *args, **kwargs):
-        self.reset(*args, **kwargs)
+    def __init__(self, conf=None):
+        if conf:
+            self.reset(conf)
 
-    def reset(self, *args, **kwargs):
+    def reset(self, conf):
         raise NotImplemented("This is an abstract class")
 
     def get_configuration(self):
@@ -22,7 +23,9 @@ class DatabaseConfiguration_ABS:
         to be used as default.
         """
         raise NotImplemented("This is an abstract class")
-
+    
+    def prompt_setup(self):
+        raise NotImplemented("This is an abstract class")
 
 class GenomeSaver_ABS(object):
     """

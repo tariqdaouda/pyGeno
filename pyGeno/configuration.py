@@ -1,9 +1,7 @@
-import sys, os, time
-
-# from configparser import SafeConfigParser
-
-# class PythonVersionError(Exception) :
-#     pass
+import sys
+import os
+import time
+import importlib
 
 _FACE = "~-~-:>"
 _CHAPTER = "3"
@@ -36,7 +34,7 @@ def set_backend(backend=None, make_default=False):
     default engine: RabaDB. If make_default, the backend will be stored
     as the new default.
     """
-    from pyGeno.backends.rabadb.configuration import DatabaseConf
+    from pyGeno.backends.arangodb.configuration import DatabaseConf
     import json
 
     global _BACKEND
@@ -52,15 +50,18 @@ def set_backend(backend=None, make_default=False):
                 system_message("Using user defined default backend.")
                 with open(_DB_CONF_FILE, 'r') as file:
                     json_conf = json.load(file)
-                backend_module = importlib.import_module(json_conf["python_module"]+".configuration")
-                _BACKEND = backend_module(**json_conf["arguments"])
+                backend_module = importlib.import_module(json_conf["module"]+".configuration")
+                _BACKEND = backend_module.DatabaseConf(json_conf["arguments"])
             else:
-                system_message("Using default RabaDB backend.")
-                _BACKEND = DatabaseConf(_SETTINGS_DIR) 
+                system_message("Using default backend.")
+                _BACKEND = DatabaseConf() 
+                _BACKEND.prompt_setup()
 
+    # print(_BACKEND.get_configuration())
+    # make_default = True
     if make_default:
         with open(_DB_CONF_FILE, 'w') as file:
-            json_conf = json.dump(_BACKEND.get_configuration(), file)
+            json.dump(_BACKEND.get_configuration(), file)
         system_message("Saved new default backend configuration.")
 
 def get_backend():
@@ -70,8 +71,8 @@ def pyGeno_init():
     global _SETTINGS_DIR
     if not os.path.isdir(_SETTINGS_DIR):
         os.mkdir(_SETTINGS_DIR)
-    system_message(prettyVersion())
+    system_message(pretty_version())
     set_backend()
 
 if __name__ == '__main__':
-	pyGeno_init
+	pyGeno_init()

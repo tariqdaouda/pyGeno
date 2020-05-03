@@ -1,5 +1,6 @@
 from ..backend_abs import DatabaseConfiguration_ABS
 import pyArango.connection as CON
+import pyArango.theExceptions as PEXP 
 
 _DB_CONNECTION = None
 _DB = None
@@ -10,23 +11,26 @@ class DatabaseConf(DatabaseConfiguration_ABS):
     """
     _DB_NAME = "pyGeno"
 
-    def reset(self, **pyarango_conn_args) :
+    def reset(self, pyarango_conn_args) :
         """This function is automatically called at launch"""
         self.conn_args = pyarango_conn_args
         self.connection = CON.Connection(**self.conn_args)
+        try :
+            self.database = self.connection[self._DB_NAME]
+        except :
+            self.set_database()
         self.database = self.connection[self._DB_NAME]
 
     def set_database(self):
         try :
-          self.db = self.connection.createDatabase(self._DB_NAME)
+            self.connection.createDatabase(self._DB_NAME)
         except Exception as e :
-          print("Unable to create database: %s" % e)
-          self.db = self.connection[self._DB_NAME]
-
-        for colname in ("Peptides", "VirusSequences"):
-          try :
+            print("Unable to create database: %s" % e)
+    
+    def create_collection(self, colname):
+        try :
             self.db.createCollection(colname)
-          except PEXP.CreationError as e :
+        except PEXP.CreationError as e :
             print("Unable to create collection '%s' : %s" % (colname, e))
 
     def get_configuration(self):
@@ -35,3 +39,18 @@ class DatabaseConf(DatabaseConfiguration_ABS):
             "module": "pyGeno.backends.arangodb",
             "arguments": self.conn_args
         }
+
+    def prompt_setup(self):
+        args = {
+            "username": "root",
+            "password": "root",
+            "arangoURL": "http://localhost:8529/"
+        }
+        print("## ArangoDB backend setup")
+        for key, value in args.items():
+            val = input("~:> %s? (Press enter to use default is '%s'): " % (key, value))
+            if val != "":
+                args[key] = val
+
+        print(args)
+        self.reset(**args)
