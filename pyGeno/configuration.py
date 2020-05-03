@@ -57,8 +57,6 @@ def set_backend(backend=None, make_default=False):
                 _BACKEND = DatabaseConf() 
                 _BACKEND.prompt_setup()
 
-    # print(_BACKEND.get_configuration())
-    # make_default = True
     if make_default:
         with open(_DB_CONF_FILE, 'w') as file:
             json.dump(_BACKEND.get_configuration(), file)

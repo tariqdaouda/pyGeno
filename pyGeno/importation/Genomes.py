@@ -46,10 +46,6 @@ def _getFile(fil, directory) :
         printf("Downloading file: %s..." % fil)
         finalFile = os.path.normpath('%s/%s' %(directory, fil.split('/')[-1]))
         urllib.request.urlretrieve (fil, finalFile)
-        #with closing(urllib.request.urlopen(fil)) as r:
-        #    with open(finalFile, 'wb') as f:
-        #        shutil.copyfileobj(r, f)
-        
         printf('done.')
     else :
         finalFile = os.path.normpath('%s/%s' %(directory, fil))
