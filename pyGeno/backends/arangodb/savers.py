@@ -1,9 +1,6 @@
-import rabaDB.rabaSetup
-import rabaDB.Raba
 from ..backend_abs import GenomeSaver_ABS
-from pyGeno.database_configurationiguration import system_message
-
-import gc
+from pyGeno.configuration import system_message
+from .objects import schemas
 
 class GenomeSaver(GenomeSaver_ABS):
     """
@@ -11,75 +8,40 @@ class GenomeSaver(GenomeSaver_ABS):
     """
     def __init__(self, database_configuration):
         super(GenomeSaver, self).__init__(database_configuration)
- 
-    def add(obj_type, unique_id, dct_values):
-        self.store[obj_type][unique_id] = dct_values
+        self.db = self.database_configuration.database
 
-    def _save_genome(self):
-        genome = Genome_Raba()
-        genome.set(name = genomeName, species = species, source = genomeSource, packageInfos = packageInfos)
- 
-    def _save_objects(self):
-        self.database_configuration.db.beginTransaction()
-        system_message("Saving objects")
-        for gene in self.genes.values() :
-            gene.save()
-            conf.removeFromDBRegistery(gene)
-            
-        for trans in self.transcripts.values() :
-            trans.save()
-            conf.removeFromDBRegistery(trans.exons)
-            conf.removeFromDBRegistery(trans)
-        
-        for prot in self.proteins.values() :
-            prot.save()
-            conf.removeFromDBRegistery(prot)
-        
-        system_message('commiting changes...')
-        self.database_configuration.db.endTransaction()        
-        self.store = None
-        gc.collect()
+    def init_db(self):
+        for col in schemas.ALL_COLLECTIONS:
+            colname = col.__name__
+            if colname not in self.db:
+                self.db.createCollection(colname)
 
-    def _save_chormosomes(self):
-        pass
+        for graph in schemas.ALL_GRAPHS:
+            graph_name = graph.__name__
+            if graph_name not in self.db:
+                self.db.createGraph(graph_name)
 
-    def _drop_indexes(self):
-        indexes = self.database_configuration.db.getIndexes()
-        
-        Genome_Raba.flushIndexes()
-        Chromosome_Raba.flushIndexes()
-        Gene_Raba.flushIndexes()
-        Transcript_Raba.flushIndexes()
-        Protein_Raba.flushIndexes()
-        Exon_Raba.flushIndexes()
-        
-        return indexes
+    def create_objects(self):
+        for colname, objs in self.store.items():
+            for key, obj in objs.items():
+                try :
+                    doc = self.db[colname][key]
+                except :
+                    doc = self.db[colname].createDocument()
+                    doc["_key"] = key
+                doc.set(obj["values"])
+                doc.save()
 
-    def _restore_indexes(self, indexes):
-        self.database_configuration.db.beginTransaction()
-        system_message('restoring core indexes...')
-        Transcript.ensureGlobalIndex('exons')
-        system_message('commiting changes...')
-        self.database_configuration.db.endTransaction()
-
-        self.database_configuration.db.beginTransaction()
-        system_message('restoring user indexes')
-        pBar = ProgressBar(label = "restoring", nbEpochs = len(indexes))
-        for idx in indexes :
-            pBar.update()
-            self.database_configuration.db.execute(idx[-1].replace('CREATE INDEX', 'CREATE INDEX IF NOT EXISTS'))
-        pBar.close()
-        
-        system_message('commiting changes...')
-        self.database_configuration.db.endTransaction()
+    def create_links(self):
+        for colname, objs in self.store.items():
+            for key, obj in objs.items():
+                obj_key = "%s/%s" % (colname, key)
+                for linked_col, links in obj["links"].items():
+                    for link in links :
+                        linked_key = "%s/%s" % (linked_col, link)
+                        self.db.graphs["GenomeGraph"].link('GenomicLink', obj_key, linked_key, {})
 
     def save(self) :
-        system_message('Backuping indexes...')
-
-        system_message("Dropping all your indexes (don't worry I'll restore them later)...")
-        indexes = self._drop_indexes()
-        self._save_objects()
-        self._restore_indexes(indexes)
-
-
-        
+        self.init_db()
+        self.create_objects()
+        self.create_links()

@@ -2,6 +2,8 @@ from ..backend_abs import DatabaseConfiguration_ABS
 import pyArango.connection as CON
 import pyArango.theExceptions as PEXP 
 
+from . import savers
+
 _DB_CONNECTION = None
 _DB = None
 
@@ -21,6 +23,10 @@ class DatabaseConf(DatabaseConfiguration_ABS):
             self.set_database()
         self.database = self.connection[self._DB_NAME]
 
+    def load_saver(self):
+        self.saver = savers.GenomeSaver(self)
+        return self.saver
+    
     def set_database(self):
         try :
             self.connection.createDatabase(self._DB_NAME)

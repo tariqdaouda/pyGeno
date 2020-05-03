@@ -3,6 +3,10 @@ class DatabaseConfiguration_ABS:
     def __init__(self, conf=None):
         if conf:
             self.reset(conf)
+        self.saver = None
+
+    def load_saver():
+        raise NotImplemented("This is an abstract class")
 
     def reset(self, conf):
         raise NotImplemented("This is an abstract class")
@@ -34,51 +38,25 @@ class GenomeSaver_ABS(object):
     def __init__(self, database_configuration):
         super(GenomeSaver_ABS, self).__init__()
         self.database_configuration = database_configuration
-        self.store = {
-            "chromosomes": {},
-            "genes": {},
-            "transcripts": {},
-            "proteins": {},
-            "exons": {},
-        }
+        self.store = {}
+    
+    def add(self, obj_type, unique_id, dct_values, links):
+        if obj_type not in self.store:
+            self.store[obj_type] = {}
 
-    def add(obj_type, unique_id, dct_values):
-        self.store[obj_type][unique_id] = dct_values
+        self.store[obj_type][unique_id] = {
+            "values": dct_values,
+            "links": links
+        }
 
     def save(self) :
         raise NotImplemented("This is an abstract class")
-        # self.conf.db.beginTransaction()
-        
-        # for c in self.genes.values() :
-        #     c.save()
-        #     conf.removeFromDBRegistery(c)
-            
-        # for c in self.transcripts.values() :
-        #     c.save()
-        #     conf.removeFromDBRegistery(c.exons)
-        #     conf.removeFromDBRegistery(c)
-        
-        # for c in self.proteins.values() :
-        #     c.save()
-        #     conf.removeFromDBRegistery(c)
-        
-        # self.conf.db.endTransaction()
-        
-        # del(self.genes)
-        # del(self.transcripts)
-        # del(self.proteins)
-        # del(self.exons)
-        
-        # self.genes = {}
-        # self.transcripts = {}
-        # self.proteins = {}
-        # self.exons = {}
 
-        # gc.collect()
+    def __getitem__(self, key):
+        return self.store[key]
 
-    # def save_chros(self) :
-    #     pBar = ProgressBar(nbEpochs = len(self.chromosomes))
-    #     for c in self.chromosomes.values() :
-    #         pBar.update(label = 'Chr %s' % c.number)
-    #         c.save()
-    #     pBar.close()
+    def __setitem__(self, key, value):
+        self.store[key] = value
+
+    def __contains__(self, key):
+        return key in self.store
