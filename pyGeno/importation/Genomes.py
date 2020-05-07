@@ -220,6 +220,28 @@ def parse_gene(saver, line, genome_id):
             if end > saver["Gene"][line['gene_id']]["values"]["end"]:
                 saver["Gene"][line['gene_id']]["values"]["end"] = end
 
+def parse_transcript(saver, line, genome_id):
+    try :
+        trans_id = line['transcript_id']
+        trans_name = line['transcript_name']
+        try :
+            transcript_biotype = line['transcript_biotype']
+        except KeyError :
+            transcript_biotype = None
+        saver.add(
+            "Transcript",
+            trans_id,
+            {
+                "name": line['transcript_name'],
+                "biotype": line['transcript_biotype']
+            }
+        )
+    except KeyError :
+        trans_id = None
+        trans_name = None
+        if verbose > 2 :
+            printf('\t\tWarning: no transcript_id, name found in line %s' % gtf[i])
+            
 def import_genome_objects(saver, gtf_file_path, genome, batch_size, verbose = 0) :
     """verbose must be an int [0, 4] for various levels of verbosity"""
         
@@ -241,6 +263,7 @@ def import_genome_objects(saver, gtf_file_path, genome, batch_size, verbose = 0)
  
         # chro_number = chroN.upper()
         parse_chromosome(saver, line, genome)
+        parse_gene(saver, line, genome)
         parse_gene(saver, line, genome)
         
         if False:

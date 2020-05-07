@@ -10,10 +10,10 @@ class GenomeGraph(GR.Graph) :
       GR.EdgeDefinition(
         "GenomicLink",
         fromCollections=[
-          "Genome", "Chromosome", "Gene"
+          "Genome", "Chromosome", "Gene", "Exon"
         ],
         toCollections=[
-          "Genome", "Chromosome", "Gene"
+          "Genome", "Chromosome", "Gene", "Exon"
         ]
       )
     ]
@@ -65,5 +65,56 @@ class Gene(COL.Collection) :
         "end": COL.Field(validators=[VAL.NotNull()]),
     }
 
-ALL_COLLECTIONS = [GenomicLink, Genome, Chromosome, Gene]
+class Exon(COL.Collection) :
+    _validation = {
+        'on_save': True,
+        'on_set': True,
+        'allow_foreign_fields': False
+    }
+  
+    _fields = {
+        "id": COL.Field(validators=[VAL.NotNull()]),
+        "number": COL.Field(validators=[VAL.NotNull()]),
+        "start": COL.Field(validators=[VAL.NotNull()]),
+        "end": COL.Field(validators=[VAL.NotNull()]),
+        "length": COL.Field(validators=[VAL.NotNull()]),
+        "CDS_length": COL.Field(validators=[VAL.NotNull()]),
+        "CDS_start": COL.Field(validators=[VAL.NotNull()]),
+        "CDS_end": COL.Field(validators=[VAL.NotNull()]),
+        "frame": COL.Field(validators=[VAL.NotNull()]),
+        "strand": COL.Field(validators=[VAL.NotNull()]),
+    }
+
+class Transcript(COL.Collection) :
+    _validation = {
+        'on_save': True,
+        'on_set': True,
+        'allow_foreign_fields': False
+    }
+  
+    _fields = {
+        "id": COL.Field(validators=[VAL.NotNull()]),
+        "name": COL.Field(validators=[VAL.NotNull()]),
+        "length": COL.Field(validators=[VAL.NotNull()]),
+        "start": COL.Field(validators=[VAL.NotNull()]),
+        "end": COL.Field(validators=[VAL.NotNull()]),
+        "coding": COL.Field(validators=[VAL.NotNull()]),
+        "biotype": COL.Field(validators=[VAL.NotNull()]),
+        "selenocysteine": COL.Field(),
+    }
+
+class Protein(COL.Collection) :
+    _validation = {
+        'on_save': True,
+        'on_set': True,
+        'allow_foreign_fields': False
+    }
+  
+    _fields = {
+        "id": COL.Field(validators=[VAL.NotNull()]),
+        "name": COL.Field(validators=[VAL.NotNull()]),
+    }
+
+
+ALL_COLLECTIONS = [GenomicLink, Genome, Chromosome, Gene, Exon, Transcript, Protein]
 ALL_GRAPHS = [GenomeGraph]
