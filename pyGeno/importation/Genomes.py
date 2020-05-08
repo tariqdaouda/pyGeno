@@ -223,11 +223,33 @@ def parse_gene(saver, line, genome_id):
 def parse_transcript(saver, line, genome_id):
     try :
         trans_id = line['transcript_id']
+    except KeyError :
+        trans_id = None
+
+    if trans_id is not None:
         trans_name = line['transcript_name']
         try :
             transcript_biotype = line['transcript_biotype']
         except KeyError :
             transcript_biotype = None
+        
+        if trans_id not in store.transcripts :
+            store.transcripts[trans_id] = Transcript_Raba()
+            data = dict(
+                genome = genome,
+                id = trans_id,
+                chromosome = store.chromosomes[chro_number],
+                gene = store.genes.get(geneId, None),
+                name = transName,
+                biotype=transcript_biotype,
+                start = None,
+                end = None
+            )
+        if store.transcripts[trans_id].start is None or start < store.transcripts[trans_id].start:
+            store.transcripts[trans_id].start = start
+        if store.transcripts[trans_id].end is None or end > store.transcripts[trans_id].end:
+            store.transcripts[trans_id].end = end
+
         saver.add(
             "Transcript",
             trans_id,
@@ -236,13 +258,11 @@ def parse_transcript(saver, line, genome_id):
                 "biotype": line['transcript_biotype']
             }
         )
-    except KeyError :
-        trans_id = None
-        trans_name = None
-        if verbose > 2 :
-            printf('\t\tWarning: no transcript_id, name found in line %s' % gtf[i])
+
+    return trans_id
             
-def import_genome_objects(saver, gtf_file_path, genome, batch_size, verbose = 0) :
+def import_genome_objects(saver,
+    gtf_file_path, genome, batch_size, verbose = 0) :
     """verbose must be an int [0, 4] for various levels of verbosity"""
         
     printf('Importing gene set infos from %s...' % gtf_file_path)
@@ -264,7 +284,7 @@ def import_genome_objects(saver, gtf_file_path, genome, batch_size, verbose = 0)
         # chro_number = chroN.upper()
         parse_chromosome(saver, line, genome)
         parse_gene(saver, line, genome)
-        parse_gene(saver, line, genome)
+        parse_transcript(saver, line, genome)
         
         if False:
             try :
