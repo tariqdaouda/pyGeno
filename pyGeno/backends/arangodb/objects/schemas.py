@@ -10,10 +10,10 @@ class GenomeGraph(GR.Graph) :
       GR.EdgeDefinition(
         "GenomicLink",
         fromCollections=[
-          "Genome", "Chromosome", "Gene", "Exon"
+          "Genome", "Chromosome", "Gene", "Exon", "Transcript", "Protein", "Cds", "Start_codon", "Stop_codon", "Utr"
         ],
         toCollections=[
-          "Genome", "Chromosome", "Gene", "Exon"
+          "Genome", "Chromosome", "Gene", "Exon", "Transcript", "Protein", "Cds", "Start_codon", "Stop_codon", "Utr"
         ]
       )
     ]
@@ -21,100 +21,127 @@ class GenomeGraph(GR.Graph) :
 
 class Genome(COL.Collection) :
     _validation = {
-        'on_save': True,
-        'on_set': True,
-        'allow_foreign_fields': False
+        'on_save': False,
+        'on_set': False,
+        'allow_foreign_fields': True
     }
 
-    _fields = {
-        'name': COL.Field(validators=[VAL.NotNull()]),
-        'species': COL.Field(validators=[VAL.NotNull()]),
-        'source': COL.Field(validators=[VAL.NotNull()]),
-        'packageInfos': COL.Field(validators=[VAL.NotNull()]),
-        'length': COL.Field()
-    }
+    # _fields = {
+    #     'name': COL.Field(validators=[]),
+    #     'species': COL.Field(validators=[]),
+    #     'source': COL.Field(validators=[]),
+    #     'packageInfos': COL.Field(validators=[]),
+    #     'length': COL.Field()
+    # }
 
 class Chromosome(COL.Collection) :
     _validation = {
-        'on_save': True,
-        'on_set': True,
-        'allow_foreign_fields': False
+        'on_save': False,
+        'on_set': False,
+        'allow_foreign_fields': True
     }
   
-    _fields = {
-        # 'header': COL.Field(validators=[VAL.NotNull()]),
-        'number': COL.Field(validators=[VAL.NotNull()]),
-        'start': COL.Field(),
-        'end': COL.Field(),
-        'length': COL.Field()
-    }
+    # _fields = {
+    #     # 'header': COL.Field(validators=[]),
+    #     'number': COL.Field(validators=[]),
+    #     'start': COL.Field(),
+    #     'end': COL.Field(),
+    #     'length': COL.Field()
+    # }
 
 class Gene(COL.Collection) :
     _validation = {
-        'on_save': True,
-        'on_set': True,
-        'allow_foreign_fields': False
+        'on_save': False,
+        'on_set': False,
+        'allow_foreign_fields': True
     }
   
-    _fields = {
-        "id": COL.Field(validators=[VAL.NotNull()]),
-        "name": COL.Field(validators=[VAL.NotNull()]),
-        "strand": COL.Field(validators=[VAL.NotNull()]),
-        "biotype": COL.Field(validators=[VAL.NotNull()]),    
-        "start": COL.Field(validators=[VAL.NotNull()]),
-        "end": COL.Field(validators=[VAL.NotNull()]),
-    }
+    # _fields = {
+    #     "id": COL.Field(validators=[]),
+    #     "name": COL.Field(validators=[]),
+    #     "strand": COL.Field(validators=[]),
+    #     "biotype": COL.Field(validators=[]),    
+    #     "start": COL.Field(validators=[]),
+    #     "end": COL.Field(validators=[]),
+    # }
 
 class Exon(COL.Collection) :
     _validation = {
-        'on_save': True,
-        'on_set': True,
-        'allow_foreign_fields': False
+        'on_save': False,
+        'on_set': False,
+        'allow_foreign_fields': True
     }
   
-    _fields = {
-        "id": COL.Field(validators=[VAL.NotNull()]),
-        "number": COL.Field(validators=[VAL.NotNull()]),
-        "start": COL.Field(validators=[VAL.NotNull()]),
-        "end": COL.Field(validators=[VAL.NotNull()]),
-        "length": COL.Field(validators=[VAL.NotNull()]),
-        "CDS_length": COL.Field(validators=[VAL.NotNull()]),
-        "CDS_start": COL.Field(validators=[VAL.NotNull()]),
-        "CDS_end": COL.Field(validators=[VAL.NotNull()]),
-        "frame": COL.Field(validators=[VAL.NotNull()]),
-        "strand": COL.Field(validators=[VAL.NotNull()]),
-    }
+    # _fields = {
+    #     "id": COL.Field(validators=[]),
+    #     "number": COL.Field(validators=[]),
+    #     "start": COL.Field(validators=[]),
+    #     "end": COL.Field(validators=[]),
+    #     "length": COL.Field(validators=[]),
+    #     "CDS_length": COL.Field(validators=[]),
+    #     "CDS_start": COL.Field(validators=[]),
+    #     "CDS_end": COL.Field(validators=[]),
+    #     "frame": COL.Field(validators=[]),
+    #     "strand": COL.Field(validators=[]),
+    # }
 
 class Transcript(COL.Collection) :
     _validation = {
-        'on_save': True,
-        'on_set': True,
-        'allow_foreign_fields': False
+        'on_save': False,
+        'on_set': False,
+        'allow_foreign_fields': True
     }
   
-    _fields = {
-        "id": COL.Field(validators=[VAL.NotNull()]),
-        "name": COL.Field(validators=[VAL.NotNull()]),
-        "length": COL.Field(validators=[VAL.NotNull()]),
-        "start": COL.Field(validators=[VAL.NotNull()]),
-        "end": COL.Field(validators=[VAL.NotNull()]),
-        "coding": COL.Field(validators=[VAL.NotNull()]),
-        "biotype": COL.Field(validators=[VAL.NotNull()]),
-        "selenocysteine": COL.Field(),
-    }
+    # _fields = {
+    #     "id": COL.Field(validators=[]),
+    #     "name": COL.Field(validators=[]),
+    #     "length": COL.Field(),
+    #     "start": COL.Field(validators=[]),
+    #     "end": COL.Field(validators=[]),
+    #     "coding": COL.Field(),
+    #     "biotype": COL.Field(),
+    #     "selenocysteine": COL.Field(),
+    # }
 
 class Protein(COL.Collection) :
     _validation = {
-        'on_save': True,
-        'on_set': True,
-        'allow_foreign_fields': False
+        'on_save': False,
+        'on_set': False,
+        'allow_foreign_fields': True
     }
   
-    _fields = {
-        "id": COL.Field(validators=[VAL.NotNull()]),
-        "name": COL.Field(validators=[VAL.NotNull()]),
+    # _fields = {
+    #     "id": COL.Field(validators=[]),
+    #     "name": COL.Field(validators=[]),
+    # }
+
+class Cds(COL.Collection) :
+    _validation = {
+        'on_save': False,
+        'on_set': False,
+        'allow_foreign_fields': True
     }
 
+class Start_codon(COL.Collection) :
+    _validation = {
+        'on_save': False,
+        'on_set': False,
+        'allow_foreign_fields': True
+    }
 
-ALL_COLLECTIONS = [GenomicLink, Genome, Chromosome, Gene, Exon, Transcript, Protein]
+class Stop_codon(COL.Collection) :
+    _validation = {
+        'on_save': False,
+        'on_set': False,
+        'allow_foreign_fields': True
+    }
+
+class Utr(COL.Collection) :
+    _validation = {
+        'on_save': False,
+        'on_set': False,
+        'allow_foreign_fields': True
+    }
+
+ALL_COLLECTIONS = [GenomicLink, Genome, Chromosome, Gene, Exon, Transcript, Protein, Cds, Start_codon, Stop_codon, Utr]
 ALL_GRAPHS = [GenomeGraph]

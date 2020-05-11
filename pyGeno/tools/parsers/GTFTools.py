@@ -30,17 +30,34 @@ class GTFEntry(object) :
             try :
                 return self.data[self.gtfFile.legend['attributes']][k]
             except KeyError :
-                #return None
-                raise KeyError(
-                        "Line %d does not have an element %s.\nline:%s" % (
-                            self.lineNumber, k, self.gtfFile.lines[self.lineNumber])
-                        )
+                return None
+                # raise KeyError(
+                #         "Line %d does not have an element %s.\nline:%s" % (
+                #             self.lineNumber, k, self.gtfFile.lines[self.lineNumber])
+                #         )
     
+    def to_dct(self, flatten=True):
+        """if flatten, attributes will be merged at the root"""
+        data = {}
+        for key, value in self.gtfFile.legend.items():
+            data[key] = self.data[value]
+        attr_key = self.gtfFile.legend['attributes']
+        if flatten:
+            del data["attributes"]
+            data.update(self.data[attr_key])
+        return data
+
+    def str_data(self):
+        st = []
+        for key, value in self.gtfFile.legend.items():
+            st.append( "(%s: %s)" % (key, self.data[value]) )
+        return ", ".join(st) 
+
     def __repr__(self) :
         return "<GTFEntry line: %d>" % self.lineNumber
     
     def __str__(self) :
-        return  "<GTFEntry line: %d, %s>" % (self.lineNumber, str(self.data))
+        return  "<GTFEntry line: %d, %s>" % (self.lineNumber, self.str_data())
 
 class GTFFile(object) :
     """This is a simple GTF2.2 (Revised Ensembl GTF) parser, 

@@ -160,11 +160,10 @@ def importGenome(packageFile, batch_size = 50, verbose = 0) :
     database = conf.get_backend()
     saver = database.load_saver()
 
-    dct_data = dict(name=genome_name, species=species, source=genomeSource, packageInfos=packageInfos)
-    saver.add("Genome", genome_name, dct_data, links = {})
+    saver.set_genome(genome_name, species=species, source=genomeSource, packageInfos=packageInfos)
     printf("Importing:\n\t%s\nGenome:\n\t%s\n..."  % (clean_string(packageInfos), clean_string(parser.items('genome'))))
 
-    chros = import_genome_objects(saver, gtf_file, genome_name, batch_size, verbose)
+    chros = import_genome_objects(saver, gtf_file, batch_size, verbose)
     saver.save()
 
     if False:
@@ -185,84 +184,81 @@ def importGenome(packageFile, batch_size = 50, verbose = 0) :
     
     return True
 
-def get_start_end(line):
-    start = int(line['start']) - 1
-    end = int(line['end'])
-    if start > end :
-        start, end = end, start
-    return start, end
+# def get_start_end(line):
+#     start = int(line['start']) - 1
+#     end = int(line['end'])
+#     if start > end :
+#         start, end = end, start
+#     return start, end
+
+# def parse_chromosome(saver, line, genome_id):
+#     number = line['seqname']
+#     saver.add("Chromosome", number, {"number": number}, links = {"Genome": [genome_id]})
+
+# def parse_gene(saver, line, genome_id):
+#     if line['gene_id'] is not None :
+#         start, end = get_start_end(line)
+
+#         if not saver.contains("Gene", line["gene_id"]) :
+#             dct_data = dict(
+#                 id=line['gene_id'],
+#                 name=line['gene_name'],
+#                 strand=line['strand'],
+#                 biotype=line['gene_biotype'],
+#                 start=start,
+#                 end=end
+#             )
+#             links = {
+#                 "Genome": [genome_id],
+#                 "Chromosome": [line['seqname']]
+#             }
+#         else:
+#             dct_data = saver["Gene"][line["gene_id"]]["values"]
+#             links = saver["Gene"][line["gene_id"]]["links"]
+#             if start < dct_data["start"]:
+#                 dct_data["start"] = start
+#             if end > dct_data["end"]:
+#                 dct_data["end"] = end
         
-def parse_chromosome(saver, line, genome_id):
-    number = line['seqname']
-    saver.add("Chromosome", number, {"number": number}, links = {"Genome": [genome_id]})
+#         saver.add("Gene", line['gene_id'], dct_data, dct_data)
 
-def parse_gene(saver, line, genome_id):
-    if line['gene_id'] is not None :
-        start, end = get_start_end(line)
+# def parse_transcript(saver, line, genome_id):
+#     try :
+#         trans_id = line['transcript_id']
+#     except KeyError :
+#         trans_id = None
 
-        if ("Gene" not in saver) or (line["gene_id"] not in saver["Gene"]):
-            dct_data = dict(
-                id=line['gene_id'],
-                name=line['gene_name'],
-                strand=line['strand'],
-                biotype=line['gene_biotype'],
-                start=start,
-                end=end
-            )
-            links = {
-                "Genome": [genome_id],
-                "Chromosome": [line['seqname']]
-            }
-            saver.add("Gene", line['gene_id'], dct_data, links)
-        else: 
-            if start < saver["Gene"][line['gene_id']]["values"]["start"]:
-                saver["Gene"][line['gene_id']]["values"]["start"] = start
-            if end > saver["Gene"][line['gene_id']]["values"]["end"]:
-                saver["Gene"][line['gene_id']]["values"]["end"] = end
-
-def parse_transcript(saver, line, genome_id):
-    try :
-        trans_id = line['transcript_id']
-    except KeyError :
-        trans_id = None
-
-    if trans_id is not None:
-        trans_name = line['transcript_name']
-        try :
-            transcript_biotype = line['transcript_biotype']
-        except KeyError :
-            transcript_biotype = None
+#     if trans_id is not None:
+#         print(str(line))
+#         start, end = get_start_end(line)
+#         trans_name = line['transcript_name']
+#         try :
+#             transcript_biotype = line['transcript_biotype']
+#         except KeyError :
+#             transcript_biotype = None
         
-        if trans_id not in store.transcripts :
-            store.transcripts[trans_id] = Transcript_Raba()
-            data = dict(
-                genome = genome,
-                id = trans_id,
-                chromosome = store.chromosomes[chro_number],
-                gene = store.genes.get(geneId, None),
-                name = transName,
-                biotype=transcript_biotype,
-                start = None,
-                end = None
-            )
-        if store.transcripts[trans_id].start is None or start < store.transcripts[trans_id].start:
-            store.transcripts[trans_id].start = start
-        if store.transcripts[trans_id].end is None or end > store.transcripts[trans_id].end:
-            store.transcripts[trans_id].end = end
+#         if not saver.contains("Transcript", line["transcript_id"]):
+#             data = dict(
+#                 id = trans_id,
+#                 name = line['transcript_name'],
+#                 biotype=transcript_biotype,
+#                 start = start,
+#                 end = end
+#             )
+#             links = {}
+#         else:
+#             data = saver["Transcript"][line["transcript_id"]]["values"]
+#             links = {}
+#             if data["start"] is None or start < data["start"]:
+#                 data["start"] = start
+#             if data["end"]is None or end > data["end"] :
+#                 data["end"]= end
 
-        saver.add(
-            "Transcript",
-            trans_id,
-            {
-                "name": line['transcript_name'],
-                "biotype": line['transcript_biotype']
-            }
-        )
+#         saver.add("Transcript", trans_id, data, links)
 
-    return trans_id
+#     return trans_id
             
-def import_genome_objects(saver,
-    gtf_file_path, genome, batch_size, verbose = 0) :
+def import_genome_objects(saver, gtf_file_path, batch_size, verbose = 0) :
     """verbose must be an int [0, 4] for various levels of verbosity"""
         
     printf('Importing gene set infos from %s...' % gtf_file_path)
@@ -274,6 +270,7 @@ def import_genome_objects(saver,
 
     pBar = ProgressBar(nbEpochs = len(gtf))
     for line in gtf :
+        saver.add(line)
         # pBar.update()
         
         # strand = line['strand']
@@ -282,9 +279,9 @@ def import_genome_objects(saver,
         # frame = line['frame']
  
         # chro_number = chroN.upper()
-        parse_chromosome(saver, line, genome)
-        parse_gene(saver, line, genome)
-        parse_transcript(saver, line, genome)
+        # parse_chromosome(saver, line, genome)
+        # parse_gene(saver, line, genome)
+        # parse_transcript(saver, line, genome)
         
         if False:
             try :
