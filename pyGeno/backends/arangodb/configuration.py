@@ -3,6 +3,7 @@ import pyArango.connection as CON
 import pyArango.theExceptions as PEXP 
 
 from . import savers
+from . import query_handler
 
 _DB_CONNECTION = None
 _DB = None
@@ -23,6 +24,10 @@ class DatabaseConf(DatabaseConfiguration_ABS):
             self.set_database()
         self.database = self.connection[self._DB_NAME]
 
+   def get_query_handler(self):
+        self.query_handler = query_handler.QueryHandler()
+        return self.query_handler
+            
     def load_saver(self):
         self.saver = savers.GenomeSaver(self)
         return self.saver
@@ -59,3 +64,4 @@ class DatabaseConf(DatabaseConfiguration_ABS):
                 args[key] = val
 
         self.reset(**args)
+

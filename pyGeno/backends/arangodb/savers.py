@@ -16,7 +16,7 @@ class GenomeSaver(GenomeSaver_ABS):
             if colname not in self.db:
                 self.db.createCollection(colname)
             else :
-                print("TRUNCATING", colname)
+                print("TRUNCATING (temporary for tests, should be removed)", colname)
                 self.db[colname].truncate()
 
         for graph in schemas.ALL_GRAPHS:

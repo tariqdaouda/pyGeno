@@ -1,9 +1,15 @@
+from . import rich_query
+
 class DatabaseConfiguration_ABS:
     """The general interface for objects storing database configurations"""
     def __init__(self, conf=None):
         if conf:
             self.reset(conf)
         self.saver = None
+        self.query_handler = None
+
+    def get_query_handler(self):
+        raise NotImplemented("This is an abstract class")
 
     def load_saver():
         raise NotImplemented("This is an abstract class")
@@ -195,3 +201,29 @@ class GenomeSaver_ABS_(object):
     # def __contains__(self, obj_type):
     #     obj_type = obj_type.capitalize()
     #     return obj_type in self.store
+
+class QueryHandler_ABS:
+    """
+    Saves genome into database
+    """
+    def get(self, *args, **kwargs):
+        if len(args) == 0:
+            return self.dict_query(kwargs)
+        elif len(args) == 1:
+            if type(args[0]) is dict:
+                return self.lazy_query(args[0])
+            elif type(args[0]) is rich_query.Filter:
+                return self.rich_query(args[0])
+            else :
+                raise ValueError("Unknown query type: %s" % args[0])
+        else :
+            raise ValueError("Get only takes 1 argument, dict of rich query, or a layze query: a = x, b = y, etc..." % args[0])
+
+    def rich_query(self, pygeno_filter, object_name):
+        raise NotImplemented("Must be implemented in child")
+
+    def lazy_query(self, type_name, **lazy_args):
+        raise NotImplemented("Must be implemented in child")
+        
+    def dict_query(self, anchor_type, type_name, dct):
+        raise NotImplemented("Must be implemented in child")
