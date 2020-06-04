@@ -24,7 +24,7 @@ class DatabaseConf(DatabaseConfiguration_ABS):
             self.set_database()
         self.database = self.connection[self._DB_NAME]
 
-   def get_query_handler(self):
+    def get_query_handler(self):
         self.query_handler = query_handler.QueryHandler()
         return self.query_handler
             

@@ -25,7 +25,7 @@ class QueryHandler(QueryHandler_ABS):
         """.format(collection=self.collection_name, obj=object_name, filters=aql_filters)
     
         objects = self.db.AQLQuery(aql, batchSize=1000, rawResults=True)
-        for obj in objects;
+        for obj in objects:
             yield obj_type(obj)
 
     def lazy_query(self, anchor_type, type_name, **lazy_args):
@@ -33,7 +33,7 @@ class QueryHandler(QueryHandler_ABS):
 
     def dict_query(self, anchor_type, type_name, dct):
         def _find_operator(key):
-            for op in [">", ">=", "<". "<=", "=="]:
+            for op in [">", ">=", "<", "<=", "=="]:
                 if op in key :
                     return op
             return "=="
@@ -56,5 +56,5 @@ class QueryHandler(QueryHandler_ABS):
         """.format(anchor_col=anchor_type, other_col=type_name, filters=aql_filters)
 
         objects = self.db.AQLQuery(aql, batchSize=1000, rawResults=True)
-        for obj in objects;
+        for obj in objects:
             yield obj_type(obj)
