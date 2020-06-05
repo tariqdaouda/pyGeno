@@ -63,5 +63,5 @@ class DatabaseConf(DatabaseConfiguration_ABS):
             if val != "":
                 args[key] = val
 
-        self.reset(**args)
+        self.reset(args)
 
