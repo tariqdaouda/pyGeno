@@ -6,53 +6,35 @@ from configparser import SafeConfigParser
 from pyGeno.tools.ProgressBar import ProgressBar
 import pyGeno.configuration as conf
 
-# from pyGeno.Genome import *
-# from pyGeno.Chromosome import *
-# from pyGeno.Gene import *
-# from pyGeno.Transcript import *
-# from pyGeno.Exon import *
-# from pyGeno.Protein import *
-
 from pyGeno.tools.parsers.GTFTools import GTFFile
 from pyGeno.tools.ProgressBar import ProgressBar
 from pyGeno.tools.io import printf
 
-# import gc
-#~ import objgraph
-
-# def backUpDB() :
-#     """backup the current database version. automatically called by importGenome(). Returns the filename of the backup"""
-#     st = time.ctime().replace(' ', '_')
-#     fn = conf.pyGeno_RABA_DBFILE.replace('.db', '_%s-bck.db' % st)
-#     shutil.copy2(conf.pyGeno_RABA_DBFILE, fn)
-
-#     return fn
-
-def _decompress_package(packageFile) :
-    pFile = tarfile.open(packageFile)
+def unpack_datawrap(package_file) :
+    pFile = tarfile.open(package_file)
     
-    packageDir = tempfile.mkdtemp(prefix = "pyGeno_import_")
-    if os.path.isdir(packageDir) :
-        shutil.rmtree(packageDir)
-    os.makedirs(packageDir)
+    package_dir = tempfile.mkdtemp(prefix = "pyGeno_import_")
+    if os.path.isdir(package_dir) :
+        shutil.rmtree(package_dir)
+    os.makedirs(package_dir)
 
     for mem in pFile :
-        pFile.extract(mem, packageDir)
+        pFile.extract(mem, package_dir)
 
-    return packageDir
+    return package_dir
 
-def _get_file(fil, directory) :
+def get_file(fil, directory) :
     if fil.find("http://") == 0 or fil.find("ftp://") == 0 :
         printf("Downloading file: %s..." % fil)
-        finalFile = os.path.normpath('%s/%s' %(directory, fil.split('/')[-1]))
-        urllib.request.urlretrieve (fil, finalFile)
+        final_file = os.path.normpath('%s/%s' %(directory, fil.split('/')[-1]))
+        urllib.request.urlretrieve (fil, final_file)
         printf('done.')
     else :
-        finalFile = os.path.normpath('%s/%s' %(directory, fil))
+        final_file = os.path.normpath('%s/%s' %(directory, fil))
     
-    return finalFile
+    return final_file
 
-def deleteGenome(species, name) :
+def delete_genome(species, name) :
     """Removes a genome from the database"""
 
     printf('deleting genome (%s, %s)...' % (species, name))
@@ -93,7 +75,7 @@ def deleteGenome(species, name) :
     conf.db.endTransaction()
     return allGood
 
-def importGenome(packageFile, batch_size = 50, verbose = 0) :
+def import_genome(package_file, batch_size = 50, verbose = 0) :
     """Import a pyGeno genome package. A genome packages is folder or a tar.gz ball that contains at it's root:
 
     * gziped fasta files for all chromosomes, or URLs from where them must be downloaded
@@ -134,131 +116,40 @@ def importGenome(packageFile, batch_size = 50, verbose = 0) :
         s = s.replace('[', '').replace(']', '').replace("',", ': ').replace('), ', '\n').replace("'", '').replace('(', '').replace(')', '')
         return s.replace('\n', '\n\t')
 
-    printf('Importing genome package: %s... (This may take a while)' % packageFile)
+    printf('Importing genome package: %s... (This may take a while)' % package_file)
 
-    isDir = False
-    if not os.path.isdir(packageFile) :
-        packageDir = _decompress_package(packageFile)
+    is_dir = False
+    if not os.path.isdir(package_file) :
+        package_dir = unpack_datawrap(package_file)
     else :
-        isDir = True
-        packageDir = packageFile
+        is_dir = True
+        package_dir = package_file
 
     parser = SafeConfigParser()
-    parser.read(os.path.normpath(packageDir+'/manifest.ini'))
+    parser.read(os.path.normpath(package_dir+'/manifest.ini'))
     packageInfos = parser.items('package_infos')
 
     genome_name = parser.get('genome', 'name')
     species = parser.get('genome', 'species')
     genomeSource = parser.get('genome', 'source')
     
-    gtf_file = _get_file(parser.get('gene_set', 'gtf'), packageDir)
-    
-    chromosome_files = {}
-    for key, fil in parser.items('chromosome_files') :
-        chromosome_files[key] = _get_file(fil, packageDir)
+    gtf_file = get_file(parser.get('gene_set', 'gtf'), package_dir)
+    chromosome_files = {
+        key: get_file(fil, package_dir) for key, fil in parser.items('chromosome_files') 
+    }
     
     database = conf.get_backend()
     saver = database.load_saver()
 
-    saver.set_genome(genome_name, species=species, source=genomeSource, packageInfos=packageInfos)
     printf("Importing:\n\t%s\nGenome:\n\t%s\n..."  % (clean_string(packageInfos), clean_string(parser.items('genome'))))
-
-    chros = import_genome_objects(saver, gtf_file, batch_size, verbose)
+    saver.set_genome(genome_name, species=species, source=genomeSource, packageInfos=packageInfos)
+    saver = import_genome_objects(saver, gtf_file, chromosome_files, batch_size, verbose)
     saver.save()
-
-    if False:
-        # os.makedirs(seqTargetDir)
-        startChro = 0
-        pBar = ProgressBar(nbEpochs = len(chros))
-        for chro in chros :
-            pBar.update(label = "Importing DNA, chro %s" % chro.number)
-            length = _importSequence(chro, chromosome_files[chro.number.lower()], seqTargetDir)
-            chro.start = startChro
-            chro.end = startChro+length
-            startChro = chro.end
-            chro.save()
-        pBar.close()
-        
-        if not isDir :
-            shutil.rmtree(packageDir)
-    
-    return True
-
-# def get_start_end(line):
-#     start = int(line['start']) - 1
-#     end = int(line['end'])
-#     if start > end :
-#         start, end = end, start
-#     return start, end
-
-# def parse_chromosome(saver, line, genome_id):
-#     number = line['seqname']
-#     saver.add("Chromosome", number, {"number": number}, links = {"Genome": [genome_id]})
-
-# def parse_gene(saver, line, genome_id):
-#     if line['gene_id'] is not None :
-#         start, end = get_start_end(line)
-
-#         if not saver.contains("Gene", line["gene_id"]) :
-#             dct_data = dict(
-#                 id=line['gene_id'],
-#                 name=line['gene_name'],
-#                 strand=line['strand'],
-#                 biotype=line['gene_biotype'],
-#                 start=start,
-#                 end=end
-#             )
-#             links = {
-#                 "Genome": [genome_id],
-#                 "Chromosome": [line['seqname']]
-#             }
-#         else:
-#             dct_data = saver["Gene"][line["gene_id"]]["values"]
-#             links = saver["Gene"][line["gene_id"]]["links"]
-#             if start < dct_data["start"]:
-#                 dct_data["start"] = start
-#             if end > dct_data["end"]:
-#                 dct_data["end"] = end
-        
-#         saver.add("Gene", line['gene_id'], dct_data, dct_data)
-
-# def parse_transcript(saver, line, genome_id):
-#     try :
-#         trans_id = line['transcript_id']
-#     except KeyError :
-#         trans_id = None
-
-#     if trans_id is not None:
-#         print(str(line))
-#         start, end = get_start_end(line)
-#         trans_name = line['transcript_name']
-#         try :
-#             transcript_biotype = line['transcript_biotype']
-#         except KeyError :
-#             transcript_biotype = None
-        
-#         if not saver.contains("Transcript", line["transcript_id"]):
-#             data = dict(
-#                 id = trans_id,
-#                 name = line['transcript_name'],
-#                 biotype=transcript_biotype,
-#                 start = start,
-#                 end = end
-#             )
-#             links = {}
-#         else:
-#             data = saver["Transcript"][line["transcript_id"]]["values"]
-#             links = {}
-#             if data["start"] is None or start < data["start"]:
-#                 data["start"] = start
-#             if data["end"]is None or end > data["end"] :
-#                 data["end"]= end
-
-#         saver.add("Transcript", trans_id, data, links)
-
-#     return trans_id
             
-def import_genome_objects(saver, gtf_file_path, batch_size, verbose = 0) :
+    if not is_dir :
+        shutil.rmtree(package_dir)
+            
+def import_genome_objects(saver, gtf_file_path, chromosome_files, batch_size, verbose = 0) :
     """verbose must be an int [0, 4] for various levels of verbosity"""
         
     printf('Importing gene set infos from %s...' % gtf_file_path)
@@ -267,167 +158,21 @@ def import_genome_objects(saver, gtf_file_path, batch_size, verbose = 0) :
     gtf = GTFFile(gtf_file_path, gziped = True)
     
     printf('Done. Importation begins!')
-
     pBar = ProgressBar(nbEpochs = len(gtf))
     for line in gtf :
+        chro_fasta_file = chromosome_files[line["seqname"].lower()]
         saver.add(line)
-        # pBar.update()
-        
-        # strand = line['strand']
-        # gene_biotype = line['gene_biotype']
-        # regionType = line['feature']
-        # frame = line['frame']
- 
-        # chro_number = chroN.upper()
-        # parse_chromosome(saver, line, genome)
-        # parse_gene(saver, line, genome)
-        # parse_transcript(saver, line, genome)
-        
-        if False:
-            try :
-                transId = line['transcript_id']
-                transName = line['transcript_name']
-                try :
-                    transcript_biotype = line['transcript_biotype']
-                except KeyError :
-                    transcript_biotype = None
-            except KeyError :
-                transId = None
-                transName = None
-                if verbose > 2 :
-                    printf('\t\tWarning: no transcript_id, name found in line %s' % gtf[i])
-            
-            if transId is not None :
-                if transId not in store.transcripts :
-                    if verbose > 1 :
-                        printf('\t\tTranscript %s, %s...' % (transId, transName))
-                    store.transcripts[transId] = Transcript_Raba()
-                    store.transcripts[transId].set(genome = genome, id = transId, chromosome = store.chromosomes[chro_number], gene = store.genes.get(geneId, None), name = transName, biotype=transcript_biotype)
-                if store.transcripts[transId].start is None or start < store.transcripts[transId].start:
-                    store.transcripts[transId].start = start
-                if store.transcripts[transId].end is None or end > store.transcripts[transId].end:
-                    store.transcripts[transId].end = end
-            
-                try :
-                    protId = line['protein_id']
-                except KeyError :
-                    protId = None
-                    if verbose > 2 :
-                        printf('Warning: no protein_id found in line %s' % gtf[i])
+        if not saver.has_sequence(line["seqname"]):
+            header, chro_sequence = import_sequence(chro_fasta_file)
+            saver["Chromosome"][line["seqname"]]["fasta_header"] = header
+            saver.add_sequence(line["seqname"], chro_sequence)
 
-                # Store selenocysteine positions in transcript
-                if regionType == 'Selenocysteine':
-                    store.transcripts[transId].selenocysteine.append(start)
-                        
-                if protId is not None and protId not in store.proteins :
-                    if verbose > 1 :
-                        printf('\t\tProtein %s...' % (protId))
-                    store.proteins[protId] = Protein_Raba()
-                    store.proteins[protId].set(genome = genome, id = protId, chromosome = store.chromosomes[chro_number], gene = store.genes.get(geneId, None), transcript = store.transcripts.get(transId, None), name = transName)
-                    store.transcripts[transId].protein = store.proteins[protId]
+    return saver
 
-                try :
-                    exonNumber = int(line['exon_number']) - 1
-                    exonKey = (transId, exonNumber)
-                except KeyError :
-                    exonNumber = None
-                    exonKey = None
-                    if verbose > 2 :
-                        printf('Warning: no exon number or id found in line %s' % gtf[i])
-                
-                if exonKey is not None :
-                    if verbose > 3 :
-                        printf('\t\t\texon %s...' % (exonId))
-                    
-                    if exonKey not in store.exons and regionType == 'exon' :
-                        store.exons[exonKey] = Exon_Raba()
-                        store.exons[exonKey].set(genome = genome, chromosome = store.chromosomes[chro_number], gene = store.genes.get(geneId, None), transcript = store.transcripts.get(transId, None), protein = store.proteins.get(protId, None), strand = strand, number = exonNumber, start = start, end = end)
-                        store.transcripts[transId].exons.append(store.exons[exonKey])
-                    
-                    try :
-                        store.exons[exonKey].id = line['exon_id']
-                    except KeyError :
-                        pass
-                    
-                    if regionType == 'exon' :
-                        if store.exons[exonKey].start is None or start < store.exons[exonKey].start:
-                            store.exons[exonKey].start = start
-                        if store.exons[exonKey].end is None or end > store.transcripts[transId].end:
-                            store.exons[exonKey].end = end
-                    elif regionType == 'CDS' :
-                        store.exons[exonKey].CDS_start = start
-                        store.exons[exonKey].CDS_end = end
-                        store.exons[exonKey].frame = frame
-                    elif regionType == 'stop_codon' :
-                        if strand == '+' :
-                            if store.exons[exonKey].CDS_end != None :
-                                store.exons[exonKey].CDS_end += 3
-                                if store.exons[exonKey].end < store.exons[exonKey].CDS_end :
-                                    store.exons[exonKey].end = store.exons[exonKey].CDS_end
-                                if store.transcripts[transId].end < store.exons[exonKey].CDS_end :
-                                    store.transcripts[transId].end = store.exons[exonKey].CDS_end
-                                if store.genes[geneId].end < store.exons[exonKey].CDS_end :
-                                    store.genes[geneId].end = store.exons[exonKey].CDS_end
-                        if strand == '-' :
-                            if store.exons[exonKey].CDS_start != None :
-                                store.exons[exonKey].CDS_start -= 3
-                                if store.exons[exonKey].start > store.exons[exonKey].CDS_start :
-                                    store.exons[exonKey].start = store.exons[exonKey].CDS_start
-                                if store.transcripts[transId].start > store.exons[exonKey].CDS_start :
-                                    store.transcripts[transId].start = store.exons[exonKey].CDS_start
-                                if store.genes[geneId].start > store.exons[exonKey].CDS_start :
-                                    store.genes[geneId].start = store.exons[exonKey].CDS_start
-            pBar.close()
-            
-            store.batch_save()
-            
-            conf.db.beginTransaction()
-            printf('almost done saving chromosomes...')
-            store.save_chros()
-            
-            printf('saving genome object...')
-            genome.save()
-            conf.db.endTransaction()
-            
-            conf.db.beginTransaction()
-            printf('restoring core indexes...')
-            # Genome.ensureGlobalIndex(('name', 'species'))
-            # Chromosome.ensureGlobalIndex('genome')
-            # Gene.ensureGlobalIndex('genome')
-            # Transcript.ensureGlobalIndex('genome')
-            # Protein.ensureGlobalIndex('genome')
-            # Exon.ensureGlobalIndex('genome')
-            Transcript.ensureGlobalIndex('exons')
-            
-            printf('commiting changes...')
-            conf.db.endTransaction()
-            
-            conf.db.beginTransaction()
-            printf('restoring user indexes')
-            pBar = ProgressBar(label = "restoring", nbEpochs = len(indexes))
-            for idx in indexes :
-                pBar.update()
-                conf.db.execute(idx[-1].replace('CREATE INDEX', 'CREATE INDEX IF NOT EXISTS'))
-            pBar.close()
-            
-            printf('commiting changes...')
-            conf.db.endTransaction()
-            
-            return list(store.chromosomes.values())
-
-#~ @profile
-def _importSequence(chromosome, fastaFile, targetDir) :
-    "Serializes fastas into .dat files"
-
-    f = gzip.open(fastaFile, 'rt')
-    header = f.readline()
-    strRes = f.read().upper().replace('\n', '').replace('\r', '')
-    f.close()
-
-    fn = '%s/chromosome%s.dat' % (targetDir, chromosome.number)
-    f = open(fn, 'w')
-    f.write(strRes)
-    f.close()
-    chromosome.dataFile = fn
-    chromosome.header = header
-    return len(strRes)
+def import_sequence(fasta_file) :
+    """Serializes fastas file returns original header and sequence as an upper case single line"""
+    with gzip.open(fasta_file, 'rt') as f:
+        header = f.readline()[:-1]
+        sequence = f.read().upper().replace('\n', '').replace('\r', '')
+    
+        return header, sequence

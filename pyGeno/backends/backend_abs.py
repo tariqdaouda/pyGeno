@@ -45,10 +45,12 @@ class GenomeSaver_ABS(object):
         super(GenomeSaver_ABS, self).__init__()
         self.database_configuration = database_configuration
         self.data = {}
+        self.sequences = {}
         self.links = list()
         self.genome_id = None
 
     def get_start_end(self, gtf_line):
+        """converts from 1 based to 0 based"""
         start = int(gtf_line['start']) - 1
         end = int(gtf_line['end'])
         if start > end :
@@ -56,6 +58,7 @@ class GenomeSaver_ABS(object):
         return start, end
 
     def fix_numbers(self, data):
+        """make sure int are inte and not strings"""
         if "frame" in data:
             if data["frame"] != ".":
                 data["frame"] = int(data["frame"])
@@ -64,11 +67,13 @@ class GenomeSaver_ABS(object):
         return data
 
     def set_genome(self, unique_id, **kw_data):
+        """set the genome"""
         self.data["Genome"] = {}
         self.data["Genome"][unique_id] = kw_data
         self.genome_id = unique_id
 
     def _get_link(self, from_type, from_id, to_type, to_id):
+        """return a link (edge) connecting two objects"""
         data =  {
             "from": {
                 "type": from_type.capitalize(),
@@ -82,6 +87,7 @@ class GenomeSaver_ABS(object):
         return data
 
     def link(self, gtf_line, unique_id=None):
+        """create a link (edge) between two objects"""
         if unique_id is None:
             unique_id = self.get_uid(gtf_line)
         
@@ -102,6 +108,7 @@ class GenomeSaver_ABS(object):
                     )
 
     def add(self, gtf_line):
+        """add an object to the registery"""
         if self.genome_id is None:
             raise ValueError("Must set genome first")
 
@@ -117,7 +124,7 @@ class GenomeSaver_ABS(object):
 
         unique_id = self.get_uid(gtf_line)
         data = gtf_line.to_dct()
-        data["start"],  data["end"] = self.get_start_end(gtf_line)
+        data["start"], data["end"] = self.get_start_end(gtf_line)
         data = self.fix_numbers(data)
         data["genome_id"] = self.genome_id
         self.data[obj_type][unique_id] = data
@@ -125,6 +132,7 @@ class GenomeSaver_ABS(object):
         self.add_protein(gtf_line)
 
     def add_protein(self, gtf_line):
+        """add a protein object. Proteins are not lines in the gtf, the info has to be extrected from other objects"""
         if "Protein" not in self.data:
             self.data["Protein"] = {}
 
@@ -137,16 +145,42 @@ class GenomeSaver_ABS(object):
             self.link(gtf_line, gtf_line["protein_id"])
 
     def contains(self, obj_type, unique_id):
+        """ask if an bject of of specific types exists in the registery"""
         obj_type = obj_type.capitalize()
         try :
             return self.data[obj_type][unique_id]
         except KeyError:
             return None
 
+    def __contains__(self, key):
+        if key in self.data:
+            return True
+        for typ in self.data:
+            if key in self.data[typ]:
+                return True
+        return False
+
+    def has_sequence(self, key):
+        """ask if a sequence is present for a given id"""
+        return key.lower() in self.sequences
+
+    def add_sequence(self, key, seq):
+        """add a sequence to the registery"""
+        self.sequences[key.lower()] = seq
+
+    def get_subsequence(self, seq_id, start, end):
+        """get a subsequence from the registery"""
+        return self.sequences[seq_id.lower()][start: end]
+
     def get_type(self, gtf_line):
+        """get ovject type name"""
         return gtf_line["feature"].capitalize()
 
     def get_uid(self, gtf_line):
+        """
+        makes a unique id based on information in the line. This is useful for things that do not
+        already have a unique id, like stop_codons
+         """
         if gtf_line["feature"].lower() in ["cds", "exon", "start_codon", "stop_codon"]:
             return "%s_%s" % (gtf_line['transcript_id'], gtf_line['exon_number'])
         elif gtf_line["feature"].lower() in ["utr"]:
@@ -155,52 +189,12 @@ class GenomeSaver_ABS(object):
         return gtf_line["attributes"][gtf_line["feature"].lower() + "_id"]
 
     def save(self) :
+        """save registery into backend"""
         raise NotImplemented("This is an abstract class")
 
     def __getitem__(self, obj_type):
         obj_type = obj_type.capitalize()
         return self.data[obj_type]
-
-class GenomeSaver_ABS_(object):
-    """
-    Saves genome into database
-    """
-    def __init__(self, database_configuration):
-        super(GenomeSaver_ABS, self).__init__()
-        self.database_configuration = database_configuration
-        self.store = {}
-    
-    def add(self, obj_type, unique_id, dct_values, links):
-        obj_type = obj_type.capitalize()
-        if obj_type not in self.store:
-            self.store[obj_type] = {}
-
-        self.store[obj_type][unique_id] = {
-            "values": dct_values,
-            "links": links
-        }
-
-    def contains(self, obj_type, unique_id):
-        obj_type = obj_type.capitalize()
-        try :
-            return self.store[obj_type][unique_id]
-        except KeyError:
-            return None
-
-    def save(self) :
-        raise NotImplemented("This is an abstract class")
-
-    def __getitem__(self, obj_type):
-        obj_type = obj_type.capitalize()
-        return self.store[obj_type]
-
-    # def __setitem__(self, obj_type, value):
-    #     obj_type = obj_type.capitalize()
-    #     self.store[obj_type] = value
-
-    # def __contains__(self, obj_type):
-    #     obj_type = obj_type.capitalize()
-    #     return obj_type in self.store
 
 class QueryHandler_ABS:
     """
