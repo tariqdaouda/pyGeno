@@ -55,7 +55,7 @@ class DatabaseConf(DatabaseConfiguration_ABS):
         args = {
             "username": "root",
             "password": "root",
-            "arangoURL": "http://localhost:8529/"
+            "arangoURL": "http://127.0.0.1:8529/"
         }
         print("## ArangoDB backend setup")
         for key, value in args.items():
