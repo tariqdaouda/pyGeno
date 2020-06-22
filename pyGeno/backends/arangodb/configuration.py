@@ -5,8 +5,8 @@ import pyArango.theExceptions as PEXP
 from . import savers
 from . import query_handler
 
-_DB_CONNECTION = None
-_DB = None
+# _DB_CONNECTION = None
+# _DB = None
 
 class DatabaseConf(DatabaseConfiguration_ABS):
     """
@@ -24,8 +24,17 @@ class DatabaseConf(DatabaseConfiguration_ABS):
             self.set_database()
         self.database = self.connection[self._DB_NAME]
 
+    def list_genomes(self):
+        """"""
+        aql = """
+            FOR g IN Genome
+                RETURN DISTINCT g.name
+        """
+        ret = self.database.AQLQuery(aql, batchSize=1000)
+        return ret.result
+
     def get_query_handler(self):
-        self.query_handler = query_handler.QueryHandler()
+        self.query_handler = query_handler.QueryHandler(self)
         return self.query_handler
             
     def load_saver(self):
@@ -43,6 +52,11 @@ class DatabaseConf(DatabaseConfiguration_ABS):
             self.db.createCollection(colname)
         except PEXP.CreationError as e :
             print("Unable to create collection '%s' : %s" % (colname, e))
+
+    def get_link_collection_name(self, col1, col2):
+        if col1[0] > col2[0] :
+            return "%s_X_%s" % (col1, col2)
+        return "%s_X_%s" % (col2, col1)
 
     def get_configuration(self):
         """return configuration of the backend in a dictionary"""
@@ -64,4 +78,3 @@ class DatabaseConf(DatabaseConfiguration_ABS):
                 args[key] = val
 
         self.reset(args)
-

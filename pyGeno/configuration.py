@@ -28,7 +28,7 @@ def pretty_version() :
     """returns pyGeno's current version in a pretty human readable way"""
     return "pyGeno Chapter: %s, Name: %s, Release Level: %s, Version: %s, Build time: %s" % version()
 
-def set_backend(backend=None, make_default=False):
+def set_backend(backend=None, make_default=True):
     """
     Set the backend for pyGeno. if backend=None, pyGeno will revert to the
     default engine: RabaDB. If make_default, the backend will be stored

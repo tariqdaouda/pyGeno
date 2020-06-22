@@ -8,6 +8,9 @@ class DatabaseConfiguration_ABS:
         self.saver = None
         self.query_handler = None
 
+    def list_genomes(self):
+        raise NotImplemented("This is an abstract class")
+
     def get_query_handler(self):
         raise NotImplemented("This is an abstract class")
 
@@ -68,7 +71,7 @@ class GenomeSaver_ABS(object):
 
     def set_genome(self, unique_id, **kw_data):
         """set the genome"""
-        self.data["Genome"] = {}
+        self.data["Genome"] = {"name": unique_id}
         self.data["Genome"][unique_id] = kw_data
         self.genome_id = unique_id
 
@@ -200,6 +203,9 @@ class QueryHandler_ABS:
     """
     Saves genome into database
     """
+    def __init__(self, database_configuration):
+        self.database_configuration = database_configuration
+
     def get(self, *args, **kwargs):
         if len(args) == 0:
             return self.dict_query(kwargs)
@@ -212,6 +218,9 @@ class QueryHandler_ABS:
                 raise ValueError("Unknown query type: %s" % args[0])
         else :
             raise ValueError("Get only takes 1 argument, dict of rich query, or a layze query: a = x, b = y, etc..." % args[0])
+
+    def get_example(self, object_type):
+        raise NotImplemented("Must be implemented in child")
 
     def rich_query(self, pygeno_filter, object_name):
         raise NotImplemented("Must be implemented in child")

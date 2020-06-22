@@ -80,6 +80,3 @@ class GenomeSaver(GenomeSaver_ABS):
         indexes = self._drop_indexes()
         self._save_objects()
         self._restore_indexes(indexes)
-
-
-        

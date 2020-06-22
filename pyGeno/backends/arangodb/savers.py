@@ -35,11 +35,7 @@ class GenomeSaver(GenomeSaver_ABS):
 
     def create_links(self):
         def _get_collection(from_type, to_type):
-            if from_type[0] > to_type[0] :
-                name = "%s_X_%s" % (from_type, to_type)
-            else :
-                name = "%s_X_%s" % (to_type, from_type)
-
+            name = self.database_configuration.get_link_collection_name(from_type, to_type)
             try :
                 return self.db[name]
             except :

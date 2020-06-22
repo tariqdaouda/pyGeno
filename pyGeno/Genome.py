@@ -1,116 +1,103 @@
 from . import configuration as conf
 import pyGeno.tools.UsefulFunctions as uf
-from .pyGenoObjectBases import *
+# from .pyGenoObjectBases import *
 
-from .Chromosome import Chromosome
-from .Gene import Gene
-from .Transcript import Transcript
-from .Protein import Protein
-from .Exon import Exon
+# from .Chromosome import Chromosome
+# from .Gene import Gene
+# from .Transcript import Transcript
+# from .Protein import Protein
+# from .Exon import Exon
 from . import SNPFiltering as SF
-from .SNP import *
+# from .SNP import *
 
-import rabaDB.fields as rf
+from . backends.rich_query import RichFilter
 
-def getGenomeList() :
-	"""Return the names of all imported genomes"""
-	import rabaDB.filters as rfilt
-	f = rfilt.RabaQuery(Genome_Raba)
-	names = []
-	for g in f.run(gen=True) :
-		names.append(g.name)
-	return names
+class Genome :
+    """
+    This is the entry point to pyGeno::
+        
+        myGeno = Genome(name = 'GRCh37.75', SNPs = ['RNA_S1', 'DNA_S1'], SNPFilter = MyFilter)
+        for prot in myGeno.get(Protein) :
+            print prot.sequence
+    
+    """
+    # _wrapped_class = Genome_Raba
 
-class Genome_Raba(pyGenoRabaObject) :
-	"""The wrapped Raba object that really holds the data"""
-	
-	_raba_namespace = conf.pyGeno_RABA_NAMESPACE
-	#_raba_not_a_singleton = True #you can have several instances of the same genome but they all share the same location in the database
+    def __init__(self, name, SNPs = None, SNPFilter = None) :
+        self.fetcher = conf.get_backend().get_query_handler()
+        res_data = list(self.fetcher.lazy_query("Genome", name=name))
+        try:
+            self.data = res_data[0]
+        except KeyError as e:
+            raise KeyError("Can't find Genome: '%s'")
+        
+        if len(res_data) > 1:
+            raise KeyError("Filter is not unique, found %d objects matching" % lem(res_data))
 
-	name = rf.Primitive()
-	species = rf.Primitive()
+        if type(SNPs) is str :
+            self.SNPsSets = [SNPs]
+        else :
+            self.SNPsSets = SNPs
 
-	source = rf.Primitive()
-	packageInfos = rf.Primitive()
+        if SNPFilter is None :
+            self.SNPFilter = SF.DefaultSNPFilter()
+        else :
+            if issubclass(SNPFilter.__class__, SF.SNPFilter) :
+                self.SNPFilter = SNPFilter
+            else :
+                raise ValueError("The value of 'SNPFilter' is not an object deriving from a subclass of SNPFiltering.SNPFilter. Got: '%s'" % SNPFilter)
 
-	def _curate(self) :
-		self.species = self.species.lower()
+        self.SNPTypes = {}
+        
+        if SNPs is not None :
+            raise NotImplemented("Not yet implemented")
 
-	def getSequencePath(self) :
-		return conf.getGenomeSequencePath(self.species, self.name)
+            f = RabaQuery(SNPMaster, namespace = self._raba_namespace)
+            for se in self.SNPsSets :
+                f.addFilter(setName = se, species = self.species)
 
-	def getReferenceSequencePath(self) :
-		return conf.getReferenceGenomeSequencePath(self.species)
+            res = f.run()
+            if res is None or len(res) < 1 :
+                raise ValueError("There's no set of SNPs that goes by the name of %s for species %s" % (SNPs, self.species))
 
-	def __len__(self) :
-		"""Size of the genome in pb"""
-		l = 0
-		for c in self.chromosomes :
-			l +=  len(c)
+            for s in res :
+                self.SNPTypes[s.setName] = s.SNPType
 
-		return l
+    def get(self, object_type, query=None, **lazy_args):
+        ret = None
+        if (query is not None and not type(query) is dict) and len(lazy_args) > 0:
+            raise ValueError("Only dict type queries are compatible with lazy_args")
 
-class Genome(pyGenoRabaObjectWrapper) :
-	"""
-	This is the entry point to pyGeno::
-		
-		myGeno = Genome(name = 'GRCh37.75', SNPs = ['RNA_S1', 'DNA_S1'], SNPFilter = MyFilter)
-		for prot in myGeno.get(Protein) :
-			print prot.sequence
-	
-	"""
-	_wrapped_class = Genome_Raba
+        if query is None:
+           ret = self.fetcher.lazy_query(anchor_type="Genome", fetch_type=object_type)
 
-	def __init__(self, SNPs = None, SNPFilter = None,  *args, **kwargs) :
-		
-		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
+        if type(query) is dict:
+            if len(lazy_args) > 0:
+               query = query.update(lazy_args)
+            ret = self.fetcher.dict_query(anchor_type="Genome", fetch_type=object_type, dct=query)
+        elif len(lazy_args) > 0:
+           ret = self.fetcher.lazy_query(anchor_type="Genome", fetch_type=object_type, **lazy_args)
 
-		if type(SNPs) is str :
-			self.SNPsSets = [SNPs]
-		else :
-			self.SNPsSets = SNPs
+        if type(query) is RichFilter:
+           ret = self.fetcher.rich_query(anchor_type="Genome", fetch_type=object_type, pygeno_filter=query)
 
-		# print "pifpasdf", self.SNPsSets
+        if ret is None :
+            raise ValueError("Invalid filter type:", query)
 
-		if SNPFilter is None :
-			self.SNPFilter = SF.DefaultSNPFilter()
-		else :
-			if issubclass(SNPFilter.__class__, SF.SNPFilter) :
-				self.SNPFilter = SNPFilter
-			else :
-				raise ValueError("The value of 'SNPFilter' is not an object deriving from a subclass of SNPFiltering.SNPFilter. Got: '%s'" % SNPFilter)
+        return ret
 
-		self.SNPTypes = {}
-		
-		if SNPs is not None :
-			f = RabaQuery(SNPMaster, namespace = self._raba_namespace)
-			for se in self.SNPsSets :
-				f.addFilter(setName = se, species = self.species)
+    @classmethod
+    def help(self):
+        import json
+        fetcher = conf.get_backend().get_query_handler()
+        ret = json.dumps(fetcher.get_example("Genome"), indent=4)
+        print("Example schema:\n%s" % ret)
 
-			res = f.run()
-			if res is None or len(res) < 1 :
-				raise ValueError("There's no set of SNPs that goes by the name of %s for species %s" % (SNPs, self.species))
+    def __getitem__(self, key):
+        return self.data[key]
 
-			for s in res :
-				# print s.setName, s.SNPType
-				self.SNPTypes[s.setName] = s.SNPType
+    def __getattr__(self, key):
+        return self.data[key]
 
-	def _makeLoadQuery(self, objectType, *args, **coolArgs) :
-		if issubclass(objectType, SNP_INDEL) :
-			# conf.db.enableDebug(True)
-			f = RabaQuery(objectType, namespace = self._wrapped_class._raba_namespace)
-			coolArgs['species'] = self.species
-
-			if len(args) > 0 and type(args[0]) is list :
-				for a in args[0] :
-					if type(a) is dict :
-						f.addFilter(**a)
-			else :
-				f.addFilter(*args, **coolArgs)
-
-			return f
-		
-		return pyGenoRabaObjectWrapper._makeLoadQuery(self, objectType, *args, **coolArgs)
-	
-	def __str__(self) :
-		return "Genome: %s/%s SNPs: %s" %(self.species, self.name, self.SNPTypes)
+    def __str__(self) :
+        return "Genome: %s/%s SNPs: %s" %(self.species, self.name, self.SNPTypes)

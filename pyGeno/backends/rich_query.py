@@ -1,15 +1,15 @@
-class Filter:
-    """docstring for Filter"""
+class RichFilter:
+    """docstring for RichFilter"""
     def __init__(self, statement, operator=None, right_statement=None):
-        super(Filter, self).__init__()
+        super(RichFilter, self).__init__()
         self.statement = statement
         self.operator = operator
         self.right_statement = right_statement
 
     def _mix(self, statement, operator):
-        if not isinstance(statement, Filter):
-            raise ValueError("statement must be of type Filter, got: '%s'" % statement)
-        return Filter(self, operator, statement)
+        if not isinstance(statement, RichFilter):
+            raise ValueError("statement must be of type RichFilter, got: '%s'" % statement)
+        return RichFilter(self, operator, statement)
 
     def __and__(self, statement):
         return self._mix(statement, "and")
@@ -25,8 +25,8 @@ class Filter:
     def __repr__(self):
         return self.to_str()
 
-f = Filter
+_f = RichFilter
 
 if __name__ == '__main__':
-   q =  ( f("a > 1") & f("b < 6") ) | ( f("d = 1") & f("c != 6") ) & f("j = 0") 
+   q =  ( _f("a > 1") & _f("b < 6") ) | ( _f("d = 1") & _f("c != 6") ) & _f("j = 0") 
    print(q)
