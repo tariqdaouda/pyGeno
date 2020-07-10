@@ -40,6 +40,39 @@ class DatabaseConfiguration_ABS:
     def prompt_setup(self):
         raise NotImplemented("This is an abstract class")
 
+class LinkStore(object):
+    """docstring for LinkStore"""
+    def __init__(self):
+        super(LinkStore, self).__init__()
+        self.store = []
+        self.check = set()
+        self.start = 0
+
+    def get_key(self, key1, key2):
+        if key1[0] < key2[0]:
+            return ( key1, key2)
+        else:
+            return ( key2, key1)
+
+    def add(self, type1, key1, type2, key2):
+        data =  {
+            "from": {
+                "type": type1.capitalize(),
+                "id": key1 
+            },
+            "to":{
+                "type": type2.capitalize(),
+                "id": key2 
+            }
+        }
+        key = self.get_key(key1, key2)
+        if key not in self.check:
+            self.store.append(data)
+            self.check.add(key)
+
+    def __iter__(self):
+        return iter(self.store)
+
 class GenomeSaver_ABS(object):
     """
     Saves genome into database
@@ -49,7 +82,7 @@ class GenomeSaver_ABS(object):
         self.database_configuration = database_configuration
         self.data = {}
         self.sequences = {}
-        self.links = list()
+        self.links =  LinkStore() #set()#list()
         self.genome_id = None
 
     def get_start_end(self, gtf_line):
@@ -71,45 +104,46 @@ class GenomeSaver_ABS(object):
 
     def set_genome(self, unique_id, **kw_data):
         """set the genome"""
-        self.data["Genome"] = {"name": unique_id}
+        # self.data["Genome"] = {"name": unique_id}
+        self.data["Genome"] = {}
         self.data["Genome"][unique_id] = kw_data
         self.genome_id = unique_id
 
-    def _get_link(self, from_type, from_id, to_type, to_id):
-        """return a link (edge) connecting two objects"""
-        data =  {
-            "from": {
-                "type": from_type.capitalize(),
-                "id": from_id 
-            },
-            "to":{
-                "type": to_type.capitalize(),
-                "id": to_id 
-            }
-        }
-        return data
+    # def _get_link(self, from_type, from_id, to_type, to_id):
+    #     """return a link (edge) connecting two objects"""
+    #     data =  {
+    #         "from": {
+    #             "type": from_type.capitalize(),
+    #             "id": from_id 
+    #         },
+    #         "to":{
+    #             "type": to_type.capitalize(),
+    #             "id": to_id 
+    #         }
+    #     }
+    #     return (from_id, to_id), data
 
     def link(self, gtf_line, unique_id=None):
         """create a link (edge) between two objects"""
         if unique_id is None:
             unique_id = self.get_uid(gtf_line)
         
-        self.links.append(
-            self._get_link(self.get_type(gtf_line), unique_id, "Genome", self.genome_id)
-        )
-        self.links.append(
-            self._get_link(self.get_type(gtf_line), unique_id, "Chromosome", gtf_line["seqname"])
-        )
-
+        self.links.add(self.get_type(gtf_line), unique_id, "Genome", self.genome_id)
+        self.links.add(self.get_type(gtf_line), unique_id, "Chromosome", gtf_line["seqname"])
+        # edge_uid, link = self._get_link(self.get_type(gtf_line), unique_id, "Genome", self.genome_id)
+        # self.links[edge_uid] = link
+        # edge_uid, link = self._get_link(self.get_type(gtf_line), unique_id, "Chromosome", gtf_line["seqname"])
+        # self.links[edge_uid] = link
+        
         for key in gtf_line["attributes"]:
             if key[-3:] == "_id":
                 skey = key.split("_")
                 if skey[0] != gtf_line["feature"]:
                     # print(gtf_line["feature"], unique_id, skey[0], gtf_line["attributes"][key])
-                    self.links.append(
-                        self._get_link(gtf_line["feature"], unique_id, skey[0], gtf_line["attributes"][key])
-                    )
-
+                    # edge_uid, link = self._get_link(gtf_line["feature"], unique_id, skey[0], gtf_line["attributes"][key])
+                    # self.links[edge_uid] = link
+                    self.links.add(gtf_line["feature"], unique_id, skey[0], gtf_line["attributes"][key])
+            
     def add(self, gtf_line):
         """add an object to the registery"""
         if self.genome_id is None:

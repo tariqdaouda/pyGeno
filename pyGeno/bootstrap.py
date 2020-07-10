@@ -1,5 +1,5 @@
 import pyGeno.importation.Genomes as PG
-import pyGeno.importation.SNPs as PS
+# import pyGeno.importation.SNPs as PS
 from pyGeno.tools.io import printf
 import os, tempfile, json
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse

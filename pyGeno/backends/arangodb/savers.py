@@ -12,14 +12,22 @@ class GenomeSaver(GenomeSaver_ABS):
         self.accepted_contigs = ["Cds", "Ccds", "Exon", "Start_codon", "Stop_codon", "Utr", "Gene", "Transcript"]
 
     def init_db(self):
-        for col in schemas.ALL_COLLECTIONS:
-            colname = col.__name__
+        for col1 in schemas.ALL_COLLECTIONS:
+            colname = col1.__name__
             if colname not in self.db:
                 self.db.createCollection(colname)
             else :
                 print("TRUNCATING (temporary for tests, should be removed)", colname)
                 self.db[colname].truncate()
-    
+            for col2 in schemas.ALL_COLLECTIONS:
+                if not col2 is col1 :
+                    edges = self.database_configuration.get_link_collection_name(colname, col2.__name__)
+                    print("TRUNCATING (temporary for tests, should be removed)", edges)
+                    try:
+                        self.db[edges].truncate()
+                    except:
+                        print("\tNot TRUNCATABLE")
+
     def create_objects(self):
         for colname, objs in self.data.items():
             for key, obj in objs.items():
@@ -28,6 +36,7 @@ class GenomeSaver(GenomeSaver_ABS):
                 except :
                     doc = self.db[colname].createDocument()
                     doc["_key"] = key
+                    doc["unique_id"] = key
                 doc.set(obj)
                 if colname in self.accepted_contigs:
                     doc["contig"] = self.get_subsequence(doc["seqname"], doc["start"], doc["end"])

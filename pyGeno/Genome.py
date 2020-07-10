@@ -12,7 +12,64 @@ from . import SNPFiltering as SF
 
 from . backends.rich_query import RichFilter
 
-class Genome :
+class GenomeObject:
+    """docstring for GenomeObject"""
+    def __init__(self, type_name, data=None, unique_id=None):
+        self.type_name = type_name
+        self.data = data
+        self.unique_id = unique_id
+        self.fetcher = conf.get_backend().get_query_handler()
+
+    def get(self, object_type, query=None, **lazy_args):
+        ret = None
+        if (query is not None and not type(query) is dict) and len(lazy_args) > 0:
+            raise ValueError("Only dict type queries are compatible with lazy_args")
+
+        if query is None:
+            ret = self.fetcher.lazy_query(anchor_type=self.type_name, anchor_id=self.unique_id, fetch_type=object_type)
+
+        if type(query) is dict:
+            if len(lazy_args) > 0:
+               query = query.update(lazy_args)
+            ret = self.fetcher.dict_query(anchor_type=self.type_name, anchor_id=self.unique_id, fetch_type=object_type, dct=query)
+        elif len(lazy_args) > 0:
+           ret = self.fetcher.lazy_query(anchor_type=self.type_name, anchor_id=self.unique_id, fetch_type=object_type, **lazy_args)
+
+        if type(query) is RichFilter:
+           ret = self.fetcher.rich_query(anchor_type=self.type_name, anchor_id=self.unique_id, fetch_type=object_type, pygeno_filter=query)
+
+        if ret is None :
+            raise ValueError("Invalid filter type:", query)
+
+        for dct in ret:
+            yield GenomeObject(type_name=object_type, data=dct, unique_id=dct["unique_id"])
+
+    @classmethod
+    def help(self):
+        import json
+        fetcher = conf.get_backend().get_query_handler()
+        ret = json.dumps(fetcher.get_example("Genome"), indent=4)
+        print("Example schema:\n%s" % ret)
+
+    def __getattr__(self, key):
+        if key in self.data:
+            return self.data[key]
+
+        if key[-1] == "s":
+            key = key[:-1]
+
+        res = list(self.get(key.capitalize()))
+        if len(res) == 1:
+            return res[0]
+        return res
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def __repr__(self) :
+        return "%s: %s" %(self.type_name, self.data)
+    
+class Genome(GenomeObject) :
     """
     This is the entry point to pyGeno::
         
@@ -24,15 +81,16 @@ class Genome :
     # _wrapped_class = Genome_Raba
 
     def __init__(self, name, SNPs = None, SNPFilter = None) :
-        self.fetcher = conf.get_backend().get_query_handler()
-        res_data = list(self.fetcher.lazy_query("Genome", name=name))
+        super(Genome, self).__init__(type_name="Genome", unique_id=name)
+
+        res_data = list(self.fetcher.lazy_query("Genome", anchor_id=name))
         try:
             self.data = res_data[0]
         except KeyError as e:
             raise KeyError("Can't find Genome: '%s'")
         
         if len(res_data) > 1:
-            raise KeyError("Filter is not unique, found %d objects matching" % lem(res_data))
+            raise KeyError("Filter is not unique, found %d objects matching" % len(res_data))
 
         if type(SNPs) is str :
             self.SNPsSets = [SNPs]
@@ -63,41 +121,5 @@ class Genome :
             for s in res :
                 self.SNPTypes[s.setName] = s.SNPType
 
-    def get(self, object_type, query=None, **lazy_args):
-        ret = None
-        if (query is not None and not type(query) is dict) and len(lazy_args) > 0:
-            raise ValueError("Only dict type queries are compatible with lazy_args")
-
-        if query is None:
-           ret = self.fetcher.lazy_query(anchor_type="Genome", fetch_type=object_type)
-
-        if type(query) is dict:
-            if len(lazy_args) > 0:
-               query = query.update(lazy_args)
-            ret = self.fetcher.dict_query(anchor_type="Genome", fetch_type=object_type, dct=query)
-        elif len(lazy_args) > 0:
-           ret = self.fetcher.lazy_query(anchor_type="Genome", fetch_type=object_type, **lazy_args)
-
-        if type(query) is RichFilter:
-           ret = self.fetcher.rich_query(anchor_type="Genome", fetch_type=object_type, pygeno_filter=query)
-
-        if ret is None :
-            raise ValueError("Invalid filter type:", query)
-
-        return ret
-
-    @classmethod
-    def help(self):
-        import json
-        fetcher = conf.get_backend().get_query_handler()
-        ret = json.dumps(fetcher.get_example("Genome"), indent=4)
-        print("Example schema:\n%s" % ret)
-
-    def __getitem__(self, key):
-        return self.data[key]
-
-    def __getattr__(self, key):
-        return self.data[key]
-
     def __str__(self) :
-        return "Genome: %s/%s SNPs: %s" %(self.species, self.name, self.SNPTypes)
+        return "Genome: %s/%s SNPs: %s" %(self.species, self.unique_id, self.SNPTypes)
