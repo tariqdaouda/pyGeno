@@ -62,9 +62,10 @@ class QueryHandler(QueryHandler_ABS):
                     RETURN obj2 
         """.format(anchor_col=anchor_type, anchor_id=anchor_id, link_col_name=link_col_name,other_col=fetch_type, filters=aql_filters)
 
+        # print(aql)
         objects = self.db.AQLQuery(aql, batchSize=1000, rawResults=True)
         return objects
-        
+    
     def _get_dict_join_result(self, anchor_type, anchor_id, fetch_type, dct=None):
         aql_filters = self._dct_to_aql_filters(dct, obj_name="obj2")
         return self._get_join_result(anchor_type, anchor_id, fetch_type, aql_filters)

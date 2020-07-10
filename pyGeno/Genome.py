@@ -55,12 +55,16 @@ class GenomeObject:
         if key in self.data:
             return self.data[key]
 
-        if key[-1] == "s":
-            key = key[:-1]
-
-        res = list(self.get(key.capitalize()))
-        if len(res) == 1:
-            return res[0]
+        try:
+            res = list(self.get(key.capitalize()))
+            if len(res) == 1:
+                res = res[0]
+        except :
+            if key[-1] == "s":
+                key = key[:-1]
+                res = list(self.get(key.capitalize()))
+            else:
+                raise KeyError("Unknown attribute: %s" % key)
         return res
 
     def __getitem__(self, key):
@@ -68,7 +72,13 @@ class GenomeObject:
 
     def __repr__(self) :
         return "%s: %s" %(self.type_name, self.data)
-    
+
+class Transript(object):
+    """docstring for Transript"""
+    def __init__(self, arg):
+        super(Transript, self).__init__()
+        self.arg = arg
+        
 class Genome(GenomeObject) :
     """
     This is the entry point to pyGeno::
