@@ -86,7 +86,7 @@ class ChrosomeSequence(object) :
 		return data
 	
 	def _getSequence(self, slic) :
-		return ''.join(self.getSequenceData(slice(0, None, 1)))[slic]
+		return ''.join(self.getSequenceData(slic))
 
 	def __getitem__(self, i) :
 		return self._getSequence(i)
