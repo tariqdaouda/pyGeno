@@ -102,19 +102,8 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			if e.hasCDS() :
 				UTR5.append(''.join(e.UTR5))
 
-				if self.selenocysteine is not None:
-					for position in self.selenocysteine:
-						if e.CDS_start <= position <= e.CDS_end:
+                                e._patch_seleno(e, self.selenocysteine)
 
-							if e.strand == '+':
-								ajusted_position = position - e.CDS_start
-							else:
-								ajusted_position = e.CDS_end - position - 3
-
-							if e.CDS[ajusted_position] == 'T':
-								e.CDS = list(e.CDS)
-								e.CDS[ajusted_position] = '!'			
-				
 				if len(cDNA) == 0 and e.frame != 0 :
 					e.CDS = e.CDS[e.frame:]
 					
@@ -151,7 +140,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 	def _load_bin_sequence(self) :
 		self.bin_sequence = NucBinarySequence(self.sequence)
 		self.bin_UTR5 =  NucBinarySequence(self.UTR5)
-		self.bin_cDNA =  NucBinarySequence(self.cDNA)
+		self.bin_cDNA =  NucBinarySequence(self.cDNA.replace('!', 'T' ))
 		self.bin_UTR3 =  NucBinarySequence(self.UTR3)
 
 	def getNucleotideCodon(self, cdnaX1) :

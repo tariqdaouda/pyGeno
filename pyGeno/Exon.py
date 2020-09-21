@@ -109,6 +109,20 @@ class Exon(pyGenoRabaObjectWrapper) :
 		self.bin_CDS =  NucBinarySequence(self.CDS)
 		self.bin_UTR3 =  NucBinarySequence(self.UTR3)
 		
+	def _patch_seleno(self, e, selenocysteine):
+		if selenocysteine is not None:
+			for position in selenocysteine:
+				if e.CDS_start <= position <= e.CDS_end:
+
+					if e.strand == '+':
+						ajusted_position = position - e.CDS_start
+					else:
+						ajusted_position = e.CDS_end - position - 3
+
+					if e.CDS[ajusted_position] == 'T':
+						e.CDS = list(e.CDS)
+						e.CDS[ajusted_position] = '!'
+
 	def hasCDS(self) :
 		"""returns true or false depending on if the exon has a CDS"""
 		if self.CDS_start != None and self.CDS_end != None:
