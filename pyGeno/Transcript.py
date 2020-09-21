@@ -102,7 +102,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			if e.hasCDS() :
 				UTR5.append(''.join(e.UTR5))
 
-                                e._patch_seleno(e, self.selenocysteine)
+				e._patch_seleno(e, self.selenocysteine)
 
 				if len(cDNA) == 0 and e.frame != 0 :
 					e.CDS = e.CDS[e.frame:]
