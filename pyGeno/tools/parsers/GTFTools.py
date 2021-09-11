@@ -363,11 +363,15 @@ class GTFFile(object) :
             return self._join_ends(positions, kept=kept+[(start, end)])
         else:
             start, end = positions.pop(0)
-            start_next, end_next = positions.pop(0)
-            while end >= start_next and positions:
+            start_next, end_next = positions[0]
+            while end >= start_next and len(positions):
                 start = min(start, start_next)
                 end = max(end, end_next)
-                start_next, end_next = positions.pop(0)
+                _ = positions.pop(0)
+                if len(positions):
+                    start_next, end_next = positions[0]
+                else:
+                    break
             return self._join_ends(positions, kept=kept+[(start, end)])
                 
     def __iter__(self) :
