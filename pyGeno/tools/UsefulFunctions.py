@@ -87,9 +87,7 @@ translTable['default'] = {
 'GTT' : 'V', 'GTC' : 'V', 'GTA' : 'V', 'GTG' : 'V',
 'GCT' : 'A', 'GCC' : 'A', 'GCA' : 'A', 'GCG' : 'A',
 'GAT' : 'D', 'GAC' : 'D', 'GAA' : 'E', 'GAG' : 'E',
-'GGT' : 'G', 'GGC' : 'G', 'GGA' : 'G', 'GGG' : 'G',
-
-'!GA' : 'U'
+'GGT' : 'G', 'GGC' : 'G', 'GGA' : 'G', 'GGG' : 'G'
 
 }
 codonTable = translTable['default']

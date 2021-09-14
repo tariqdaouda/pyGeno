@@ -102,18 +102,14 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			if e.hasCDS() :
 				UTR5.append(''.join(e.UTR5))
 
-				e._patch_seleno(e, self.selenocysteine)
+				if len(cDNA) == 0 and e.frame != 0:
+					cDNA.append('N'*(3-e.frame))
 
-				if len(cDNA) == 0 and e.frame != 0 :
-					e.CDS = e.CDS[e.frame:]
-					
-					if e.strand == '+':
-						e.CDS_start += e.frame
-					else:
-						e.CDS_end -= e.frame
-				
 				if len(e.CDS):
 					cDNA.append(''.join(e.CDS))
+				else:
+					print('WARNING: hasCDS flag is incorrect for exon %s.' % e.id)
+
 				UTR3.append(''.join(e.UTR3))
 				prime5 = False
 			else :
@@ -140,7 +136,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 	def _load_bin_sequence(self) :
 		self.bin_sequence = NucBinarySequence(self.sequence)
 		self.bin_UTR5 =  NucBinarySequence(self.UTR5)
-		self.bin_cDNA =  NucBinarySequence(self.cDNA.replace('!', 'T' ))
+		self.bin_cDNA =  NucBinarySequence(self.cDNA)
 		self.bin_UTR3 =  NucBinarySequence(self.UTR3)
 
 	def getNucleotideCodon(self, cdnaX1) :
