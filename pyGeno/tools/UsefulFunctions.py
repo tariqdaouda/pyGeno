@@ -195,10 +195,15 @@ def complement(seq) :
 
 def translateDNA_6Frames(sequence) :
 	"""returns 6 translation of sequence. One for each reading frame"""
-	trans, d, p = (), ['f', 'r'], ['1', '2', '3']
-	for i in d:
-		for j in p:
-			trans += (translateDNA(sequence, i + j),)	
+	trans = (
+			translateDNA(sequence, 'f1'),
+			translateDNA(sequence, 'f2'),
+			translateDNA(sequence, 'f3'),
+
+			translateDNA(sequence, 'r1'),
+			translateDNA(sequence, 'r2'),
+			translateDNA(sequence, 'r3'),
+		)
 
 	return trans
 
@@ -343,11 +348,11 @@ def decodePolymorphicNucleotide_str(nuc) :
 def getNucleotideCodon(sequence, x1) :
 	"""Returns the entire codon of the nucleotide at pos x1 in sequence, 
 	and the position of that nocleotide in the codon in a tuple"""
-	r = None
-	if -1 < x1 < len(sequence):
+	if 0 <= x1 < len(sequence):
 		p = x1 % 3
-		r = (sequence[x1 - p : x1 + 3 - p], p)
-	return r
+		return (sequence[x1 - p : x1 + 3 - p], p)
+	else:
+		return None
 
 def showDifferences(seq1, seq2) :
 	"""Returns a string highligthing differences between seq1 and seq2:
@@ -383,7 +388,7 @@ def highlightSubsequence(sequence, x1, x2, start=' [', stop = '] ') :
 	in bewteen 'start' and 'stop'"""
 
 	seq = list(sequence)
-	print(x1, x2-1, len(seq)) #??
+	#print(x1, x2-1, len(seq))
 	seq[x1] = start + seq[x1]
 	seq[x2-1] = seq[x2-1] + stop
 	return ''.join(seq)
