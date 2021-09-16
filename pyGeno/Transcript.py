@@ -92,46 +92,40 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		UTR5 = []
 		UTR3 = []
 		exons = []
+		positions = []
 		prime5 = True
 		for ee in self.wrapped_object.exons :
 			e = pyGenoRabaObjectWrapper_metaclass._wrappers[Exon_Raba](wrapped_object_and_bag = (ee, getV('bagKey')))
 			self.exonsDict[(e.start, e.end)] = e
 			exons.append(e)
 			self.data.extend(e.data)
+			if self.gene.strand == '+':
+				positions.extend(range(e.start, e.end))
+			else:
+				positions.extend(range(e.end-1, e.start-1, -1))
 			
 			if e.hasCDS() :
 				UTR5.append(''.join(e.UTR5))
 
-				if self.selenocysteine is not None:
-					for position in self.selenocysteine:
-						if e.CDS_start <= position <= e.CDS_end:
+				if len(cDNA) == 0 and e.frame != 0:
+					cDNA.append('N'*(3-e.frame))
 
-							if e.strand == '+':
-								ajusted_position = position - e.CDS_start
-							else:
-								ajusted_position = e.CDS_end - position - 3
-
-							if e.CDS[ajusted_position] == 'T':
-								e.CDS = list(e.CDS)
-								e.CDS[ajusted_position] = '!'			
-				
-				if len(cDNA) == 0 and e.frame != 0 :
-					e.CDS = e.CDS[e.frame:]
-					
-					if e.strand == '+':
-						e.CDS_start += e.frame
-					else:
-						e.CDS_end -= e.frame
-				
 				if len(e.CDS):
 					cDNA.append(''.join(e.CDS))
+				else:
+					print('WARNING: hasCDS flag is incorrect for exon %s.' % e.id)
+
 				UTR3.append(''.join(e.UTR3))
 				prime5 = False
 			else :
 				if prime5 :
 					UTR5.append(''.join(e.data))
+					if len(e.UTR3):
+						print("WARNING: exon has 3'UTR before transcript starts (%s)." % self.id)
 				else :
 					UTR3.append(''.join(e.data))
+					if len(e.UTR5):
+						print("WARNING: exon has 5'UTR after transcript ends." % self.id)
 		
 		sequence = ''.join(self.data)
 		cDNA = ''.join(cDNA)
@@ -142,6 +136,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 		setV('cDNA', cDNA)
 		setV('UTR5', UTR5)
 		setV('UTR3', UTR3)
+		setV('positions', positions)
 		
 		if len(cDNA) > 0 and len(cDNA) % 3 != 0 :
 			setV('flags', {'DUBIOUS' : True, 'cDNA_LEN_NOT_MULT_3': True})
