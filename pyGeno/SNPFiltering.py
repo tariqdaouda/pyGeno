@@ -27,16 +27,18 @@ class SequenceInsert(Sequence_modifiers) :
 		Sequence_modifiers.__init__(self, sources)
 		self.bases = bases
 		self.offset = 0
+		self.indel = 0
 
 		# Allow to use format like C/CCTGGAA(dbSNP) or CCT/CCTGGAA(samtools)
 		if ref != '-':
 			if ref == bases[:len(ref)]:
 				self.offset = len(ref) 
 				self.bases = self.bases[self.offset:]
-				#-1 because if the insertion are after the last nuc we go out of table
+				#-1 because if the insertion are after the last nuc we go out of table	
 				self.offset -= 1
-			else:
-				raise NotImplemented("This format of Insetion is not accepted. Please change your format, or implement your format in pyGeno.")
+			# Allow indel like GG/GAG
+			else: 
+				self.indel = len(ref) - 1
 
 
 class SequenceDel(Sequence_modifiers) :
@@ -45,6 +47,7 @@ class SequenceDel(Sequence_modifiers) :
 		Sequence_modifiers.__init__(self, sources)
 		self.length = length
 		self.offset = 0
+		self.indel = 0
 
 		# Allow to use format like CCTGGAA/C(dbSNP) or CCTGGAA/CCT(samtools)
 		if alt != '-':
@@ -52,8 +55,10 @@ class SequenceDel(Sequence_modifiers) :
 				if alt == ref[:len(alt)]:
 					self.offset = len(alt)
 					self.length = self.length - len(alt)
+				# Allow indel like  CATA/CAA
 				else:
-					raise NotImplemented("This format of Deletion is not accepted. Please change your format, or implement your format in pyGeno.")
+					self.bases = alt
+					self.indel = len(ref) - 1
 			else:
 				raise Exception("You need to add a ref sequence in your call of SequenceDel. Or implement your format in pyGeno.")
 
