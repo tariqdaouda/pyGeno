@@ -3,17 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. image:: http://bioinfo.iric.ca/~daoudat/pyGeno/_static/logo.png
+.. image:: _static/logo.png
    :alt: pyGeno's logo
 
 pyGeno: A Python package for precision medicine and proteogenomics
 ===================================================================
-.. image:: http://depsy.org/api/package/pypi/pyGeno/badge.svg
-   :alt: depsy
-   :target: http://depsy.org/package/python/pyGeno
 .. image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
     :target: https://opensource.org/licenses/Apache-2.0
-.. image:: https://img.shields.io/badge/python-3.5-blue.svg 
+.. image:: https://img.shields.io/badge/python-3.5-blue.svg
 
 pyGeno's `lair is on Github`_.
 
@@ -42,28 +39,28 @@ be able cope with huge queries.
 
 .. code::
 
-	from pyGeno.Genome import *
+    from pyGeno.Genome import *
 
-   # In case the Genome cannot be found (i.e., KeyError), please consider the below section on bootstrapping
-	g = Genome(name = "GRCh37.75")
-	prot = g.get(Protein, id = 'ENSP00000438917')[0]
-	#print the protein sequence
-	print(prot.sequence)
-	#print the protein's gene biotype
-	print(prot.gene.biotype)
-	#print protein's transcript sequence
-	print(prot.transcript.sequence)
+    # In case the Genome cannot be found (i.e., KeyError), please consider the below section on bootstrapping
+    g = Genome(name = "GRCh37.75")
+    prot = g.get(Protein, id = 'ENSP00000438917')[0]
+    #print the protein sequence
+    print(prot.sequence)
+    #print the protein's gene biotype
+    print(prot.gene.biotype)
+    #print protein's transcript sequence
+    print(prot.transcript.sequence)
 
-	#fancy queries
-	for exons in g.get(Exons, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :
-		#print the exon's coding sequence
-		print(exon.CDS)
-		#print the exon's transcript sequence
-		print(exon.transcript.sequence)
+    #fancy queries
+    for exons in g.get(Exons, {"CDS_start >": x1, "CDS_end <=" : x2, "chromosome.number" : "22"}) :
+        #print the exon's coding sequence
+        print(exon.CDS)
+        #print the exon's transcript sequence
+        print(exon.transcript.sequence)
 
-	#You can do the same for your subject specific genomes
-	#by combining a reference genome with polymorphisms 
-	g = Genome(name = "GRCh37.75", SNPs = ["STY21_RNA"], SNPFilter = MyFilter())
+    #You can do the same for your subject specific genomes
+    #by combining a reference genome with polymorphisms
+    g = Genome(name = "GRCh37.75", SNPs = ["STY21_RNA"], SNPFilter = MyFilter())
 
 
 Verbose Introduction
@@ -82,7 +79,7 @@ pyGeno is a python package that  was designed to be:
 * Fast to install. It has no dependencies but its own backend: `rabaDB`_.
 * Fast to run and memory efficient, so you can use it on your laptop.
 * Fast to use. No queries to foreign APIs all the data rests on your computer, so it is readily accessible when you need it.
-* Fast to learn. One single function **get()** can do the job of several other tools at once. 
+* Fast to learn. One single function **get()** can do the job of several other tools at once.
 
 It also comes with:
 
@@ -108,7 +105,7 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-   
+
    publications
    quickstart
    installation
@@ -120,6 +117,7 @@ Contents:
    snp_filter
    tools
    parsers
+   citing
 
 Indices and tables
 ==================
