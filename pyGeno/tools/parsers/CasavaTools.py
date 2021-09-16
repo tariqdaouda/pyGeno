@@ -44,7 +44,7 @@ class SNPsTxtFile(object) :
 		
 		f = SNPsTxtFile('snps.txt')
 		for line in f :
-			print line['ref']
+			print(line['ref'])
 	
 	"""
 	def __init__(self, fil, gziped = False) :

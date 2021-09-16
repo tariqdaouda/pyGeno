@@ -97,7 +97,6 @@ class CSVEntry(object) :
 			# for d in tmpData :
 				d = tmpData[i]
 				sd = d.strip()
-				# print sd, tmpData, i
 				if len(sd) > 0 and sd[0] == csvFile.stringSeparator :
 					more = []	
 					for i in range(i, len(tmpData)) :
@@ -184,7 +183,7 @@ class CSVFile(object) :
 		f = CSVFile()
 		f.parse('hop.csv')
 		for line in f :
-			print line['ref']
+			print(line['ref'])
 
 		#writing, legend can either be a list of a dict {field : column number}
 		f = CSVFile(legend = ['name', 'email'])
@@ -193,7 +192,7 @@ class CSVFile(object) :
 		l['email'] = "hop@gmail.com"
 		
 		for field, value in l :
-			print field, value
+			print(field, value)
 
 		f.save('myCSV.csv')		
 	"""
@@ -244,7 +243,6 @@ class CSVFile(object) :
 		self.lines = []
 		self.comments = []
 		for l in lines :
-			# print l
 			if len(l) != 0 and l[0] != "#" :
 				self.lines.append(l)
 			elif l[0] == "#" :

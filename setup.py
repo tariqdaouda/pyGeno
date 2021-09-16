@@ -58,7 +58,7 @@ setup(
     # installed, specify them here.  OBSOLETE [If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.]
     package_data={
-        '': ['*.txt', '*.rst', '*.tar.gz'],
+        'pyGeno': ['bootstrap_data/*/*'],
     },
 
     # Although 'package_data' is the preferred approach, in some case you may

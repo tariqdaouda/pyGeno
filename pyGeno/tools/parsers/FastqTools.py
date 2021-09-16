@@ -27,7 +27,7 @@ class FastqFile(object) :
 		f = FastqFile()
 		f.parse('hop.fastq')
 		for line in f :
-			print line['sequence']
+			print(line['sequence'])
 		
 		#writing, legend can either be a list of a dict {field : column number}
 		f = CSVFile(legend = ['name', 'email'])
@@ -102,7 +102,6 @@ class FastqFile(object) :
 	def __next__(self) :
 		#self to call getitem, and split he line if necessary
 		i = self.currentPos +1
-		#print i-1, self.currentPos
 		if i > len(self) :
 			raise StopIteration()
 			

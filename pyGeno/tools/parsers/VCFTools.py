@@ -77,7 +77,7 @@ class VCFFile(object) :
 		f = VCFFile()
 		f.parse('hop.vcf')
 		for line in f :
-			print line['pos']
+			print(line['pos'])
 	"""
 	
 	def __init__(self, filename = None, gziped = False, stream = False) :
@@ -201,7 +201,6 @@ if __name__ == '__main__' :
 	i = 0
 	pBar = ProgressBar()
 	for f in v :
-		#print f
 		pBar.update('%s' % i)
 		if i > 1000000 :
 			break
@@ -218,7 +217,4 @@ if __name__ == '__main__' :
 		if i > 1000000 :
 			break
 		i += 1
-		#print f
 	pBar.close()
-	#print v.lines
-
