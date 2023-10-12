@@ -54,7 +54,7 @@ Please cite this paper_.
 Installation:
 -------------
 
-It is recommended to install pyGeno within a `virtual environement`_, to setup one you can use:
+It is recommended to install pyGeno within a `virtual environment`_, to setup one you can use:
 
 .. code:: shell
 
@@ -129,7 +129,7 @@ Should output:
 	
 Creating a Personalized Genome:
 -------------------------------
-Personalized Genomes are a powerful feature that allow you to work on the specific genomes and proteomes of your patients. You can even mix several SNP sets together.
+Personalized Genomes are a powerful feature that allows you to work on the specific genomes and proteomes of your patients. You can even mix several SNP sets together.
 
 .. code:: python
   
@@ -249,7 +249,7 @@ To get a list of remote datawraps that pyGeno can download for you, do:
 Importing whole genomes is a demanding process that take more than an hour and requires (according to tests) 
 at least 3GB of memory. Depending on your configuration, more might be required.
 
-That being said importating a data wrap is a one time operation and once the importation is complete the datawrap
+That being said importing a data wrap is a one time operation and once the importation is complete the datawrap
 can be discarded without consequences.
 
 The bootstrap module also has some handy functions for importing built-in packages.
@@ -265,7 +265,7 @@ Some of them just for playing around with pyGeno (**Fast importation** and **Sma
 	B.importGenome("Human.GRCh37.75_Y-Only.tar.gz")
 	
 	#A dummy datawrap for humans SNPs and Indels in pyGeno's AgnosticSNP  format. 
-	# This one has one SNP at the begining of the gene SRY
+	# This one has one SNP at the beginning of the gene SRY
 	B.importSNPs("Human.dummySRY_casava.tar.gz")
 
 And for more **Serious Work**, the whole reference genome.
@@ -361,13 +361,13 @@ Find in sequences:
 ------------------
 
 Internally pyGeno uses a binary representation for nucleotides and amino acids to deal with polymorphisms. 
-For example,both "AGC" and "ATG" will match the following sequence "...AT/GCCG...".
+For example, both "AGC" and "ATG" will match the following sequence "...AT/GCCG...".
 
 .. code:: python
 
-	#returns the position of the first occurence
+	#returns the position of the first occurrence
 	transcript.find("AT/GCCG")
-	#returns the positions of all occurences
+	#returns the positions of all occurrences
 	transcript.findAll("AT/GCCG")
 	
 	#similarly, you can also do
