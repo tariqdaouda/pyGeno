@@ -1,23 +1,23 @@
 import sys
 
 def printf(*s) :
-	'print + sys.stdout.flush()'
+	"""print (+ sys.stdout.flush(), probably not needed for py3"""
 	for e in s[:-1] :
-		print e,
-	print s[-1]
+		print (e,)
+	print(s[-1])
 
 	sys.stdout.flush()
 
 def enterConfirm_prompt(enterMsg) :
 	stopi = False
 	while not stopi :
-		print "====\n At any time you can quit by entering 'quit'\n===="
+		print ("====\n At any time you can quit by entering 'quit'\n====")
 		vali = raw_input(enterMsg)
 		if vali.lower() == 'quit' :
 			vali = None
 			stopi = True
 		else :
-			print "You've entered:\n\t%s" % vali
+			print ("You've entered:\n\t%s" % vali)
 			valj = confirm_prompt("")
 			if valj == 'yes' :
 				stopi = True

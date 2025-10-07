@@ -142,7 +142,7 @@ class SegmentTree :
 		"""Returns a list of all segments intersected by [x1, x2]"""
 		
 		def condition(x1, x2, tree) :
-			#print self.id, tree.x1, tree.x2, x1, x2
+			#print (self.id, tree.x1, tree.x2, x1, x2)
 			if (tree.x1 != None and tree.x2 != None) and (tree.x1 <= x1 and x1 < tree.x2 or tree.x1 <= x2 and x2 < tree.x2) :
 				return True
 			return False
@@ -350,19 +350,19 @@ if __name__== "__main__" :
 	s.insert(35, 38, 'region 5')
 	s.insert(36, 37, 'region 6', 'aaa')
 	s.insert(36, 37, 'region 6', 'aaa2')
-	print "Tree:"
-	print s
-	print "indexed length", s.getIndexedLength()
-	print "removing gaps and adding region 7 : [13-37["
+	print ("Tree:")
+	print (s)
+	print ("indexed length", s.getIndexedLength())
+	print ("removing gaps and adding region 7 : [13-37[")
 	s.removeGaps()
 	#s.insert(13, 37, 'region 7')
-	print s
-	print "indexed length", s.getIndexedLength()
-	#print "intersections"
+	print (s)
+	print ("indexed length", s.getIndexedLength())
+	#print ("intersections")
 	#for c in [6, 10, 14, 1000] :
-	#	print c, s.intersect(c)
+	#	print (c, s.intersect(c))
 	
-	print "Move"
+	print ("Move")
 	s.move(0)
-	print s
-	print "indexed length", s.getIndexedLength()
+	print (s)
+	print ("indexed length", s.getIndexedLength())

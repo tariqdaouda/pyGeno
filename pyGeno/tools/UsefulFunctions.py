@@ -15,7 +15,7 @@ def saveResults(directoryName, fileName, strResults, log = '', args = ''):
 
 	resPath = "%s/%s"%(directoryName, fileName)
 	resFile = open(resPath, 'w')
-	print "Saving results :\n\t%s..."%resPath
+	print (("Saving results :\n\t%s..."%resPath))
 	resFile.write(strResults)
 	resFile.close()
 
@@ -23,7 +23,7 @@ def saveResults(directoryName, fileName, strResults, log = '', args = ''):
 		errPath = "%s.err.txt"%(resPath)
 		errFile = open(errPath, 'w')
 
-		print "Saving log :\n\t%s..." %errPath
+		print (("Saving log :\n\t%s..." %errPath))
 		errFile.write(log)
 		errFile.close()
 
@@ -31,7 +31,7 @@ def saveResults(directoryName, fileName, strResults, log = '', args = ''):
 		paramPath = "%s.args.txt"%(resPath)
 		paramFile = open(paramPath, 'w')
 
-		print "Saving arguments :\n\t%s..." %paramPath
+		print (("Saving arguments :\n\t%s..." %paramPath))
 		paramFile.write(args)
 		paramFile.close()
 
@@ -141,7 +141,7 @@ def findAll(haystack, needle) :
 	f = haystack.find(needle)
 	offset = 0
 	while (f >= 0) :
-		#print h, needle, f, offset
+		#print ((h, needle, f, offset))
 		res.append(f+offset)
 		offset += f+len(needle)
 		h = h[f+len(needle):]
@@ -394,7 +394,7 @@ def highlightSubsequence(sequence, x1, x2, start=' [', stop = '] ') :
 	in bewteen 'start' and 'stop'"""
 
 	seq = list(sequence)
-	print x1, x2-1, len(seq)
+	print ((x1, x2-1, len(seq)))
 	seq[x1] = start + seq[x1]
 	seq[x2-1] = seq[x2-1] + stop
 	return ''.join(seq)

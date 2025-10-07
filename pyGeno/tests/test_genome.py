@@ -13,21 +13,21 @@ class pyGenoSNPTests(unittest.TestCase):
 		# except KeyError :
 		# 	deleteGenome("human", "GRCh37.75_Y-Only")
 		# 	B.importGenome("Human.GRCh37.75_Y-Only.tar.gz")
-		# 	print "--> Seems to already exist in db"
+		# 	print ("--> Seems to already exist in db")
      
 		# try :
 		# 	B.importSNPs("Human_agnostic.dummySRY.tar.gz")
 		# except KeyError :
 		# 	deleteSNPs("dummySRY_AGN")
 		# 	B.importSNPs("Human_agnostic.dummySRY.tar.gz")
-		# 	print "--> Seems to already exist in db"
+		# 	print ("--> Seems to already exist in db")
 		
 		# try :
 		# 	B.importSNPs("Human_agnostic.dummySRY_indels")
 		# except KeyError :
 		# 	deleteSNPs("dummySRY_AGN_indels")
 		# 	B.importSNPs("Human_agnostic.dummySRY_indels")
-		# 	print "--> Seems to already exist in db"
+		# 	print ("--> Seems to already exist in db")
 		self.ref = Genome(name = 'GRCh37.75_Y-Only')
 
 	def tearDown(self):
@@ -171,21 +171,21 @@ def runTests() :
 	except KeyError :
 		deleteGenome("human", "GRCh37.75_Y-Only")
 		B.importGenome("Human.GRCh37.75_Y-Only.tar.gz")
-		print "--> Seems to already exist in db"
+		print ("--> Seems to already exist in db")
  
 	try :
 		B.importSNPs("Human_agnostic.dummySRY.tar.gz")
 	except KeyError :
 		deleteSNPs("dummySRY_AGN")
 		B.importSNPs("Human_agnostic.dummySRY.tar.gz")
-		print "--> Seems to already exist in db"
+		print ("--> Seems to already exist in db")
 	
 	try :
 		B.importSNPs("Human_agnostic.dummySRY_indels")
 	except KeyError :
 		deleteSNPs("dummySRY_AGN_indels")
 		B.importSNPs("Human_agnostic.dummySRY_indels")
-		print "--> Seems to already exist in db"
+		print ("--> Seems to already exist in db")
 	# import time
 	# time.sleep(10)
 	unittest.main()

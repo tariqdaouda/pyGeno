@@ -1,4 +1,4 @@
-import sys, time, cPickle
+import sys, time, pickle
 
 class ProgressBar :
 	"""A very simple unthreaded progress bar. This progress bar also logs stats in .logs.
@@ -68,7 +68,7 @@ class ProgressBar :
 	def saveLogs(self, filename) :
 		"""dumps logs into a nice pickle"""
 		f = open(filename, 'wb')
-		cPickle.dump(self.logs, f)
+		pickle.dump(self.logs, f)
 		f.close()
 
 	def update(self, label = '', forceRefresh = False, log = False) :
@@ -116,7 +116,7 @@ class ProgressBar :
 	def close(self) :
 		"""Closes the bar so your next print will be on another line"""
 		self.update(forceRefresh = True)
-		print '\n'
+		print('\n')
 		
 if __name__ == "__main__" :
 	p = ProgressBar(nbEpochs = 100000000000)

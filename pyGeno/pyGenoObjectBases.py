@@ -1,5 +1,5 @@
 import time, types, string
-import configuration as conf
+import pyGeno.configuration as conf
 from rabaDB.rabaSetup import *
 from rabaDB.Raba import *
 from rabaDB.filters import RabaQuery
@@ -164,7 +164,7 @@ class pyGenoRabaObjectWrapper(object) :
 	def __getattr__(self, name) :
 		"""If a wrapper does not have a specific field, pyGeno will 
 		look for it in the wrapped_object"""
-		# print "pyGenoObjectBases __getattr__ : " + name + " from " + str(type(self))
+		# print ("pyGenoObjectBases __getattr__ : " + name + " from " + str(type(self)))
 
 		
 		if name == 'save' or name == 'delete' :

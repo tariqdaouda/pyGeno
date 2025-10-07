@@ -1,5 +1,5 @@
 import sys, os, time
-from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
 import rabaDB.rabaSetup
 import rabaDB.Raba
 
@@ -7,11 +7,11 @@ class PythonVersionError(Exception) :
 	pass
 
 pyGeno_FACE = "~-~-:>"
-pyGeno_BRANCH = "V2"
+pyGeno_BRANCH = "V3"
 
 pyGeno_VERSION_NAME = 'Lean Viper!'
 pyGeno_VERSION_RELEASE_LEVEL = 'Release'
-pyGeno_VERSION_NUMBER = 14.09
+pyGeno_VERSION_NUMBER = 25.10
 pyGeno_VERSION_BUILD_TIME = time.ctime(os.path.getmtime(__file__))
 
 pyGeno_RABA_NAMESPACE = 'pyGenoRaba'
@@ -52,7 +52,7 @@ def createDefaultConfigFile() :
 
 def getSettingsPath() :
 	"""Returns the path where the settings are stored"""
-	parser = SafeConfigParser()
+	parser = ConfigParser()
 	try :
 		parser.read(os.path.normpath(pyGeno_SETTINGS_DIR+'/config.ini'))
 		return parser.get('pyGeno_config', 'settings_dir')

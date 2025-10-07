@@ -66,7 +66,7 @@ And for more serious work, the whole reference genome.
 	#Downloads the whole genome (205MB, sequences + annotations), may take an hour or more.
 	B.importGenome("Human.GRCh38.78.tar.gz")
 
-That's it, you can now print the sequences of all the proteins that a gene can produce::
+That's it, you can now print (the sequences of all the proteins that a gene can produce::)
 
 	from pyGeno.Genome import Genome
 	from pyGeno.Gene import Gene
@@ -77,7 +77,7 @@ That's it, you can now print the sequences of all the proteins that a gene can p
 	#get returns a list of elements
 	gene = ref.get(Gene, name = 'SRY')[0]
 	for prot in gene.get(Protein) :
-		  print prot.sequence
+		  print (prot.sequence)
 
 You can see pyGeno achitecture as a graph where everything is connected to everything. For instance you can do things such as::
 
@@ -112,7 +112,7 @@ Faster queries
 To speed up loops use iterGet()::
 	
 	for prot in gene.iterGet(Protein) :
-	  print prot.sequence
+	  print (prot.sequence)
 
 For more speed create indexes on the fields you need the most::
 	

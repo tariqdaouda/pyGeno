@@ -1,6 +1,7 @@
-import os, glob, gzip, tarfile, shutil, time, sys, gc, cPickle, tempfile, urllib2
+import os, glob, gzip, tarfile, shutil, time, sys, gc, tempfile
+from urllib.request import urlopen
 from contextlib import closing
-from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
 
 from pyGeno.tools.ProgressBar import ProgressBar
 import pyGeno.configuration as conf
@@ -41,11 +42,11 @@ def _decompressPackage(packageFile) :
     return packageDir
 
 def _getFile(fil, directory) :
-    if fil.find("http://") == 0 or fil.find("ftp://") == 0 :
+    if fil.find("https://") == 0 or fil.find("http://") == 0 or fil.find("ftp://") == 0 :
         printf("Downloading file: %s..." % fil)
         finalFile = os.path.normpath('%s/%s' %(directory, fil.split('/')[-1]))
         # urllib.urlretrieve (fil, finalFile)
-        with closing(urllib2.urlopen(fil)) as r:
+        with closing(urlopen(fil)) as r:
             with open(finalFile, 'wb') as f:
                 shutil.copyfileobj(r, f)
         
@@ -146,7 +147,7 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
         isDir = True
         packageDir = packageFile
 
-    parser = SafeConfigParser()
+    parser = ConfigParser()
     parser.read(os.path.normpath(packageDir+'/manifest.ini'))
     packageInfos = parser.items('package_infos')
 

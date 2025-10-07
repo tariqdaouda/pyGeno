@@ -18,7 +18,7 @@ def listRemoteDatawraps(location = conf.pyGeno_REMOTE_LOCATION) :
 
 def printRemoteDatawraps(location = conf.pyGeno_REMOTE_LOCATION) :
 	"""
-		print all available datawraps from a remote location the location must have a datawraps.json in the following format::
+		print (all available datawraps from a remote location the location must have a datawraps.json in the following format::)
 
 			{
 			"Ordered": {
@@ -44,7 +44,7 @@ def printRemoteDatawraps(location = conf.pyGeno_REMOTE_LOCATION) :
 	
 	l = listRemoteDatawraps(location)
 	printf("Available datawraps for bootstraping\n")
-	print json.dumps(l["Ordered"], sort_keys=True, indent=4, separators=(',', ': '))
+	print (json.dumps(l["Ordered"], sort_keys=True, indent=4, separators=(',', ': ')))
 
 def _DW(name, url) :
 	packageDir = tempfile.mkdtemp(prefix = "pyGeno_remote_")
@@ -89,7 +89,7 @@ def listDatawraps() :
 	return l
 
 def printDatawraps() :
-	"""print all available datawraps for bootstraping"""
+	"""print (all available datawraps for bootstraping""")
 	l = listDatawraps()
 	printf("Available datawraps for boostraping\n")
 	for k, v in l.iteritems() :
