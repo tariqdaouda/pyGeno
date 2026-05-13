@@ -36,7 +36,7 @@ class SequenceInsert(Sequence_modifiers) :
 				#-1 because if the insertion are after the last nuc we go out of table
 				self.offset -= 1
 			else:
-				raise NotImplemented("This format of Insetion is not accepted. Please change your format, or implement your format in pyGeno.")
+				raise NotImplementedError("This format of Insetion is not accepted. Please change your format, or implement your format in pyGeno.")
 
 
 class SequenceDel(Sequence_modifiers) :
@@ -53,7 +53,7 @@ class SequenceDel(Sequence_modifiers) :
 					self.offset = len(alt)
 					self.length = self.length - len(alt)
 				else:
-					raise NotImplemented("This format of Deletion is not accepted. Please change your format, or implement your format in pyGeno.")
+					raise NotImplementedError("This format of Deletion is not accepted. Please change your format, or implement your format in pyGeno.")
 			else:
 				raise Exception("You need to add a ref sequence in your call of SequenceDel. Or implement your format in pyGeno.")
 
@@ -66,7 +66,7 @@ class SNPFilter(object) :
 		pass
 
 	def filter(self, chromosome, **kwargs) :
-		raise NotImplemented("Must be implemented in child")
+		raise NotImplementedError("Must be implemented in child")
 
 class DefaultSNPFilter(SNPFilter) :
 	"""

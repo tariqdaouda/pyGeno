@@ -1,4 +1,5 @@
 import array, copy
+import icecream as ic 
 
 class BinarySequence :
 	"""A class for representing sequences in a binary format"""
@@ -15,8 +16,7 @@ class BinarySequence :
 		self.binSequence, self.defaultSequence, self.polymorphisms = self.encode(sequence)
 		self.itemsize = self.binSequence.itemsize
 		self.typecode = self.binSequence.typecode
-		#print 'bin', len(self.sequence), len(self.binSequence)
-
+		#print 'bin', len(self.sequence), len(self.binSequence)	
 	def encode(self, sequence):
 		"""Returns a tuple (binary reprensentation, default sequence, polymorphisms list)"""
 		
@@ -45,7 +45,7 @@ class BinarySequence :
 					poly = set()
 				
 				while b % 2 != 0 :
-					b = b/2
+					b = b//2
 					
 				defaultSequence += sequence[i]
 				b = 0
@@ -187,14 +187,14 @@ class BinarySequence :
 		else :
 			if (offset <= (len(self) - len(needle))) :
 				if lst is not None :
-					self._dichFind(needle, currHaystack[:len(currHaystack)/2], offset, lst)
-					self._dichFind(needle, currHaystack[len(currHaystack)/2:], offset + len(currHaystack)/2, lst)
+					self._dichFind(needle, currHaystack[:len(currHaystack)//2], offset, lst)
+					self._dichFind(needle, currHaystack[len(currHaystack)//2:], offset + len(currHaystack)//2, lst)
 				else :
-					v1 = self._dichFind(needle, currHaystack[:len(currHaystack)/2], offset, lst)
+					v1 = self._dichFind(needle, currHaystack[:len(currHaystack)//2], offset, lst)
 					if v1 > -1 :
 						return v1
 					
-					return self._dichFind(needle, currHaystack[len(currHaystack)/2:], offset + len(currHaystack)/2, lst)
+					return self._dichFind(needle, currHaystack[len(currHaystack)//2:], offset + len(currHaystack)//2, lst)
 			return -1
 
 	def _kmp_construct_next(self, pattern):

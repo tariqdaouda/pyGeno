@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages 
-from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
@@ -41,8 +40,18 @@ setup(
 
         'License :: OSI Approved :: Apache Software License',
 
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
     ],
+
+    python_requires='>=3.8',
+
 
     keywords='proteogenomics genomics proteomics annotations medicine research personalized gene sequence protein',
 

@@ -1,7 +1,7 @@
 import os, glob, gzip, tarfile, shutil, time, sys, gc, pickle, tempfile
 import urllib.request, urllib.error, urllib.parse
 from contextlib import closing
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 
 from pyGeno.tools.ProgressBar import ProgressBar
 import pyGeno.configuration as conf
@@ -58,7 +58,6 @@ def _getFile(fil, directory) :
 
 def deleteGenome(species, name) :
     """Removes a genome from the database"""
-
     printf('deleting genome (%s, %s)...' % (species, name))
 
     conf.db.beginTransaction()
@@ -147,7 +146,7 @@ def importGenome(packageFile, batchSize = 50, verbose = 0) :
         isDir = True
         packageDir = packageFile
 
-    parser = SafeConfigParser()
+    parser = ConfigParser()
     parser.read(os.path.normpath(packageDir+'/manifest.ini'))
     packageInfos = parser.items('package_infos')
 

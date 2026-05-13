@@ -3,7 +3,7 @@ from . import configuration as conf
 from .pyGenoObjectBases import *
 
 import rabaDB.fields as rf
-
+from icecream import ic 
 from .tools import UsefulFunctions as uf
 from .Exon import *
 from .SNP import SNP_INDEL
@@ -114,7 +114,6 @@ class Transcript(pyGenoRabaObjectWrapper) :
 							if e.CDS[ajusted_position] == 'T':
 								e.CDS = list(e.CDS)
 								e.CDS[ajusted_position] = '!'			
-				
 				if len(cDNA) == 0 and e.frame != 0 :
 					e.CDS = e.CDS[e.frame:]
 					
@@ -122,6 +121,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 						e.CDS_start += e.frame
 					else:
 						e.CDS_end -= e.frame
+
 				
 				if len(e.CDS):
 					cDNA.append(''.join(e.CDS))
@@ -164,7 +164,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 	def iterCodons(self) :
 		"""iterates through the codons"""
-		for i in range(len(self.cDNA)/3) :
+		for i in range(len(self.cDNA)//3) :
 			yield self.getCodon(i)
 
 	def find(self, sequence) :

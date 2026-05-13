@@ -120,4 +120,4 @@ class FastqFile(object) :
 		self.data[i] = v
 		
 	def __len__(self) :
-		return len(self.data)/4
+		return len(self.data)//4

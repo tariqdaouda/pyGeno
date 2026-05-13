@@ -59,12 +59,14 @@ class Protein(pyGenoRabaObjectWrapper) :
 			self.sequence = uf.translateDNA(self.transcript.cDNA).rstrip('*')
 		else:
 			self.sequence = uf.translateDNA(self.transcript.cDNA, translTable_id='mt').rstrip('*')
-
 	
 	def getSequence(self):
 		return self.sequence
+		print("jizz")
+		print(self.sequence)
 
 	def _load_bin_sequence(self) :
+		ll
 		self.bin_sequence = AABinarySequence(self.sequence)
 
 	def getDefaultSequence(self) :

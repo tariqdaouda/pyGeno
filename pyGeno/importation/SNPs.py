@@ -1,6 +1,6 @@
 import urllib.request, urllib.parse, urllib.error, shutil
 
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 import pyGeno.configuration as conf
 from pyGeno.SNP import *
 from pyGeno.tools.ProgressBar import ProgressBar
@@ -43,7 +43,7 @@ def importSNPs(packageFile) :
 	if not os.path.isfile(fpMan) :
 		raise ValueError("Not file named manifest.ini! Mais quel SCANDALE!!!!")
 
-	parser = SafeConfigParser()
+	parser = ConfigParser()
 	parser.read(os.path.normpath(packageDir+'/manifest.ini'))
 	packageInfos = parser.items('package_infos')
 

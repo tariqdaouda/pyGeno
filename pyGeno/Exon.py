@@ -1,6 +1,6 @@
 from .pyGenoObjectBases import *
 from .SNP import SNP_INDEL
-
+from icecream import ic
 import rabaDB.fields as rf
 from .tools import UsefulFunctions as uf
 from .tools.BinarySequence import NucBinarySequence
@@ -76,7 +76,6 @@ class Exon(pyGenoRabaObjectWrapper) :
 	
 	def _load_data(self) :
 		data = self.chromosome.getSequenceData(slice(self.start,self.end))
-
 		diffLen = (self.end-self.start) - len(data)
 		
 		if self.strand == '+' :

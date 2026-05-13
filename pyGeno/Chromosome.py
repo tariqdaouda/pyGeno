@@ -1,7 +1,7 @@
 #import copy
 #import types
 #from tools import UsefulFunctions as uf
-
+from icecream import ic 
 from types import *
 from . import configuration as conf
 from .pyGenoObjectBases import *
@@ -21,7 +21,6 @@ class ChrosomeSequence(object) :
 	"""Represents a chromosome sequence. If 'refOnly' no ploymorphisms are applied and the ref sequence is always returned"""
 
 	def __init__(self, data, chromosome, refOnly = False) :
-		
 		self.data = data
 		self.refOnly = refOnly
 		self.chromosome = chromosome

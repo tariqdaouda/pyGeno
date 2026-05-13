@@ -54,7 +54,7 @@ class SegmentTree :
 	"""
 	
 	def __init__(self, x1 = None, x2 = None, name = '', referedObject = [], father = None, level = 0) :
-		if x1 > x2 :
+		if x1 is not None and x2 is not None and x1 > x2 :
 			self.x1, self.x2 = x2, x1
 		else :
 			self.x1, self.x2 = x1, x2
@@ -163,15 +163,15 @@ class SegmentTree :
 		if xx1 < self.children[c1].x1 :
 			c1 -= 1
 			
-		inter = self.__radiateDown(x1, x2, c1, condition)
+		inter = self.__radiateDown(xx1, xx2, c1, condition)
 		if self.children[c1].id == self.children[c2].id :
-			inter.extend(self.__radiateUp(x1, x2, c2+1, condition))
+			inter.extend(self.__radiateUp(xx1, xx2, c2+1, condition))
 		else :
-			inter.extend(self.__radiateUp(x1, x2, c2, condition))
+			inter.extend(self.__radiateUp(xx1, xx2, c2, condition))
 		
 		ret = []
 		for c in inter :
-			ret.extend(c.intersect(x1, x2))
+			ret.extend(c.intersect(xx1, xx2))
 		
 		inter.extend(ret)
 		return inter
@@ -181,7 +181,7 @@ class SegmentTree :
 		r2 = len(self.children)-1
 		pos = -1
 		while (r1 <= r2) :
-			pos = (r1+r2)/2
+			pos = (r1+r2)//2
 			val = self.children[pos].x1
 
 			if val == x1 :

@@ -1,5 +1,5 @@
 import sys, os, time
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 import rabaDB.rabaSetup
 import rabaDB.Raba
 
@@ -52,7 +52,7 @@ def createDefaultConfigFile() :
 
 def getSettingsPath() :
 	"""Returns the path where the settings are stored"""
-	parser = SafeConfigParser()
+	parser = ConfigParser()
 	try :
 		parser.read(os.path.normpath(pyGeno_SETTINGS_DIR+'/config.ini'))
 		return parser.get('pyGeno_config', 'settings_dir')

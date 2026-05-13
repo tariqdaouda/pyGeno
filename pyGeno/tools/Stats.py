@@ -2,8 +2,8 @@ import numpy as np
 
 def kullback_leibler(p, q) :
 	"""Discrete Kullback-Leibler divergence D(P||Q)"""
-	p = np.asarray(p, dtype=np.float)
-	q = np.asarray(q, dtype=np.float)
+	p = np.asarray(p, dtype=np.float32)
+	q = np.asarray(q, dtype=np.float32)
 
 	if p.shape != q.shape :
 		raise ValueError("p and q must be of the same dimensions")
@@ -11,8 +11,8 @@ def kullback_leibler(p, q) :
 	return np.sum(np.where(p > 0, np.log(p / q) * p, 0))
 
 def squaredError_log10(p, q) :
-	p = np.asarray(p, dtype=np.float)
-	q = np.asarray(q, dtype=np.float)
+	p = np.asarray(p, dtype=np.float32)
+	q = np.asarray(q, dtype=np.float32)
 	
 	if p.shape != q.shape :
 		raise ValueError("p and q must be of the same dimensions")
