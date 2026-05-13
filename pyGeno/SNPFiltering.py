@@ -1,8 +1,6 @@
-import types
+from . import configuration as conf
 
-import configuration as conf
-
-from tools import UsefulFunctions as uf
+from .tools import UsefulFunctions as uf
 
 class Sequence_modifiers(object) :
 	"""Abtract Class. All sequence must inherit from me"""
@@ -17,7 +15,7 @@ class SequenceSNP(Sequence_modifiers) :
 	"""Represents a SNP to be applied to the sequence"""
 	def __init__(self, alleles, sources = {}) :
 		Sequence_modifiers.__init__(self, sources)
-		if type(alleles) is types.ListType :
+		if type(alleles) is list :
 			self.alleles = uf.encodePolymorphicNucleotide(''.join(alleles))
 		else :
 			self.alleles = uf.encodePolymorphicNucleotide(alleles)
@@ -38,7 +36,7 @@ class SequenceInsert(Sequence_modifiers) :
 				#-1 because if the insertion are after the last nuc we go out of table
 				self.offset -= 1
 			else:
-				raise NotImplemented("This format of Insetion is not accepted. Please change your format, or implement your format in pyGeno.")
+				raise NotImplementedError("This format of Insetion is not accepted. Please change your format, or implement your format in pyGeno.")
 
 
 class SequenceDel(Sequence_modifiers) :
@@ -55,7 +53,7 @@ class SequenceDel(Sequence_modifiers) :
 					self.offset = len(alt)
 					self.length = self.length - len(alt)
 				else:
-					raise NotImplemented("This format of Deletion is not accepted. Please change your format, or implement your format in pyGeno.")
+					raise NotImplementedError("This format of Deletion is not accepted. Please change your format, or implement your format in pyGeno.")
 			else:
 				raise Exception("You need to add a ref sequence in your call of SequenceDel. Or implement your format in pyGeno.")
 
@@ -68,7 +66,7 @@ class SNPFilter(object) :
 		pass
 
 	def filter(self, chromosome, **kwargs) :
-		raise NotImplemented("Must be implemented in child")
+		raise NotImplementedError("Must be implemented in child")
 
 class DefaultSNPFilter(SNPFilter) :
 	"""
@@ -124,7 +122,7 @@ class DefaultSNPFilter(SNPFilter) :
 		warn = 'Warning: the default snp filter ignores indels. IGNORED %s of SNP set: %s at pos: %s of chromosome: %s'
 		sources = {}
 		alleles = []
-		for snpSet, data in kwargs.iteritems() :
+		for snpSet, data in kwargs.items() :
 			if type(data) is list :
 				for snp in data :
 					alleles, sources = appendAllele(alleles, sources, snp)

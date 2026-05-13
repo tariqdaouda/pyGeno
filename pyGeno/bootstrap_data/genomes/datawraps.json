@@ -1,0 +1,22 @@
+{
+	"Ordered": {	
+		"Reference genomes": {
+			"Human" :	["GRCh37.75", "GRCh38.78", "GRCh38.98"],
+			"Mouse" : ["GRCm38.78", "GRCm38.98"]
+		},
+		"SNPs":{		
+			}
+	},
+	"Flat":{
+		"Reference genomes": {
+			"GRCh37.75": "Human.GRCh37.75.tar.gz",
+			"GRCh38.78": "Human.GRCh38.78.tar.gz",
+			"GRCh38.98": "Human.GRCh38.98.tar.gz",
+			"GRCm38.78": "Mouse.GRCm38.78.tar.gz",
+			"GRCm38.98": "Mouse.GRCm38.98.tar.gz"
+		},
+		"SNPs":{		
+		}
+	}
+}
+

@@ -22,7 +22,7 @@ def removeDuplicates(inFileName, outFileName) :
 	
 	lines = f.readlines()
 	for l in lines :
-		if not h.has_key(l) :
+		if l not in h :
 			h[l] = 0
 			data += l
 			
@@ -52,7 +52,7 @@ def joinCSVs(csvFilePaths, column, ouputFileName, separator = ',') :
 		c = CSVFile()
 		c.parse(f)
 		csvs.append(c)
-		legend.append(separator.join(c.legend.keys()))
+		legend.append(separator.join(list(c.legend.keys())))
 	legend = separator.join(legend)
 	
 	lines = []
@@ -97,10 +97,9 @@ class CSVEntry(object) :
 			# for d in tmpData :
 				d = tmpData[i]
 				sd = d.strip()
-				# print sd, tmpData, i
 				if len(sd) > 0 and sd[0] == csvFile.stringSeparator :
 					more = []	
-					for i in xrange(i, len(tmpData)) :
+					for i in range(i, len(tmpData)) :
 						more.append(tmpData[i])
 						i+=1
 						if more[-1][-1] == csvFile.stringSeparator :
@@ -129,12 +128,12 @@ class CSVEntry(object) :
 		self.currentField = -1
 		return self
 	
-	def next(self) :
+	def __next__(self) :
 		self.currentField += 1
 		if self.currentField >= len(self.csvFile.legend) :
 			raise StopIteration
 			
-		k = self.csvFile.legend.keys()[self.currentField]
+		k = list(self.csvFile.legend.keys())[self.currentField]
 		v = self.data[self.currentField]
 		return k, v
 
@@ -159,7 +158,7 @@ class CSVEntry(object) :
 			try:
 				self.data[field] = str(value)
 			except Exception as e:
-				for i in xrange(field-len(self.data)+1) :
+				for i in range(field-len(self.data)+1) :
 					self.data.append("")
 				self.data[field] = str(value)
 
@@ -168,7 +167,7 @@ class CSVEntry(object) :
 		
 	def __repr__(self) :
 		r = {}
-		for k, v in self.csvFile.legend.iteritems() :
+		for k, v in self.csvFile.legend.items() :
 			r[k] = self.data[v]
 
 		return "<line %d: %s>" %(self.lineNumber, str(r))
@@ -184,7 +183,7 @@ class CSVFile(object) :
 		f = CSVFile()
 		f.parse('hop.csv')
 		for line in f :
-			print line['ref']
+			print(line['ref'])
 
 		#writing, legend can either be a list of a dict {field : column number}
 		f = CSVFile(legend = ['name', 'email'])
@@ -193,7 +192,7 @@ class CSVFile(object) :
 		l['email'] = "hop@gmail.com"
 		
 		for field, value in l :
-			print field, value
+			print(field, value)
 
 		f.save('myCSV.csv')		
 	"""
@@ -244,7 +243,6 @@ class CSVFile(object) :
 		self.lines = []
 		self.comments = []
 		for l in lines :
-			# print l
 			if len(l) != 0 and l[0] != "#" :
 				self.lines.append(l)
 			elif l[0] == "#" :
@@ -303,7 +301,7 @@ class CSVFile(object) :
 
 		self.streamBuffer.append(line)
 		if len(self.streamBuffer) % self.writeRate == 0 :
-			for i in xrange(len(self.streamBuffer)) :
+			for i in range(len(self.streamBuffer)) :
 				self.streamBuffer[i] = str(self.streamBuffer[i])
 			self.streamFile.write("%s\n" % ('\n'.join(self.streamBuffer)))
 			self.streamFile.flush()
@@ -314,7 +312,7 @@ class CSVFile(object) :
 		if self.streamBuffer is None :
 			raise ValueError("Commit lines is only for when you are streaming to a file")
 
-		for i in xrange(len(self.streamBuffer)) :
+		for i in range(len(self.streamBuffer)) :
 			self.streamBuffer[i] = str(self.streamBuffer[i])
 		self.streamFile.write('\n'.join(self.streamBuffer))
 		self.streamFile.close()
@@ -378,7 +376,7 @@ class CSVFile(object) :
 		self.currentPos = -1
 		return self
 	
-	def next(self) :
+	def __next__(self) :
 		self.currentPos += 1
 		if self.currentPos >= len(self) :
 			raise StopIteration
@@ -395,7 +393,7 @@ class CSVFile(object) :
 			if start is None :
 				start = 0
 
-			for l in xrange(len(self.lines[line])) :
+			for l in range(len(self.lines[line])) :
 				self._developLine(l + start)
 
 			# start, stop = line.start, line.stop

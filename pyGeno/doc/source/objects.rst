@@ -6,42 +6,42 @@ Base classes
 -------------
 Base classes are abstract and are not meant to be instanciated, they nonetheless implement most of the functions that classes such as Genome possess.
 
-.. automodule:: pyGenoObjectBases
+.. automodule:: pyGeno.pyGenoObjectBases
    :members:
 
 Genome
 -------
-.. automodule:: Genome
+.. automodule:: pyGeno.Genome
    :members:
 
 Chromosome
 ----------
-.. automodule:: Chromosome
+.. automodule:: pyGeno.Chromosome
    :members:
 
 Gene
 ----
-.. automodule:: Gene
+.. automodule:: pyGeno.Gene
    :members:
 
 Transcript
 ----------
-.. automodule:: Transcript
+.. automodule:: pyGeno.Transcript
    :members:
 
 Exon
 ----
-.. automodule:: Exon
+.. automodule:: pyGeno.Exon
    :members:
 
 Protein
 -------
-.. automodule:: Protein
+.. automodule:: pyGeno.Protein
    :members:
 
 SNP
 ---
-.. automodule:: SNP
+.. automodule:: pyGeno.SNP
    :members:
 
 

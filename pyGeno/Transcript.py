@@ -1,14 +1,14 @@
-import configuration as conf
+from . import configuration as conf
 
-from pyGenoObjectBases import *
+from .pyGenoObjectBases import *
 
 import rabaDB.fields as rf
+from icecream import ic 
+from .tools import UsefulFunctions as uf
+from .Exon import *
+from .SNP import SNP_INDEL
 
-from tools import UsefulFunctions as uf
-from Exon import *
-from SNP import SNP_INDEL
-
-from tools.BinarySequence import NucBinarySequence
+from .tools.BinarySequence import NucBinarySequence
 
 
 class Transcript_Raba(pyGenoRabaObject) :
@@ -69,9 +69,9 @@ class Transcript(pyGenoRabaObjectWrapper) :
 			coolArgs['start >='] = self.start
 			coolArgs['start <'] = self.end
 		
-			if len(args) > 0 and type(args[0]) is types.ListType :
+			if len(args) > 0 and type(args[0]) is list :
 				for a in args[0] :
-					if type(a) is types.DictType :
+					if type(a) is dict :
 						f.addFilter(**a)
 			else :
 				f.addFilter(*args, **coolArgs)
@@ -114,7 +114,6 @@ class Transcript(pyGenoRabaObjectWrapper) :
 							if e.CDS[ajusted_position] == 'T':
 								e.CDS = list(e.CDS)
 								e.CDS[ajusted_position] = '!'			
-				
 				if len(cDNA) == 0 and e.frame != 0 :
 					e.CDS = e.CDS[e.frame:]
 					
@@ -122,6 +121,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 						e.CDS_start += e.frame
 					else:
 						e.CDS_end -= e.frame
+
 				
 				if len(e.CDS):
 					cDNA.append(''.join(e.CDS))
@@ -164,7 +164,7 @@ class Transcript(pyGenoRabaObjectWrapper) :
 
 	def iterCodons(self) :
 		"""iterates through the codons"""
-		for i in range(len(self.cDNA)/3) :
+		for i in range(len(self.cDNA)//3) :
 			yield self.getCodon(i)
 
 	def find(self, sequence) :

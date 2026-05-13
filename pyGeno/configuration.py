@@ -1,5 +1,5 @@
 import sys, os, time
-from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
 import rabaDB.rabaSetup
 import rabaDB.Raba
 
@@ -20,7 +20,7 @@ pyGeno_SETTINGS_DIR = os.path.normpath(os.path.expanduser('~/.pyGeno/'))
 pyGeno_SETTINGS_PATH = None
 pyGeno_RABA_DBFILE = None
 pyGeno_DATA_PATH = None
-pyGeno_REMOTE_LOCATION = 'http://bioinfo.iric.ca/~daoudat/pyGeno_datawraps'
+pyGeno_REMOTE_LOCATION = 'http://bioinfo.iric.ca/~feghalya/pyGeno_datawraps'
 
 db = None #proxy for the raba database
 dbConf = None #proxy for the raba database configuration
@@ -34,9 +34,9 @@ def prettyVersion() :
 	return "pyGeno %s Branch: %s, Name: %s, Release Level: %s, Version: %s, Build time: %s" % version()
 
 def checkPythonVersion() :
-	"""pyGeno needs python 2.7+"""
+	"""pyGeno needs python 3.5+"""
 	
-	if sys.version_info[0] < 2 or (sys.version_info[0] > 2  and sys.version_info[1] < 7) :
+	if sys.version_info[0] < 3 or (sys.version_info[0] == 3  and sys.version_info[1] < 5) :
 		return False
 	return True
 
@@ -52,7 +52,7 @@ def createDefaultConfigFile() :
 
 def getSettingsPath() :
 	"""Returns the path where the settings are stored"""
-	parser = SafeConfigParser()
+	parser = ConfigParser()
 	try :
 		parser.read(os.path.normpath(pyGeno_SETTINGS_DIR+'/config.ini'))
 		return parser.get('pyGeno_config', 'settings_dir')
@@ -83,7 +83,7 @@ def pyGeno_init() :
 	global pyGeno_DATA_PATH
 	
 	if not checkPythonVersion() :
-		raise PythonVersionError("==> FATAL: pyGeno only works with python 2.7 and above, please upgrade your python version")
+		raise PythonVersionError("==> FATAL: pyGeno only works with python 3.5 and above, please upgrade your python version")
 
 	if not os.path.exists(pyGeno_SETTINGS_DIR) :
 		os.makedirs(pyGeno_SETTINGS_DIR)

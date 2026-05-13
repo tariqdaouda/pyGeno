@@ -44,7 +44,7 @@ class SNPsTxtFile(object) :
 		
 		f = SNPsTxtFile('snps.txt')
 		for line in f :
-			print line['ref']
+			print(line['ref'])
 	
 	"""
 	def __init__(self, fil, gziped = False) :
@@ -52,7 +52,7 @@ class SNPsTxtFile(object) :
 		if not gziped :
 			f = open(fil)
 		else :
-			f = gzip.open(fil)
+			f = gzip.open(fil, 'rt')
 		
 		for l in f :
 			if l[0] != '#' :
@@ -69,7 +69,7 @@ class SNPsTxtFile(object) :
 		self.currentPos = 0
 		return self
 	
-	def next(self) :
+	def __next__(self) :
 		if self.currentPos >= len(self) :
 			raise StopIteration()
 		v = self[self.currentPos]

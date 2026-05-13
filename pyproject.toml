@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyGeno"
+version = "2.0.1"
+description = "A python package for Personalized Genomics and Proteomics"
+readme = "DESCRIPTION.rst"
+license = "Apache-2.0"
+requires-python = ">=3.8"
+authors = [
+    { name = "Tariq Daouda", email = "tariq.daouda@umontreal.ca" },
+]
+keywords = [
+    "proteogenomics",
+    "genomics",
+    "proteomics",
+    "annotations",
+    "medicine",
+    "research",
+    "personalized",
+    "gene",
+    "sequence",
+    "protein",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Healthcare Industry",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "rabaDB>=2.0.0",
+]
+
+[project.urls]
+Homepage = "http://pyGeno.iric.ca"
+
+[project.scripts]
+sample = "sample:main"
+
+[tool.setuptools.packages.find]
+include = ["pyGeno*"]
+
+[tool.setuptools.package-data]
+pyGeno = ["bootstrap_data/*/*"]

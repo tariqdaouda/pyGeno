@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages 
-from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
@@ -11,7 +10,7 @@ with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
 setup(
     name='pyGeno',
 
-    version='1.3.2',
+    version='2.0.1',
 
     description='A python package for Personalized Genomics and Proteomics',
     long_description=long_description,
@@ -21,7 +20,7 @@ setup(
     author='Tariq Daouda',
     author_email='tariq.daouda@umontreal.ca',
 
-	test_suite="pyGeno.tests", 
+    test_suite="pyGeno.tests", 
 	
     license='ApacheV2.0',
 
@@ -41,8 +40,18 @@ setup(
 
         'License :: OSI Approved :: Apache Software License',
 
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
     ],
+
+    python_requires='>=3.8',
+
 
     keywords='proteogenomics genomics proteomics annotations medicine research personalized gene sequence protein',
 
@@ -52,13 +61,13 @@ setup(
     # project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/technical.html#install-requires-vs-requirements-files
-    install_requires=['rabaDB >= 1.0.5'],
+    install_requires=['rabaDB >= 2.0.0'],
 
     # If there are data files included in your packages that need to be
-    # installed, specify them here.  If using Python 2.6 or less, then these
-    # have to be included in MANIFEST.in as well.
+    # installed, specify them here.  OBSOLETE [If using Python 2.6 or less, then these
+    # have to be included in MANIFEST.in as well.]
     package_data={
-        '': ['*.txt', '*.rst', '*.tar.gz'],
+        'pyGeno': ['bootstrap_data/*/*'],
     },
 
     # Although 'package_data' is the preferred approach, in some case you may

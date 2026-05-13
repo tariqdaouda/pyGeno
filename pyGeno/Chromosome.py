@@ -1,19 +1,19 @@
 #import copy
 #import types
 #from tools import UsefulFunctions as uf
-
+from icecream import ic 
 from types import *
-import configuration as conf
-from pyGenoObjectBases import *
+from . import configuration as conf
+from .pyGenoObjectBases import *
 
-from SNP import *
-import SNPFiltering as SF
+from .SNP import *
+from . import SNPFiltering as SF
 
 from rabaDB.filters import RabaQuery
 import rabaDB.fields as rf
 
-from tools.SecureMmap import SecureMmap as SecureMmap
-from tools import SingletonManager
+from .tools.SecureMmap import SecureMmap as SecureMmap
+from .tools import SingletonManager
 
 import pyGeno.configuration as conf
 
@@ -21,7 +21,6 @@ class ChrosomeSequence(object) :
 	"""Represents a chromosome sequence. If 'refOnly' no ploymorphisms are applied and the ref sequence is always returned"""
 
 	def __init__(self, data, chromosome, refOnly = False) :
-		
 		self.data = data
 		self.refOnly = refOnly
 		self.chromosome = chromosome
@@ -31,13 +30,13 @@ class ChrosomeSequence(object) :
 		self.SNPFilter = SNPFilter
 	
 	def getSequenceData(self, slic) :
-		data = self.data[slic]
+		data = self.data[slic].decode('utf-8')
 		SNPTypes = self.chromosome.genome.SNPTypes
 		if SNPTypes is None or self.refOnly :
 			return data
 		
 		iterators = []
-		for setName, SNPType in SNPTypes.iteritems() :
+		for setName, SNPType in SNPTypes.items() :
 			f = RabaQuery(str(SNPType), namespace = self.chromosome._raba_namespace)
 			
 			chromosomeNumber = self.chromosome.number
@@ -47,7 +46,7 @@ class ChrosomeSequence(object) :
 			
 			f.addFilter({'start >=' : slic.start, 'start <' : slic.stop, 'setName' : str(setName), 'chromosomeNumber' : chromosomeNumber})
 			# conf.db.enableDebug(True)
-			iterators.append(f.iterRun(sqlTail = 'ORDER BY start'))
+			iterators.append(f.run(sqlTail = 'ORDER BY start', gen=True))
 		
 		if len(iterators) < 1 :
 			return data
@@ -65,7 +64,7 @@ class ChrosomeSequence(object) :
 						polys[poly.start][poly.setName].append(poly)
 						
 		data = list(data)
-		for start, setPolys in polys.iteritems() :
+		for start, setPolys in polys.items() :
 			
 			seqPos = start - slic.start
 			sequenceModifier = self.SNPFilter.filter(self.chromosome, **setPolys)
@@ -121,7 +120,7 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 	def __init__(self, *args, **kwargs) :
 		pyGenoRabaObjectWrapper.__init__(self, *args, **kwargs)
 
-		path = '%s/chromosome%s.dat'%(self.genome.getSequencePath(), self.number)
+		path = '%s/chromosome%s.dat' % (self.genome.getSequencePath(), self.number)
 		if not SingletonManager.contains(path) :
 			datMap = SingletonManager.add(SecureMmap(path), path)
 		else :
@@ -140,9 +139,9 @@ class Chromosome(pyGenoRabaObjectWrapper) :
 			coolArgs['species'] = self.genome.species
 			coolArgs['chromosomeNumber'] = self.number
 
-			if len(args) > 0 and type(args[0]) is types.ListType :
+			if len(args) > 0 and type(args[0]) is list :
 				for a in args[0] :
-					if type(a) is types.DictType :
+					if type(a) is dict :
 						f.addFilter(**a)
 			else :
 				f.addFilter(*args, **coolArgs)

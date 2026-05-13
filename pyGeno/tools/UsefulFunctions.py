@@ -1,4 +1,4 @@
-import string, os, copy, types
+import os, copy
 
 class UnknownNucleotide(Exception) :
 	def __init__(self, nuc) :
@@ -15,7 +15,7 @@ def saveResults(directoryName, fileName, strResults, log = '', args = ''):
 
 	resPath = "%s/%s"%(directoryName, fileName)
 	resFile = open(resPath, 'w')
-	print "Saving results :\n\t%s..."%resPath
+	print("Saving results :\n\t%s..."%resPath)
 	resFile.write(strResults)
 	resFile.close()
 
@@ -23,7 +23,7 @@ def saveResults(directoryName, fileName, strResults, log = '', args = ''):
 		errPath = "%s.err.txt"%(resPath)
 		errFile = open(errPath, 'w')
 
-		print "Saving log :\n\t%s..." %errPath
+		print("Saving log :\n\t%s..." %errPath)
 		errFile.write(log)
 		errFile.close()
 
@@ -31,7 +31,7 @@ def saveResults(directoryName, fileName, strResults, log = '', args = ''):
 		paramPath = "%s.args.txt"%(resPath)
 		paramFile = open(paramPath, 'w')
 
-		print "Saving arguments :\n\t%s..." %paramPath
+		print("Saving arguments :\n\t%s..." %paramPath)
 		paramFile.write(args)
 		paramFile.close()
 
@@ -187,8 +187,8 @@ def reverseComplement(seq):
 
 def complement(seq) :
 	"""returns the complementary sequence without inversing it"""
-	tb = string.maketrans("ACGTRYMKWSBDHVNacgtrymkwsbdhvn",
-						  "TGCAYRKMWSVHDBNtgcayrkmwsvhdbn")
+	tb = str.maketrans("ACGTRYMKWSBDHVNacgtrymkwsbdhvn",
+					   "TGCAYRKMWSVHDBNtgcayrkmwsvhdbn")
 	
 	#just to be sure that seq isn't unicode
 	return str(seq).translate(tb)
@@ -196,14 +196,14 @@ def complement(seq) :
 def translateDNA_6Frames(sequence) :
 	"""returns 6 translation of sequence. One for each reading frame"""
 	trans = (
-				translateDNA(sequence, 'f1'),
-				translateDNA(sequence, 'f2'),
-				translateDNA(sequence, 'f3'),
+			translateDNA(sequence, 'f1'),
+			translateDNA(sequence, 'f2'),
+			translateDNA(sequence, 'f3'),
 
-				translateDNA(sequence, 'r1'),
-				translateDNA(sequence, 'r2'),
-				translateDNA(sequence, 'r3'),
-			)
+			translateDNA(sequence, 'r1'),
+			translateDNA(sequence, 'r2'),
+			translateDNA(sequence, 'r3'),
+		)
 
 	return trans
 
@@ -252,7 +252,7 @@ def translateDNA(sequence, frame = 'f1', translTable_id='default') :
 def getSequenceCombinaisons(polymorphipolymorphicDnaSeqSeq, pos = 0) :
 	"""Takes a dna sequence with polymorphismes and returns all the possible sequences that it can yield"""
 
-	if type(polymorphipolymorphicDnaSeqSeq) is not types.ListType :
+	if type(polymorphipolymorphicDnaSeqSeq) is not list :
 		seq = list(polymorphipolymorphicDnaSeqSeq)
 	else :
 		seq = polymorphipolymorphicDnaSeqSeq
@@ -282,7 +282,7 @@ def encodePolymorphicNucleotide(polySeq) :
 	in a single character. PolySeq must have one of the following forms: 
 	['A', 'T', 'G'], 'ATG', 'A/T/G'"""
 	
-	if type(polySeq) is types.StringType :
+	if type(polySeq) is str :
 		if polySeq.find("/") < 0 :
 			sseq = list(polySeq)
 		else :
@@ -348,17 +348,11 @@ def decodePolymorphicNucleotide_str(nuc) :
 def getNucleotideCodon(sequence, x1) :
 	"""Returns the entire codon of the nucleotide at pos x1 in sequence, 
 	and the position of that nocleotide in the codon in a tuple"""
-
-	if x1 < 0 or x1 >= len(sequence) :
+	if 0 <= x1 < len(sequence):
+		p = x1 % 3
+		return (sequence[x1 - p : x1 + 3 - p], p)
+	else:
 		return None
-
-	p = x1%3
-	if p == 0 :
-		return (sequence[x1: x1+3], 0)
-	elif p ==1 :
-		return (sequence[x1-1: x1+2], 1)
-	elif p == 2 :
-		return (sequence[x1-2: x1+1], 2)
 
 def showDifferences(seq1, seq2) :
 	"""Returns a string highligthing differences between seq1 and seq2:
@@ -394,7 +388,7 @@ def highlightSubsequence(sequence, x1, x2, start=' [', stop = '] ') :
 	in bewteen 'start' and 'stop'"""
 
 	seq = list(sequence)
-	print x1, x2-1, len(seq)
+	#print(x1, x2-1, len(seq))
 	seq[x1] = start + seq[x1]
 	seq[x2-1] = seq[x2-1] + stop
 	return ''.join(seq)

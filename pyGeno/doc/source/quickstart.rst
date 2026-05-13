@@ -28,7 +28,9 @@ pyGeno comes with a few datawraps, to get the list you can use:
 	       |~~~:> Human.GRCh37.75.tar.gz
 	       |~~~:> Human.GRCh37.75_Y-Only.tar.gz
 	       |~~~:> Human.GRCh38.78.tar.gz
+	       |~~~:> Human.GRCh38.98.tar.gz
 	       |~~~:> Mouse.GRCm38.78.tar.gz
+	       |~~~:> Mouse.GRCm38.98.tar.gz
 
 To get a list of remote datawraps that pyGeno can download for you, do:
 
@@ -77,7 +79,7 @@ That's it, you can now print the sequences of all the proteins that a gene can p
 	#get returns a list of elements
 	gene = ref.get(Gene, name = 'SRY')[0]
 	for prot in gene.get(Protein) :
-		  print prot.sequence
+		  print(prot.sequence)
 
 You can see pyGeno achitecture as a graph where everything is connected to everything. For instance you can do things such as::
 
@@ -88,6 +90,9 @@ You can see pyGeno achitecture as a graph where everything is connected to every
 
 Queries
 -------
+
+Note that the way queries are handled is changing
+    Since pyGeno v1.4 the default method is to use generators
 
 PyGeno allows for several kinds of queries, here are some snippets::
 
@@ -109,10 +114,13 @@ To know the available fields for queries, there's a "help()" function::
 Faster queries
 ---------------
 
-To speed up loops use iterGet()::
+Note that the way queries are handled is changing
+    Since pyGeno v1.4 the default method is to use generators
+
+To speed up loops use get(gen=True)::
 	
-	for prot in gene.iterGet(Protein) :
-	  print prot.sequence
+	for prot in gene.get(Protein, gen=True) :
+	  print(prot.sequence)
 
 For more speed create indexes on the fields you need the most::
 	
@@ -120,6 +128,7 @@ For more speed create indexes on the fields you need the most::
 
 
 Getting sequences
+
 -------------------
 
 Anything that has a sequence can be indexed using the usual python list syntax::

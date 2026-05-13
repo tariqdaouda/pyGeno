@@ -1,4 +1,4 @@
-import random, copy, types
+import random, copy
 
 def aux_insertTree(childTree, parentTree):
 	"""This a private (You shouldn't have to call it) recursive function that inserts a child tree into a parent tree."""
@@ -54,7 +54,7 @@ class SegmentTree :
 	"""
 	
 	def __init__(self, x1 = None, x2 = None, name = '', referedObject = [], father = None, level = 0) :
-		if x1 > x2 :
+		if x1 is not None and x2 is not None and x1 > x2 :
 			self.x1, self.x2 = x2, x1
 		else :
 			self.x1, self.x2 = x1, x2
@@ -98,7 +98,7 @@ class SegmentTree :
 			
 			elif xx1 <= self.children[i].x1 and self.children[i].x2 <= xx2 :
 				if rt == None :
-					if type(referedObject) is types.ListType :
+					if type(referedObject) is list :
 						rt = SegmentTree(xx1, xx2, name, referedObject, self, self.level+1)
 					else :
 						rt = SegmentTree(xx1, xx2, name, [referedObject], self, self.level+1)
@@ -118,7 +118,7 @@ class SegmentTree :
 			for c in childrenToRemove :
 				self.children.remove(c)
 		else :
-			if type(referedObject) is types.ListType :
+			if type(referedObject) is list :
 				rt = SegmentTree(xx1, xx2, name, referedObject, self, self.level+1)
 			else :
 				rt = SegmentTree(xx1, xx2, name, [referedObject], self, self.level+1)
@@ -163,15 +163,15 @@ class SegmentTree :
 		if xx1 < self.children[c1].x1 :
 			c1 -= 1
 			
-		inter = self.__radiateDown(x1, x2, c1, condition)
+		inter = self.__radiateDown(xx1, xx2, c1, condition)
 		if self.children[c1].id == self.children[c2].id :
-			inter.extend(self.__radiateUp(x1, x2, c2+1, condition))
+			inter.extend(self.__radiateUp(xx1, xx2, c2+1, condition))
 		else :
-			inter.extend(self.__radiateUp(x1, x2, c2, condition))
+			inter.extend(self.__radiateUp(xx1, xx2, c2, condition))
 		
 		ret = []
 		for c in inter :
-			ret.extend(c.intersect(x1, x2))
+			ret.extend(c.intersect(xx1, xx2))
 		
 		inter.extend(ret)
 		return inter
@@ -181,7 +181,7 @@ class SegmentTree :
 		r2 = len(self.children)-1
 		pos = -1
 		while (r1 <= r2) :
-			pos = (r1+r2)/2
+			pos = (r1+r2)//2
 			val = self.children[pos].x1
 
 			if val == x1 :
@@ -350,19 +350,19 @@ if __name__== "__main__" :
 	s.insert(35, 38, 'region 5')
 	s.insert(36, 37, 'region 6', 'aaa')
 	s.insert(36, 37, 'region 6', 'aaa2')
-	print "Tree:"
-	print s
-	print "indexed length", s.getIndexedLength()
-	print "removing gaps and adding region 7 : [13-37["
+	print("Tree:")
+	print(s)
+	print("indexed length", s.getIndexedLength())
+	print("removing gaps and adding region 7 : [13-37[")
 	s.removeGaps()
 	#s.insert(13, 37, 'region 7')
-	print s
-	print "indexed length", s.getIndexedLength()
+	print(s)
+	print("indexed length", s.getIndexedLength())
 	#print "intersections"
 	#for c in [6, 10, 14, 1000] :
 	#	print c, s.intersect(c)
 	
-	print "Move"
+	print("Move")
 	s.move(0)
-	print s
-	print "indexed length", s.getIndexedLength()
+	print(s)
+	print("indexed length", s.getIndexedLength())
