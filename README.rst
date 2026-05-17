@@ -1,3 +1,10 @@
+CODE FREEZE:
+============
+
+PyGeno has long been limited due to it's backend. We are now ready to take it to the next level.
+
+We are working on a major port of pyGeno to the open-source multi-modal database ArangoDB. PyGeno's code on both branches master and bloody is frozen until we are finished. No pull request will be merged until then, and we won't implement any new features.
+
 pyGeno: A Python package for precision medicine and proteogenomics
 ==================================================================
 
